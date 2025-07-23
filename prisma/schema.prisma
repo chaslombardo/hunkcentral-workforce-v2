@@ -1,0 +1,31 @@
+// Prisma schema - will be fully implemented in task 2
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Placeholder models - will be implemented in task 2
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String
+  roles     String[] // Array of roles: 'captain', 'wingman', 'manager', 'sales', 'admin'
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DailyLog {
+  id        String   @id @default(uuid())
+  captainId String
+  logDate   DateTime @db.Date
+  status    String   // 'draft', 'submitted', 'approved'
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
