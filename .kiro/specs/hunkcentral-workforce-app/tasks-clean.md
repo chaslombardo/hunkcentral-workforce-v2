@@ -1,4 +1,4 @@
-# HUNKCentral Implementation Plan
+# HUNKCentral Implementation Plan - Clean Version
 
 ## Testing Philosophy
 
@@ -10,33 +10,14 @@
 - Unit tests focus on business logic, integration tests on workflows, E2E tests on user journeys
 - All calculations, validations, and business rules must have corresponding tests
 
-## Shadcn/UI Implementation Rules
-
-**ALWAYS use Shadcn/UI MCP server for UI components:**
-
-- Use `list_blocks` to find relevant blocks before implementing any UI feature
-- Use `get_block` to get complete block implementations for complex layouts
-- Use `get_component_demo` to see proper usage patterns before implementation
-- Prioritize blocks over individual components when available
-- Follow New York theme styling consistently throughout
-- Apply College Hunks brand colors (#026937 green, #ea7200 orange) to all components
-
 ## Phase 1: Foundation & Authentication
 
-- [x] 0. Fix critical application errors preventing startup
-  - Created fresh Next.js 15 app with modern patterns
-  - Removed all legacy code and `legacyBehavior` props
-  - Verified application starts without errors
-  - _Requirements: 10.1, 8.1_
-
 - [ ] 1. Set up modern Next.js 15 project foundation
-  - Install and configure Shadcn/ui with New York theme using MCP server
-  - Use `list_blocks` to identify layout and authentication blocks
+  - Install and configure Shadcn/ui with New York theme
   - Set up Tailwind with College Hunks brand colors (#026937, #ea7200)
   - Configure TypeScript strict mode and ESLint
   - Install core dependencies: React Hook Form, Zod, NextAuth.js, Prisma
   - Create proper folder structure following design document
-  - Use `get_component_demo` for Button, Input, Card foundation components
   - _Requirements: 8.1, 8.4, 10.1_
 
 - [ ] 2. Configure database and Prisma schema
@@ -47,10 +28,8 @@
   - _Requirements: 1.1, 1.2, 6.1, 6.2, 10.2, 10.3, 12.1_
 
 - [ ] 3. Implement authentication system
-  - Use `list_blocks` to find login/authentication blocks
-  - Use `get_block` for login-02 or similar authentication block
   - Create NextAuth.js configuration with credentials provider
-  - Build login form using Shadcn/UI blocks with proper validation
+  - Build login form with proper validation
   - Implement session management and role-based access control
   - Create protected route wrapper and role guards
   - Write unit tests for authentication logic
@@ -59,26 +38,20 @@
 ## Phase 2: Core Log Management
 
 - [ ] 4. Build basic layout and navigation
-  - Use `list_blocks` to find navigation and sidebar blocks
-  - Use `get_block` for sidebar-07 or similar navigation block
-  - Create responsive header with navigation menu using Shadcn/UI blocks
+  - Create responsive header with navigation menu
   - Implement role-based navigation structure
   - Build mobile-friendly sidebar/drawer navigation
   - Add user profile dropdown and logout functionality
-  - Apply New York theme styling throughout
   - _Requirements: 8.1, 8.3, 8.4_
 
 - [ ] 5. Create captain log form foundation
-  - Use `get_component_demo` for Tabs, Card, and Select components
   - Build log form with section tabs (Junk, Move, Other Hours)
   - Implement captain selector with current user default
-  - Create section visibility toggles using Checkbox components
+  - Create section visibility toggles
   - Add basic form state management with React Hook Form
-  - Apply College Hunks brand colors to form elements
   - _Requirements: 2.1, 2.16_
 
 - [ ] 6. Implement job entry system
-  - Use `get_component_demo` for Card, Input, Button components
   - Create dynamic job tiles for Junk and Move sections
   - Build job form with proper validation (Job ID, client, revenue, tips)
   - Implement "Add Another Job" functionality
@@ -87,26 +60,22 @@
   - _Requirements: 2.2, 2.3, 2.4, 2.14, 9.1, 9.3_
 
 - [ ] 7. Build team hours tracking
-  - Use `get_component_demo` for Accordion, Select, Input components
   - Create employee hour entry system
   - Implement department selection and hour input
-  - Add co-captain designation functionality using Checkbox
+  - Add co-captain designation functionality
   - Build "Add HUNK" functionality for multiple employees
   - Write unit tests for hour calculation logic
   - _Requirements: 2.5, 2.11_
 
 - [ ] 8. Implement real-time calculations
-  - Use `get_component_demo` for Progress, Badge components
   - Build labor cost percentage calculations
   - Implement tips per HUNK calculations
   - Create section summaries with progress indicators
   - Add overall log totals and employee summary
-  - Apply College Hunks brand colors to progress indicators
   - Write comprehensive unit tests for all calculation logic
   - _Requirements: 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 5.3_
 
 - [ ] 9. Add log submission and auto-save
-  - Use `get_component_demo` for Toast, Alert components
   - Implement auto-save functionality (every 30 seconds)
   - Create log submission workflow with validation
   - Add draft/submitted status management
@@ -117,17 +86,14 @@
 ## Phase 3: Review & Approval System
 
 - [ ] 10. Build manager review interface
-  - Use `list_blocks` to find table and dashboard blocks
-  - Use `get_block` for appropriate table/dashboard block
   - Create log review queue with filtering and search
-  - Implement side-by-side log comparison view using Resizable panels
+  - Implement side-by-side log comparison view
   - Build approve/reject functionality with comments
   - Add bulk operations for multiple logs
   - Write unit tests for approval logic
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.7_
 
 - [ ] 11. Implement audit trail system
-  - Use `get_component_demo` for Table, Badge, HoverCard components
   - Create audit logging for all log changes
   - Build audit trail viewer with filtering
   - Implement change history tracking
@@ -138,7 +104,6 @@
 ## Phase 4: Commission System
 
 - [ ] 12. Build commission entry system
-  - Use `get_component_demo` for Dialog, Calendar, Select components
   - Create commission entry form with validation
   - Implement sales consultant selector
   - Add job ID uniqueness validation
@@ -151,14 +116,12 @@
   - Implement automatic matching on log approval
   - Build commission calculation logic
   - Add conflict resolution for duplicate job IDs
-  - Use Toast components for match notifications
   - Write comprehensive unit tests for matching logic
   - _Requirements: 3.5, 4.3, 4.4, 4.5_
 
 ## Phase 5: Payroll & Administration
 
 - [ ] 14. Build user management system
-  - Use `get_component_demo` for Dialog, Tabs, Checkbox components
   - Create user creation/editing forms
   - Implement role assignment interface
   - Build compensation settings (rates, salary, commission)
@@ -175,8 +138,6 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
 - [ ] 16. Build payroll reporting system
-  - Use `list_blocks` to find dashboard/report blocks
-  - Use `get_block` for dashboard-01 or similar reporting block
   - Create payroll report generation
   - Implement ADP export functionality
   - Build employee self-service payroll view
@@ -185,7 +146,6 @@
   - _Requirements: 5.7, 5.8_
 
 - [ ] 17. Implement pay period management
-  - Use `get_component_demo` for Calendar, AlertDialog components
   - Create pay period creation and management
   - Build period status workflow (open/locked/closed)
   - Implement data locking for closed periods
@@ -204,7 +164,6 @@
   - _Requirements: 10.7_
 
 - [ ] 19. Performance optimization and mobile polish
-  - Use `get_component_demo` for Skeleton, Sheet, Drawer components
   - Optimize for mobile-first experience
   - Implement proper loading states and error boundaries
   - Add offline capability and data synchronization
@@ -219,24 +178,20 @@
   - Deploy to production with proper rollback procedures
   - _Requirements: 10.1, 10.2, 10.4_
 
-## Key Implementation Principles
+## Key Principles for Implementation
 
-1. **Shadcn/UI First**: Always check MCP server for blocks and components before custom implementation
-2. **New York Theme**: Consistent styling throughout with College Hunks brand colors
-3. **Test-Driven Development**: Write tests based on requirements, then implement code to pass tests
-4. **Mobile-First**: Every component must work perfectly on mobile devices
-5. **Real-Time Feedback**: Calculations update immediately as users input data
-6. **Error Handling**: Comprehensive error handling with user-friendly messages
-7. **Performance**: Target <1 second page load times
-8. **Accessibility**: WCAG 2.1 AA compliance for all components
-9. **Security**: Proper input validation and role-based access control
+1. **Test-Driven Development**: Write tests based on requirements, then implement code to pass tests
+2. **Mobile-First**: Every component must work perfectly on mobile devices
+3. **Real-Time Feedback**: Calculations update immediately as users input data
+4. **Error Handling**: Comprehensive error handling with user-friendly messages
+5. **Performance**: Target <1 second page load times
+6. **Accessibility**: WCAG 2.1 AA compliance for all components
+7. **Security**: Proper input validation and role-based access control
 
-## Shadcn/UI MCP Usage Checklist
+## Testing Standards
 
-Before implementing any UI feature:
-- [ ] Run `list_blocks` to find relevant blocks
-- [ ] Use `get_block` for complex layouts (login, dashboard, forms)
-- [ ] Use `get_component_demo` to understand proper usage
-- [ ] Apply New York theme styling consistently
-- [ ] Integrate College Hunks brand colors appropriately
-- [ ] Test responsive behavior on mobile devices
+- **Unit Tests**: Test all business logic, calculations, and validations
+- **Integration Tests**: Test complete workflows from start to finish
+- **E2E Tests**: Test critical user journeys in real browser environment
+- **Manual Testing**: Verify each feature works as expected in actual usage
+- **Performance Testing**: Ensure application meets performance targets
