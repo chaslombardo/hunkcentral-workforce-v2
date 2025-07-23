@@ -1,0 +1,48 @@
+{
+  "enabled": true,
+  "name": "Documentation Sync",
+  "description": "Monitors all source files and triggers documentation updates in README or docs folder when code changes are detected",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.js",
+      "*.jsx",
+      "*.py",
+      "*.java",
+      "*.cpp",
+      "*.c",
+      "*.h",
+      "*.cs",
+      "*.php",
+      "*.rb",
+      "*.go",
+      "*.rs",
+      "*.swift",
+      "*.kt",
+      "*.scala",
+      "*.clj",
+      "*.hs",
+      "*.ml",
+      "*.fs",
+      "*.vb",
+      "*.sql",
+      "*.sh",
+      "*.ps1",
+      "*.bat",
+      "package.json",
+      "tsconfig.json",
+      "next.config.js",
+      "tailwind.config.js",
+      "prisma/schema.prisma",
+      "*.md",
+      "*.mdx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source code files have been modified in the repository. Please review the changes and update the documentation accordingly. If there is a README.md file, update it to reflect any new features, API changes, or architectural modifications. If there is a /docs folder, update the relevant documentation files there. Focus on keeping the documentation current with the codebase changes, including any new components, functions, configuration changes, or business logic updates."
+  }
+}
