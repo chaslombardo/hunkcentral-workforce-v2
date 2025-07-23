@@ -2,7 +2,7 @@
 
 A modern digital workforce management system built for College Hunks Hauling Junk & Moving, replacing paper logs and Excel spreadsheets with a streamlined web application.
 
-## 🚀 Tech Stack - 
+## 🚀 Tech Stack
 
 - **Framework**: Next.js 15 with App Router and TypeScript
 - **UI Library**: Shadcn/ui with New York theme
