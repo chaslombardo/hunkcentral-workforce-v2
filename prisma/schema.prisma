@@ -1,4 +1,6 @@
-// Prisma schema - will be fully implemented in task 2
+// HUNKCentral Prisma Schema
+// Complete database schema for workforce management system
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,24 +10,160 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Placeholder models - will be implemented in task 2
+// Users (NextAuth + Prisma)
 model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  fullName          String
+  roles             String[]  // Array of roles: 'captain', 'wingman', 'manager', 'sales', 'admin'
+
+  // Department-specific hourly rates
+  rateJunkCaptain   Decimal?  @db.Decimal(6, 2)
+  rateJunkWingman   Decimal?  @db.Decimal(6, 2)
+  rateMoveCaptain   Decimal?  @db.Decimal(6, 2)
+  rateMoveWingman   Decimal?  @db.Decimal(6, 2)
+  rateZigma         Decimal?  @db.Decimal(6, 2)
+  rateTraining      Decimal?  @db.Decimal(6, 2)
+  rateEstimating    Decimal?  @db.Decimal(6, 2)
+  rateWarehouse     Decimal?  @db.Decimal(6, 2)
+  rateAdmin         Decimal?  @db.Decimal(6, 2)
+
+  // Salary settings
+  salaryAmount      Decimal?  @db.Decimal(10, 2)
+  salaryFrequency   String?   // 'weekly', 'bi-weekly', 'monthly'
+  salaryType        String?   // 'base': replaces hourly wages, 'guaranteed': minimum if primary pay is low, 'supplemental': added to other earnings
+
+  // Commission and bonus settings
+  commissionRate    Decimal?  @db.Decimal(5, 2)
+  junkBonusGoal     Decimal   @default(0.14) @db.Decimal(5, 2)
+  moveBonusGoal     Decimal   @default(0.24) @db.Decimal(5, 2)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  dailyLogs         DailyLog[]
+  approvedLogs      DailyLog[] @relation("ApprovedBy")
+  createdLogs       DailyLog[] @relation("CreatedBy")
+  editedLogs        DailyLog[] @relation("LastEditedBy")
+  logHours          LogHour[]
+  commissionEntries CommissionEntry[]
+  auditLogs         AuditLog[]
+}
+
+// Daily Logs
+model DailyLog {
+  id          String    @id @default(uuid())
+  captainId   String
+  captain     User      @relation(fields: [captainId], references: [id])
+  logDate     DateTime  @db.Date
+  status      String    // 'draft', 'submitted', 'approved'
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  approvedById String?
+  approvedBy  User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  // Audit fields
+  createdById String
+  createdBy   User      @relation("CreatedBy", fields: [createdById], references: [id])
+  lastEditedById String?
+  lastEditedBy User?    @relation("LastEditedBy", fields: [lastEditedById], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  jobs        LogJob[]
+  hours       LogHour[]
+  commissions CommissionEntry[]
+  auditLogs   AuditLog[]
+}
+
+// Log Jobs
+model LogJob {
+  id          String   @id @default(uuid())
+  logId       String
+  log         DailyLog @relation(fields: [logId], references: [id])
+  jobType     String   // 'junk', 'move'
+  jobId       String
+  clientName  String
+  revenue     Decimal  @db.Decimal(10, 2)
+  tips        Decimal  @db.Decimal(10, 2)
+
+  // Move-specific fields
+  junkOnMove  Decimal? @db.Decimal(10, 2)
+  valuation   Decimal? @db.Decimal(10, 2)
+  materials   Decimal? @db.Decimal(10, 2)
+
+  // Junk-specific fields (section level)
+  disposalCost Decimal? @db.Decimal(10, 2)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Log Hours
+model LogHour {
+  id          String   @id @default(uuid())
+  logId       String
+  log         DailyLog @relation(fields: [logId], references: [id])
+  employeeId  String
+  employee    User     @relation(fields: [employeeId], references: [id])
+  department  String   // 'junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin'
+  hours       Decimal  @db.Decimal(5, 2)
+  isCoCaptain Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Commission Entries
+model CommissionEntry {
+  id               String    @id @default(uuid())
+  salesId          String
+  sales            User      @relation(fields: [salesId], references: [id])
+  jobId            String    @unique
+  clientName       String
+  jobType          String
+  targetDate       DateTime  @db.Date
+  estimatedRevenue Decimal   @db.Decimal(10, 2)
+  actualRevenue    Decimal?  @db.Decimal(10, 2)
+  commissionAmount Decimal?  @db.Decimal(10, 2)
+  status           String    // 'pending', 'matched', 'approved'
+
+  matchedLogId     String?
+  matchedLog       DailyLog? @relation(fields: [matchedLogId], references: [id])
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// Pay Periods
+model PayPeriod {
   id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String
-  roles     String[] // Array of roles: 'captain', 'wingman', 'manager', 'sales', 'admin'
-  
+  name      String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  status    String   // 'open', 'locked', 'closed'
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model DailyLog {
-  id        String   @id @default(uuid())
-  captainId String
-  logDate   DateTime @db.Date
-  status    String   // 'draft', 'submitted', 'approved'
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Audit Log
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityType  String   // 'daily_log', 'commission_entry', 'user', etc.
+  entityId    String   // ID of the entity being audited
+  action      String   // 'create', 'update', 'delete', 'approve', 'submit'
+  changes     Json?    // JSON object containing before/after values
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Optional relation to daily log for log-specific audits
+  dailyLogId  String?
+  dailyLog    DailyLog? @relation(fields: [dailyLogId], references: [id])
+
+  createdAt   DateTime @default(now())
 }

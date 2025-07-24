@@ -1,6 +1,8 @@
 // Dashboard page
 'use client';
 
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useSession } from '@/hooks/useSession';
 import { MainLayout } from '@/components/layout/main-layout';
 import {
   Card,
@@ -9,17 +11,31 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
+  const { user } = useSession();
+
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to HUNKCentral - Your workforce management system
-          </p>
-        </div>
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Welcome back, {user?.fullName}! Your roles: {user?.roles.join(', ')}
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => signOut({ callbackUrl: '/auth/login' })}
+            >
+              Sign Out
+            </Button>
+          </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -76,9 +92,26 @@ export default function DashboardPage() {
               <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Quick actions will be available once authentication is set up.
-              </p>
+              {user?.roles.includes('captain') && (
+                <Button asChild className="w-full justify-start">
+                  <Link href="/logs/create">Create Daily Log</Link>
+                </Button>
+              )}
+              {user?.roles.includes('sales') && (
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/commission/create">Add Commission Entry</Link>
+                </Button>
+              )}
+              {(user?.roles.includes('manager') || user?.roles.includes('admin')) && (
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/logs/review">Review Logs</Link>
+                </Button>
+              )}
+              {user?.roles.includes('admin') && (
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/admin/users">Manage Users</Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -96,5 +129,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </MainLayout>
+    </ProtectedRoute>
   );
 }

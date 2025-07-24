@@ -1,30 +1,53 @@
 // Authentication utilities and session helpers
-// This will be implemented in later tasks
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth-config';
+import type { User, UserRole } from '@/types';
 
-export type UserRole = 'admin' | 'manager' | 'captain' | 'sales' | 'wingman';
+export type { UserRole, User };
 
-export interface User {
+export interface SessionUser {
   id: string;
   email: string;
   fullName: string;
   roles: UserRole[];
 }
 
-export interface Session {
-  user: User;
-  expires: string;
+// Server-side session helper
+export async function getSession() {
+  return await getServerSession(authOptions);
 }
 
-// Placeholder functions - will be implemented with NextAuth.js
-export async function getSession(): Promise<Session | null> {
-  // TODO: Implement with NextAuth.js
-  return null;
+// Server-side user helper
+export async function getCurrentUser(): Promise<SessionUser | null> {
+  const session = await getSession();
+  return session?.user as SessionUser | null;
 }
 
-export function hasRole(user: User, role: UserRole): boolean {
+// Role checking utilities
+export function hasRole(user: SessionUser | User, role: UserRole): boolean {
   return user.roles.includes(role);
 }
 
-export function hasAnyRole(user: User, roles: UserRole[]): boolean {
+export function hasAnyRole(user: SessionUser | User, roles: UserRole[]): boolean {
   return roles.some((role) => user.roles.includes(role));
+}
+
+export function requireAuth(user: SessionUser | User | null): asserts user is SessionUser | User {
+  if (!user) {
+    throw new Error('Authentication required');
+  }
+}
+
+export function requireRole(user: SessionUser | User | null, role: UserRole): asserts user is SessionUser | User {
+  requireAuth(user);
+  if (!hasRole(user, role)) {
+    throw new Error(`Role '${role}' required`);
+  }
+}
+
+export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[]): asserts user is SessionUser | User {
+  requireAuth(user);
+  if (roles.length > 0 && !hasAnyRole(user, roles)) {
+    throw new Error(`One of roles [${roles.join(', ')}] required`);
+  }
 }

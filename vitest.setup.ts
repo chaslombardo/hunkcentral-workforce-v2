@@ -14,14 +14,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Mock NextAuth
-vi.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: null,
-    status: 'unauthenticated',
-  }),
-  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+// NextAuth mock will be handled in individual test files when needed
 
 // Global test utilities
 global.ResizeObserver = vi.fn().mockImplementation(() => ({

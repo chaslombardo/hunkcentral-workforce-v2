@@ -2,12 +2,13 @@
 'use client';
 
 import { useSession as useNextAuthSession } from 'next-auth/react';
-import type { User, UserRole } from '@/types';
+import type { UserRole } from '@/types';
+import type { SessionUser } from '@/lib/auth';
 
 export function useSession() {
   const { data: session, status } = useNextAuthSession();
 
-  const user = session?.user as User | undefined;
+  const user = session?.user as SessionUser | undefined;
 
   const hasRole = (role: UserRole): boolean => {
     return user?.roles?.includes(role) ?? false;
