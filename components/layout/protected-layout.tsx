@@ -17,8 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-
-interface MainLayoutProps {
+interface ProtectedLayoutProps {
   children: React.ReactNode
   breadcrumbs?: {
     label: string
@@ -26,7 +25,7 @@ interface MainLayoutProps {
   }[]
 }
 
-export function MainLayout({ children, breadcrumbs = [] }: MainLayoutProps) {
+export function ProtectedLayout({ children, breadcrumbs = [] }: ProtectedLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
