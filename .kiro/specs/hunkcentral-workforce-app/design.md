@@ -464,11 +464,11 @@ The application will use Zod schemas for form validation with React Hook Form:
 ```typescript
 // Example Zod schema for log job
 const logJobSchema = z.object({
-  jobType: z.enum(["junk", "move"]),
-  jobId: z.string().min(1, "Job ID is required"),
-  clientName: z.string().min(1, "Client name is required"),
-  revenue: z.number().min(0, "Revenue must be a positive number"),
-  tips: z.number().min(0, "Tips must be a positive number"),
+  jobType: z.enum(['junk', 'move']),
+  jobId: z.string().min(1, 'Job ID is required'),
+  clientName: z.string().min(1, 'Client name is required'),
+  revenue: z.number().min(0, 'Revenue must be a positive number'),
+  tips: z.number().min(0, 'Tips must be a positive number'),
   // Conditional fields based on job type
   disposalCost: z.number().min(0).optional(),
   junkOnMove: z.number().min(0).optional(),

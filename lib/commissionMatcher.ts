@@ -28,8 +28,8 @@ export function findCommissionMatches(
   jobId: string,
   commissionEntries: CommissionEntry[]
 ): CommissionEntry[] {
-  return commissionEntries.filter(entry => 
-    entry.jobId === jobId && entry.status === 'pending'
+  return commissionEntries.filter(
+    (entry) => entry.jobId === jobId && entry.status === 'pending'
   );
 }
 
@@ -41,9 +41,9 @@ export function calculateBookingAccuracy(
   actualRevenue: number
 ): number {
   if (estimatedRevenue === 0) return 0;
-  
+
   const difference = Math.abs(estimatedRevenue - actualRevenue);
-  const accuracy = 1 - (difference / Math.max(estimatedRevenue, actualRevenue));
+  const accuracy = 1 - difference / Math.max(estimatedRevenue, actualRevenue);
   return Math.max(0, accuracy * 100);
 }
 
@@ -73,7 +73,10 @@ export function matchCommissions(
     if (processedJobIds.has(logJob.jobId)) continue;
     processedJobIds.add(logJob.jobId);
 
-    const matchingEntries = findCommissionMatches(logJob.jobId, allCommissionEntries);
+    const matchingEntries = findCommissionMatches(
+      logJob.jobId,
+      allCommissionEntries
+    );
 
     if (matchingEntries.length === 0) {
       // No commission entries for this job - this is normal
@@ -104,13 +107,16 @@ export function matchCommissions(
   }
 
   // Find unmatched commission entries
-  const matchedEntryIds = new Set(matches.map(m => m.commissionEntry.id));
-  const conflictEntryIds = new Set(conflicts.flatMap(c => c.commissionEntries.map(e => e.id)));
-  
-  const unmatched = allCommissionEntries.filter(entry => 
-    entry.status === 'pending' && 
-    !matchedEntryIds.has(entry.id) && 
-    !conflictEntryIds.has(entry.id)
+  const matchedEntryIds = new Set(matches.map((m) => m.commissionEntry.id));
+  const conflictEntryIds = new Set(
+    conflicts.flatMap((c) => c.commissionEntries.map((e) => e.id))
+  );
+
+  const unmatched = allCommissionEntries.filter(
+    (entry) =>
+      entry.status === 'pending' &&
+      !matchedEntryIds.has(entry.id) &&
+      !conflictEntryIds.has(entry.id)
   );
 
   return {
@@ -127,7 +133,7 @@ export async function processCommissionMatching(
 ): Promise<MatchResult> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _ = _approvedLogId; // Acknowledge unused parameter
-  
+
   // TODO: Implement database operations for commission matching
   return {
     matches: [],

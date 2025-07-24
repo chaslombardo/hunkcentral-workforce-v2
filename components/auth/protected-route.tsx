@@ -14,10 +14,10 @@ interface ProtectedRouteProps {
   currentRoute?: string;
 }
 
-export function ProtectedRoute({ 
-  children, 
+export function ProtectedRoute({
+  children,
   requiredRoles,
-  currentRoute 
+  currentRoute,
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useSession();
 
@@ -37,7 +37,9 @@ export function ProtectedRoute({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Authentication Required</h1>
-          <p className="text-muted-foreground">Please sign in to access this page.</p>
+          <p className="text-muted-foreground">
+            Please sign in to access this page.
+          </p>
           <Button asChild>
             <Link href="/auth/login">Sign In</Link>
           </Button>
@@ -47,12 +49,16 @@ export function ProtectedRoute({
   }
 
   // Check role-based access
-  if (requiredRoles && !requiredRoles.some(role => user.roles.includes(role))) {
+  if (
+    requiredRoles &&
+    !requiredRoles.some((role) => user.roles.includes(role))
+  ) {
     return (
       <div className="container mx-auto py-8">
         <Alert variant="destructive">
           <AlertDescription>
-            You don&apos;t have permission to access this page. Required roles: {requiredRoles.join(', ')}
+            You don&apos;t have permission to access this page. Required roles:{' '}
+            {requiredRoles.join(', ')}
           </AlertDescription>
         </Alert>
         <div className="mt-4">

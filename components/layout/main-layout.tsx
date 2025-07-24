@@ -34,9 +34,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <aside className="hidden md:block border-r bg-background">
           <Sidebar />
         </aside>
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
   );

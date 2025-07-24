@@ -14,7 +14,7 @@ export function useSession() {
   };
 
   const hasAnyRole = (roles: UserRole[]): boolean => {
-    return roles.some(role => hasRole(role));
+    return roles.some((role) => hasRole(role));
   };
 
   const isAdmin = hasRole('admin');

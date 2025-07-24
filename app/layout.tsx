@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { Providers } from "./providers";
-import { Toaster } from "@/components/ui/toaster";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/toaster';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "HUNKCentral - Workforce Management",
-  description: "Digital workforce management system for College Hunks Hauling Junk & Moving",
+  title: 'HUNKCentral - Workforce Management',
+  description:
+    'Digital workforce management system for College Hunks Hauling Junk & Moving',
 };
 
 export default function RootLayout({
@@ -19,9 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

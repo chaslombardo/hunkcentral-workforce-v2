@@ -56,36 +56,41 @@ A modern digital workforce management system built for College Hunks Hauling Jun
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - PostgreSQL database (local or Supabase)
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd hunkcentral-v2
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your database and auth configuration
    ```
 
 4. **Set up the database**
+
    ```bash
    npx prisma generate
    npx prisma db push
    ```
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -106,6 +111,7 @@ A modern digital workforce management system built for College Hunks Hauling Jun
 ## 🏗️ Implementation Status
 
 ### ✅ Phase 1: Foundation (Task 1) - COMPLETED
+
 - [x] Next.js 15 project setup with TypeScript strict mode
 - [x] Shadcn/ui configuration with New York theme
 - [x] Tailwind CSS with College Hunks brand colors (#026937, #ea7200)
@@ -118,6 +124,7 @@ A modern digital workforce management system built for College Hunks Hauling Jun
 - [x] Build verification and development server testing
 
 ### 🔄 Next Steps
+
 - **Task 2**: Configure database and Prisma schema
 - **Task 3**: Implement authentication system
 - **Task 4**: Build basic layout and navigation

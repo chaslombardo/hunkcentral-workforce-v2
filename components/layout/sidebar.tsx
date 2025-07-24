@@ -29,33 +29,31 @@ export function Sidebar() {
               {navigation.map((item) => (
                 <div key={item.href}>
                   <Button
-                    variant={pathname === item.href ? "secondary" : "ghost"}
+                    variant={pathname === item.href ? 'secondary' : 'ghost'}
                     className={cn(
-                      "w-full justify-start",
-                      pathname === item.href && "bg-secondary"
+                      'w-full justify-start',
+                      pathname === item.href && 'bg-secondary'
                     )}
                     asChild
                   >
-                    <Link href={item.href}>
-                      {item.title}
-                    </Link>
+                    <Link href={item.href}>{item.title}</Link>
                   </Button>
                   {item.children && item.children.length > 0 && (
                     <div className="ml-4 mt-1 space-y-1">
                       {item.children.map((child) => (
                         <Button
                           key={child.href}
-                          variant={pathname === child.href ? "secondary" : "ghost"}
+                          variant={
+                            pathname === child.href ? 'secondary' : 'ghost'
+                          }
                           size="sm"
                           className={cn(
-                            "w-full justify-start",
-                            pathname === child.href && "bg-secondary"
+                            'w-full justify-start',
+                            pathname === child.href && 'bg-secondary'
                           )}
                           asChild
                         >
-                          <Link href={child.href}>
-                            {child.title}
-                          </Link>
+                          <Link href={child.href}>{child.title}</Link>
                         </Button>
                       ))}
                     </div>

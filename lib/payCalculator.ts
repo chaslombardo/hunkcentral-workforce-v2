@@ -35,12 +35,12 @@ export function calculateHourlyWage(
 
   switch (department) {
     case 'junk':
-      return usesCaptainRate 
-        ? (user.rateJunkCaptain ?? 0) 
+      return usesCaptainRate
+        ? (user.rateJunkCaptain ?? 0)
         : (user.rateJunkWingman ?? 0);
     case 'move':
-      return usesCaptainRate 
-        ? (user.rateMoveCaptain ?? 0) 
+      return usesCaptainRate
+        ? (user.rateMoveCaptain ?? 0)
         : (user.rateMoveWingman ?? 0);
     case 'zigma':
       return user.rateZigma ?? 0;
@@ -65,7 +65,7 @@ export function calculateLaborCostPercentage(
   totalRevenue: number,
   jobType: 'junk' | 'move'
 ): LaborCostCalculation {
-  const percentage = totalRevenue > 0 ? (totalLaborCost / totalRevenue) : 0;
+  const percentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
   const goal = jobType === 'junk' ? LABOR_GOALS.JUNK : LABOR_GOALS.MOVE;
 
   return {
@@ -90,7 +90,7 @@ export function calculateLaborBonus(
 ): number {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _ = _jobType; // Acknowledge unused parameter
-  
+
   // Only captains are eligible for labor bonuses
   if (!captain.roles.includes('captain')) {
     return 0;
@@ -109,7 +109,10 @@ export function calculateLaborBonus(
 /**
  * Calculate tips per HUNK for a section
  */
-export function calculateTipsPerHunk(totalTips: number, numberOfHunks: number): number {
+export function calculateTipsPerHunk(
+  totalTips: number,
+  numberOfHunks: number
+): number {
   return numberOfHunks > 0 ? totalTips / numberOfHunks : 0;
 }
 
@@ -123,7 +126,7 @@ export function calculatePayroll(
 ): PayrollCalculation[] {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _ = [_users, _logHours, _payPeriodStart, _payPeriodEnd]; // Acknowledge unused parameters
-  
+
   // TODO: Implement comprehensive payroll calculation
   return [];
 }

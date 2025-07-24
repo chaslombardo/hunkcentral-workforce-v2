@@ -5,26 +5,26 @@ export const ROUTES = {
   // Public routes
   HOME: '/',
   LOGIN: '/auth/login',
-  
+
   // Protected routes
   DASHBOARD: '/dashboard',
-  
+
   // Log routes
   LOGS: '/logs',
   CREATE_LOG: '/logs/create',
   REVIEW_LOGS: '/logs/review',
   LOG_DETAIL: (id: string) => `/logs/${id}`,
-  
+
   // Commission routes
   COMMISSION: '/commission',
   CREATE_COMMISSION: '/commission/create',
   COMMISSION_LIST: '/commission/list',
-  
+
   // Report routes
   REPORTS: '/reports',
   PAYROLL_REPORTS: '/reports/payroll',
   MY_PAYROLL: '/reports/my-payroll',
-  
+
   // Admin routes
   ADMIN: '/admin',
   MANAGE_USERS: '/admin/users',
@@ -124,14 +124,14 @@ export const NAVIGATION: NavItem[] = [
  * Filter navigation items based on user roles
  */
 export function getNavigationForRoles(userRoles: UserRole[]): NavItem[] {
-  return NAVIGATION.filter(item => {
+  return NAVIGATION.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.some(role => userRoles.includes(role));
-  }).map(item => ({
+    return item.roles.some((role) => userRoles.includes(role));
+  }).map((item) => ({
     ...item,
-    children: item.children?.filter(child => {
+    children: item.children?.filter((child) => {
       if (!child.roles) return true;
-      return child.roles.some(role => userRoles.includes(role));
+      return child.roles.some((role) => userRoles.includes(role));
     }),
   }));
 }
@@ -146,7 +146,10 @@ export function hasRouteAccess(route: string, userRoles: UserRole[]): boolean {
   }
 
   // Find the navigation item for this route
-  const findNavItem = (items: NavItem[], targetRoute: string): NavItem | null => {
+  const findNavItem = (
+    items: NavItem[],
+    targetRoute: string
+  ): NavItem | null => {
     for (const item of items) {
       if (item.href === targetRoute) return item;
       if (item.children) {
@@ -160,5 +163,5 @@ export function hasRouteAccess(route: string, userRoles: UserRole[]): boolean {
   const navItem = findNavItem(NAVIGATION, route);
   if (!navItem || !navItem.roles) return false;
 
-  return navItem.roles.some(role => userRoles.includes(role));
+  return navItem.roles.some((role) => userRoles.includes(role));
 }

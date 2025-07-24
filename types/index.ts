@@ -10,7 +10,14 @@ export type CommissionStatus = 'pending' | 'matched' | 'approved';
 
 export type PayPeriodStatus = 'open' | 'locked' | 'closed';
 
-export type Department = 'junk' | 'move' | 'zigma' | 'training' | 'estimating' | 'warehouse' | 'admin';
+export type Department =
+  | 'junk'
+  | 'move'
+  | 'zigma'
+  | 'training'
+  | 'estimating'
+  | 'warehouse'
+  | 'admin';
 
 export type SalaryType = 'base' | 'guaranteed' | 'supplemental';
 

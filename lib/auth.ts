@@ -26,5 +26,5 @@ export function hasRole(user: User, role: UserRole): boolean {
 }
 
 export function hasAnyRole(user: User, roles: UserRole[]): boolean {
-  return roles.some(role => user.roles.includes(role));
+  return roles.some((role) => user.roles.includes(role));
 }

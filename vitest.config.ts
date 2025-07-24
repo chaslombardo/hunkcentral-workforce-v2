@@ -1,7 +1,7 @@
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import { codecovVitePlugin } from '@codecov/vite-plugin'
-import path from 'path'
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import { codecovVitePlugin } from '@codecov/vite-plugin';
+import path from 'path';
 
 export default defineConfig({
   plugins: [
@@ -9,7 +9,7 @@ export default defineConfig({
     // Put the Codecov vite plugin after all other plugins
     codecovVitePlugin({
       enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
-      bundleName: "hunkcentral-workforce-app",
+      bundleName: 'hunkcentral-workforce-app',
       uploadToken: process.env.CODECOV_TOKEN,
     }),
   ],
@@ -36,4 +36,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
     },
   },
-})
+});

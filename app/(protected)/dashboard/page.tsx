@@ -2,7 +2,13 @@
 'use client';
 
 import { MainLayout } from '@/components/layout/main-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function DashboardPage() {
   return (
@@ -18,15 +24,11 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Daily Logs
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Daily Logs</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Pending review
-              </p>
+              <p className="text-xs text-muted-foreground">Pending review</p>
             </CardContent>
           </Card>
 
@@ -38,9 +40,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Awaiting match
-              </p>
+              <p className="text-xs text-muted-foreground">Awaiting match</p>
             </CardContent>
           </Card>
 
@@ -52,9 +52,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                System users
-              </p>
+              <p className="text-xs text-muted-foreground">System users</p>
             </CardContent>
           </Card>
 
@@ -66,9 +64,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">Open</div>
-              <p className="text-xs text-muted-foreground">
-                Status
-              </p>
+              <p className="text-xs text-muted-foreground">Status</p>
             </CardContent>
           </Card>
         </div>
@@ -77,9 +73,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Common tasks and shortcuts
-              </CardDescription>
+              <CardDescription>Common tasks and shortcuts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-sm text-muted-foreground">
@@ -91,9 +85,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>
-                Latest system activity
-              </CardDescription>
+              <CardDescription>Latest system activity</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">

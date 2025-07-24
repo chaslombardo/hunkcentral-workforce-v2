@@ -234,6 +234,7 @@
 ## Shadcn/UI MCP Usage Checklist
 
 Before implementing any UI feature:
+
 - [ ] Run `list_blocks` to find relevant blocks
 - [ ] Use `get_block` for complex layouts (login, dashboard, forms)
 - [ ] Use `get_component_demo` to understand proper usage

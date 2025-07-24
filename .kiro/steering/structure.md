@@ -55,21 +55,25 @@
 ## Key Architectural Decisions
 
 ### Route Organization
+
 - **Protected Routes**: All main application routes under `/(protected)` with middleware
 - **Role-Based Access**: Dashboard and admin routes adapt based on user roles
 - **RESTful Patterns**: Consistent URL patterns for CRUD operations
 
 ### Component Architecture
+
 - **Feature-Based**: Components organized by business domain
 - **Composition**: Small, reusable components that compose into larger features
 - **Server/Client Split**: Clear separation between server and client components
 
 ### Data Layer
+
 - **Prisma Models**: Single source of truth for database schema
 - **Server Actions**: Handle all data mutations
 - **Type Safety**: Full TypeScript coverage from database to UI
 
 ### Form Patterns
+
 - **Unified Forms**: Consistent form handling with React Hook Form + Zod
 - **Auto-save**: Draft functionality for complex forms
 - **Real-time Validation**: Immediate feedback on user input
@@ -84,6 +88,7 @@
 ## Database Schema Organization
 
 ### Core Models
+
 - **User**: Authentication and compensation settings
 - **DailyLog**: Captain work logs with approval workflow
 - **LogJob**: Individual jobs within daily logs
@@ -93,6 +98,7 @@
 - **AuditLog**: Change tracking and audit trail
 
 ### Relationships
+
 - One-to-many: User → DailyLogs, DailyLog → LogJobs/LogHours
 - Many-to-one: CommissionEntry → User (sales), LogHour → User (employee)
 - Optional: CommissionEntry → DailyLog (when matched)
