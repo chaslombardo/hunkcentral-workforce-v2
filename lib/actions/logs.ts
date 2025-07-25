@@ -8,18 +8,8 @@ import { auth } from '@/lib/auth';
 export type LogActionResult = {
   success: boolean;
   error?: string;
-  data?: {
-    id: string;
-    status: string;
-    updatedAt?: Date;
-    submittedAt?: Date;
-    approvedAt?: Date;
-    createdAt?: Date;
-    jobs?: unknown[];
-    hours?: unknown[];
-    captainId?: string;
-    logDate?: Date;
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any; // Allow flexible data types for different operations
 };
 
 /**
