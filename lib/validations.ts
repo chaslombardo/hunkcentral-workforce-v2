@@ -49,6 +49,33 @@ export const CommissionEntrySchema = z.object({
   estimatedRevenue: z.number().min(0, 'Estimated revenue must be positive'),
 });
 
+// Log hour schema for team hours tracking
+export const LogHourSchema = z.object({
+  employeeId: z.string().min(1, 'Employee is required'),
+  department: z.enum(['junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin']),
+  hours: z.number().min(0).max(24, 'Hours cannot exceed 24 per day'),
+  isCoCaptain: z.boolean(),
+});
+
+// Daily log form schema
+export const DailyLogFormSchema = z.object({
+  captainId: z.string().min(1, 'Captain selection is required'),
+  logDate: z.date(),
+  sections: z.object({
+    junk: z.boolean(),
+    move: z.boolean(),
+    otherHours: z.boolean(),
+  }),
+  // Jobs will be added dynamically
+  jobs: z.array(LogJobSchema),
+  // Junk section disposal cost (section level)
+  disposalCost: z.number().min(0).optional(),
+  // Hours will be added dynamically
+  hours: z.array(LogHourSchema),
+});
+
 export type LoginFormData = z.infer<typeof LoginSchema>;
 export type LogJobFormData = z.infer<typeof LogJobSchema>;
+export type LogHourFormData = z.infer<typeof LogHourSchema>;
 export type CommissionEntryFormData = z.infer<typeof CommissionEntrySchema>;
+export type DailyLogFormData = z.infer<typeof DailyLogFormSchema>;

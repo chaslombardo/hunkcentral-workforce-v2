@@ -68,7 +68,7 @@
   - Apply New York theme styling throughout
   - _Requirements: 8.1, 8.3, 8.4_
 
-- [ ] 5. Create captain log form foundation
+- [x] 5. Create captain log form foundation
   - Use `get_component_demo` for Tabs, Card, and Select components
   - Build log form with section tabs (Junk, Move, Other Hours)
   - Implement captain selector with current user default
@@ -77,7 +77,7 @@
   - Apply College Hunks brand colors to form elements
   - _Requirements: 2.1, 2.16_
 
-- [ ] 6. Implement job entry system
+- [x] 6. Implement job entry system
   - Use `get_component_demo` for Card, Input, Button components
   - Create dynamic job tiles for Junk and Move sections
   - Build job form with proper validation (Job ID, client, revenue, tips)
@@ -86,7 +86,7 @@
   - Write unit tests for job validation logic
   - _Requirements: 2.2, 2.3, 2.4, 2.14, 9.1, 9.3_
 
-- [ ] 7. Build team hours tracking
+- [x] 7. Build team hours tracking
   - Use `get_component_demo` for Accordion, Select, Input components
   - Create employee hour entry system
   - Implement department selection and hour input
