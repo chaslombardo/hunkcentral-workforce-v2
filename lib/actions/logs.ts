@@ -290,3 +290,354 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
     };
   }
 }
+
+/**
+ * Get logs for manager review
+ */
+export async function getLogsForReview(): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required' };
+    }
+
+    const logs = await prisma.dailyLog.findMany({
+      where: {
+        status: {
+          in: ['submitted', 'approved', 'rejected']
+        }
+      },
+      include: {
+        captain: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+        jobs: {
+          select: {
+            revenue: true,
+            tips: true,
+          },
+        },
+        hours: {
+          select: {
+            hours: true,
+          },
+        },
+      },
+      orderBy: {
+        submittedAt: 'desc',
+      },
+    });
+
+    const reviewData = logs.map(log => ({
+      id: log.id,
+      captainName: log.captain.fullName,
+      logDate: log.logDate,
+      status: log.status,
+      totalRevenue: log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0),
+      totalHours: log.hours.reduce((sum, hour) => sum + Number(hour.hours), 0),
+      jobCount: log.jobs.length,
+      submittedAt: log.submittedAt,
+      approvedAt: log.approvedAt,
+      approvedBy: log.approvedBy?.fullName,
+    }));
+
+    return { 
+      success: true, 
+      data: reviewData
+    };
+  } catch (error) {
+    console.error('Error getting logs for review:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to get logs for review' 
+    };
+  }
+}
+
+/**
+ * Approve a daily log
+ */
+export async function approveLog(logId: string, comments?: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required' };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      include: {
+        jobs: true,
+        commissions: true,
+      },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    if (log.status !== 'submitted') {
+      return { success: false, error: 'Only submitted logs can be approved' };
+    }
+
+    // Update log status to approved
+    const approvedLog = await prisma.dailyLog.update({
+      where: { id: logId },
+      data: {
+        status: 'approved',
+        approvedAt: new Date(),
+        approvedById: session.user.id,
+      },
+    });
+
+    // Create audit log entry
+    await prisma.auditLog.create({
+      data: {
+        entityType: 'daily_log',
+        entityId: logId,
+        action: 'approve',
+        changes: {
+          status: { from: 'submitted', to: 'approved' },
+          approvedAt: approvedLog.approvedAt,
+          comments: comments,
+        },
+        userId: session.user.id,
+        dailyLogId: logId,
+      },
+    });
+
+    // Auto-match commission entries for jobs in this log
+    for (const job of log.jobs) {
+      const commissionEntry = await prisma.commissionEntry.findUnique({
+        where: { jobId: job.jobId },
+      });
+
+      if (commissionEntry && commissionEntry.status === 'pending') {
+        await prisma.commissionEntry.update({
+          where: { id: commissionEntry.id },
+          data: {
+            status: 'matched',
+            actualRevenue: job.revenue,
+            commissionAmount: Number(job.revenue) * (Number(commissionEntry.estimatedRevenue) / 100), // Simplified calculation
+            matchedLogId: logId,
+          },
+        });
+
+        // Create audit log for commission matching
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'commission_entry',
+            entityId: commissionEntry.id,
+            action: 'match',
+            changes: {
+              status: { from: 'pending', to: 'matched' },
+              actualRevenue: job.revenue,
+              matchedLogId: logId,
+            },
+            userId: session.user.id,
+          },
+        });
+      }
+    }
+
+    revalidatePath('/logs/review');
+    revalidatePath('/dashboard');
+
+    return { 
+      success: true, 
+      data: { 
+        id: approvedLog.id,
+        status: approvedLog.status,
+        approvedAt: approvedLog.approvedAt || undefined,
+      }
+    };
+  } catch (error) {
+    console.error('Error approving log:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to approve log' 
+    };
+  }
+}
+
+/**
+ * Reject a daily log
+ */
+export async function rejectLog(logId: string, comments: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required' };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    if (log.status !== 'submitted') {
+      return { success: false, error: 'Only submitted logs can be rejected' };
+    }
+
+    if (!comments.trim()) {
+      return { success: false, error: 'Comments are required when rejecting a log' };
+    }
+
+    // Update log status to rejected
+    const rejectedLog = await prisma.dailyLog.update({
+      where: { id: logId },
+      data: {
+        status: 'rejected',
+        approvedAt: new Date(), // Track when rejection occurred
+        approvedById: session.user.id,
+      },
+    });
+
+    // Create audit log entry
+    await prisma.auditLog.create({
+      data: {
+        entityType: 'daily_log',
+        entityId: logId,
+        action: 'reject',
+        changes: {
+          status: { from: 'submitted', to: 'rejected' },
+          rejectedAt: rejectedLog.approvedAt,
+          comments: comments,
+        },
+        userId: session.user.id,
+        dailyLogId: logId,
+      },
+    });
+
+    revalidatePath('/logs/review');
+    revalidatePath('/dashboard');
+
+    return { 
+      success: true, 
+      data: { 
+        id: rejectedLog.id,
+        status: rejectedLog.status,
+        approvedAt: rejectedLog.approvedAt || undefined,
+      }
+    };
+  } catch (error) {
+    console.error('Error rejecting log:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to reject log' 
+    };
+  }
+}
+
+/**
+ * Bulk approve multiple logs
+ */
+export async function bulkApproveLogs(logIds: string[], comments?: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required' };
+    }
+
+    const results = [];
+    for (const logId of logIds) {
+      const result = await approveLog(logId, comments);
+      results.push({ logId, ...result });
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success).length;
+
+    return { 
+      success: failureCount === 0, 
+      data: {
+        successCount,
+        failureCount,
+        results,
+      }
+    };
+  } catch (error) {
+    console.error('Error bulk approving logs:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to bulk approve logs' 
+    };
+  }
+}
+
+/**
+ * Bulk reject multiple logs
+ */
+export async function bulkRejectLogs(logIds: string[], comments: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required' };
+    }
+
+    if (!comments.trim()) {
+      return { success: false, error: 'Comments are required when rejecting logs' };
+    }
+
+    const results = [];
+    for (const logId of logIds) {
+      const result = await rejectLog(logId, comments);
+      results.push({ logId, ...result });
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success).length;
+
+    return { 
+      success: failureCount === 0, 
+      data: {
+        successCount,
+        failureCount,
+        results,
+      }
+    };
+  } catch (error) {
+    console.error('Error bulk rejecting logs:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to bulk reject logs' 
+    };
+  }
+}
