@@ -153,8 +153,11 @@ describe('TeamHoursSection', () => {
       </TestWrapper>
     );
 
-    // The department options are tested implicitly through the component rendering
-    // In a real test, you might want to open the select dropdown and verify options
+    // Click to expand accordion to see the form fields
+    const trigger = screen.getByRole('button', { name: /select employee/i });
+    fireEvent.click(trigger);
+
+    // Now we should see the Department label
     expect(screen.getByText('Department')).toBeInTheDocument();
   });
 });

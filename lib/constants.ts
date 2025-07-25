@@ -60,6 +60,8 @@ export const SALARY_FREQUENCIES = {
 
 // Labor cost percentage goals
 export const LABOR_GOALS = {
-  JUNK: 0.14, // 14%
-  MOVE: 0.24, // 24%
+  JUNK: 14, // 14%
+  MOVE: 24, // 24%
+  JUNK_DECIMAL: 0.14, // For calculations that need decimal
+  MOVE_DECIMAL: 0.24, // For calculations that need decimal
 } as const;

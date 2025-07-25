@@ -66,7 +66,7 @@ export function calculateLaborCostPercentage(
   jobType: 'junk' | 'move'
 ): LaborCostCalculation {
   const percentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
-  const goal = jobType === 'junk' ? LABOR_GOALS.JUNK : LABOR_GOALS.MOVE;
+  const goal = jobType === 'junk' ? LABOR_GOALS.JUNK_DECIMAL : LABOR_GOALS.MOVE_DECIMAL;
 
   return {
     totalRevenue,

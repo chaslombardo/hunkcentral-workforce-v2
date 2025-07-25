@@ -90,12 +90,12 @@
   - Use `get_component_demo` for Accordion, Select, Input components
   - Create employee hour entry system
   - Implement department selection and hour input
-  - Add co-captain designation functionality using Checkbox
+  - Add co-captain des ``1234ignation functionality using Checkbox
   - Build "Add HUNK" functionality for multiple employees
   - Write unit tests for hour calculation logic
   - _Requirements: 2.5, 2.11_
 
-- [ ] 8. Implement real-time calculations
+- [x] 8. Implement real-time calculations
   - Use `get_component_demo` for Progress, Badge components
   - Build labor cost percentage calculations
   - Implement tips per HUNK calculations
@@ -105,7 +105,7 @@
   - Write comprehensive unit tests for all calculation logic
   - _Requirements: 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 5.3_
 
-- [ ] 9. Add log submission and auto-save
+- [x] 9. Add log submission and auto-save
   - Use `get_component_demo` for Toast, Alert components
   - Implement auto-save functionality (every 30 seconds)
   - Create log submission workflow with validation
