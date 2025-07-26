@@ -2,7 +2,9 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getCommissionEntries } from '@/lib/actions/commission';
 import { CommissionList } from '@/components/features/commission/commission-list';
+import { CommissionConflicts } from '@/components/features/commission/commission-conflicts';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 
@@ -45,18 +47,31 @@ export default async function CommissionListPage() {
         </Link>
       </div>
 
-      <CommissionList 
-        entries={entries}
-        onEdit={() => {
-          // TODO: Implement edit functionality in a future task
-        }}
-        onDelete={() => {
-          // TODO: Implement delete functionality in a future task
-        }}
-        onView={() => {
-          // TODO: Implement view details functionality in a future task
-        }}
-      />
+      <Tabs defaultValue="entries" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="entries">Commission Entries</TabsTrigger>
+          <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="entries" className="space-y-6">
+          <CommissionList 
+            entries={entries}
+            onEdit={() => {
+              // TODO: Implement edit functionality in a future task
+            }}
+            onDelete={() => {
+              // TODO: Implement delete functionality in a future task
+            }}
+            onView={() => {
+              // TODO: Implement view details functionality in a future task
+            }}
+          />
+        </TabsContent>
+        
+        <TabsContent value="conflicts" className="space-y-6">
+          <CommissionConflicts />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { DailyLogFormSchema, type DailyLogFormData } from '@/lib/validations';
 import { auth } from '@/lib/auth';
-import { logDailyLogChange, logCommissionChange } from '@/lib/auditLogger';
+import { logDailyLogChange } from '@/lib/auditLogger';
 
 export type LogActionResult = {
   success: boolean;
@@ -407,33 +407,12 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
       { comments }
     );
 
-    // Auto-match commission entries for jobs in this log
-    for (const job of log.jobs) {
-      const commissionEntry = await prisma.commissionEntry.findUnique({
-        where: { jobId: job.jobId },
-      });
-
-      if (commissionEntry && commissionEntry.status === 'pending') {
-        await prisma.commissionEntry.update({
-          where: { id: commissionEntry.id },
-          data: {
-            status: 'matched',
-            actualRevenue: job.revenue,
-            commissionAmount: Number(job.revenue) * (Number(commissionEntry.estimatedRevenue) / 100), // Simplified calculation
-            matchedLogId: logId,
-          },
-        });
-
-        // Create audit log for commission matching
-        await logCommissionChange(
-          'match',
-          commissionEntry.id,
-          session.user.id,
-          { status: 'pending' },
-          { status: 'matched', actualRevenue: job.revenue, matchedLogId: logId }
-        );
-      }
-    }
+    // Auto-match commission entries using the comprehensive matching service
+    const { handleLogApprovalCommissionMatching } = await import('@/lib/commissionMatchingService');
+    const matchingResult = await handleLogApprovalCommissionMatching(logId, session.user.id);
+    
+    // Store matching notifications in the response data for UI feedback
+    const matchingNotifications = matchingResult.notifications || [];
 
     revalidatePath('/logs/review');
     revalidatePath('/dashboard');
@@ -444,6 +423,12 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
         id: approvedLog.id,
         status: approvedLog.status,
         approvedAt: approvedLog.approvedAt || undefined,
+        commissionMatching: {
+          success: matchingResult.success,
+          notifications: matchingNotifications,
+          matchCount: matchingResult.matchResult?.matches.length || 0,
+          conflictCount: matchingResult.matchResult?.conflicts.length || 0,
+        },
       }
     };
   } catch (error) {

@@ -126,18 +126,154 @@ export function matchCommissions(
   };
 }
 
-// Placeholder function - will be fully implemented in later tasks
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * Process commission matching for an approved log
+ * This is the main function called when a log is approved
+ */
 export async function processCommissionMatching(
-  _approvedLogId: string
+  approvedLogId: string
 ): Promise<MatchResult> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = _approvedLogId; // Acknowledge unused parameter
+  const { prisma } = await import('@/lib/prisma');
+  
+  // Get the approved log with its jobs
+  const approvedLogData = await prisma.dailyLog.findUnique({
+    where: { id: approvedLogId },
+    include: {
+      jobs: true,
+      captain: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          roles: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          roles: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+      hours: true,
+    },
+  });
 
-  // TODO: Implement database operations for commission matching
-  return {
-    matches: [],
-    conflicts: [],
-    unmatched: [],
-  };
+  if (!approvedLogData) {
+    throw new Error('Approved log not found');
+  }
+
+  // Transform to match DailyLog type - use type assertion for database compatibility
+  const approvedLog = {
+    ...approvedLogData,
+    captain: {
+      ...approvedLogData.captain,
+      junkBonusGoal: Number(approvedLogData.captain.junkBonusGoal),
+      moveBonusGoal: Number(approvedLogData.captain.moveBonusGoal),
+      roles: approvedLogData.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+    },
+    createdBy: {
+      ...approvedLogData.createdBy,
+      junkBonusGoal: Number(approvedLogData.createdBy.junkBonusGoal),
+      moveBonusGoal: Number(approvedLogData.createdBy.moveBonusGoal),
+      roles: approvedLogData.createdBy.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+    },
+    jobs: approvedLogData.jobs.map(job => ({
+      ...job,
+      revenue: Number(job.revenue),
+      tips: Number(job.tips),
+      junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
+      valuation: job.valuation ? Number(job.valuation) : undefined,
+      materials: job.materials ? Number(job.materials) : undefined,
+      disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
+      jobType: job.jobType as 'junk' | 'move',
+      log: {} as DailyLog, // Will be set after creation
+    })),
+    hours: approvedLogData.hours.map(hour => ({
+      ...hour,
+      hours: Number(hour.hours),
+      department: hour.department as 'junk' | 'move' | 'zigma' | 'training' | 'estimating' | 'warehouse' | 'admin',
+      log: {} as DailyLog, // Will be set after creation
+      employee: {
+        ...approvedLogData.captain,
+        junkBonusGoal: Number(approvedLogData.captain.junkBonusGoal),
+        moveBonusGoal: Number(approvedLogData.captain.moveBonusGoal),
+        roles: approvedLogData.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+      },
+    })),
+  } as DailyLog;
+
+  // Set circular references
+  approvedLog.jobs.forEach(job => { job.log = approvedLog; });
+  approvedLog.hours.forEach(hour => { hour.log = approvedLog; });
+
+  // Get all pending commission entries
+  const allCommissionEntriesData = await prisma.commissionEntry.findMany({
+    where: { status: 'pending' },
+    include: {
+      sales: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          roles: true,
+          commissionRate: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+    },
+  });
+
+  // Transform to match CommissionEntry type
+  const allCommissionEntries = allCommissionEntriesData.map(entry => ({
+    ...entry,
+    estimatedRevenue: Number(entry.estimatedRevenue),
+    actualRevenue: entry.actualRevenue ? Number(entry.actualRevenue) : null,
+    commissionAmount: entry.commissionAmount ? Number(entry.commissionAmount) : null,
+    status: entry.status as 'pending' | 'matched' | 'approved',
+    jobType: entry.jobType as 'junk' | 'move',
+    sales: {
+      ...entry.sales,
+      junkBonusGoal: Number(entry.sales.junkBonusGoal),
+      moveBonusGoal: Number(entry.sales.moveBonusGoal),
+      roles: entry.sales.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+      commissionRate: entry.sales.commissionRate ? Number(entry.sales.commissionRate) : undefined,
+    },
+  })) as CommissionEntry[];
+
+  // Match commissions using the existing logic
+  const matchResult = matchCommissions(approvedLog, allCommissionEntries);
+
+  // Process successful matches
+  for (const match of matchResult.matches) {
+    const commissionRate = Number(match.commissionEntry.sales.commissionRate || 0);
+    const commissionAmount = calculateCommissionAmount(
+      Number(match.logJob.revenue),
+      commissionRate
+    );
+
+    await prisma.commissionEntry.update({
+      where: { id: match.commissionEntry.id },
+      data: {
+        status: 'matched',
+        actualRevenue: Number(match.logJob.revenue),
+        commissionAmount: commissionAmount,
+        matchedLogId: approvedLogId,
+      },
+    });
+  }
+
+  return matchResult;
 }
