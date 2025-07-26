@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { DailyLogFormSchema, type DailyLogFormData } from '@/lib/validations';
 import { auth } from '@/lib/auth';
+import { logDailyLogChange, logCommissionChange } from '@/lib/auditLogger';
 
 export type LogActionResult = {
   success: boolean;
@@ -38,7 +39,15 @@ export async function saveDraftLog(
 
     let savedLog;
 
+    let existingLog = null;
+    
     if (logId) {
+      // Get existing log for audit trail
+      existingLog = await prisma.dailyLog.findUnique({
+        where: { id: logId },
+        include: { jobs: true, hours: true },
+      });
+      
       // Update existing draft
       savedLog = await prisma.dailyLog.update({
         where: { id: logId },
@@ -94,19 +103,14 @@ export async function saveDraftLog(
     }
 
     // Create audit log entry
-    await prisma.auditLog.create({
-      data: {
-        entityType: 'daily_log',
-        entityId: savedLog.id,
-        action: logId ? 'update' : 'create',
-        changes: {
-          status: 'draft',
-          formData: validatedData,
-        },
-        userId: session.user.id,
-        dailyLogId: savedLog.id,
-      },
-    });
+    await logDailyLogChange(
+      logId ? 'update' : 'create',
+      savedLog.id,
+      session.user.id,
+      existingLog ? existingLog as Record<string, unknown> : undefined,
+      savedLog as Record<string, unknown>,
+      { formData: validatedData }
+    );
 
     return { 
       success: true, 
@@ -169,19 +173,13 @@ export async function submitLog(
       });
 
       // Create audit log entry for submission
-      await prisma.auditLog.create({
-        data: {
-          entityType: 'daily_log',
-          entityId: submittedLog.id,
-          action: 'submit',
-          changes: {
-            status: { from: 'draft', to: 'submitted' },
-            submittedAt: submittedLog.submittedAt,
-          },
-          userId: session.user.id,
-          dailyLogId: submittedLog.id,
-        },
-      });
+      await logDailyLogChange(
+        'submit',
+        submittedLog.id,
+        session.user.id,
+        { status: 'draft' },
+        { status: 'submitted', submittedAt: submittedLog.submittedAt }
+      );
 
       revalidatePath('/logs');
       revalidatePath('/dashboard');
@@ -400,20 +398,14 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
     });
 
     // Create audit log entry
-    await prisma.auditLog.create({
-      data: {
-        entityType: 'daily_log',
-        entityId: logId,
-        action: 'approve',
-        changes: {
-          status: { from: 'submitted', to: 'approved' },
-          approvedAt: approvedLog.approvedAt,
-          comments: comments,
-        },
-        userId: session.user.id,
-        dailyLogId: logId,
-      },
-    });
+    await logDailyLogChange(
+      'approve',
+      logId,
+      session.user.id,
+      { status: 'submitted' },
+      { status: 'approved', approvedAt: approvedLog.approvedAt },
+      { comments }
+    );
 
     // Auto-match commission entries for jobs in this log
     for (const job of log.jobs) {
@@ -433,19 +425,13 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
         });
 
         // Create audit log for commission matching
-        await prisma.auditLog.create({
-          data: {
-            entityType: 'commission_entry',
-            entityId: commissionEntry.id,
-            action: 'match',
-            changes: {
-              status: { from: 'pending', to: 'matched' },
-              actualRevenue: job.revenue,
-              matchedLogId: logId,
-            },
-            userId: session.user.id,
-          },
-        });
+        await logCommissionChange(
+          'match',
+          commissionEntry.id,
+          session.user.id,
+          { status: 'pending' },
+          { status: 'matched', actualRevenue: job.revenue, matchedLogId: logId }
+        );
       }
     }
 
@@ -511,20 +497,14 @@ export async function rejectLog(logId: string, comments: string): Promise<LogAct
     });
 
     // Create audit log entry
-    await prisma.auditLog.create({
-      data: {
-        entityType: 'daily_log',
-        entityId: logId,
-        action: 'reject',
-        changes: {
-          status: { from: 'submitted', to: 'rejected' },
-          rejectedAt: rejectedLog.approvedAt,
-          comments: comments,
-        },
-        userId: session.user.id,
-        dailyLogId: logId,
-      },
-    });
+    await logDailyLogChange(
+      'reject',
+      logId,
+      session.user.id,
+      { status: 'submitted' },
+      { status: 'rejected', rejectedAt: rejectedLog.approvedAt },
+      { comments }
+    );
 
     revalidatePath('/logs/review');
     revalidatePath('/dashboard');

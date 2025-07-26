@@ -3,11 +3,11 @@
 ## Core Stack
 
 - **Framework**: Next.js 15 with App Router and TypeScript (strict mode)
-- **UI Library**: Shadcn/ui with New York theme (use shadcn/ui blocks where possible)
+- **UI Library**: Shadcn/ui with New York theme (use shadcn/ui blocks where possible). Always use shadcn/ui blocks where available. Only use components if no block exists.
 - **Styling**: Tailwind CSS with custom brand colors
 - **Database**: Supabase-hosted PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with credentials provider
-- **Forms**: React Hook Form + Zod validation
+- **Forms**: React Hook Form + Zod validation. Use React Hook Form + Zod everywhere. Real-time validation is preferred.
 - **State Management**: Zustand (minimal usage, prefer server state)
 - **Deployment**: Vercel
 
@@ -17,6 +17,8 @@
 - Secondary: `#ea7200` (College Hunks Orange)
 
 ## Architecture Patterns
+
+*Server actions and server components should handle data and mutations where possible. Client components should be used for interactivity only.*
 
 - **Server Components**: Use React Server Components for data-heavy pages
 - **Server Actions**: Handle form submissions and mutations

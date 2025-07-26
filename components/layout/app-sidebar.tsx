@@ -115,6 +115,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Pay Periods",
           url: "/admin/pay-periods",
         },
+        {
+          title: "Audit Trail",
+          url: "/admin/audit",
+        },
       ],
     }] : []),
   ]
