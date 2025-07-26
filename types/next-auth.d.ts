@@ -9,6 +9,7 @@ declare module 'next-auth' {
       name: string;
       fullName: string;
       roles: UserRole[];
+      commissionRate?: number | null;
     };
   }
 
@@ -18,6 +19,7 @@ declare module 'next-auth' {
     name: string;
     fullName: string;
     roles: UserRole[];
+    commissionRate?: number | null;
   }
 }
 
@@ -26,5 +28,6 @@ declare module 'next-auth/jwt' {
     id: string;
     fullName: string;
     roles: UserRole[];
+    commissionRate?: number | null;
   }
 }

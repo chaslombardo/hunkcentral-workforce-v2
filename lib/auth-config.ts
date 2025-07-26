@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
             name: user.fullName,
             fullName: user.fullName,
             roles: user.roles as UserRole[],
+            commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
           };
         } catch {
           // Authentication failed - return null to indicate failure
@@ -65,6 +66,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.fullName = token.fullName as string;
         session.user.roles = token.roles as UserRole[];
+        session.user.commissionRate = token.commissionRate as number | null;
       }
       return session;
     },
@@ -75,6 +77,8 @@ export const authOptions: NextAuthOptions = {
         token.fullName = (user as any).fullName;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token.roles = (user as any).roles;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        token.commissionRate = (user as any).commissionRate;
       }
       return token;
     },
