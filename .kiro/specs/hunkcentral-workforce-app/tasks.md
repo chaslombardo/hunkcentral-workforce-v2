@@ -175,13 +175,17 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
 - [ ] 16. Build payroll reporting system
-  - Use `list_blocks` to find dashboard/report blocks
-  - Use `get_block` for dashboard-01 or similar reporting block
-  - Create payroll report generation
-  - Implement ADP export functionality
-  - Build employee self-service payroll view
-  - Add report filtering and date range selection
-  - Write unit tests for report generation logic
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP 1**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP 2**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP 3**: Use `get_component_demo` for individual components as needed
+  - **STEP 4**: Create payroll report generation using shadcn/ui patterns from dashboard-01
+  - **STEP 5**: Implement ADP export functionality with shadcn/ui Dialog components
+  - **STEP 6**: Build employee self-service payroll view using shadcn/ui blocks
+  - **STEP 7**: Add report filtering and date range selection with shadcn/ui components
+  - **STEP 8**: Write unit tests for report generation logic
+  - **IMPORTANT**: Follow dashboard-01 block patterns for layout, cards, tables, and charts
+  - **NO CUSTOM COMPONENTS**: Use only shadcn/ui blocks and components
   - _Requirements: 5.7, 5.8_
 
 - [ ] 17. Implement pay period management

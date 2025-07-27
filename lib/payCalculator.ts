@@ -1,5 +1,5 @@
 // Payroll and bonus calculation logic
-import type { User, LogHour, Department, DailyLog, LogJob, CommissionEntry, SalaryType, SalaryFrequency } from '@/types';
+import type { User, Department, DailyLog, CommissionEntry, SalaryType, SalaryFrequency } from '@/types';
 import { LABOR_GOALS } from './constants';
 
 export interface PayrollCalculation {
@@ -126,11 +126,8 @@ export function calculateLaborBonus(
   captain: User,
   actualPercentage: number,
   goalPercentage: number,
-  totalRevenue: number,
-  _jobType: 'junk' | 'move'
+  totalRevenue: number
 ): number {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ = _jobType; // Acknowledge unused parameter
 
   // Only captains are eligible for labor bonuses
   if (!captain.roles.includes('captain')) {
@@ -286,8 +283,7 @@ export function calculateLaborBonusesTotals(
           captain,
           actualPercentage,
           goalPercentage,
-          junkRevenue,
-          'junk'
+          junkRevenue
         );
 
         if (bonus > 0) {
@@ -316,8 +312,7 @@ export function calculateLaborBonusesTotals(
           captain,
           actualPercentage,
           goalPercentage,
-          moveRevenue,
-          'move'
+          moveRevenue
         );
 
         if (bonus > 0) {
