@@ -1,7 +1,3 @@
----
-inclusion: fileMatch
-fileMatchPattern: "**/*.test.*"
----
 
 # Testing Standards
 

@@ -74,8 +74,64 @@ export const DailyLogFormSchema = z.object({
   hours: z.array(LogHourSchema),
 });
 
+// Base user schema for common fields
+const BaseUserSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  fullName: z.string().min(1, 'Full name is required'),
+  roles: z.array(UserRoleSchema).min(1, 'At least one role is required'),
+  
+  // Department-specific hourly rates
+  rateJunkCaptain: z.number().min(0).optional(),
+  rateJunkWingman: z.number().min(0).optional(),
+  rateMoveCaptain: z.number().min(0).optional(),
+  rateMoveWingman: z.number().min(0).optional(),
+  rateZigma: z.number().min(0).optional(),
+  rateTraining: z.number().min(0).optional(),
+  rateEstimating: z.number().min(0).optional(),
+  rateWarehouse: z.number().min(0).optional(),
+  rateAdmin: z.number().min(0).optional(),
+  
+  // Salary settings
+  salaryAmount: z.number().min(0).optional(),
+  salaryFrequency: z.enum(['weekly', 'bi-weekly', 'monthly']).optional(),
+  salaryType: z.enum(['base', 'guaranteed', 'supplemental']).optional(),
+  
+  // Commission and bonus settings
+  commissionRate: z.number().min(0).max(100).optional(),
+  junkBonusGoal: z.number().min(0).max(1).default(0.14),
+  moveBonusGoal: z.number().min(0).max(1).default(0.24),
+});
+
+// User management schemas
+export const CreateUserSchema = BaseUserSchema.extend({
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export const UpdateUserSchema = BaseUserSchema.extend({
+  id: z.string(),
+  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
+});
+
+export const UserSearchSchema = z.object({
+  search: z.string().optional(),
+  roles: z.array(UserRoleSchema).optional(),
+  sortBy: z.enum(['fullName', 'email', 'createdAt']).default('fullName'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(20),
+}).transform((data) => ({
+  ...data,
+  sortBy: data.sortBy || 'fullName',
+  sortOrder: data.sortOrder || 'asc',
+  page: data.page || 1,
+  limit: data.limit || 20,
+}));
+
 export type LoginFormData = z.infer<typeof LoginSchema>;
 export type LogJobFormData = z.infer<typeof LogJobSchema>;
 export type LogHourFormData = z.infer<typeof LogHourSchema>;
 export type CommissionEntryFormData = z.infer<typeof CommissionEntrySchema>;
 export type DailyLogFormData = z.infer<typeof DailyLogFormSchema>;
+export type CreateUserFormData = z.infer<typeof CreateUserSchema>;
+export type UpdateUserFormData = z.infer<typeof UpdateUserSchema>;
+export type UserSearchFormData = z.infer<typeof UserSearchSchema>;
