@@ -17,6 +17,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     commissionEntry: {
       findUnique: vi.fn(),
+      findMany: vi.fn(),
       update: vi.fn(),
     },
   },
@@ -31,6 +32,8 @@ const mockPrisma = prisma as any
 describe('Log Approval Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Set default mocks
+    mockPrisma.commissionEntry.findMany.mockResolvedValue([])
   })
 
   describe('approveLog', () => {
@@ -88,7 +91,7 @@ describe('Log Approval Actions', () => {
           action: 'approve',
           changes: {
             status: { from: 'submitted', to: 'approved' },
-            approvedAt: expect.any(Date),
+            approvedAt: expect.any(String),
             comments: 'Approved by manager',
           },
           userId: 'manager-1',
@@ -183,6 +186,18 @@ describe('Log Approval Actions', () => {
         jobId: 'J-2024-001',
         status: 'pending',
         estimatedRevenue: 400,
+        jobType: 'junk',
+        sales: {
+          id: 'sales-1',
+          email: 'sales@example.com',
+          fullName: 'Sales Person',
+          roles: ['sales'],
+          junkBonusGoal: 0.14,
+          moveBonusGoal: 0.24,
+          commissionRate: 0.10,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       }
 
       mockPrisma.dailyLog.findUnique.mockResolvedValue(mockLog)
@@ -192,6 +207,7 @@ describe('Log Approval Actions', () => {
         approvedAt: new Date(),
       })
       mockPrisma.commissionEntry.findUnique.mockResolvedValue(mockCommission)
+      mockPrisma.commissionEntry.findMany.mockResolvedValue([mockCommission])
       mockPrisma.commissionEntry.update.mockResolvedValue({})
       mockPrisma.auditLog.create.mockResolvedValue({})
 
@@ -246,7 +262,7 @@ describe('Log Approval Actions', () => {
           action: 'reject',
           changes: {
             status: { from: 'submitted', to: 'rejected' },
-            rejectedAt: expect.any(Date),
+            rejectedAt: expect.any(String),
             comments: 'Issues with job entries',
           },
           userId: 'manager-1',

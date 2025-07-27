@@ -403,8 +403,8 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
       logId,
       session.user.id,
       { status: 'submitted' },
-      { status: 'approved', approvedAt: approvedLog.approvedAt },
-      { comments }
+      { status: 'approved' },
+      { comments, approvedAt: approvedLog.approvedAt }
     );
 
     // Auto-match commission entries using the comprehensive matching service
@@ -487,8 +487,8 @@ export async function rejectLog(logId: string, comments: string): Promise<LogAct
       logId,
       session.user.id,
       { status: 'submitted' },
-      { status: 'rejected', rejectedAt: rejectedLog.approvedAt },
-      { comments }
+      { status: 'rejected' },
+      { comments, rejectedAt: rejectedLog.approvedAt }
     );
 
     revalidatePath('/logs/review');
