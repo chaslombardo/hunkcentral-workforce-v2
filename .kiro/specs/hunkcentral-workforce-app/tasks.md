@@ -100,21 +100,29 @@ Before implementing any UI feature:
   - Apply College Hunks brand colors to form elements
   - _Requirements: 2.1, 2.16_
 
-- [x] 6. Implement job entry system
-  - Use `get_component_demo` for Card, Input, Button components
-  - Create dynamic job tiles for Junk and Move sections
-  - Build job form with proper validation (Job ID, client, revenue, tips)
-  - Implement "Add Another Job" functionality
+- [x] 6. Complete job entry system in captain log form
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
+  - Use shadcn/ui `get_component_demo` for Card, Input, Button components
+  - Fix dynamic job tiles for Junk and Move sections
+  - Ensure job form has proper validation (Job ID, client, revenue, tips)
+  - Verify "Add Another Job" functionality works correctly
   - Add move-specific fields (junk on move, valuation, materials)
   - Write unit tests for job validation logic
   - _Requirements: 2.2, 2.3, 2.4, 2.14, 9.1, 9.3_
 
-- [x] 7. Build team hours tracking
-  - Use `get_component_demo` for Accordion, Select, Input components
-  - Create employee hour entry system
+- [ ] 7. Complete team hours tracking in captain log form
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
+  - Use shadcn/ui `get_component_demo` for Accordion, Select, Input components
+  - Fix employee hour entry system for Junk and Move sections
   - Implement department selection and hour input
-  - Add co-captain des ``1234ignation functionality using Checkbox
-  - Build "Add HUNK" functionality for multiple employees
+  - Add co-captain designation functionality using Checkbox
+  - Fix "Add HUNK" functionality for multiple employees
   - Write unit tests for hour calculation logic
   - _Requirements: 2.5, 2.11_
 
@@ -139,7 +147,11 @@ Before implementing any UI feature:
 
 ## Phase 3: Review & Approval System
 
-- [x] 10. Build manager review interface
+- [ ] 10. Build manager review interface
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
   - Use `list_blocks` to find table and dashboard blocks
   - Use `get_block` for appropriate table/dashboard block
   - Create log review queue with filtering and search
@@ -148,6 +160,19 @@ Before implementing any UI feature:
   - Add bulk operations for multiple logs
   - Write unit tests for approval logic
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.7_
+
+- [ ] 10.1. Build log viewing and detail pages
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
+  - Use `list_blocks` to find appropriate detail view blocks
+  - Use `get_block` for detailed content display patterns
+  - Create individual log detail view pages accessible by clicking logs
+  - Implement comprehensive log information display with job details and team hours
+  - Add navigation between log list and detail views
+  - Use `get_component_demo` for Card, Tabs, Table components for structured display
+  - _Requirements: 3.1, 3.2, 8.1_
 
 - [x] 11. Implement audit trail system
   - Use `get_component_demo` for Table, Badge, HoverCard components
@@ -160,12 +185,16 @@ Before implementing any UI feature:
 
 ## Phase 4: Commission System
 
-- [x] 12. Build commission entry system
-  - Use `get_component_demo` for Dialog, Calendar, Select components
-  - Create commission entry form with validation
-  - Implement sales consultant selector
+- [ ] 12. Fix commission entry system
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
+  - Use shadcn/ui `get_component_demo` for Dialog, Calendar, Select components
+  - Fix commission entry form functionality and validation
+  - Ensure sales consultant selector works properly
   - Add job ID uniqueness validation
-  - Build commission list with status tracking
+  - Verify commission list displays and functions correctly
   - Write unit tests for commission validation
   - _Requirements: 4.1, 4.2, 4.6, 4.7_
 
@@ -180,12 +209,18 @@ Before implementing any UI feature:
 
 ## Phase 5: Payroll & Administration
 
-- [x] 14. Build user management system
-  - Use `get_component_demo` for Dialog, Tabs, Checkbox components
-  - Create user creation/editing forms
+- [ ] 14. Complete user management system
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
+  - Use shadcn/ui `get_component_demo` for Dialog, Tabs, Checkbox components
+  - Fix user creation/editing forms functionality
   - Implement role assignment interface
   - Build compensation settings (rates, salary, commission)
   - Add user search and filtering
+  - **NEW**: Create user detail view page accessible by clicking users in the list
+  - **NEW**: Implement user detail page with comprehensive user information display
   - Write unit tests for user management operations
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
@@ -203,10 +238,11 @@ Before implementing any UI feature:
   - **STEP 2**: Use `get_block` for dashboard-01 or similar reporting block
   - **STEP 3**: Use `get_component_demo` for individual components as needed
   - **STEP 4**: Create payroll report generation using shadcn/ui patterns from dashboard-01
-  - **STEP 5**: Implement ADP export functionality with shadcn/ui Dialog components
-  - **STEP 6**: Build employee self-service payroll view using shadcn/ui blocks
-  - **STEP 7**: Add report filtering and date range selection with shadcn/ui components
-  - **STEP 8**: Write unit tests for report generation logic
+  - **STEP 5**: Show detailed breakdown of hours, tips, and pay by department (Junk Captain, Junk Wingman, Move Captain, Move Wingman, Admin, Estimating, Zigma, Training, Warehouse)
+  - **STEP 6**: Implement ADP export functionality with shadcn/ui Dialog components
+  - **STEP 7**: Build employee self-service payroll view with detailed pay breakdown using shadcn/ui blocks
+  - **STEP 8**: Add report filtering and date range selection with shadcn/ui components
+  - **STEP 9**: Write unit tests for report generation logic
   - **IMPORTANT**: Follow dashboard-01 block patterns for layout, cards, tables, and charts
   - **NO CUSTOM COMPONENTS**: Use only shadcn/ui blocks and components
   - _Requirements: 5.7, 5.8_
