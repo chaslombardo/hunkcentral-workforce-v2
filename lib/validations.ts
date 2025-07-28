@@ -41,12 +41,16 @@ export const LogJobSchema = z.object({
 
 // Commission entry schema
 export const CommissionEntrySchema = z.object({
-  salesId: z.string(),
-  jobId: z.string().min(1, 'Job ID is required'),
-  clientName: z.string().min(1, 'Client name is required'),
+  salesId: z.string().min(1, 'Sales consultant is required'),
+  jobId: z.string()
+    .min(1, 'Job ID is required')
+    .max(50, 'Job ID must be 50 characters or less')
+    .transform((val) => val.toUpperCase().trim())
+    .refine((val) => /^[A-Z0-9\-_]+$/.test(val), 'Job ID can only contain letters, numbers, hyphens, and underscores'),
+  clientName: z.string().min(1, 'Client name is required').max(100, 'Client name must be 100 characters or less'),
   jobType: z.enum(['junk', 'move']),
   targetDate: z.date(),
-  estimatedRevenue: z.number().min(0, 'Estimated revenue must be positive'),
+  estimatedRevenue: z.number().min(0.01, 'Estimated revenue must be greater than $0.00'),
 });
 
 // Log hour schema for team hours tracking

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/validations';
@@ -107,6 +107,7 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#026937] hover:bg-[#026937]/90">
+          <Plus className="mr-2 h-4 w-4" />
           Create Commission Entry
         </Button>
       </DialogTrigger>
@@ -128,7 +129,7 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
                   <FormLabel>Sales Consultant</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select sales consultant" />
                       </SelectTrigger>
                     </FormControl>
@@ -136,10 +137,11 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
                       {salesUsers.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           <div className="flex flex-col">
-                            <span>{user.fullName}</span>
+                            <span className="font-medium">{user.fullName}</span>
+                            <span className="text-xs text-muted-foreground">{user.email}</span>
                             {user.commissionRate && (
-                              <span className="text-xs text-muted-foreground">
-                                {user.commissionRate}% commission
+                              <span className="text-xs text-[#026937] font-medium">
+                                {user.commissionRate}% commission rate
                               </span>
                             )}
                           </div>
@@ -148,7 +150,7 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select the sales consultant who booked this job
+                    Select the sales consultant who booked this job. You can select any sales person with commission permissions.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -160,17 +162,18 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
               name="jobId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job ID</FormLabel>
+                  <FormLabel>Job ID *</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Enter unique job ID" 
+                      placeholder="Enter unique job ID (e.g., JOB123)" 
                       {...field}
-                      className="uppercase"
-                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      className="uppercase font-mono"
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase().trim())}
+                      maxLength={50}
                     />
                   </FormControl>
                   <FormDescription>
-                    Must match the job ID that will be entered in the captain&apos;s log
+                    Must be unique and match exactly what will be entered in the captain&apos;s log. Duplicate job IDs are not allowed.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

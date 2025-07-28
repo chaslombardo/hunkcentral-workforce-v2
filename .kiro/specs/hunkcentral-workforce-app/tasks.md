@@ -185,7 +185,7 @@ Before implementing any UI feature:
 
 ## Phase 4: Commission System
 
-- [ ] 12. Fix commission entry system
+- [x] 12. Fix commission entry system
   - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
   - **STEP**: Use `list_blocks` to find dashboard/report blocks
   - **STEP**: Use `get_block` for dashboard-01 or similar reporting block

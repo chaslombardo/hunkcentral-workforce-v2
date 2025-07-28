@@ -27,6 +27,13 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface CommissionEntry {
   id: string;
@@ -110,60 +117,67 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+      {/* Summary Cards - Following dashboard-01 patterns */}
+      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
+        <Card className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEntries}</div>
+            <div className="text-2xl font-bold tabular-nums @[250px]/card:text-3xl">{totalEntries}</div>
+            <p className="text-xs text-muted-foreground">Commission bookings</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{pendingEntries}</div>
+            <div className="text-2xl font-bold text-yellow-600 tabular-nums @[250px]/card:text-3xl">{pendingEntries}</div>
+            <p className="text-xs text-muted-foreground">Awaiting job completion</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Matched</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#026937]">{matchedEntries}</div>
+            <div className="text-2xl font-bold text-[#026937] tabular-nums @[250px]/card:text-3xl">{matchedEntries}</div>
+            <p className="text-xs text-muted-foreground">Successfully matched</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="@container/card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Commission</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#ea7200]">{formatCurrency(totalCommission)}</div>
+            <div className="text-2xl font-bold text-[#ea7200] tabular-nums @[250px]/card:text-3xl">{formatCurrency(totalCommission)}</div>
+            <p className="text-xs text-muted-foreground">Earned commission</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          placeholder="Search by job ID, client, or sales person..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-input bg-background rounded-md text-sm"
-        >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="matched">Matched</option>
-          <option value="approved">Approved</option>
-        </select>
+      {/* Filters - Following dashboard-01 patterns */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 gap-4">
+          <Input
+            placeholder="Search by job ID, client, or sales person..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="matched">Matched</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Commission Table */}

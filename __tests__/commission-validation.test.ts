@@ -136,12 +136,12 @@ describe('Commission Entry Validation', () => {
       const result = CommissionEntrySchema.safeParse(invalidEntry);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Estimated revenue must be positive');
+        expect(result.error.issues[0].message).toBe('Estimated revenue must be greater than $0.00');
       }
     });
 
-    it('should allow zero estimatedRevenue', () => {
-      const validEntry = {
+    it('should not allow zero estimatedRevenue', () => {
+      const invalidEntry = {
         salesId: 'user-123',
         jobId: 'JOB-001',
         clientName: 'John Doe',
@@ -150,8 +150,11 @@ describe('Commission Entry Validation', () => {
         estimatedRevenue: 0,
       };
 
-      const result = CommissionEntrySchema.safeParse(validEntry);
-      expect(result.success).toBe(true);
+      const result = CommissionEntrySchema.safeParse(invalidEntry);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Estimated revenue must be greater than $0.00');
+      }
     });
 
     it('should handle decimal values for estimatedRevenue', () => {
