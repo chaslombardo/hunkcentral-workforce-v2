@@ -147,7 +147,7 @@ Before implementing any UI feature:
 
 ## Phase 3: Review & Approval System
 
-- [ ] 10. Build manager review interface
+- [x] 10. Build manager review interface
   - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
   - **STEP**: Use `list_blocks` to find dashboard/report blocks
   - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
@@ -161,7 +161,7 @@ Before implementing any UI feature:
   - Write unit tests for approval logic
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.7_
 
-- [ ] 10.1. Build log viewing and detail pages
+- [x] 10.1. Build log viewing and detail pages
   - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
   - **STEP**: Use `list_blocks` to find dashboard/report blocks
   - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
