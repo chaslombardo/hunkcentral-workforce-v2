@@ -113,7 +113,7 @@ Before implementing any UI feature:
   - Write unit tests for job validation logic
   - _Requirements: 2.2, 2.3, 2.4, 2.14, 9.1, 9.3_
 
-- [ ] 7. Complete team hours tracking in captain log form
+- [x] 7. Complete team hours tracking in captain log form
   - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
   - **STEP**: Use `list_blocks` to find dashboard/report blocks
   - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
