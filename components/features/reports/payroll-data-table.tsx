@@ -22,9 +22,10 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Download,
-  Filter,
   MoreHorizontal,
   User as UserIcon,
+  Columns,
+  Plus,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -349,7 +350,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
 
   return (
     <div className="flex flex-col gap-4 px-4 lg:px-6">
-      {/* Header and Controls */}
+      {/* Header and Controls - Following dashboard-01 DataTable pattern */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Employee Payroll</h2>
@@ -369,12 +370,12 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
             className="max-w-sm"
           />
           
-          {/* Department Filter - Note: This would need custom filtering logic in real implementation */}
+          {/* Department Filter */}
           <Select
             defaultValue="all"
-            onValueChange={(value) => {
+            onValueChange={() => {
               // In real implementation, this would filter by department
-              console.log('Filter by department:', value);
+              // Department filtering logic would go here
             }}
           >
             <SelectTrigger className="w-32">
@@ -389,12 +390,13 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
             </SelectContent>
           </Select>
 
-          {/* Column Visibility */}
+          {/* Column Visibility - Following dashboard-01 pattern */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Columns
+                <Columns className="mr-2 h-4 w-4" />
+                <span className="hidden lg:inline">Customize Columns</span>
+                <span className="lg:hidden">Columns</span>
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -424,6 +426,11 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
           </DropdownMenu>
 
           {/* Export */}
+          <Button variant="outline" size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            <span className="hidden lg:inline">Add Employee</span>
+          </Button>
+          
           <Button size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -431,10 +438,10 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table - Following dashboard-01 DataTable pattern */}
       <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader className="bg-muted">
+          <TableHeader className="bg-muted sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -452,7 +459,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="**:data-[slot=table-cell]:first:w-8">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

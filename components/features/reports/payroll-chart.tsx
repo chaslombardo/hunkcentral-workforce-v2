@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Card,
@@ -10,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import {
   Select,
   SelectContent,
@@ -21,11 +28,10 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@/components/ui/toggle-group';
+
 import type { PayPeriod } from '@/types';
-import type { PayrollCalculation } from '@/lib/payCalculator';
 
 interface PayrollChartProps {
-  payrollData: PayrollCalculation[];
   selectedPeriod: PayPeriod | null;
 }
 
@@ -37,6 +43,21 @@ const chartData = [
   { date: '2025-01-22', totalPay: 49000, hours: 1300, bonuses: 4100 },
   { date: '2025-01-29', totalPay: 51000, hours: 1320, bonuses: 4600 },
 ];
+
+const chartConfig = {
+  totalPay: {
+    label: 'Total Pay',
+    color: 'var(--primary)',
+  },
+  hours: {
+    label: 'Hours',
+    color: 'var(--primary)',
+  },
+  bonuses: {
+    label: 'Bonuses',
+    color: 'var(--primary)',
+  },
+} satisfies ChartConfig;
 
 
 
@@ -56,7 +77,7 @@ export function PayrollChart({ selectedPeriod }: PayrollChartProps) {
     return chartData;
   }, []);
 
-  const formatCurrency = (value: number) => {
+  const formatChartCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -170,15 +191,117 @@ export function PayrollChart({ selectedPeriod }: PayrollChartProps) {
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <div className="aspect-auto h-[300px] w-full flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg">
-          <div className="text-center text-muted-foreground">
-            <div className="text-lg font-medium">Payroll Chart</div>
-            <div className="text-sm">Chart visualization will be implemented here</div>
-            <div className="text-xs mt-2">
-              Showing {getChartTitle()} for {selectedPeriod?.name || 'current period'}
-            </div>
-          </div>
-        </div>
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[300px] w-full"
+        >
+          <AreaChart data={filteredData}>
+            <defs>
+              <linearGradient id="fillTotalPay" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-totalPay)"
+                  stopOpacity={1.0}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-totalPay)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillHours" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-hours)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-hours)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillBonuses" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-bonuses)"
+                  stopOpacity={0.6}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-bonuses)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
+              tickFormatter={(value) => {
+                const date = new Date(value);
+                return date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                });
+              }}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(value) => {
+                    return new Date(value).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    });
+                  }}
+                  indicator="dot"
+                  formatter={(value, name) => {
+                    if (name === 'totalPay') {
+                      return formatChartCurrency(value as number);
+                    } else if (name === 'hours') {
+                      return formatHours(value as number);
+                    } else if (name === 'bonuses') {
+                      return formatChartCurrency(value as number);
+                    }
+                    return value;
+                  }}
+                />
+              }
+            />
+            {chartType === 'totalPay' && (
+              <Area
+                dataKey="totalPay"
+                type="natural"
+                fill="url(#fillTotalPay)"
+                stroke="var(--color-totalPay)"
+                stackId="a"
+              />
+            )}
+            {chartType === 'hours' && (
+              <Area
+                dataKey="hours"
+                type="natural"
+                fill="url(#fillHours)"
+                stroke="var(--color-hours)"
+                stackId="a"
+              />
+            )}
+            {chartType === 'bonuses' && (
+              <Area
+                dataKey="bonuses"
+                type="natural"
+                fill="url(#fillBonuses)"
+                stroke="var(--color-bonuses)"
+                stackId="a"
+              />
+            )}
+          </AreaChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

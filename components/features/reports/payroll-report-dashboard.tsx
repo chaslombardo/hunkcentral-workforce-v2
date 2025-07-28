@@ -10,6 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { CalendarIcon, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -97,7 +103,7 @@ export function PayrollReportDashboard() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Header Section */}
+          {/* Header Section - Following dashboard-01 pattern */}
           <div className="px-4 lg:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
@@ -176,25 +182,63 @@ export function PayrollReportDashboard() {
             </div>
           </div>
 
-          {/* Summary Cards - Using dashboard-01 SectionCards pattern */}
-          <PayrollSummaryCards 
-            payrollData={payrollData}
-            selectedPeriod={selectedPeriod}
-          />
+          {/* Tabs for different report views - Following dashboard-01 Tabs pattern */}
+          <Tabs defaultValue="overview" className="w-full flex-col justify-start gap-6">
+            <div className="flex items-center justify-between px-4 lg:px-6">
+              <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="detailed">
+                  Detailed <Badge variant="secondary">{payrollData.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="export">Export</TabsTrigger>
+              </TabsList>
+            </div>
 
-          {/* Chart Section - Using dashboard-01 ChartAreaInteractive pattern */}
-          <div className="px-4 lg:px-6">
-            <PayrollChart 
-              payrollData={payrollData}
-              selectedPeriod={selectedPeriod}
-            />
-          </div>
+            {/* Overview Tab - Main dashboard view */}
+            <TabsContent value="overview" className="flex flex-col gap-4 overflow-auto">
+              {/* Summary Cards - Using dashboard-01 SectionCards pattern */}
+              <PayrollSummaryCards 
+                payrollData={payrollData}
+                selectedPeriod={selectedPeriod}
+              />
 
-          {/* Data Table - Using dashboard-01 DataTable pattern */}
-          <PayrollDataTable 
-            payrollData={payrollData}
-            selectedPeriod={selectedPeriod}
-          />
+              {/* Chart Section - Using dashboard-01 ChartAreaInteractive pattern */}
+              <div className="px-4 lg:px-6">
+                <PayrollChart 
+                  selectedPeriod={selectedPeriod}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Detailed Tab - Data table view */}
+            <TabsContent value="detailed" className="flex flex-col overflow-auto">
+              <PayrollDataTable 
+                payrollData={payrollData}
+                selectedPeriod={selectedPeriod}
+              />
+            </TabsContent>
+
+            {/* Analytics Tab - Additional charts and insights */}
+            <TabsContent value="analytics" className="flex flex-col px-4 lg:px-6">
+              <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="text-lg font-medium">Advanced Analytics</div>
+                  <div className="text-sm">Department comparisons, trends, and insights</div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Export Tab - Export options and history */}
+            <TabsContent value="export" className="flex flex-col px-4 lg:px-6">
+              <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="text-lg font-medium">Export Center</div>
+                  <div className="text-sm">Export options and download history</div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Export Dialog */}
           <PayrollExportDialog 

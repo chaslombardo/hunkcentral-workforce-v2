@@ -3,6 +3,7 @@
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Users, Clock, Award } from 'lucide-react';
+import { formatCurrency, formatHours } from '@/lib/formatters';
 import type { PayPeriod } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 
@@ -28,16 +29,7 @@ export function PayrollSummaryCards({ payrollData, selectedPeriod }: PayrollSumm
   const hoursChange = totalHours > 0 ? ((totalHours - previousTotalHours) / previousTotalHours) * 100 : 0;
   const hoursTrending = hoursChange > 0;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
-  const formatHours = (hours: number) => {
-    return `${hours.toFixed(1)}h`;
-  };
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">

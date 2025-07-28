@@ -21,6 +21,29 @@
 - Follow New York theme styling consistently throughout
 - Apply College Hunks brand colors (#026937 green, #ea7200 orange) to all components
 
+## Key Implementation Principles
+
+1. **Shadcn/UI First**: Always check MCP server for blocks and components before custom implementation
+2. **New York Theme**: Consistent styling throughout with College Hunks brand colors
+3. **Test-Driven Development**: Write tests based on requirements, then implement code to pass tests
+4. **Mobile-First**: Every component must work perfectly on mobile devices
+5. **Real-Time Feedback**: Calculations update immediately as users input data
+6. **Error Handling**: Comprehensive error handling with user-friendly messages
+7. **Performance**: Target <1 second page load times
+8. **Accessibility**: WCAG 2.1 AA compliance for all components
+9. **Security**: Proper input validation and role-based access control
+
+## Shadcn/UI MCP Usage Checklist
+
+Before implementing any UI feature:
+
+- Run `list_blocks` to find relevant blocks
+- Use `get_block` for complex layouts (login, dashboard, forms)
+- Use `get_component_demo` to understand proper usage
+- Apply New York theme styling consistently
+- Integrate College Hunks brand colors appropriately
+- Test responsive behavior on mobile device
+
 ## Phase 1: Foundation & Authentication
 
 - [x] 0. Fix critical application errors preventing startup
@@ -174,7 +197,7 @@
   - Write extensive unit tests for all payroll calculations
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
-- [ ] 16. Build payroll reporting system
+- [x] 16. Build payroll reporting system (shadcn/ui)
   - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
   - **STEP 1**: Use `list_blocks` to find dashboard/report blocks
   - **STEP 2**: Use `get_block` for dashboard-01 or similar reporting block
@@ -188,7 +211,11 @@
   - **NO CUSTOM COMPONENTS**: Use only shadcn/ui blocks and components
   - _Requirements: 5.7, 5.8_
 
-- [ ] 17. Implement pay period management
+- [ ] 17. Implement pay period management (use shadcn/ui blocks for ui)
+  - **MANDATORY**: Use shadcn/ui MCP server for ALL UI components
+  - **STEP**: Use `list_blocks` to find dashboard/report blocks
+  - **STEP**: Use `get_block` for dashboard-01 or similar reporting block
+  - **STEP**: Use `get_component_demo` for individual components as needed
   - Use `get_component_demo` for Calendar, AlertDialog components
   - Create pay period creation and management
   - Build period status workflow (open/locked/closed)
@@ -223,25 +250,4 @@
   - Deploy to production with proper rollback procedures
   - _Requirements: 10.1, 10.2, 10.4_
 
-## Key Implementation Principles
-
-1. **Shadcn/UI First**: Always check MCP server for blocks and components before custom implementation
-2. **New York Theme**: Consistent styling throughout with College Hunks brand colors
-3. **Test-Driven Development**: Write tests based on requirements, then implement code to pass tests
-4. **Mobile-First**: Every component must work perfectly on mobile devices
-5. **Real-Time Feedback**: Calculations update immediately as users input data
-6. **Error Handling**: Comprehensive error handling with user-friendly messages
-7. **Performance**: Target <1 second page load times
-8. **Accessibility**: WCAG 2.1 AA compliance for all components
-9. **Security**: Proper input validation and role-based access control
-
-## Shadcn/UI MCP Usage Checklist
-
-Before implementing any UI feature:
-
-- Run `list_blocks` to find relevant blocks
-- Use `get_block` for complex layouts (login, dashboard, forms)
-- Use `get_component_demo` to understand proper usage
-- Apply New York theme styling consistently
-- Integrate College Hunks brand colors appropriately
-- Test responsive behavior on mobile devices
+s

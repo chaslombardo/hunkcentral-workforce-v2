@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -34,12 +36,20 @@ import {
 } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import {
   Clock,
   DollarSign,
   Download,
   TrendingUp,
+  TrendingDown,
   Award,
 } from 'lucide-react';
+import { formatCurrency, formatDate, calculateTrend } from '@/lib/formatters';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 
@@ -114,32 +124,7 @@ export function MyPayrollView() {
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(mockPayPeriods[0]);
   const [userPayroll] = React.useState<PayrollCalculation>(mockUserPayroll);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const calculateTrend = () => {
-    const currentPay = userPayroll.totalPay;
-    const previousPay = mockHistoricalData[0].totalPay;
-    const change = ((currentPay - previousPay) / previousPay) * 100;
-    return {
-      percentage: change,
-      isPositive: change > 0,
-    };
-  };
-
-  const trend = calculateTrend();
+  const trend = calculateTrend(userPayroll.totalPay, mockHistoricalData[0].totalPay);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -192,7 +177,7 @@ export function MyPayrollView() {
             </div>
           </div>
 
-          {/* Summary Cards */}
+          {/* Summary Cards - Following dashboard-01 SectionCards pattern */}
           <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
             {/* Total Pay */}
             <Card className="@container/card">
@@ -201,22 +186,22 @@ export function MyPayrollView() {
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                   {formatCurrency(userPayroll.totalPay)}
                 </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant={trend.isPositive ? 'default' : 'secondary'}>
-                    <TrendingUp className="h-3 w-3" />
+                <CardAction>
+                  <Badge variant="outline">
+                    {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                     {trend.isPositive ? '+' : ''}{trend.percentage.toFixed(1)}%
                   </Badge>
-                </div>
+                </CardAction>
               </CardHeader>
-              <CardContent className="flex-col items-start gap-1.5 text-sm">
+              <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
                   {trend.isPositive ? 'Increased' : 'Decreased'} from last period
-                  <TrendingUp className="size-4" />
+                  {trend.isPositive ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                 </div>
                 <div className="text-muted-foreground">
                   {formatDate(selectedPeriod.startDate)} - {formatDate(selectedPeriod.endDate)}
                 </div>
-              </CardContent>
+              </CardFooter>
             </Card>
 
             {/* Hours Worked */}
@@ -226,14 +211,14 @@ export function MyPayrollView() {
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                   {userPayroll.totalHours}h
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <CardAction>
                   <Badge variant="outline">
                     <Clock className="h-3 w-3" />
                     Regular
                   </Badge>
-                </div>
+                </CardAction>
               </CardHeader>
-              <CardContent className="flex-col items-start gap-1.5 text-sm">
+              <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
                   Total hours worked this period
                   <Clock className="size-4" />
@@ -242,7 +227,7 @@ export function MyPayrollView() {
                   Primary department: {Object.entries(userPayroll.hoursByDepartment)
                     .find(([, hours]) => hours > 0)?.[0] || 'admin'}
                 </div>
-              </CardContent>
+              </CardFooter>
             </Card>
 
             {/* Tips Earned */}
@@ -252,14 +237,14 @@ export function MyPayrollView() {
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                   {formatCurrency(userPayroll.tips)}
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <CardAction>
                   <Badge variant="outline">
                     <DollarSign className="h-3 w-3" />
                     Performance
                   </Badge>
-                </div>
+                </CardAction>
               </CardHeader>
-              <CardContent className="flex-col items-start gap-1.5 text-sm">
+              <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
                   Great customer service!
                   <Award className="size-4" />
@@ -267,7 +252,7 @@ export function MyPayrollView() {
                 <div className="text-muted-foreground">
                   Average per job: {formatCurrency(userPayroll.tips / 8)}
                 </div>
-              </CardContent>
+              </CardFooter>
             </Card>
 
             {/* Bonuses */}
@@ -277,14 +262,14 @@ export function MyPayrollView() {
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                   {formatCurrency(userPayroll.bonuses)}
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <CardAction>
                   <Badge variant="outline">
                     <Award className="h-3 w-3" />
                     Labor Bonus
                   </Badge>
-                </div>
+                </CardAction>
               </CardHeader>
-              <CardContent className="flex-col items-start gap-1.5 text-sm">
+              <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
                   Efficiency bonus earned
                   <Award className="size-4" />
@@ -292,21 +277,31 @@ export function MyPayrollView() {
                 <div className="text-muted-foreground">
                   Performance bonus earned
                 </div>
-              </CardContent>
+              </CardFooter>
             </Card>
           </div>
 
-          {/* Detailed Breakdown */}
-          <div className="px-4 lg:px-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pay Breakdown</CardTitle>
-                <CardDescription>
-                  Detailed breakdown of your compensation for {selectedPeriod.name}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="w-full">
+          {/* Tabs for different views - Following dashboard-01 Tabs pattern */}
+          <Tabs defaultValue="breakdown" className="w-full flex-col justify-start gap-6">
+            <div className="flex items-center justify-between px-4 lg:px-6">
+              <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
+                <TabsTrigger value="breakdown">Pay Breakdown</TabsTrigger>
+                <TabsTrigger value="history">Pay History</TabsTrigger>
+                <TabsTrigger value="performance">Performance</TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Pay Breakdown Tab */}
+            <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pay Breakdown</CardTitle>
+                  <CardDescription>
+                    Detailed breakdown of your compensation for {selectedPeriod.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
                   {/* Regular Pay */}
                   <AccordionItem value="regular-pay">
                     <AccordionTrigger>
@@ -400,62 +395,73 @@ export function MyPayrollView() {
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                </Accordion>
+                  </Accordion>
 
-                <Separator className="my-4" />
+                  <Separator className="my-4" />
 
-                {/* Total */}
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total Pay:</span>
-                  <span className="font-mono">{formatCurrency(userPayroll.totalPay)}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  {/* Total */}
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>Total Pay:</span>
+                    <span className="font-mono">{formatCurrency(userPayroll.totalPay)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Pay History */}
-          <div className="px-4 lg:px-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Pay History</CardTitle>
-                <CardDescription>
-                  Your compensation over the last few pay periods
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Pay Period</TableHead>
-                      <TableHead className="text-right">Hours</TableHead>
-                      <TableHead className="text-right">Tips</TableHead>
-                      <TableHead className="text-right">Bonuses</TableHead>
-                      <TableHead className="text-right">Total Pay</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockHistoricalData.map((period, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{period.period}</TableCell>
-                        <TableCell className="text-right font-mono">
-                          {period.hours}h
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {formatCurrency(period.tips)}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {formatCurrency(85)} {/* Mock bonus */}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-semibold">
-                          {formatCurrency(period.totalPay)}
-                        </TableCell>
+            {/* Pay History Tab */}
+            <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Pay History</CardTitle>
+                  <CardDescription>
+                    Your compensation over the last few pay periods
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Pay Period</TableHead>
+                        <TableHead className="text-right">Hours</TableHead>
+                        <TableHead className="text-right">Tips</TableHead>
+                        <TableHead className="text-right">Bonuses</TableHead>
+                        <TableHead className="text-right">Total Pay</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
+                    </TableHeader>
+                    <TableBody>
+                      {mockHistoricalData.map((period, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{period.period}</TableCell>
+                          <TableCell className="text-right font-mono">
+                            {period.hours}h
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatCurrency(period.tips)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatCurrency(85)} {/* Mock bonus */}
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-semibold">
+                            {formatCurrency(period.totalPay)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Performance Tab */}
+            <TabsContent value="performance" className="flex flex-col px-4 lg:px-6">
+              <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="text-lg font-medium">Performance Metrics</div>
+                  <div className="text-sm">Labor efficiency, tip averages, and performance trends</div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
