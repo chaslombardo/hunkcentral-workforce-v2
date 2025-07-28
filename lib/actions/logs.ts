@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { DailyLogFormSchema, type DailyLogFormData } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { logDailyLogChange } from '@/lib/auditLogger';
+import { canModifyDataForDate } from '@/lib/actions/pay-periods';
 
 export type LogActionResult = {
   success: boolean;
@@ -28,6 +29,15 @@ export async function saveDraftLog(
 
     // Validate form data
     const validatedData = DailyLogFormSchema.parse(formData);
+
+    // Check if data can be modified for this date
+    const canModify = await canModifyDataForDate(validatedData.logDate);
+    if (!canModify) {
+      return { 
+        success: false, 
+        error: 'Cannot modify data for this date - pay period is locked or closed' 
+      };
+    }
 
     const logData = {
       captainId: validatedData.captainId,

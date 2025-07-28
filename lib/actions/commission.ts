@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
+import { canModifyDataForDate } from '@/lib/actions/pay-periods';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {
@@ -16,6 +17,12 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
 
     // Validate the data
     const validatedData = CommissionEntrySchema.parse(data);
+
+    // Check if data can be modified for the target date
+    const canModify = await canModifyDataForDate(validatedData.targetDate);
+    if (!canModify) {
+      throw new Error('Cannot create commission entry for this date - pay period is locked or closed');
+    }
 
     // Check if job ID already exists
     const existingEntry = await prisma.commissionEntry.findUnique({

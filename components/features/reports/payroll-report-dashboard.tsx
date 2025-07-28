@@ -19,9 +19,9 @@ import {
 import { CalendarIcon, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
-import type { PayPeriod } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 import type { DateRange } from 'react-day-picker';
+import { getPayPeriods, type PayPeriod } from '@/lib/actions/pay-periods';
 
 export function PayrollReportDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PayPeriod | null>(null);
@@ -31,39 +31,26 @@ export function PayrollReportDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showExportDialog, setShowExportDialog] = useState(false);
 
-  // Mock data for development - replace with actual API calls
+  // Load pay periods and payroll data
   useEffect(() => {
     const loadPayrollData = async () => {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock pay periods
-      const mockPayPeriods: PayPeriod[] = [
-        {
-          id: '1',
-          name: 'January 2025 - Week 1',
-          startDate: new Date('2025-01-01'),
-          endDate: new Date('2025-01-07'),
-          status: 'closed',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: '2',
-          name: 'January 2025 - Week 2',
-          startDate: new Date('2025-01-08'),
-          endDate: new Date('2025-01-14'),
-          status: 'open',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-
-      setPayPeriods(mockPayPeriods);
-      setSelectedPeriod(mockPayPeriods[0]);
-      setIsLoading(false);
+      try {
+        // Load pay periods
+        const periodsResult = await getPayPeriods();
+        if (periodsResult.success && periodsResult.data) {
+          setPayPeriods(periodsResult.data);
+          // Set the most recent period as default
+          if (periodsResult.data.length > 0) {
+            setSelectedPeriod(periodsResult.data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading payroll data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadPayrollData();
