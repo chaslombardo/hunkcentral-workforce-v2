@@ -1,0 +1,67 @@
+{
+  "name": "HUNKCentral - Workforce Management",
+  "short_name": "HUNKCentral",
+  "description": "Digital workforce management system for College Hunks Hauling Junk & Moving",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#026937",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create Log",
+      "short_name": "New Log",
+      "description": "Create a new daily log",
+      "url": "/logs/create",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Review Logs",
+      "short_name": "Review",
+      "description": "Review pending logs",
+      "url": "/logs/review",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Commission",
+      "short_name": "Commission",
+      "description": "Add commission entry",
+      "url": "/commission/create",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

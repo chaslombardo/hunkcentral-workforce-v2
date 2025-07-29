@@ -5,8 +5,9 @@ import { UseFormWatch } from 'react-hook-form';
 import { saveDraftLog, type LogActionResult } from '@/lib/actions/logs';
 import { type DailyLogFormData } from '@/lib/validations';
 import { useToast } from '@/hooks/use-toast';
+import { useOffline, useOfflineStorage } from './useOffline';
 
-export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'offline';
 
 interface UseAutoSaveOptions {
   watch: UseFormWatch<DailyLogFormData>;
@@ -20,6 +21,7 @@ interface UseAutoSaveReturn {
   lastSaved: Date | null;
   saveNow: () => Promise<LogActionResult>;
   error: string | null;
+  isOfflineSave: boolean;
 }
 
 export function useAutoSave({
@@ -32,8 +34,11 @@ export function useAutoSave({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentLogId, setCurrentLogId] = useState<string | null>(logId);
+  const [isOfflineSave, setIsOfflineSave] = useState(false);
   
   const { toast } = useToast();
+  const { isOnline, isOffline } = useOffline();
+  const { storeData, getData } = useOfflineStorage();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastDataRef = useRef<string>('');
   const isSavingRef = useRef(false);
@@ -51,12 +56,39 @@ export function useAutoSave({
       setStatus('saving');
       setError(null);
 
+      if (isOffline) {
+        // Save offline
+        const offlineKey = currentLogId || `draft_${Date.now()}`;
+        await storeData(offlineKey, {
+          ...formData,
+          savedAt: new Date().toISOString(),
+          isOffline: true,
+        });
+        
+        setStatus('offline');
+        setLastSaved(new Date());
+        setError(null);
+        setIsOfflineSave(true);
+        
+        // Update the last saved data reference
+        lastDataRef.current = JSON.stringify(formData);
+
+        toast({
+          title: 'Saved Offline',
+          description: 'Your changes have been saved locally and will sync when you&apos;re back online.',
+        });
+
+        return { success: true, data: { id: offlineKey } };
+      }
+
+      // Online save
       const result = await saveDraftLog(currentLogId, formData);
 
       if (result.success) {
         setStatus('saved');
         setLastSaved(new Date());
         setError(null);
+        setIsOfflineSave(false);
         
         // Update logId if this was a new log
         if (result.data?.id && !currentLogId) {
@@ -66,34 +98,82 @@ export function useAutoSave({
         // Update the last saved data reference
         lastDataRef.current = JSON.stringify(formData);
       } else {
-        setStatus('error');
-        setError(result.error || 'Save failed');
-        
-        // Show error toast for manual saves
-        toast({
-          title: 'Save Failed',
-          description: result.error || 'Unable to save your changes. Please try again.',
-          variant: 'destructive',
-        });
+        // If online save fails, try offline save as fallback
+        try {
+          const offlineKey = currentLogId || `draft_${Date.now()}`;
+          await storeData(offlineKey, {
+            ...formData,
+            savedAt: new Date().toISOString(),
+            isOffline: true,
+            failedOnlineSync: true,
+          });
+          
+          setStatus('offline');
+          setLastSaved(new Date());
+          setError('Saved offline due to connection issues');
+          setIsOfflineSave(true);
+          
+          toast({
+            title: 'Saved Offline',
+            description: 'Online save failed, but your changes are saved locally.',
+            variant: 'default',
+          });
+
+          return { success: true, data: { id: offlineKey } };
+        } catch (offlineError) {
+          setStatus('error');
+          setError(result.error || 'Save failed');
+          
+          toast({
+            title: 'Save Failed',
+            description: result.error || 'Unable to save your changes. Please try again.',
+            variant: 'destructive',
+          });
+        }
       }
 
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Save failed';
-      setStatus('error');
-      setError(errorMessage);
       
-      toast({
-        title: 'Save Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      // Try offline save as fallback
+      try {
+        const offlineKey = currentLogId || `draft_${Date.now()}`;
+        await storeData(offlineKey, {
+          ...formData,
+          savedAt: new Date().toISOString(),
+          isOffline: true,
+          failedOnlineSync: true,
+        });
+        
+        setStatus('offline');
+        setLastSaved(new Date());
+        setError('Saved offline due to connection issues');
+        setIsOfflineSave(true);
+        
+        toast({
+          title: 'Saved Offline',
+          description: 'Connection failed, but your changes are saved locally.',
+        });
 
-      return { success: false, error: errorMessage };
+        return { success: true, data: { id: offlineKey } };
+      } catch (offlineError) {
+        setStatus('error');
+        setError(errorMessage);
+        setIsOfflineSave(false);
+        
+        toast({
+          title: 'Save Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+
+        return { success: false, error: errorMessage };
+      }
     } finally {
       isSavingRef.current = false;
     }
-  }, [currentLogId, formData, toast]);
+  }, [currentLogId, formData, toast, isOffline, storeData]);
 
   // Auto-save effect
   useEffect(() => {
@@ -160,10 +240,31 @@ export function useAutoSave({
     }
   }, [status]);
 
+  // Load offline data on mount if available
+  useEffect(() => {
+    const loadOfflineData = async () => {
+      if (currentLogId) {
+        try {
+          const offlineData = await getData(currentLogId) as { isOffline?: boolean; savedAt?: string } | null;
+          if (offlineData?.isOffline) {
+            setIsOfflineSave(true);
+            setLastSaved(new Date(offlineData.savedAt || new Date().toISOString()));
+            setStatus('offline');
+          }
+        } catch (e) {
+          // Ignore load errors
+        }
+      }
+    };
+
+    loadOfflineData();
+  }, [currentLogId, getData]);
+
   return {
     status,
     lastSaved,
     saveNow,
     error,
+    isOfflineSave,
   };
 }

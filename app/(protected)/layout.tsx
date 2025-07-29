@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/main-layout"
-import { MobileHeader } from "@/components/layout/mobile-header"
+import { EnhancedMobileHeader, MobileQuickActions } from "@/components/layout/mobile-navigation"
+import { MobileNetworkIndicator } from "@/components/ui/offline-indicator"
 
 export default function ProtectedLayout({
   children,
@@ -8,9 +9,12 @@ export default function ProtectedLayout({
 }) {
   return (
     <>
+      {/* Mobile network indicator */}
+      <MobileNetworkIndicator />
+      
       {/* Mobile header - only visible on mobile */}
       <div className="md:hidden">
-        <MobileHeader />
+        <EnhancedMobileHeader />
       </div>
       
       {/* Desktop layout with sidebar - hidden on mobile */}
@@ -20,10 +24,13 @@ export default function ProtectedLayout({
       
       {/* Mobile content - only visible on mobile */}
       <div className="md:hidden">
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 p-4 pb-20">
           {children}
         </div>
       </div>
+      
+      {/* Mobile quick actions */}
+      <MobileQuickActions />
     </>
   )
 }
