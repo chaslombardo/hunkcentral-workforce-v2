@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
+import { ZodError } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { CreateUserSchema, UpdateUserSchema, UserSearchSchema } from '@/lib/validations';
@@ -15,7 +16,22 @@ export async function createUser(data: CreateUserFormData) {
       throw new Error('Unauthorized: Admin access required');
     }
 
-    const validatedData = CreateUserSchema.parse(data);
+    let validatedData;
+    try {
+      validatedData = CreateUserSchema.parse(data);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const issues = error.issues;
+        if (issues && issues.length > 0) {
+          const firstIssue = issues[0];
+          return { 
+            success: false, 
+            error: firstIssue.message 
+          };
+        }
+      }
+      throw error; // Re-throw if not a ZodError
+    }
     
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -58,9 +74,15 @@ export async function createUser(data: CreateUserFormData) {
     return { success: true, user: { id: user.id, email: user.email, fullName: user.fullName } };
   } catch (error) {
     console.error('Error creating user:', error);
+    if (error instanceof Error) {
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to create user' 
+      error: 'Failed to create user' 
     };
   }
 }
@@ -73,7 +95,22 @@ export async function updateUser(data: UpdateUserFormData) {
       throw new Error('Unauthorized: Admin access required');
     }
 
-    const validatedData = UpdateUserSchema.parse(data);
+    let validatedData;
+    try {
+      validatedData = UpdateUserSchema.parse(data);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const issues = error.issues;
+        if (issues && issues.length > 0) {
+          const firstIssue = issues[0];
+          return { 
+            success: false, 
+            error: firstIssue.message 
+          };
+        }
+      }
+      throw error; // Re-throw if not a ZodError
+    }
     
     // Get existing user for audit trail
     const existingUser = await prisma.user.findUnique({
@@ -127,9 +164,15 @@ export async function updateUser(data: UpdateUserFormData) {
     return { success: true, user: { id: updatedUser.id, email: updatedUser.email, fullName: updatedUser.fullName } };
   } catch (error) {
     console.error('Error updating user:', error);
+    if (error instanceof Error) {
+      return { 
+        success: false, 
+        error: error.message 
+      };
+    }
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to update user' 
+      error: 'Failed to update user' 
     };
   }
 }

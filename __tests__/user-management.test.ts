@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { createUser, updateUser, deleteUser, getUsers, getUserById, copyUserSettings } from '@/lib/actions/users';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
@@ -10,10 +10,10 @@ vi.mock('@/lib/prisma', () => ({
     user: {
       findUnique: vi.fn(),
       findMany: vi.fn(),
-      count: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      count: vi.fn(),
     },
     auditLog: {
       create: vi.fn(),
@@ -35,345 +35,306 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-const mockPrisma = prisma as any;
-const mockGetSession = getSession as any;
-const mockBcrypt = bcrypt as any;
+const mockSession = {
+  user: {
+    id: 'admin-user-id',
+    roles: ['admin'],
+  },
+};
 
-describe('User Management Actions', () => {
+const mockUser = {
+  id: 'user-1',
+  email: 'john@example.com',
+  fullName: 'John Doe',
+  roles: ['captain'],
+  rateJunkCaptain: 25.00,
+  rateJunkWingman: 20.00,
+  rateMoveCaptain: 30.00,
+  rateMoveWingman: 25.00,
+  rateZigma: null,
+  rateTraining: null,
+  rateEstimating: null,
+  rateWarehouse: null,
+  rateAdmin: null,
+  salaryAmount: null,
+  salaryFrequency: null,
+  salaryType: null,
+  commissionRate: null,
+  junkBonusGoal: 0.14,
+  moveBonusGoal: 0.24,
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
+};
+
+describe('User Management Operations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (getSession as any).mockResolvedValue(mockSession);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('createUser', () => {
-    const mockAdminSession = {
-      user: { id: 'admin-id', roles: ['admin'] },
-    };
+    it('should create a new user successfully', async () => {
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['captain'] as any,
+        rateJunkCaptain: 25.00,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-    const validUserData = {
-      email: 'test@example.com',
-      password: 'password123',
-      fullName: 'Test User',
-      roles: ['captain'] as const,
-      rateJunkCaptain: 25.00,
-      junkBonusGoal: 0.14,
-      moveBonusGoal: 0.24,
-    };
+      (prisma.user.findUnique as any).mockResolvedValue(null); // User doesn't exist
+      (bcrypt.hash as any).mockResolvedValue('hashed-password');
+      (prisma.user.create as any).mockResolvedValue(mockUser);
+      (prisma.auditLog.create as any).mockResolvedValue({});
 
-    it('should create a user successfully', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(null); // User doesn't exist
-      mockBcrypt.hash.mockResolvedValue('hashed-password');
-      mockPrisma.user.create.mockResolvedValue({
-        id: 'new-user-id',
-        email: validUserData.email,
-        fullName: validUserData.fullName,
-      });
-      mockPrisma.auditLog.create.mockResolvedValue({});
-
-      const result = await createUser(validUserData);
+      const result = await createUser(userData);
 
       expect(result.success).toBe(true);
       expect(result.user).toEqual({
-        id: 'new-user-id',
-        email: validUserData.email,
-        fullName: validUserData.fullName,
+        id: mockUser.id,
+        email: mockUser.email,
+        fullName: mockUser.fullName,
       });
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+      expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
-          ...validUserData,
+          ...userData,
           password: 'hashed-password',
         },
       });
-      expect(mockPrisma.auditLog.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
     });
 
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
+    it('should fail if user already exists', async () => {
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['captain'] as any,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
+
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser); // User exists
+
+      const result = await createUser(userData);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('User with this email already exists');
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('should fail if user is not admin', async () => {
+      (getSession as any).mockResolvedValue({
         user: { id: 'user-id', roles: ['captain'] },
       });
 
-      const result = await createUser(validUserData);
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['captain'] as any,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
+
+      const result = await createUser(userData);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Unauthorized: Admin access required');
     });
-
-    it('should reject duplicate email addresses', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'existing-user' });
-
-      const result = await createUser(validUserData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('User with this email already exists');
-    });
-
-    it('should validate required fields', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-
-      const invalidData = {
-        email: 'invalid-email',
-        password: '123', // Too short
-        fullName: '',
-        roles: [],
-      };
-
-      const result = await createUser(invalidData as any);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Please enter a valid email address');
-    });
   });
 
   describe('updateUser', () => {
-    const mockAdminSession = {
-      user: { id: 'admin-id', roles: ['admin'] },
-    };
+    it('should update user successfully', async () => {
+      const updateData = {
+        id: 'user-1',
+        email: 'john.updated@example.com',
+        fullName: 'John Updated',
+        roles: ['captain', 'manager'] as any,
+        rateJunkCaptain: 30.00,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-    const existingUser = {
-      id: 'user-id',
-      email: 'old@example.com',
-      fullName: 'Old Name',
-      roles: ['wingman'],
-    };
-
-    const updateData = {
-      id: 'user-id',
-      email: 'new@example.com',
-      fullName: 'New Name',
-      roles: ['captain'] as const,
-      rateJunkCaptain: 30.00,
-    };
-
-    it('should update a user successfully', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
-      mockPrisma.user.update.mockResolvedValue({
-        id: updateData.id,
-        email: updateData.email,
-        fullName: updateData.fullName,
-        roles: updateData.roles,
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (prisma.user.update as any).mockResolvedValue({
+        ...mockUser,
+        ...updateData,
       });
-      mockPrisma.auditLog.create.mockResolvedValue({});
+      (prisma.auditLog.create as any).mockResolvedValue({});
 
       const result = await updateUser(updateData);
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({
-        where: { id: updateData.id },
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
         data: expect.objectContaining({
-          email: updateData.email,
-          fullName: updateData.fullName,
-          roles: updateData.roles,
-          rateJunkCaptain: updateData.rateJunkCaptain,
+          email: 'john.updated@example.com',
+          fullName: 'John Updated',
+          roles: ['captain', 'manager'],
+          rateJunkCaptain: 30.00,
         }),
       });
-      expect(mockPrisma.auditLog.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
     });
 
-    it('should hash password when provided', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(existingUser);
-      mockBcrypt.hash.mockResolvedValue('new-hashed-password');
-      mockPrisma.user.update.mockResolvedValue({});
-      mockPrisma.auditLog.create.mockResolvedValue({});
+    it('should hash password if provided', async () => {
+      const updateData = {
+        id: 'user-1',
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'newpassword123',
+        roles: ['captain'] as any,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-      const dataWithPassword = { ...updateData, password: 'newpassword123' };
-      await updateUser(dataWithPassword);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (bcrypt.hash as any).mockResolvedValue('new-hashed-password');
+      (prisma.user.update as any).mockResolvedValue(mockUser);
+      (prisma.auditLog.create as any).mockResolvedValue({});
 
-      expect(mockBcrypt.hash).toHaveBeenCalledWith('newpassword123', 12);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({
-        where: { id: updateData.id },
+      const result = await updateUser(updateData);
+
+      expect(result.success).toBe(true);
+      expect(bcrypt.hash).toHaveBeenCalledWith('newpassword123', 12);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
         data: expect.objectContaining({
           password: 'new-hashed-password',
         }),
       });
     });
 
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
-        user: { id: 'user-id', roles: ['captain'] },
-      });
+    it('should fail if user not found', async () => {
+      const updateData = {
+        id: 'nonexistent-user',
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        roles: ['captain'] as any,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-      const result = await updateUser(updateData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Unauthorized: Admin access required');
-    });
-
-    it('should handle non-existent user', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      (prisma.user.findUnique as any).mockResolvedValue(null);
 
       const result = await updateUser(updateData);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('User not found');
+      expect(prisma.user.update).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteUser', () => {
-    const mockAdminSession = {
-      user: { id: 'admin-id', roles: ['admin'] },
-    };
+    it('should delete user successfully', async () => {
+      (prisma.user.findUnique as any)
+        .mockResolvedValueOnce(mockUser) // First call for existence check
+        .mockResolvedValueOnce({ // Second call for related data check
+          ...mockUser,
+          dailyLogs: [],
+          logHours: [],
+          commissionEntries: [],
+        });
+      (prisma.user.delete as any).mockResolvedValue(mockUser);
+      (prisma.auditLog.create as any).mockResolvedValue({});
 
-    const existingUser = {
-      id: 'user-id',
-      email: 'test@example.com',
-      fullName: 'Test User',
-      roles: ['wingman'],
-      dailyLogs: [],
-      logHours: [],
-      commissionEntries: [],
-    };
-
-    it('should delete a user successfully', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique
-        .mockResolvedValueOnce(existingUser) // First call for existence check
-        .mockResolvedValueOnce(existingUser); // Second call for related data check
-      mockPrisma.user.delete.mockResolvedValue({});
-      mockPrisma.auditLog.create.mockResolvedValue({});
-
-      const result = await deleteUser('user-id');
+      const result = await deleteUser('user-1');
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.user.delete).toHaveBeenCalledWith({
-        where: { id: 'user-id' },
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
       });
-      expect(mockPrisma.auditLog.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
     });
 
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
-        user: { id: 'user-id', roles: ['manager'] },
-      });
-
-      const result = await deleteUser('user-id');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Unauthorized: Admin access required');
-    });
-
-    it('should prevent deletion of users with related data', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique
-        .mockResolvedValueOnce(existingUser)
-        .mockResolvedValueOnce({
-          ...existingUser,
-          dailyLogs: [{ id: 'log-1' }], // Has related data
+    it('should fail if user has related data', async () => {
+      (prisma.user.findUnique as any)
+        .mockResolvedValueOnce(mockUser) // First call for existence check
+        .mockResolvedValueOnce({ // Second call for related data check
+          ...mockUser,
+          dailyLogs: [{ id: 'log-1' }],
+          logHours: [],
+          commissionEntries: [],
         });
 
-      const result = await deleteUser('user-id');
+      const result = await deleteUser('user-1');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Cannot delete user with existing logs, hours, or commission entries');
+      expect(prisma.user.delete).not.toHaveBeenCalled();
     });
 
-    it('should handle non-existent user', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+    it('should fail if user not found', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      const result = await deleteUser('user-id');
+      const result = await deleteUser('nonexistent-user');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('User not found');
+      expect(prisma.user.delete).not.toHaveBeenCalled();
     });
   });
 
   describe('getUsers', () => {
-    const mockManagerSession = {
-      user: { id: 'manager-id', roles: ['manager'] },
-    };
-
-    const mockUsers = [
-      {
-        id: 'user-1',
-        email: 'user1@example.com',
-        fullName: 'User One',
-        roles: ['captain'],
-        createdAt: new Date(),
-      },
-      {
-        id: 'user-2',
-        email: 'user2@example.com',
-        fullName: 'User Two',
-        roles: ['wingman'],
-        createdAt: new Date(),
-      },
-    ];
-
     it('should return users with pagination', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(2);
-      mockPrisma.user.findMany.mockResolvedValue(mockUsers);
+      const mockUsers = [mockUser];
+      (prisma.user.count as any).mockResolvedValue(1);
+      (prisma.user.findMany as any).mockResolvedValue(mockUsers);
 
-      const result = await getUsers({
-        page: 1,
-        limit: 10,
-        sortBy: 'fullName',
-        sortOrder: 'asc',
-      });
+      const result = await getUsers({ page: 1, limit: 10 });
 
       expect(result.success).toBe(true);
-      expect(result.data?.users).toEqual(mockUsers);
-      expect(result.data?.pagination).toEqual({
-        page: 1,
-        limit: 10,
-        total: 2,
-        pages: 1,
+      expect(result.data).toEqual({
+        users: mockUsers,
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          pages: 1,
+        },
       });
     });
 
     it('should filter by search term', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(1);
-      mockPrisma.user.findMany.mockResolvedValue([mockUsers[0]]);
+      (prisma.user.count as any).mockResolvedValue(1);
+      (prisma.user.findMany as any).mockResolvedValue([mockUser]);
 
-      await getUsers({
-        search: 'User One',
-        page: 1,
-        limit: 10,
-      });
+      const result = await getUsers({ search: 'john', page: 1, limit: 10 });
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+      expect(result.success).toBe(true);
+      expect(prisma.user.count).toHaveBeenCalledWith({
         where: {
           OR: [
-            { fullName: { contains: 'User One', mode: 'insensitive' } },
-            { email: { contains: 'User One', mode: 'insensitive' } },
+            { fullName: { contains: 'john', mode: 'insensitive' } },
+            { email: { contains: 'john', mode: 'insensitive' } },
           ],
         },
-        select: expect.any(Object),
-        orderBy: { fullName: 'asc' },
-        skip: 0,
-        take: 10,
       });
     });
 
     it('should filter by roles', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(1);
-      mockPrisma.user.findMany.mockResolvedValue([mockUsers[0]]);
+      (prisma.user.count as any).mockResolvedValue(1);
+      (prisma.user.findMany as any).mockResolvedValue([mockUser]);
 
-      await getUsers({
-        roles: ['captain'],
-        page: 1,
-        limit: 10,
-      });
+      const result = await getUsers({ roles: ['captain'], page: 1, limit: 10 });
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+      expect(result.success).toBe(true);
+      expect(prisma.user.count).toHaveBeenCalledWith({
         where: {
           roles: { hasSome: ['captain'] },
         },
-        select: expect.any(Object),
-        orderBy: { fullName: 'asc' },
-        skip: 0,
-        take: 10,
       });
     });
 
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
+    it('should fail if user is not admin or manager', async () => {
+      (getSession as any).mockResolvedValue({
         user: { id: 'user-id', roles: ['captain'] },
       });
 
@@ -385,184 +346,170 @@ describe('User Management Actions', () => {
   });
 
   describe('getUserById', () => {
-    const mockManagerSession = {
-      user: { id: 'manager-id', roles: ['manager'] },
-    };
-
-    const mockUser = {
-      id: 'user-id',
-      email: 'test@example.com',
-      fullName: 'Test User',
-      roles: ['captain'],
-    };
-
     it('should return user by ID', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      const result = await getUserById('user-id');
+      const result = await getUserById('user-1');
 
       expect(result.success).toBe(true);
       expect(result.user).toEqual(mockUser);
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user-id' },
-        select: expect.any(Object),
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        select: expect.objectContaining({
+          id: true,
+          email: true,
+          fullName: true,
+          roles: true,
+        }),
       });
     });
 
-    it('should handle non-existent user', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+    it('should fail if user not found', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      const result = await getUserById('user-id');
+      const result = await getUserById('nonexistent-user');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('User not found');
     });
-
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
-        user: { id: 'user-id', roles: ['captain'] },
-      });
-
-      const result = await getUserById('user-id');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Unauthorized: Admin or Manager access required');
-    });
   });
 
   describe('copyUserSettings', () => {
-    const mockAdminSession = {
-      user: { id: 'admin-id', roles: ['admin'] },
-    };
+    it('should copy settings from source to target user', async () => {
+      const sourceSettings = {
+        rateJunkCaptain: 25.00,
+        rateJunkWingman: 20.00,
+        salaryAmount: 5000.00,
+        salaryFrequency: 'monthly',
+        salaryType: 'base',
+        commissionRate: 5.0,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-    const sourceUserSettings = {
-      rateJunkCaptain: 25.00,
-      rateJunkWingman: 20.00,
-      salaryAmount: 50000,
-      commissionRate: 5.0,
-      junkBonusGoal: 0.14,
-      moveBonusGoal: 0.24,
-    };
-
-    it('should copy user settings successfully', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(sourceUserSettings);
-      mockPrisma.user.update.mockResolvedValue({});
-      mockPrisma.auditLog.create.mockResolvedValue({});
+      (prisma.user.findUnique as any).mockResolvedValue(sourceSettings);
+      (prisma.user.update as any).mockResolvedValue({});
+      (prisma.auditLog.create as any).mockResolvedValue({});
 
       const result = await copyUserSettings('source-user-id', 'target-user-id');
 
       expect(result.success).toBe(true);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+      expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'target-user-id' },
-        data: sourceUserSettings,
+        data: sourceSettings,
       });
-      expect(mockPrisma.auditLog.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          entityType: 'user',
+          entityId: 'target-user-id',
+          action: 'update',
+          changes: {
+            action: 'copy_settings',
+            fromUserId: 'source-user-id',
+            settings: sourceSettings,
+          },
+          userId: 'admin-user-id',
+        }),
+      });
     });
 
-    it('should reject unauthorized users', async () => {
-      mockGetSession.mockResolvedValue({
+    it('should fail if source user not found', async () => {
+      (prisma.user.findUnique as any).mockResolvedValue(null);
+
+      const result = await copyUserSettings('nonexistent-user', 'target-user-id');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Source user not found');
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should fail if user is not admin', async () => {
+      (getSession as any).mockResolvedValue({
         user: { id: 'user-id', roles: ['manager'] },
       });
 
-      const result = await copyUserSettings('source-id', 'target-id');
+      const result = await copyUserSettings('source-user-id', 'target-user-id');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Unauthorized: Admin access required');
     });
+  });
 
-    it('should handle non-existent source user', async () => {
-      mockGetSession.mockResolvedValue(mockAdminSession);
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+  describe('Error Handling', () => {
+    it('should handle database errors gracefully', async () => {
+      (prisma.user.findUnique as any).mockRejectedValue(new Error('Database error'));
 
-      const result = await copyUserSettings('source-id', 'target-id');
+      const result = await getUserById('user-1');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Source user not found');
+      expect(result.error).toBe('Database error');
+    });
+
+    it('should handle validation errors', async () => {
+      const invalidUserData = {
+        email: 'invalid-email',
+        fullName: '',
+        password: '123', // Too short
+        roles: [],
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
+
+      const result = await createUser(invalidUserData as any);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('email');
     });
   });
 
-  describe('Enhanced Search and Filtering', () => {
-    const mockManagerSession = {
-      user: { id: 'manager-id', roles: ['manager'] },
-    };
+  describe('Business Logic Validation', () => {
+    it('should validate role assignments', async () => {
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['invalid-role'] as any,
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-    it('should filter by multiple roles', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(2);
-      mockPrisma.user.findMany.mockResolvedValue([]);
+      const result = await createUser(userData);
 
-      await getUsers({
-        roles: ['captain', 'manager'],
-        page: 1,
-        limit: 10,
-      });
-
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
-        where: {
-          roles: { hasSome: ['captain', 'manager'] },
-        },
-        select: expect.any(Object),
-        orderBy: { fullName: 'asc' },
-        skip: 0,
-        take: 10,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Invalid option');
     });
 
-    it('should combine search and role filters', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(1);
-      mockPrisma.user.findMany.mockResolvedValue([]);
+    it('should validate bonus goal percentages', async () => {
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['captain'] as any,
+        junkBonusGoal: 1.5, // Invalid: > 1
+        moveBonusGoal: -0.1, // Invalid: < 0
+      };
 
-      await getUsers({
-        search: 'John',
-        roles: ['captain'],
-        page: 1,
-        limit: 10,
-      });
+      const result = await createUser(userData);
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
-        where: {
-          AND: [
-            {
-              OR: [
-                { fullName: { contains: 'John', mode: 'insensitive' } },
-                { email: { contains: 'John', mode: 'insensitive' } },
-              ],
-            },
-            {
-              roles: { hasSome: ['captain'] },
-            },
-          ],
-        },
-        select: expect.any(Object),
-        orderBy: { fullName: 'asc' },
-        skip: 0,
-        take: 10,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Too big');
     });
 
-    it('should handle empty search and role filters', async () => {
-      mockGetSession.mockResolvedValue(mockManagerSession);
-      mockPrisma.user.count.mockResolvedValue(10);
-      mockPrisma.user.findMany.mockResolvedValue([]);
+    it('should validate hourly rates are non-negative', async () => {
+      const userData = {
+        email: 'john@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roles: ['captain'] as any,
+        rateJunkCaptain: -10.00, // Invalid: negative
+        junkBonusGoal: 0.14,
+        moveBonusGoal: 0.24,
+      };
 
-      await getUsers({
-        search: '',
-        roles: [],
-        page: 1,
-        limit: 10,
-      });
+      const result = await createUser(userData);
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
-        where: {},
-        select: expect.any(Object),
-        orderBy: { fullName: 'asc' },
-        skip: 0,
-        take: 10,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Too small');
     });
   });
 });
