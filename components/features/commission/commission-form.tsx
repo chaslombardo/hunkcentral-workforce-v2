@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { CalendarIcon, Loader2, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -11,15 +12,6 @@ import { createCommissionEntry } from '@/lib/actions/commission';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -52,13 +44,12 @@ interface CommissionFormProps {
     commissionRate: number | null;
   }>;
   currentUserId?: string;
-  onSuccess?: () => void;
 }
 
-export function CommissionForm({ salesUsers, currentUserId, onSuccess }: CommissionFormProps) {
-  const [open, setOpen] = useState(false);
+export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<CommissionEntryFormData>({
     resolver: zodResolver(CommissionEntrySchema),
@@ -83,8 +74,7 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
           description: 'Commission entry created successfully',
         });
         form.reset();
-        setOpen(false);
-        onSuccess?.();
+        router.push('/commission/list');
       } else {
         toast({
           title: 'Error',
@@ -104,23 +94,8 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-[#026937] hover:bg-[#026937]/90">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Commission Entry
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create Commission Entry</DialogTitle>
-          <DialogDescription>
-            Enter details for a new commission booking. The entry will be automatically matched when the job is completed.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="salesId"
@@ -291,27 +266,25 @@ export function CommissionForm({ salesUsers, currentUserId, onSuccess }: Commiss
               )}
             />
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-[#026937] hover:bg-[#026937]/90"
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Entry
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex gap-4 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="bg-[#026937] hover:bg-[#026937]/90"
+          >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create Entry
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

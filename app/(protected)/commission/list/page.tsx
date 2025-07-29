@@ -56,15 +56,6 @@ export default async function CommissionListPage() {
         <TabsContent value="entries" className="space-y-6">
           <CommissionList 
             entries={entries}
-            onEdit={() => {
-              // TODO: Implement edit functionality in a future task
-            }}
-            onDelete={() => {
-              // TODO: Implement delete functionality in a future task
-            }}
-            onView={() => {
-              // TODO: Implement view details functionality in a future task
-            }}
           />
         </TabsContent>
         

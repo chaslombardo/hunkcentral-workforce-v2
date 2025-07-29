@@ -48,10 +48,6 @@ export default async function CreateCommissionPage() {
             <CommissionForm 
               salesUsers={salesUsers}
               currentUserId={session.user.id}
-              onSuccess={() => {
-                // Redirect to commission list after successful creation
-                window.location.href = '/commission/list';
-              }}
             />
           </CardContent>
         </Card>
