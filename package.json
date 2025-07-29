@@ -2,6 +2,7 @@
   "name": "hunkcentral-v2",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -14,6 +15,11 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "test:integration": "vitest run __tests__/integration/**/*.test.ts",
+    "test:e2e": "vitest run __tests__/e2e/**/*.test.ts",
+    "test:edge-cases": "vitest run __tests__/edge-cases/**/*.test.ts",
+    "test:performance": "vitest run __tests__/performance/**/*.test.ts",
+    "test:comprehensive": "tsx __tests__/test-runner.ts",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -72,6 +78,7 @@
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
+    "@eslint/eslintrc": "^3.3.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
