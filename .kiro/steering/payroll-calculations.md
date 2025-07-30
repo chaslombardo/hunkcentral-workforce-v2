@@ -1,7 +1,3 @@
----
-inclusion: fileMatch
-fileMatchPattern: "lib/payCalculator.ts"
----
 
 # Payroll & Commission Calculations
 

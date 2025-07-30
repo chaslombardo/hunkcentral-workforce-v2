@@ -15,6 +15,43 @@ export interface PayrollCalculation {
   breakdown: PayrollBreakdown;
 }
 
+export interface EnhancedPayrollCalculation extends PayrollCalculation {
+  departmentBreakdown: {
+    [key in Department]: {
+      hours: number;
+      rate: number;
+      grossPay: number;
+      percentage: number;
+    };
+  };
+  dailyBreakdown: {
+    [date: string]: {
+      departments: { [key in Department]: number };
+      tips: number;
+      totalHours: number;
+    };
+  };
+  tipsBreakdown: TipEntry[];
+  rateSchedule: {
+    [key in Department]: {
+      captainRate?: number;
+      wingmanRate?: number;
+      currentRate: number;
+    };
+  };
+}
+
+export interface TipEntry {
+  date: Date;
+  jobId: string;
+  clientName: string;
+  totalJobTips: number;
+  teamMembers: number;
+  myShare: number;
+  jobType: 'junk' | 'move';
+  logId: string;
+}
+
 export interface PayrollBreakdown {
   hourlyWages: number;
   salaryAmount: number;
@@ -77,22 +114,22 @@ export function calculateHourlyWage(
   switch (department) {
     case 'junk':
       return usesCaptainRate
-        ? (user.rateJunkCaptain ?? 0)
-        : (user.rateJunkWingman ?? 0);
+        ? Number(user.rateJunkCaptain ?? 0)
+        : Number(user.rateJunkWingman ?? 0);
     case 'move':
       return usesCaptainRate
-        ? (user.rateMoveCaptain ?? 0)
-        : (user.rateMoveWingman ?? 0);
+        ? Number(user.rateMoveCaptain ?? 0)
+        : Number(user.rateMoveWingman ?? 0);
     case 'zigma':
-      return user.rateZigma ?? 0;
+      return Number(user.rateZigma ?? 0);
     case 'training':
-      return user.rateTraining ?? 0;
+      return Number(user.rateTraining ?? 0);
     case 'estimating':
-      return user.rateEstimating ?? 0;
+      return Number(user.rateEstimating ?? 0);
     case 'warehouse':
-      return user.rateWarehouse ?? 0;
+      return Number(user.rateWarehouse ?? 0);
     case 'admin':
-      return user.rateAdmin ?? 0;
+      return Number(user.rateAdmin ?? 0);
     default:
       return 0;
   }
@@ -121,7 +158,6 @@ export function calculateLaborCostPercentage(
 /**
  * Calculate labor bonus for a captain
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function calculateLaborBonus(
   captain: User,
   actualPercentage: number,
@@ -176,7 +212,7 @@ export function calculateTipDistribution(
 
     // Calculate tips for junk section
     if (junkJobs.length > 0 && junkHours.length > 0) {
-      const totalJunkTips = junkJobs.reduce((sum, job) => sum + job.tips, 0);
+      const totalJunkTips = junkJobs.reduce((sum, job) => sum + Number(job.tips), 0);
       const junkEmployees = [...new Set(junkHours.map(hour => hour.employeeId))];
       const tipsPerEmployee = totalJunkTips / junkEmployees.length;
 
@@ -188,7 +224,7 @@ export function calculateTipDistribution(
 
     // Calculate tips for move section
     if (moveJobs.length > 0 && moveHours.length > 0) {
-      const totalMoveTips = moveJobs.reduce((sum, job) => sum + job.tips, 0);
+      const totalMoveTips = moveJobs.reduce((sum, job) => sum + Number(job.tips), 0);
       const moveEmployees = [...new Set(moveHours.map(hour => hour.employeeId))];
       const tipsPerEmployee = totalMoveTips / moveEmployees.length;
 
@@ -202,7 +238,7 @@ export function calculateTipDistribution(
     // Tips from "other" jobs would be distributed among other hours employees
     const otherJobs = log.jobs.filter(job => !['junk', 'move'].includes(job.jobType));
     if (otherJobs.length > 0 && otherHours.length > 0) {
-      const totalOtherTips = otherJobs.reduce((sum, job) => sum + job.tips, 0);
+      const totalOtherTips = otherJobs.reduce((sum, job) => sum + Number(job.tips), 0);
       const otherEmployees = [...new Set(otherHours.map(hour => hour.employeeId))];
       const tipsPerEmployee = totalOtherTips / otherEmployees.length;
 
@@ -241,7 +277,7 @@ export function calculateCommissionTotals(
     const currentCommission = employeeCommissions.get(commission.salesId) || 0;
     employeeCommissions.set(
       commission.salesId, 
-      currentCommission + (commission.commissionAmount || 0)
+      currentCommission + Number(commission.commissionAmount || 0)
     );
   }
 
@@ -267,17 +303,17 @@ export function calculateLaborBonusesTotals(
     // Calculate bonuses for junk section
     const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
     if (junkJobs.length > 0) {
-      const junkRevenue = junkJobs.reduce((sum, job) => sum + job.revenue, 0);
+      const junkRevenue = junkJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
       const junkHours = log.hours.filter(hour => hour.department === 'junk');
       
       if (junkHours.length > 0) {
         const totalJunkLaborCost = junkHours.reduce((sum, hour) => {
           const rate = calculateHourlyWage(hour.employee, 'junk', hour.isCoCaptain);
-          return sum + (hour.hours * rate);
+          return sum + (Number(hour.hours) * rate);
         }, 0);
 
         const actualPercentage = junkRevenue > 0 ? totalJunkLaborCost / junkRevenue : 0;
-        const goalPercentage = captain.junkBonusGoal;
+        const goalPercentage = Number(captain.junkBonusGoal);
 
         const bonus = calculateLaborBonus(
           captain,
@@ -296,17 +332,17 @@ export function calculateLaborBonusesTotals(
     // Calculate bonuses for move section
     const moveJobs = log.jobs.filter(job => job.jobType === 'move');
     if (moveJobs.length > 0) {
-      const moveRevenue = moveJobs.reduce((sum, job) => sum + job.revenue, 0);
+      const moveRevenue = moveJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
       const moveHours = log.hours.filter(hour => hour.department === 'move');
       
       if (moveHours.length > 0) {
         const totalMoveLaborCost = moveHours.reduce((sum, hour) => {
           const rate = calculateHourlyWage(hour.employee, 'move', hour.isCoCaptain);
-          return sum + (hour.hours * rate);
+          return sum + (Number(hour.hours) * rate);
         }, 0);
 
         const actualPercentage = moveRevenue > 0 ? totalMoveLaborCost / moveRevenue : 0;
-        const goalPercentage = captain.moveBonusGoal;
+        const goalPercentage = Number(captain.moveBonusGoal);
 
         const bonus = calculateLaborBonus(
           captain,
@@ -372,7 +408,7 @@ export function applySalaryRules(
     };
   }
 
-  const weeklySalaryAmount = convertSalaryToWeekly(user.salaryAmount, user.salaryFrequency);
+  const weeklySalaryAmount = convertSalaryToWeekly(Number(user.salaryAmount || 0), user.salaryFrequency);
 
   switch (user.salaryType) {
     case 'base':
@@ -487,12 +523,13 @@ export function calculatePayroll(
       const employeeHours = log.hours.filter(hour => hour.employeeId === user.id);
       
       for (const hour of employeeHours) {
-        hoursByDepartment[hour.department] += hour.hours;
-        totalHours += hour.hours;
+        const hoursValue = Number(hour.hours);
+        hoursByDepartment[hour.department] += hoursValue;
+        totalHours += hoursValue;
 
         // Calculate wages for this hour entry
         const rate = calculateHourlyWage(user, hour.department, hour.isCoCaptain);
-        hourlyWages += hour.hours * rate;
+        hourlyWages += hoursValue * rate;
       }
     }
 
@@ -522,4 +559,290 @@ export function calculatePayroll(
   }
 
   return payrollCalculations;
+}
+
+/**
+ * Calculate enhanced payroll with detailed breakdowns
+ */
+export function calculateEnhancedPayroll(
+  user: User,
+  approvedLogs: DailyLog[],
+  commissionEntries: CommissionEntry[],
+  payPeriodStart: Date,
+  payPeriodEnd: Date
+): EnhancedPayrollCalculation {
+  // Get basic payroll calculation
+  const basicPayroll = calculatePayroll(
+    [user],
+    approvedLogs,
+    commissionEntries,
+    payPeriodStart,
+    payPeriodEnd
+  )[0];
+
+  // Calculate enhanced breakdowns
+  const departmentBreakdown = calculateEnhancedDepartmentBreakdown(user, approvedLogs);
+  const dailyBreakdown = calculateEnhancedDailyBreakdown(user, approvedLogs);
+  const tipsBreakdown = calculateEnhancedTipsBreakdown(user, approvedLogs);
+  const rateSchedule = calculateRateSchedule(user);
+
+  return {
+    ...basicPayroll,
+    departmentBreakdown,
+    dailyBreakdown,
+    tipsBreakdown,
+    rateSchedule,
+  };
+}
+
+/**
+ * Calculate enhanced department breakdown
+ */
+function calculateEnhancedDepartmentBreakdown(
+  user: User,
+  approvedLogs: DailyLog[]
+): { [key in Department]: { hours: number; rate: number; grossPay: number; percentage: number } } {
+  const breakdown: { [key in Department]: { hours: number; rate: number; grossPay: number; percentage: number } } = {
+    junk: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    move: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    zigma: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    training: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    estimating: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    warehouse: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+    admin: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
+  };
+
+  let totalHours = 0;
+
+  // Calculate hours and pay by department
+  for (const log of approvedLogs) {
+    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
+    
+    for (const hour of userHours) {
+      const department = hour.department as Department;
+      const rate = calculateHourlyWage(user, department, hour.isCoCaptain);
+      const pay = hour.hours * rate;
+
+      const hoursValue = Number(hour.hours);
+      breakdown[department].hours += hoursValue;
+      breakdown[department].grossPay += pay;
+      breakdown[department].rate = rate; // Use the rate (could be captain or wingman)
+      totalHours += hoursValue;
+    }
+  }
+
+  // Calculate percentages
+  for (const department of Object.keys(breakdown) as Department[]) {
+    if (totalHours > 0) {
+      breakdown[department].percentage = (breakdown[department].hours / totalHours) * 100;
+    }
+  }
+
+  return breakdown;
+}
+
+/**
+ * Calculate enhanced daily breakdown
+ */
+function calculateEnhancedDailyBreakdown(
+  user: User,
+  approvedLogs: DailyLog[]
+): { [date: string]: { departments: { [key in Department]: number }; tips: number; totalHours: number } } {
+  const dailyBreakdown: { [date: string]: { departments: { [key in Department]: number }; tips: number; totalHours: number } } = {};
+
+  for (const log of approvedLogs) {
+    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
+    
+    if (userHours.length === 0) continue;
+
+    const dateKey = log.logDate.toISOString().split('T')[0];
+    
+    if (!dailyBreakdown[dateKey]) {
+      dailyBreakdown[dateKey] = {
+        departments: {
+          junk: 0,
+          move: 0,
+          zigma: 0,
+          training: 0,
+          estimating: 0,
+          warehouse: 0,
+          admin: 0,
+        },
+        tips: 0,
+        totalHours: 0,
+      };
+    }
+
+    // Add hours by department
+    for (const hour of userHours) {
+      const department = hour.department as Department;
+      const hoursValue = Number(hour.hours);
+      dailyBreakdown[dateKey].departments[department] += hoursValue;
+      dailyBreakdown[dateKey].totalHours += hoursValue;
+    }
+
+    // Calculate tips for this day
+    const dailyTips = calculateUserDailyTips(user.id, log);
+    dailyBreakdown[dateKey].tips += dailyTips;
+  }
+
+  return dailyBreakdown;
+}
+
+/**
+ * Calculate enhanced tips breakdown
+ */
+function calculateEnhancedTipsBreakdown(
+  user: User,
+  approvedLogs: DailyLog[]
+): TipEntry[] {
+  const tipEntries: TipEntry[] = [];
+
+  for (const log of approvedLogs) {
+    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
+    
+    if (userHours.length === 0) continue;
+
+    // Process junk jobs
+    const junkHours = userHours.filter(hour => hour.department === 'junk');
+    if (junkHours.length > 0) {
+      const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
+      const junkTeamSize = [...new Set(log.hours
+        .filter(hour => hour.department === 'junk')
+        .map(hour => hour.employeeId))].length;
+
+      for (const job of junkJobs) {
+        const jobTips = Number(job.tips);
+        if (jobTips > 0) {
+          tipEntries.push({
+            date: log.logDate,
+            jobId: job.jobId,
+            clientName: job.clientName,
+            totalJobTips: jobTips,
+            teamMembers: junkTeamSize,
+            myShare: jobTips / junkTeamSize,
+            jobType: 'junk',
+            logId: log.id,
+          });
+        }
+      }
+    }
+
+    // Process move jobs
+    const moveHours = userHours.filter(hour => hour.department === 'move');
+    if (moveHours.length > 0) {
+      const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+      const moveTeamSize = [...new Set(log.hours
+        .filter(hour => hour.department === 'move')
+        .map(hour => hour.employeeId))].length;
+
+      for (const job of moveJobs) {
+        const jobTips = Number(job.tips);
+        if (jobTips > 0) {
+          tipEntries.push({
+            date: log.logDate,
+            jobId: job.jobId,
+            clientName: job.clientName,
+            totalJobTips: jobTips,
+            teamMembers: moveTeamSize,
+            myShare: jobTips / moveTeamSize,
+            jobType: 'move',
+            logId: log.id,
+          });
+        }
+      }
+    }
+  }
+
+  return tipEntries.sort((a, b) => b.date.getTime() - a.date.getTime());
+}
+
+/**
+ * Calculate rate schedule for a user
+ */
+function calculateRateSchedule(user: User): {
+  [key in Department]: {
+    captainRate?: number;
+    wingmanRate?: number;
+    currentRate: number;
+  };
+} {
+  const departments: Department[] = ['junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin'];
+  const rateSchedule: {
+    [key in Department]: {
+      captainRate?: number;
+      wingmanRate?: number;
+      currentRate: number;
+    };
+  } = {} as {
+    [key in Department]: {
+      captainRate?: number;
+      wingmanRate?: number;
+      currentRate: number;
+    };
+  };
+
+  for (const department of departments) {
+    const schedule: {
+      captainRate?: number;
+      wingmanRate?: number;
+      currentRate: number;
+    } = {
+      currentRate: calculateHourlyWage(user, department, false),
+    };
+
+    // Add captain/wingman rates for departments that have them
+    if (department === 'junk') {
+      if (user.rateJunkCaptain) schedule.captainRate = user.rateJunkCaptain;
+      if (user.rateJunkWingman) schedule.wingmanRate = user.rateJunkWingman;
+    } else if (department === 'move') {
+      if (user.rateMoveCaptain) schedule.captainRate = user.rateMoveCaptain;
+      if (user.rateMoveWingman) schedule.wingmanRate = user.rateMoveWingman;
+    }
+
+    rateSchedule[department] = schedule;
+  }
+
+  return rateSchedule;
+}
+
+/**
+ * Calculate daily tips for a specific user from a log
+ */
+function calculateUserDailyTips(userId: string, log: DailyLog): number {
+  const userHours = log.hours.filter(hour => hour.employeeId === userId);
+  
+  if (userHours.length === 0) return 0;
+
+  let totalTips = 0;
+
+  // Calculate tips from junk section
+  const junkHours = userHours.filter(hour => hour.department === 'junk');
+  if (junkHours.length > 0) {
+    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
+    const junkTeamSize = [...new Set(log.hours
+      .filter(hour => hour.department === 'junk')
+      .map(hour => hour.employeeId))].length;
+    
+    const junkTips = junkJobs.reduce((sum, job) => sum + Number(job.tips), 0);
+    if (junkTeamSize > 0) {
+      totalTips += junkTips / junkTeamSize;
+    }
+  }
+
+  // Calculate tips from move section
+  const moveHours = userHours.filter(hour => hour.department === 'move');
+  if (moveHours.length > 0) {
+    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const moveTeamSize = [...new Set(log.hours
+      .filter(hour => hour.department === 'move')
+      .map(hour => hour.employeeId))].length;
+    
+    const moveTips = moveJobs.reduce((sum, job) => sum + Number(job.tips), 0);
+    if (moveTeamSize > 0) {
+      totalTips += moveTips / moveTeamSize;
+    }
+  }
+
+  return totalTips;
 }
