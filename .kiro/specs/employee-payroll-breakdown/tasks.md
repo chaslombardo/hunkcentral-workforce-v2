@@ -6,7 +6,7 @@
   - Add server actions for fetching detailed payroll breakdowns with proper caching
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2_
 
-- [ ] 2. Create department breakdown component with rate visibility
+- [x] 2. Create department breakdown component with rate visibility
   - Implement DepartmentBreakdown component showing hours, rates, and pay by department
   - Add rate information panel displaying all employee hourly rates across departments
   - Create visual indicators for primary department and percentage calculations

@@ -50,20 +50,37 @@ import {
   Award,
 } from 'lucide-react';
 import { formatCurrency, formatDate, calculateTrend } from '@/lib/formatters';
-import type { PayPeriod, User } from '@/types';
+import type { PayPeriod, User, Department } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
+import { DepartmentBreakdown, type DepartmentBreakdownData } from './payroll-breakdown/department-breakdown';
+import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
 
 // Mock data for current user - replace with actual user data
+const mockUser: User = {
+  id: '1',
+  fullName: 'John Smith',
+  email: 'john@example.com',
+  roles: ['captain'],
+  rateJunkCaptain: 20,
+  rateJunkWingman: 16,
+  rateMoveCaptain: 22,
+  rateMoveWingman: 18,
+  rateZigma: 19,
+  rateTraining: 15,
+  rateEstimating: 25,
+  rateWarehouse: 17,
+  rateAdmin: 14,
+  junkBonusGoal: 0.14,
+  moveBonusGoal: 0.24,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 const mockUserPayroll: PayrollCalculation = {
   employeeId: '1',
-  employee: {
-    id: '1',
-    fullName: 'John Smith',
-    email: 'john@example.com',
-    roles: ['captain'],
-  } as User,
+  employee: mockUser,
   totalHours: 40,
-  hoursByDepartment: { junk: 40, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+  hoursByDepartment: { junk: 30, move: 8, zigma: 2, training: 0, estimating: 0, warehouse: 0, admin: 0 },
   grossWages: 720,
   tips: 150,
   bonuses: 85,
@@ -81,6 +98,34 @@ const mockUserPayroll: PayrollCalculation = {
     finalPay: 955,
   },
 };
+
+// Mock department breakdown data
+const mockDepartmentBreakdown: DepartmentBreakdownData[] = [
+  {
+    department: 'junk',
+    hours: 30,
+    rate: 20, // Captain rate
+    grossPay: 600,
+    percentage: 75,
+    isPrimary: true,
+  },
+  {
+    department: 'move',
+    hours: 8,
+    rate: 18, // Wingman rate
+    grossPay: 144,
+    percentage: 20,
+    isPrimary: false,
+  },
+  {
+    department: 'zigma',
+    hours: 2,
+    rate: 19,
+    grossPay: 38,
+    percentage: 5,
+    isPrimary: false,
+  },
+];
 
 // Mock pay periods
 const mockPayPeriods: PayPeriod[] = [
@@ -293,119 +338,134 @@ export function MyPayrollView() {
 
             {/* Pay Breakdown Tab */}
             <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pay Breakdown</CardTitle>
-                  <CardDescription>
-                    Detailed breakdown of your compensation for {selectedPeriod.name}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                  {/* Regular Pay */}
-                  <AccordionItem value="regular-pay">
-                    <AccordionTrigger>
-                      <div className="flex items-center justify-between w-full mr-4">
-                        <span>Regular Pay</span>
-                        <span className="font-mono">{formatCurrency(userPayroll.grossWages)}</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Total Hours:</span>
-                          <span>{userPayroll.totalHours} hours</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Primary Department:</span>
-                          <span className="capitalize">
-                            {Object.entries(userPayroll.hoursByDepartment)
-                              .find(([, hours]) => hours > 0)?.[0] || 'admin'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Gross Wages:</span>
-                          <span>{formatCurrency(userPayroll.grossWages)}</span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between font-medium">
-                          <span>Subtotal:</span>
-                          <span>{formatCurrency(userPayroll.grossWages)}</span>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+              <div className="space-y-6">
+                {/* Department Breakdown */}
+                <DepartmentBreakdown
+                  departments={mockDepartmentBreakdown}
+                  totalHours={userPayroll.totalHours}
+                  totalPay={userPayroll.totalPay}
+                  user={userPayroll.employee}
+                />
 
+                {/* Rate Information Panel */}
+                <RateInformationPanel
+                  user={userPayroll.employee}
+                  departmentHours={userPayroll.hoursByDepartment}
+                />
 
+                {/* Traditional Pay Breakdown */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pay Components</CardTitle>
+                    <CardDescription>
+                      Detailed breakdown of your compensation for {selectedPeriod.name}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Accordion type="single" collapsible className="w-full">
+                    {/* Regular Pay */}
+                    <AccordionItem value="regular-pay">
+                      <AccordionTrigger>
+                        <div className="flex items-center justify-between w-full mr-4">
+                          <span>Regular Pay</span>
+                          <span className="font-mono">{formatCurrency(userPayroll.grossWages)}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Total Hours:</span>
+                            <span>{userPayroll.totalHours} hours</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Primary Department:</span>
+                            <span className="capitalize">
+                              {Object.entries(userPayroll.hoursByDepartment)
+                                .find(([, hours]) => hours > 0)?.[0] || 'admin'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Gross Wages:</span>
+                            <span>{formatCurrency(userPayroll.grossWages)}</span>
+                          </div>
+                          <Separator />
+                          <div className="flex justify-between font-medium">
+                            <span>Subtotal:</span>
+                            <span>{formatCurrency(userPayroll.grossWages)}</span>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
 
-                  {/* Tips */}
-                  <AccordionItem value="tips">
-                    <AccordionTrigger>
-                      <div className="flex items-center justify-between w-full mr-4">
-                        <span>Tips</span>
-                        <span className="font-mono">{formatCurrency(userPayroll.tips)}</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Total Tips Received:</span>
-                          <span>{formatCurrency(userPayroll.tips)}</span>
+                    {/* Tips */}
+                    <AccordionItem value="tips">
+                      <AccordionTrigger>
+                        <div className="flex items-center justify-between w-full mr-4">
+                          <span>Tips</span>
+                          <span className="font-mono">{formatCurrency(userPayroll.tips)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Jobs Completed:</span>
-                          <span>8 jobs</span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Total Tips Received:</span>
+                            <span>{formatCurrency(userPayroll.tips)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Jobs Completed:</span>
+                            <span>8 jobs</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Average per Job:</span>
+                            <span>{formatCurrency(userPayroll.tips / 8)}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Average per Job:</span>
-                          <span>{formatCurrency(userPayroll.tips / 8)}</span>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                      </AccordionContent>
+                    </AccordionItem>
 
-                  {/* Bonuses */}
-                  <AccordionItem value="bonuses">
-                    <AccordionTrigger>
-                      <div className="flex items-center justify-between w-full mr-4">
-                        <span>Bonuses</span>
-                        <span className="font-mono">{formatCurrency(userPayroll.bonuses)}</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Labor Efficiency Bonus:</span>
-                          <span>{formatCurrency(userPayroll.bonuses)}</span>
+                    {/* Bonuses */}
+                    <AccordionItem value="bonuses">
+                      <AccordionTrigger>
+                        <div className="flex items-center justify-between w-full mr-4">
+                          <span>Bonuses</span>
+                          <span className="font-mono">{formatCurrency(userPayroll.bonuses)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Labor Cost Percentage:</span>
-                          <span>16.0%</span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Labor Efficiency Bonus:</span>
+                            <span>{formatCurrency(userPayroll.bonuses)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Labor Cost Percentage:</span>
+                            <span>16.0%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Target:</span>
+                            <span>14.0%</span>
+                          </div>
+                          <div className="mt-2">
+                            <Progress 
+                              value={Math.min(100, (14 / 16) * 100)} 
+                              className="h-2"
+                            />
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Target:</span>
-                          <span>14.0%</span>
-                        </div>
-                        <div className="mt-2">
-                          <Progress 
-                            value={Math.min(100, (14 / 16) * 100)} 
-                            className="h-2"
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  </Accordion>
+                      </AccordionContent>
+                    </AccordionItem>
+                    </Accordion>
 
-                  <Separator className="my-4" />
+                    <Separator className="my-4" />
 
-                  {/* Total */}
-                  <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total Pay:</span>
-                    <span className="font-mono">{formatCurrency(userPayroll.totalPay)}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                    {/* Total */}
+                    <div className="flex justify-between items-center text-lg font-semibold">
+                      <span>Total Pay:</span>
+                      <span className="font-mono">{formatCurrency(userPayroll.totalPay)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Pay History Tab */}
