@@ -54,6 +54,8 @@ import type { PayPeriod, User, Department } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 import { DepartmentBreakdown, type DepartmentBreakdownData } from './payroll-breakdown/department-breakdown';
 import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
+import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
+import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 
 // Mock data for current user - replace with actual user data
 const mockUser: User = {
@@ -165,9 +167,61 @@ const mockHistoricalData = [
   { period: 'Jan Week 2', totalPay: 1020, hours: 42, tips: 180 },
 ];
 
+// Mock daily work entries for calendar
+const mockDailyWorkEntries: DailyWorkEntry[] = [
+  {
+    date: new Date('2025-01-02'),
+    logId: 'log-1',
+    departments: [
+      { department: 'junk', hours: 6, rate: 20, role: 'captain' },
+      { department: 'move', hours: 2, rate: 18, role: 'wingman' },
+    ],
+    tips: 45,
+    totalHours: 8,
+    grossPay: 156,
+    jobsCompleted: 3,
+  },
+  {
+    date: new Date('2025-01-03'),
+    logId: 'log-2',
+    departments: [
+      { department: 'junk', hours: 8, rate: 20, role: 'captain' },
+    ],
+    tips: 60,
+    totalHours: 8,
+    grossPay: 160,
+    jobsCompleted: 4,
+  },
+  {
+    date: new Date('2025-01-06'),
+    logId: 'log-3',
+    departments: [
+      { department: 'move', hours: 6, rate: 22, role: 'captain' },
+      { department: 'zigma', hours: 2, rate: 19, role: 'wingman' },
+    ],
+    tips: 35,
+    totalHours: 8,
+    grossPay: 170,
+    jobsCompleted: 2,
+  },
+];
+
+// Mock work pattern stats
+const mockWorkPatternStats: WorkPatternStats = {
+  totalDaysWorked: 15,
+  avgHoursPerDay: 8.2,
+  mostCommonDepartment: 'junk',
+  totalJobsCompleted: 45,
+  avgTipsPerDay: 42.5,
+  busiestDay: new Date('2025-01-03'),
+  highestTipDay: new Date('2025-01-03'),
+  highestPayDay: new Date('2025-01-06'),
+};
+
 export function MyPayrollView() {
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(mockPayPeriods[0]);
   const [userPayroll] = React.useState<PayrollCalculation>(mockUserPayroll);
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
 
   const trend = calculateTrend(userPayroll.totalPay, mockHistoricalData[0].totalPay);
 
@@ -331,6 +385,7 @@ export function MyPayrollView() {
             <div className="flex items-center justify-between px-4 lg:px-6">
               <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
                 <TabsTrigger value="breakdown">Pay Breakdown</TabsTrigger>
+                <TabsTrigger value="daily">Daily History</TabsTrigger>
                 <TabsTrigger value="history">Pay History</TabsTrigger>
                 <TabsTrigger value="performance">Performance</TabsTrigger>
               </TabsList>
@@ -466,6 +521,18 @@ export function MyPayrollView() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Daily History Tab */}
+            <TabsContent value="daily" className="flex flex-col px-4 lg:px-6">
+              <DailyWorkCalendar
+                workEntries={mockDailyWorkEntries}
+                workPatternStats={mockWorkPatternStats}
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                payPeriodStart={selectedPeriod.startDate}
+                payPeriodEnd={selectedPeriod.endDate}
+              />
             </TabsContent>
 
             {/* Pay History Tab */}

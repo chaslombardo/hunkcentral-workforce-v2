@@ -3,8 +3,16 @@
 import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { calculatePayroll, calculateHourlyWage } from '@/lib/payCalculator';
-import type { Department, PayPeriod, PayPeriodStatus } from '@/types';
+import { calculatePayroll, calculateEnhancedPayroll, calculateHourlyWage } from '@/lib/payCalculator';
+import type { 
+  User, 
+  Department, 
+  PayPeriod, 
+  PayPeriodStatus, 
+  DailyLog, 
+  LogJob,
+  CommissionEntry 
+} from '@/types';
 
 // Enhanced payroll data types
 export interface DepartmentBreakdown {
@@ -118,6 +126,8 @@ export async function getDetailedPayrollBreakdown(
         commissionRate: true,
         junkBonusGoal: true,
         moveBonusGoal: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -125,28 +135,28 @@ export async function getDetailedPayrollBreakdown(
       throw new Error('Employee not found');
     }
 
-    // Get detailed payroll data
     // Convert Decimal values to numbers for calculation functions
-    const employeeWithNumbers = {
+    const employeeForCalculation: User = {
       ...employee,
-      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : null,
-      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : null,
-      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : null,
-      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : null,
-      rateZigma: employee.rateZigma ? Number(employee.rateZigma) : null,
-      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : null,
-      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : null,
-      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : null,
-      rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : null,
-      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : null,
-      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : null,
+      roles: employee.roles as User['roles'],
+      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
+      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
+      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
+      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
+      rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
+      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
+      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
+      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
+      rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
+      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
+      salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
+      salaryType: employee.salaryType as User['salaryType'],
+      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
       junkBonusGoal: Number(employee.junkBonusGoal),
       moveBonusGoal: Number(employee.moveBonusGoal),
-      createdAt: new Date(), // Add required fields for User interface
-      updatedAt: new Date(),
     };
     
-    const detailedData = await getEnhancedPayrollData(employeeWithNumbers, {
+    const detailedData = await getEnhancedPayrollData(employeeForCalculation, {
       ...payPeriod,
       status: payPeriod.status as PayPeriodStatus,
     });
@@ -165,27 +175,7 @@ export async function getDetailedPayrollBreakdown(
  * Get enhanced payroll data with department breakdowns, daily history, and tips details
  */
 async function getEnhancedPayrollData(
-  employee: {
-    id: string;
-    fullName: string;
-    email: string;
-    roles: string[];
-    rateJunkCaptain?: number | null;
-    rateJunkWingman?: number | null;
-    rateMoveCaptain?: number | null;
-    rateMoveWingman?: number | null;
-    rateZigma?: number | null;
-    rateTraining?: number | null;
-    rateEstimating?: number | null;
-    rateWarehouse?: number | null;
-    rateAdmin?: number | null;
-    salaryAmount?: number | null;
-    salaryFrequency?: string | null;
-    salaryType?: string | null;
-    commissionRate?: number | null;
-    junkBonusGoal: number;
-    moveBonusGoal: number;
-  },
+  employee: User,
   payPeriod: PayPeriod
 ): Promise<EnhancedPayrollData> {
   // Get all approved logs for the pay period
@@ -203,6 +193,99 @@ async function getEnhancedPayrollData(
           id: true,
           fullName: true,
           roles: true,
+          rateJunkCaptain: true,
+          rateJunkWingman: true,
+          rateMoveCaptain: true,
+          rateMoveWingman: true,
+          rateZigma: true,
+          rateTraining: true,
+          rateEstimating: true,
+          rateWarehouse: true,
+          rateAdmin: true,
+          salaryAmount: true,
+          salaryFrequency: true,
+          salaryType: true,
+          commissionRate: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+          email: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          fullName: true,
+          roles: true,
+          email: true,
+          rateJunkCaptain: true,
+          rateJunkWingman: true,
+          rateMoveCaptain: true,
+          rateMoveWingman: true,
+          rateZigma: true,
+          rateTraining: true,
+          rateEstimating: true,
+          rateWarehouse: true,
+          rateAdmin: true,
+          salaryAmount: true,
+          salaryFrequency: true,
+          salaryType: true,
+          commissionRate: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+      approvedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          roles: true,
+          email: true,
+          rateJunkCaptain: true,
+          rateJunkWingman: true,
+          rateMoveCaptain: true,
+          rateMoveWingman: true,
+          rateZigma: true,
+          rateTraining: true,
+          rateEstimating: true,
+          rateWarehouse: true,
+          rateAdmin: true,
+          salaryAmount: true,
+          salaryFrequency: true,
+          salaryType: true,
+          commissionRate: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+      lastEditedBy: {
+        select: {
+          id: true,
+          fullName: true,
+          roles: true,
+          email: true,
+          rateJunkCaptain: true,
+          rateJunkWingman: true,
+          rateMoveCaptain: true,
+          rateMoveWingman: true,
+          rateZigma: true,
+          rateTraining: true,
+          rateEstimating: true,
+          rateWarehouse: true,
+          rateAdmin: true,
+          salaryAmount: true,
+          salaryFrequency: true,
+          salaryType: true,
+          commissionRate: true,
+          junkBonusGoal: true,
+          moveBonusGoal: true,
+          createdAt: true,
+          updatedAt: true,
         },
       },
       jobs: true,
@@ -213,6 +296,24 @@ async function getEnhancedPayrollData(
               id: true,
               fullName: true,
               roles: true,
+              email: true,
+              rateJunkCaptain: true,
+              rateJunkWingman: true,
+              rateMoveCaptain: true,
+              rateMoveWingman: true,
+              rateZigma: true,
+              rateTraining: true,
+              rateEstimating: true,
+              rateWarehouse: true,
+              rateAdmin: true,
+              salaryAmount: true,
+              salaryFrequency: true,
+              salaryType: true,
+              commissionRate: true,
+              junkBonusGoal: true,
+              moveBonusGoal: true,
+              createdAt: true,
+              updatedAt: true,
             },
           },
         },
@@ -234,58 +335,224 @@ async function getEnhancedPayrollData(
     },
     include: {
       matchedLog: true,
+      sales: true,
     },
   });
 
-  // Calculate basic payroll using existing logic
-  // Convert employee to match User interface requirements
-  const employeeForCalculation = {
-    ...employee,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    roles: employee.roles as any[], // Type assertion for roles
-    rateJunkCaptain: employee.rateJunkCaptain ?? undefined,
-    rateJunkWingman: employee.rateJunkWingman ?? undefined,
-    rateMoveCaptain: employee.rateMoveCaptain ?? undefined,
-    rateMoveWingman: employee.rateMoveWingman ?? undefined,
-    rateZigma: employee.rateZigma ?? undefined,
-    rateTraining: employee.rateTraining ?? undefined,
-    rateEstimating: employee.rateEstimating ?? undefined,
-    rateWarehouse: employee.rateWarehouse ?? undefined,
-    rateAdmin: employee.rateAdmin ?? undefined,
-    salaryAmount: employee.salaryAmount ?? undefined,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    salaryFrequency: (employee.salaryFrequency as any) ?? undefined,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    salaryType: (employee.salaryType as any) ?? undefined,
-    commissionRate: employee.commissionRate ?? undefined,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  
-  const basicPayroll = calculatePayroll(
-    [employeeForCalculation],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    approvedLogs as any, // Prisma query result matches needed DailyLog fields
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    commissionEntries as any, // Prisma query result matches needed CommissionEntry fields
+  // Convert Prisma data to proper types
+  const logsForCalculation: DailyLog[] = approvedLogs.map(log => ({
+    ...log,
+    status: log.status as DailyLog['status'],
+    submittedAt: log.submittedAt || undefined,
+    approvedAt: log.approvedAt || undefined,
+    approvedById: log.approvedById || undefined,
+    lastEditedById: log.lastEditedById || undefined,
+    captain: {
+      ...log.captain,
+      roles: log.captain.roles as User['roles'],
+      rateJunkCaptain: log.captain.rateJunkCaptain ? Number(log.captain.rateJunkCaptain) : undefined,
+      rateJunkWingman: log.captain.rateJunkWingman ? Number(log.captain.rateJunkWingman) : undefined,
+      rateMoveCaptain: log.captain.rateMoveCaptain ? Number(log.captain.rateMoveCaptain) : undefined,
+      rateMoveWingman: log.captain.rateMoveWingman ? Number(log.captain.rateMoveWingman) : undefined,
+      rateZigma: log.captain.rateZigma ? Number(log.captain.rateZigma) : undefined,
+      rateTraining: log.captain.rateTraining ? Number(log.captain.rateTraining) : undefined,
+      rateEstimating: log.captain.rateEstimating ? Number(log.captain.rateEstimating) : undefined,
+      rateWarehouse: log.captain.rateWarehouse ? Number(log.captain.rateWarehouse) : undefined,
+      rateAdmin: log.captain.rateAdmin ? Number(log.captain.rateAdmin) : undefined,
+      salaryAmount: log.captain.salaryAmount ? Number(log.captain.salaryAmount) : undefined,
+      salaryFrequency: log.captain.salaryFrequency as User['salaryFrequency'],
+      salaryType: log.captain.salaryType as User['salaryType'],
+      commissionRate: log.captain.commissionRate ? Number(log.captain.commissionRate) : undefined,
+      junkBonusGoal: Number(log.captain.junkBonusGoal),
+      moveBonusGoal: Number(log.captain.moveBonusGoal),
+    },
+    createdBy: {
+      ...log.createdBy,
+      roles: log.createdBy.roles as User['roles'],
+      rateJunkCaptain: log.createdBy.rateJunkCaptain ? Number(log.createdBy.rateJunkCaptain) : undefined,
+      rateJunkWingman: log.createdBy.rateJunkWingman ? Number(log.createdBy.rateJunkWingman) : undefined,
+      rateMoveCaptain: log.createdBy.rateMoveCaptain ? Number(log.createdBy.rateMoveCaptain) : undefined,
+      rateMoveWingman: log.createdBy.rateMoveWingman ? Number(log.createdBy.rateMoveWingman) : undefined,
+      rateZigma: log.createdBy.rateZigma ? Number(log.createdBy.rateZigma) : undefined,
+      rateTraining: log.createdBy.rateTraining ? Number(log.createdBy.rateTraining) : undefined,
+      rateEstimating: log.createdBy.rateEstimating ? Number(log.createdBy.rateEstimating) : undefined,
+      rateWarehouse: log.createdBy.rateWarehouse ? Number(log.createdBy.rateWarehouse) : undefined,
+      rateAdmin: log.createdBy.rateAdmin ? Number(log.createdBy.rateAdmin) : undefined,
+      salaryAmount: log.createdBy.salaryAmount ? Number(log.createdBy.salaryAmount) : undefined,
+      salaryFrequency: log.createdBy.salaryFrequency as User['salaryFrequency'],
+      salaryType: log.createdBy.salaryType as User['salaryType'],
+      commissionRate: log.createdBy.commissionRate ? Number(log.createdBy.commissionRate) : undefined,
+      junkBonusGoal: Number(log.createdBy.junkBonusGoal),
+      moveBonusGoal: Number(log.createdBy.moveBonusGoal),
+    },
+    approvedBy: log.approvedBy ? {
+      ...log.approvedBy,
+      roles: log.approvedBy.roles as User['roles'],
+      rateJunkCaptain: log.approvedBy.rateJunkCaptain ? Number(log.approvedBy.rateJunkCaptain) : undefined,
+      rateJunkWingman: log.approvedBy.rateJunkWingman ? Number(log.approvedBy.rateJunkWingman) : undefined,
+      rateMoveCaptain: log.approvedBy.rateMoveCaptain ? Number(log.approvedBy.rateMoveCaptain) : undefined,
+      rateMoveWingman: log.approvedBy.rateMoveWingman ? Number(log.approvedBy.rateMoveWingman) : undefined,
+      rateZigma: log.approvedBy.rateZigma ? Number(log.approvedBy.rateZigma) : undefined,
+      rateTraining: log.approvedBy.rateTraining ? Number(log.approvedBy.rateTraining) : undefined,
+      rateEstimating: log.approvedBy.rateEstimating ? Number(log.approvedBy.rateEstimating) : undefined,
+      rateWarehouse: log.approvedBy.rateWarehouse ? Number(log.approvedBy.rateWarehouse) : undefined,
+      rateAdmin: log.approvedBy.rateAdmin ? Number(log.approvedBy.rateAdmin) : undefined,
+      salaryAmount: log.approvedBy.salaryAmount ? Number(log.approvedBy.salaryAmount) : undefined,
+      salaryFrequency: log.approvedBy.salaryFrequency as User['salaryFrequency'],
+      salaryType: log.approvedBy.salaryType as User['salaryType'],
+      commissionRate: log.approvedBy.commissionRate ? Number(log.approvedBy.commissionRate) : undefined,
+      junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
+      moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
+    } : undefined,
+    lastEditedBy: log.lastEditedBy ? {
+      ...log.lastEditedBy,
+      roles: log.lastEditedBy.roles as User['roles'],
+      rateJunkCaptain: log.lastEditedBy.rateJunkCaptain ? Number(log.lastEditedBy.rateJunkCaptain) : undefined,
+      rateJunkWingman: log.lastEditedBy.rateJunkWingman ? Number(log.lastEditedBy.rateJunkWingman) : undefined,
+      rateMoveCaptain: log.lastEditedBy.rateMoveCaptain ? Number(log.lastEditedBy.rateMoveCaptain) : undefined,
+      rateMoveWingman: log.lastEditedBy.rateMoveWingman ? Number(log.lastEditedBy.rateMoveWingman) : undefined,
+      rateZigma: log.lastEditedBy.rateZigma ? Number(log.lastEditedBy.rateZigma) : undefined,
+      rateTraining: log.lastEditedBy.rateTraining ? Number(log.lastEditedBy.rateTraining) : undefined,
+      rateEstimating: log.lastEditedBy.rateEstimating ? Number(log.lastEditedBy.rateEstimating) : undefined,
+      rateWarehouse: log.lastEditedBy.rateWarehouse ? Number(log.lastEditedBy.rateWarehouse) : undefined,
+      rateAdmin: log.lastEditedBy.rateAdmin ? Number(log.lastEditedBy.rateAdmin) : undefined,
+      salaryAmount: log.lastEditedBy.salaryAmount ? Number(log.lastEditedBy.salaryAmount) : undefined,
+      salaryFrequency: log.lastEditedBy.salaryFrequency as User['salaryFrequency'],
+      salaryType: log.lastEditedBy.salaryType as User['salaryType'],
+      commissionRate: log.lastEditedBy.commissionRate ? Number(log.lastEditedBy.commissionRate) : undefined,
+      junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
+      moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
+    } : undefined,
+    hours: log.hours.map(hour => ({
+      ...hour,
+      log: {} as DailyLog, // Circular reference - will be set by parent
+      department: hour.department as Department,
+      hours: Number(hour.hours),
+      employee: {
+        ...hour.employee,
+        roles: hour.employee.roles as User['roles'],
+        rateJunkCaptain: hour.employee.rateJunkCaptain ? Number(hour.employee.rateJunkCaptain) : undefined,
+        rateJunkWingman: hour.employee.rateJunkWingman ? Number(hour.employee.rateJunkWingman) : undefined,
+        rateMoveCaptain: hour.employee.rateMoveCaptain ? Number(hour.employee.rateMoveCaptain) : undefined,
+        rateMoveWingman: hour.employee.rateMoveWingman ? Number(hour.employee.rateMoveWingman) : undefined,
+        rateZigma: hour.employee.rateZigma ? Number(hour.employee.rateZigma) : undefined,
+        rateTraining: hour.employee.rateTraining ? Number(hour.employee.rateTraining) : undefined,
+        rateEstimating: hour.employee.rateEstimating ? Number(hour.employee.rateEstimating) : undefined,
+        rateWarehouse: hour.employee.rateWarehouse ? Number(hour.employee.rateWarehouse) : undefined,
+        rateAdmin: hour.employee.rateAdmin ? Number(hour.employee.rateAdmin) : undefined,
+        salaryAmount: hour.employee.salaryAmount ? Number(hour.employee.salaryAmount) : undefined,
+        salaryFrequency: hour.employee.salaryFrequency as User['salaryFrequency'],
+        salaryType: hour.employee.salaryType as User['salaryType'],
+        commissionRate: hour.employee.commissionRate ? Number(hour.employee.commissionRate) : undefined,
+        junkBonusGoal: Number(hour.employee.junkBonusGoal),
+        moveBonusGoal: Number(hour.employee.moveBonusGoal),
+      },
+    })),
+    jobs: log.jobs.map(job => ({
+      ...job,
+      jobType: job.jobType as LogJob['jobType'],
+      revenue: Number(job.revenue),
+      tips: Number(job.tips),
+      junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
+      valuation: job.valuation ? Number(job.valuation) : undefined,
+      materials: job.materials ? Number(job.materials) : undefined,
+      disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
+      log: {} as DailyLog, // Circular reference - will be set by parent
+    })),
+  }));
+
+  const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
+    ...commission,
+    jobType: commission.jobType as CommissionEntry['jobType'],
+    status: commission.status as CommissionEntry['status'],
+    estimatedRevenue: Number(commission.estimatedRevenue),
+    actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
+    commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
+    matchedLogId: commission.matchedLogId || undefined,
+    matchedLog: commission.matchedLog ? {
+      ...commission.matchedLog,
+      status: commission.matchedLog.status as DailyLog['status'],
+      submittedAt: commission.matchedLog.submittedAt || undefined,
+      approvedAt: commission.matchedLog.approvedAt || undefined,
+      approvedById: commission.matchedLog.approvedById || undefined,
+      lastEditedById: commission.matchedLog.lastEditedById || undefined,
+    } as DailyLog : undefined,
+    sales: {
+      ...commission.sales,
+      roles: commission.sales.roles as User['roles'],
+      rateJunkCaptain: commission.sales.rateJunkCaptain ? Number(commission.sales.rateJunkCaptain) : undefined,
+      rateJunkWingman: commission.sales.rateJunkWingman ? Number(commission.sales.rateJunkWingman) : undefined,
+      rateMoveCaptain: commission.sales.rateMoveCaptain ? Number(commission.sales.rateMoveCaptain) : undefined,
+      rateMoveWingman: commission.sales.rateMoveWingman ? Number(commission.sales.rateMoveWingman) : undefined,
+      rateZigma: commission.sales.rateZigma ? Number(commission.sales.rateZigma) : undefined,
+      rateTraining: commission.sales.rateTraining ? Number(commission.sales.rateTraining) : undefined,
+      rateEstimating: commission.sales.rateEstimating ? Number(commission.sales.rateEstimating) : undefined,
+      rateWarehouse: commission.sales.rateWarehouse ? Number(commission.sales.rateWarehouse) : undefined,
+      rateAdmin: commission.sales.rateAdmin ? Number(commission.sales.rateAdmin) : undefined,
+      salaryAmount: commission.sales.salaryAmount ? Number(commission.sales.salaryAmount) : undefined,
+      salaryFrequency: commission.sales.salaryFrequency as User['salaryFrequency'],
+      salaryType: commission.sales.salaryType as User['salaryType'],
+      commissionRate: commission.sales.commissionRate ? Number(commission.sales.commissionRate) : undefined,
+      junkBonusGoal: Number(commission.sales.junkBonusGoal),
+      moveBonusGoal: Number(commission.sales.moveBonusGoal),
+    },
+  }));
+
+  // Calculate enhanced payroll using existing logic
+  const enhancedPayroll = calculateEnhancedPayroll(
+    employee,
+    logsForCalculation,
+    commissionsForCalculation,
     payPeriod.startDate,
     payPeriod.endDate
-  )[0];
+  );
 
-  // Calculate department breakdown
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const departmentBreakdown = calculateDepartmentBreakdown(employee, approvedLogs as any);
+  // Convert enhanced payroll to our interface format
+  const departmentBreakdown: DepartmentBreakdown[] = Object.entries(enhancedPayroll.departmentBreakdown)
+    .filter(([_, data]) => data.hours > 0)
+    .map(([dept, data]) => ({
+      department: dept as Department,
+      hours: data.hours,
+      rate: data.rate,
+      grossPay: data.grossPay,
+      percentage: data.percentage,
+      isPrimary: false, // Will be set below
+    }))
+    .sort((a, b) => b.hours - a.hours);
 
-  // Calculate daily work history
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dailyWorkHistory = calculateDailyWorkHistory(employee, approvedLogs as any);
+  // Mark primary department (most hours)
+  if (departmentBreakdown.length > 0) {
+    departmentBreakdown[0].isPrimary = true;
+  }
 
-  // Calculate tips details
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tipsDetails = calculateTipsDetails(employee, approvedLogs as any);
+  const dailyWorkHistory: DailyWorkEntry[] = Object.entries(enhancedPayroll.dailyBreakdown)
+    .map(([dateStr, data]) => ({
+      date: new Date(dateStr),
+      departments: Object.entries(data.departments)
+        .filter(([_, hours]) => hours > 0)
+        .map(([dept, hours]) => ({
+          department: dept as Department,
+          hours,
+          rate: calculateHourlyWage(employee, dept as Department, false),
+        })),
+      tips: data.tips,
+      logIds: [], // Would need to track this separately if needed
+      role: 'wingman' as const, // Would need to determine from log data
+    }))
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  // Get rate information
-  const rateInformation = getRateInformation(employee);
+  const tipsDetails: TipEntry[] = enhancedPayroll.tipsBreakdown;
+
+  const rateInformation: RateInfo = Object.fromEntries(
+    Object.entries(enhancedPayroll.rateSchedule).map(([dept, rates]) => [
+      dept,
+      {
+        captainRate: rates.captainRate,
+        wingmanRate: rates.wingmanRate,
+        currentRate: rates.currentRate,
+      },
+    ])
+  );
 
   return {
     employeeId: employee.id,
@@ -295,379 +562,17 @@ async function getEnhancedPayrollData(
       email: employee.email,
       roles: employee.roles,
     },
-    totalHours: basicPayroll.totalHours,
-    totalPay: basicPayroll.totalPay,
-    grossWages: basicPayroll.grossWages,
-    tips: basicPayroll.tips,
-    commission: basicPayroll.commission,
-    bonuses: basicPayroll.bonuses,
+    totalHours: enhancedPayroll.totalHours,
+    totalPay: enhancedPayroll.totalPay,
+    grossWages: enhancedPayroll.grossWages,
+    tips: enhancedPayroll.tips,
+    commission: enhancedPayroll.commission,
+    bonuses: enhancedPayroll.bonuses,
     departmentBreakdown,
     dailyWorkHistory,
     tipsDetails,
     rateInformation,
   };
-}
-
-/**
- * Calculate department breakdown for an employee
- */
-function calculateDepartmentBreakdown(
-  employee: {
-    id: string;
-    rateJunkCaptain?: number | null;
-    rateJunkWingman?: number | null;
-    rateMoveCaptain?: number | null;
-    rateMoveWingman?: number | null;
-    rateZigma?: number | null;
-    rateTraining?: number | null;
-    rateEstimating?: number | null;
-    rateWarehouse?: number | null;
-    rateAdmin?: number | null;
-    roles: string[];
-  },
-  approvedLogs: Array<{
-    id: string;
-    hours: Array<{
-      employeeId: string;
-      department: string;
-      hours: number;
-      isCoCaptain: boolean;
-    }>;
-  }>
-): DepartmentBreakdown[] {
-  const departmentTotals: Record<Department, { hours: number; grossPay: number }> = {
-    junk: { hours: 0, grossPay: 0 },
-    move: { hours: 0, grossPay: 0 },
-    zigma: { hours: 0, grossPay: 0 },
-    training: { hours: 0, grossPay: 0 },
-    estimating: { hours: 0, grossPay: 0 },
-    warehouse: { hours: 0, grossPay: 0 },
-    admin: { hours: 0, grossPay: 0 },
-  };
-
-  let totalHours = 0;
-
-  // Sum up hours and calculate pay by department
-  for (const log of approvedLogs) {
-    const employeeHours = log.hours.filter(hour => hour.employeeId === employee.id);
-    
-    for (const hour of employeeHours) {
-      const department = hour.department as Department;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rate = calculateHourlyWage(employee as any, department, hour.isCoCaptain);
-      const hoursValue = Number(hour.hours);
-      const pay = hoursValue * rate;
-
-      departmentTotals[department].hours += hoursValue;
-      departmentTotals[department].grossPay += pay;
-      totalHours += hoursValue;
-    }
-  }
-
-  // Convert to breakdown format
-  const breakdown: DepartmentBreakdown[] = [];
-  let primaryDepartment: Department | null = null;
-  let maxHours = 0;
-
-  for (const [dept, totals] of Object.entries(departmentTotals)) {
-    if (totals.hours > 0) {
-      const department = dept as Department;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rate = calculateHourlyWage(employee as any, department, false);
-      const percentage = totalHours > 0 ? (totals.hours / totalHours) * 100 : 0;
-
-      if (totals.hours > maxHours) {
-        maxHours = totals.hours;
-        primaryDepartment = department;
-      }
-
-      breakdown.push({
-        department,
-        hours: totals.hours,
-        rate,
-        grossPay: totals.grossPay,
-        percentage,
-        isPrimary: false, // Will be set below
-      });
-    }
-  }
-
-  // Mark primary department
-  if (primaryDepartment) {
-    const primaryIndex = breakdown.findIndex(b => b.department === primaryDepartment);
-    if (primaryIndex >= 0) {
-      breakdown[primaryIndex].isPrimary = true;
-    }
-  }
-
-  return breakdown.sort((a, b) => b.hours - a.hours);
-}
-
-/**
- * Calculate daily work history for an employee
- */
-function calculateDailyWorkHistory(
-  employee: {
-    id: string;
-    rateJunkCaptain?: number | null;
-    rateJunkWingman?: number | null;
-    rateMoveCaptain?: number | null;
-    rateMoveWingman?: number | null;
-    rateZigma?: number | null;
-    rateTraining?: number | null;
-    rateEstimating?: number | null;
-    rateWarehouse?: number | null;
-    rateAdmin?: number | null;
-    roles: string[];
-  },
-  approvedLogs: Array<{
-    id: string;
-    captainId: string;
-    logDate: Date;
-    hours: Array<{
-      employeeId: string;
-      department: string;
-      hours: number;
-      isCoCaptain: boolean;
-    }>;
-  }>
-): DailyWorkEntry[] {
-  const dailyEntries: Map<string, DailyWorkEntry> = new Map();
-
-  for (const log of approvedLogs) {
-    const employeeHours = log.hours.filter(hour => hour.employeeId === employee.id);
-    
-    if (employeeHours.length === 0) continue;
-
-    const dateKey = log.logDate.toISOString().split('T')[0];
-    
-    if (!dailyEntries.has(dateKey)) {
-      dailyEntries.set(dateKey, {
-        date: log.logDate,
-        departments: [],
-        tips: 0,
-        logIds: [],
-        role: 'wingman', // Default, will be updated
-      });
-    }
-
-    const entry = dailyEntries.get(dateKey)!;
-    entry.logIds.push(log.id);
-
-    // Determine role for this log
-    if (log.captainId === employee.id) {
-      entry.role = 'captain';
-    } else if (employeeHours.some(hour => hour.isCoCaptain)) {
-      entry.role = 'co-captain';
-    }
-
-    // Add department hours
-    for (const hour of employeeHours) {
-      const department = hour.department as Department;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rate = calculateHourlyWage(employee as any, department, hour.isCoCaptain);
-      const hoursValue = Number(hour.hours);
-      
-      const existingDept = entry.departments.find(d => d.department === department);
-      if (existingDept) {
-        existingDept.hours += hoursValue;
-      } else {
-        entry.departments.push({
-          department,
-          hours: hoursValue,
-          rate,
-        });
-      }
-    }
-
-    // Calculate tips for this day
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dailyTips = calculateDailyTips(employee.id, log as any);
-    entry.tips += dailyTips;
-  }
-
-  return Array.from(dailyEntries.values()).sort((a, b) => b.date.getTime() - a.date.getTime());
-}
-
-/**
- * Calculate tips details for an employee
- */
-function calculateTipsDetails(
-  employee: { id: string },
-  approvedLogs: Array<{
-    id: string;
-    logDate: Date;
-    hours: Array<{
-      employeeId: string;
-      department: string;
-    }>;
-    jobs: Array<{
-      jobId: string;
-      clientName: string;
-      jobType: string;
-      tips: number;
-    }>;
-  }>
-): TipEntry[] {
-  const tipEntries: TipEntry[] = [];
-
-  for (const log of approvedLogs) {
-    const employeeHours = log.hours.filter(hour => hour.employeeId === employee.id);
-    
-    if (employeeHours.length === 0) continue;
-
-    // Group jobs by section type
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-
-    // Calculate tips for junk section
-    const junkHours = employeeHours.filter(hour => hour.department === 'junk');
-    if (junkJobs.length > 0 && junkHours.length > 0) {
-      const junkEmployees = [...new Set(log.hours
-        .filter(hour => hour.department === 'junk')
-        .map(hour => hour.employeeId))];
-      
-      for (const job of junkJobs) {
-        if (job.tips > 0) {
-          tipEntries.push({
-            date: log.logDate,
-            jobId: job.jobId,
-            clientName: job.clientName,
-            totalJobTips: job.tips,
-            teamMembers: junkEmployees.length,
-            myShare: job.tips / junkEmployees.length,
-            jobType: 'junk',
-            logId: log.id,
-          });
-        }
-      }
-    }
-
-    // Calculate tips for move section
-    const moveHours = employeeHours.filter(hour => hour.department === 'move');
-    if (moveJobs.length > 0 && moveHours.length > 0) {
-      const moveEmployees = [...new Set(log.hours
-        .filter(hour => hour.department === 'move')
-        .map(hour => hour.employeeId))];
-      
-      for (const job of moveJobs) {
-        if (job.tips > 0) {
-          tipEntries.push({
-            date: log.logDate,
-            jobId: job.jobId,
-            clientName: job.clientName,
-            totalJobTips: job.tips,
-            teamMembers: moveEmployees.length,
-            myShare: job.tips / moveEmployees.length,
-            jobType: 'move',
-            logId: log.id,
-          });
-        }
-      }
-    }
-  }
-
-  return tipEntries.sort((a, b) => b.date.getTime() - a.date.getTime());
-}
-
-/**
- * Calculate daily tips for an employee from a specific log
- */
-function calculateDailyTips(employeeId: string, log: {
-  hours: Array<{
-    employeeId: string;
-    department: string;
-  }>;
-  jobs: Array<{
-    jobType: string;
-    tips: number;
-  }>;
-}): number {
-  const employeeHours = log.hours.filter(hour => hour.employeeId === employeeId);
-  
-  if (employeeHours.length === 0) return 0;
-
-  let totalTips = 0;
-
-  // Calculate tips from junk section
-  const junkHours = employeeHours.filter(hour => hour.department === 'junk');
-  if (junkHours.length > 0) {
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const junkEmployees = [...new Set(log.hours
-      .filter(hour => hour.department === 'junk')
-      .map(hour => hour.employeeId))];
-    
-    const junkTips = junkJobs.reduce((sum: number, job) => sum + Number(job.tips), 0);
-    if (junkEmployees.length > 0) {
-      totalTips += junkTips / junkEmployees.length;
-    }
-  }
-
-  // Calculate tips from move section
-  const moveHours = employeeHours.filter(hour => hour.department === 'move');
-  if (moveHours.length > 0) {
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-    const moveEmployees = [...new Set(log.hours
-      .filter(hour => hour.department === 'move')
-      .map(hour => hour.employeeId))];
-    
-    const moveTips = moveJobs.reduce((sum: number, job) => sum + Number(job.tips), 0);
-    if (moveEmployees.length > 0) {
-      totalTips += moveTips / moveEmployees.length;
-    }
-  }
-
-  return totalTips;
-}
-
-/**
- * Get rate information for an employee
- */
-function getRateInformation(employee: {
-  rateJunkCaptain?: number | null;
-  rateJunkWingman?: number | null;
-  rateMoveCaptain?: number | null;
-  rateMoveWingman?: number | null;
-  rateZigma?: number | null;
-  rateTraining?: number | null;
-  rateEstimating?: number | null;
-  rateWarehouse?: number | null;
-  rateAdmin?: number | null;
-  roles: string[];
-}): RateInfo {
-  const departments: Department[] = ['junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin'];
-  const rateInfo: RateInfo = {};
-
-  for (const department of departments) {
-    const info: {
-      captainRate?: number;
-      wingmanRate?: number;
-      currentRate: number;
-    } = { currentRate: 0 };
-
-    switch (department) {
-      case 'junk':
-        if (employee.rateJunkCaptain) info.captainRate = Number(employee.rateJunkCaptain);
-        if (employee.rateJunkWingman) info.wingmanRate = Number(employee.rateJunkWingman);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        info.currentRate = calculateHourlyWage(employee as any, department, false);
-        break;
-      case 'move':
-        if (employee.rateMoveCaptain) info.captainRate = Number(employee.rateMoveCaptain);
-        if (employee.rateMoveWingman) info.wingmanRate = Number(employee.rateMoveWingman);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        info.currentRate = calculateHourlyWage(employee as any, department, false);
-        break;
-      default:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        info.currentRate = calculateHourlyWage(employee as any, department, false);
-        break;
-    }
-
-    rateInfo[department] = info;
-  }
-
-  return rateInfo;
 }
 
 /**
@@ -770,6 +675,8 @@ export async function getPayrollSummary(
         commissionRate: true,
         junkBonusGoal: true,
         moveBonusGoal: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -788,6 +695,9 @@ export async function getPayrollSummary(
       },
       include: {
         captain: true,
+        createdBy: true,
+        approvedBy: true,
+        lastEditedBy: true,
         jobs: true,
         hours: {
           include: {
@@ -810,39 +720,194 @@ export async function getPayrollSummary(
       },
       include: {
         matchedLog: true,
+        sales: true,
       },
     });
 
-    // Calculate basic payroll
-    // Convert Decimal values to numbers for calculation functions
-    const employeeWithNumbers = {
+    // Convert employee data for calculation
+    const employeeForCalculation: User = {
       ...employee,
-      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : null,
-      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : null,
-      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : null,
-      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : null,
-      rateZigma: employee.rateZigma ? Number(employee.rateZigma) : null,
-      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : null,
-      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : null,
-      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : null,
-      rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : null,
-      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : null,
-      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : null,
+      roles: employee.roles as User['roles'],
+      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
+      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
+      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
+      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
+      rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
+      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
+      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
+      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
+      rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
+      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
+      salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
+      salaryType: employee.salaryType as User['salaryType'],
+      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
       junkBonusGoal: Number(employee.junkBonusGoal),
       moveBonusGoal: Number(employee.moveBonusGoal),
-      createdAt: new Date(), // Add required fields for User interface
-      updatedAt: new Date(),
     };
     
-    // Type assertion is safe here as we're passing the data from Prisma queries
-    // that match the expected User, DailyLog, and CommissionEntry interfaces
+    // Convert Prisma data to proper types (simplified for summary)
+    const logsForCalculation: DailyLog[] = approvedLogs.map(log => ({
+      ...log,
+      status: log.status as DailyLog['status'],
+      submittedAt: log.submittedAt || undefined,
+      approvedAt: log.approvedAt || undefined,
+      approvedById: log.approvedById || undefined,
+      lastEditedById: log.lastEditedById || undefined,
+      captain: {
+        ...log.captain,
+        roles: log.captain.roles as User['roles'],
+        rateJunkCaptain: log.captain.rateJunkCaptain ? Number(log.captain.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.captain.rateJunkWingman ? Number(log.captain.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.captain.rateMoveCaptain ? Number(log.captain.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.captain.rateMoveWingman ? Number(log.captain.rateMoveWingman) : undefined,
+        rateZigma: log.captain.rateZigma ? Number(log.captain.rateZigma) : undefined,
+        rateTraining: log.captain.rateTraining ? Number(log.captain.rateTraining) : undefined,
+        rateEstimating: log.captain.rateEstimating ? Number(log.captain.rateEstimating) : undefined,
+        rateWarehouse: log.captain.rateWarehouse ? Number(log.captain.rateWarehouse) : undefined,
+        rateAdmin: log.captain.rateAdmin ? Number(log.captain.rateAdmin) : undefined,
+        salaryAmount: log.captain.salaryAmount ? Number(log.captain.salaryAmount) : undefined,
+        salaryFrequency: log.captain.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.captain.salaryType as User['salaryType'],
+        commissionRate: log.captain.commissionRate ? Number(log.captain.commissionRate) : undefined,
+        junkBonusGoal: Number(log.captain.junkBonusGoal),
+        moveBonusGoal: Number(log.captain.moveBonusGoal),
+      },
+      createdBy: {
+        ...log.createdBy,
+        roles: log.createdBy.roles as User['roles'],
+        rateJunkCaptain: log.createdBy.rateJunkCaptain ? Number(log.createdBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.createdBy.rateJunkWingman ? Number(log.createdBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.createdBy.rateMoveCaptain ? Number(log.createdBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.createdBy.rateMoveWingman ? Number(log.createdBy.rateMoveWingman) : undefined,
+        rateZigma: log.createdBy.rateZigma ? Number(log.createdBy.rateZigma) : undefined,
+        rateTraining: log.createdBy.rateTraining ? Number(log.createdBy.rateTraining) : undefined,
+        rateEstimating: log.createdBy.rateEstimating ? Number(log.createdBy.rateEstimating) : undefined,
+        rateWarehouse: log.createdBy.rateWarehouse ? Number(log.createdBy.rateWarehouse) : undefined,
+        rateAdmin: log.createdBy.rateAdmin ? Number(log.createdBy.rateAdmin) : undefined,
+        salaryAmount: log.createdBy.salaryAmount ? Number(log.createdBy.salaryAmount) : undefined,
+        salaryFrequency: log.createdBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.createdBy.salaryType as User['salaryType'],
+        commissionRate: log.createdBy.commissionRate ? Number(log.createdBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.createdBy.junkBonusGoal),
+        moveBonusGoal: Number(log.createdBy.moveBonusGoal),
+      },
+      approvedBy: log.approvedBy ? {
+        ...log.approvedBy,
+        roles: log.approvedBy.roles as User['roles'],
+        rateJunkCaptain: log.approvedBy.rateJunkCaptain ? Number(log.approvedBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.approvedBy.rateJunkWingman ? Number(log.approvedBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.approvedBy.rateMoveCaptain ? Number(log.approvedBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.approvedBy.rateMoveWingman ? Number(log.approvedBy.rateMoveWingman) : undefined,
+        rateZigma: log.approvedBy.rateZigma ? Number(log.approvedBy.rateZigma) : undefined,
+        rateTraining: log.approvedBy.rateTraining ? Number(log.approvedBy.rateTraining) : undefined,
+        rateEstimating: log.approvedBy.rateEstimating ? Number(log.approvedBy.rateEstimating) : undefined,
+        rateWarehouse: log.approvedBy.rateWarehouse ? Number(log.approvedBy.rateWarehouse) : undefined,
+        rateAdmin: log.approvedBy.rateAdmin ? Number(log.approvedBy.rateAdmin) : undefined,
+        salaryAmount: log.approvedBy.salaryAmount ? Number(log.approvedBy.salaryAmount) : undefined,
+        salaryFrequency: log.approvedBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.approvedBy.salaryType as User['salaryType'],
+        commissionRate: log.approvedBy.commissionRate ? Number(log.approvedBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
+        moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
+      } : undefined,
+      lastEditedBy: log.lastEditedBy ? {
+        ...log.lastEditedBy,
+        roles: log.lastEditedBy.roles as User['roles'],
+        rateJunkCaptain: log.lastEditedBy.rateJunkCaptain ? Number(log.lastEditedBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.lastEditedBy.rateJunkWingman ? Number(log.lastEditedBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.lastEditedBy.rateMoveCaptain ? Number(log.lastEditedBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.lastEditedBy.rateMoveWingman ? Number(log.lastEditedBy.rateMoveWingman) : undefined,
+        rateZigma: log.lastEditedBy.rateZigma ? Number(log.lastEditedBy.rateZigma) : undefined,
+        rateTraining: log.lastEditedBy.rateTraining ? Number(log.lastEditedBy.rateTraining) : undefined,
+        rateEstimating: log.lastEditedBy.rateEstimating ? Number(log.lastEditedBy.rateEstimating) : undefined,
+        rateWarehouse: log.lastEditedBy.rateWarehouse ? Number(log.lastEditedBy.rateWarehouse) : undefined,
+        rateAdmin: log.lastEditedBy.rateAdmin ? Number(log.lastEditedBy.rateAdmin) : undefined,
+        salaryAmount: log.lastEditedBy.salaryAmount ? Number(log.lastEditedBy.salaryAmount) : undefined,
+        salaryFrequency: log.lastEditedBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.lastEditedBy.salaryType as User['salaryType'],
+        commissionRate: log.lastEditedBy.commissionRate ? Number(log.lastEditedBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
+        moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
+      } : undefined,
+      hours: log.hours.map(hour => ({
+        ...hour,
+        log: {} as DailyLog, // Circular reference - will be set by parent
+        department: hour.department as Department,
+        hours: Number(hour.hours),
+        employee: {
+          ...hour.employee,
+          roles: hour.employee.roles as User['roles'],
+          rateJunkCaptain: hour.employee.rateJunkCaptain ? Number(hour.employee.rateJunkCaptain) : undefined,
+          rateJunkWingman: hour.employee.rateJunkWingman ? Number(hour.employee.rateJunkWingman) : undefined,
+          rateMoveCaptain: hour.employee.rateMoveCaptain ? Number(hour.employee.rateMoveCaptain) : undefined,
+          rateMoveWingman: hour.employee.rateMoveWingman ? Number(hour.employee.rateMoveWingman) : undefined,
+          rateZigma: hour.employee.rateZigma ? Number(hour.employee.rateZigma) : undefined,
+          rateTraining: hour.employee.rateTraining ? Number(hour.employee.rateTraining) : undefined,
+          rateEstimating: hour.employee.rateEstimating ? Number(hour.employee.rateEstimating) : undefined,
+          rateWarehouse: hour.employee.rateWarehouse ? Number(hour.employee.rateWarehouse) : undefined,
+          rateAdmin: hour.employee.rateAdmin ? Number(hour.employee.rateAdmin) : undefined,
+          salaryAmount: hour.employee.salaryAmount ? Number(hour.employee.salaryAmount) : undefined,
+          salaryFrequency: hour.employee.salaryFrequency as User['salaryFrequency'],
+          salaryType: hour.employee.salaryType as User['salaryType'],
+          commissionRate: hour.employee.commissionRate ? Number(hour.employee.commissionRate) : undefined,
+          junkBonusGoal: Number(hour.employee.junkBonusGoal),
+          moveBonusGoal: Number(hour.employee.moveBonusGoal),
+        },
+      })),
+      jobs: log.jobs.map(job => ({
+        ...job,
+        jobType: job.jobType as LogJob['jobType'],
+        revenue: Number(job.revenue),
+        tips: Number(job.tips),
+        junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
+        valuation: job.valuation ? Number(job.valuation) : undefined,
+        materials: job.materials ? Number(job.materials) : undefined,
+        disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
+        log: {} as DailyLog, // Circular reference - will be set by parent
+      })),
+    }));
+
+    const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
+      ...commission,
+      jobType: commission.jobType as CommissionEntry['jobType'],
+      status: commission.status as CommissionEntry['status'],
+      estimatedRevenue: Number(commission.estimatedRevenue),
+      actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
+      commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
+      matchedLogId: commission.matchedLogId || undefined,
+      matchedLog: commission.matchedLog ? {
+        ...commission.matchedLog,
+        status: commission.matchedLog.status as DailyLog['status'],
+        submittedAt: commission.matchedLog.submittedAt || undefined,
+        approvedAt: commission.matchedLog.approvedAt || undefined,
+        approvedById: commission.matchedLog.approvedById || undefined,
+        lastEditedById: commission.matchedLog.lastEditedById || undefined,
+      } as DailyLog : undefined,
+      sales: {
+        ...commission.sales,
+        roles: commission.sales.roles as User['roles'],
+        rateJunkCaptain: commission.sales.rateJunkCaptain ? Number(commission.sales.rateJunkCaptain) : undefined,
+        rateJunkWingman: commission.sales.rateJunkWingman ? Number(commission.sales.rateJunkWingman) : undefined,
+        rateMoveCaptain: commission.sales.rateMoveCaptain ? Number(commission.sales.rateMoveCaptain) : undefined,
+        rateMoveWingman: commission.sales.rateMoveWingman ? Number(commission.sales.rateMoveWingman) : undefined,
+        rateZigma: commission.sales.rateZigma ? Number(commission.sales.rateZigma) : undefined,
+        rateTraining: commission.sales.rateTraining ? Number(commission.sales.rateTraining) : undefined,
+        rateEstimating: commission.sales.rateEstimating ? Number(commission.sales.rateEstimating) : undefined,
+        rateWarehouse: commission.sales.rateWarehouse ? Number(commission.sales.rateWarehouse) : undefined,
+        rateAdmin: commission.sales.rateAdmin ? Number(commission.sales.rateAdmin) : undefined,
+        salaryAmount: commission.sales.salaryAmount ? Number(commission.sales.salaryAmount) : undefined,
+        salaryFrequency: commission.sales.salaryFrequency as User['salaryFrequency'],
+        salaryType: commission.sales.salaryType as User['salaryType'],
+        commissionRate: commission.sales.commissionRate ? Number(commission.sales.commissionRate) : undefined,
+        junkBonusGoal: Number(commission.sales.junkBonusGoal),
+        moveBonusGoal: Number(commission.sales.moveBonusGoal),
+      },
+    }));
+
     const basicPayroll = calculatePayroll(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [employeeWithNumbers] as any[], // Prisma user data matches User interface
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      approvedLogs as any[], // Prisma log data matches DailyLog interface  
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      commissionEntries as any[], // Prisma commission data matches CommissionEntry interface
+      [employeeForCalculation],
+      logsForCalculation,
+      commissionsForCalculation,
       payPeriod.startDate,
       payPeriod.endDate
     )[0];
@@ -869,6 +934,39 @@ export async function getPayrollSummary(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch payroll summary',
+    };
+  }
+}
+
+/**
+ * Get available pay periods for an employee
+ */
+export async function getEmployeePayPeriods(employeeId?: string) {
+  try {
+    const session = await getSession();
+    if (!session?.user) {
+      throw new Error('Unauthorized: Login required');
+    }
+
+    const targetEmployeeId = employeeId || session.user.id;
+
+    // Check if user can access this data
+    if (session.user.id !== targetEmployeeId && 
+        !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
+      throw new Error('Unauthorized: Can only view your own pay periods');
+    }
+
+    const payPeriods = await prisma.payPeriod.findMany({
+      orderBy: { startDate: 'desc' },
+      take: 12, // Last 12 pay periods
+    });
+
+    return { success: true, data: payPeriods };
+  } catch (error) {
+    console.error('Error fetching employee pay periods:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch pay periods',
     };
   }
 }
@@ -917,37 +1015,4 @@ export function validateEnhancedPayrollBreakdown(data: EnhancedPayrollData): {
   }
 
   return { isValid: errors.length === 0, errors };
-}
-
-/**
- * Get available pay periods for an employee
- */
-export async function getEmployeePayPeriods(employeeId?: string) {
-  try {
-    const session = await getSession();
-    if (!session?.user) {
-      throw new Error('Unauthorized: Login required');
-    }
-
-    const targetEmployeeId = employeeId || session.user.id;
-
-    // Check if user can access this data
-    if (session.user.id !== targetEmployeeId && 
-        !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
-      throw new Error('Unauthorized: Can only view your own pay periods');
-    }
-
-    const payPeriods = await prisma.payPeriod.findMany({
-      orderBy: { startDate: 'desc' },
-      take: 12, // Last 12 pay periods
-    });
-
-    return { success: true, data: payPeriods };
-  } catch (error) {
-    console.error('Error fetching employee pay periods:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch pay periods',
-    };
-  }
 }
