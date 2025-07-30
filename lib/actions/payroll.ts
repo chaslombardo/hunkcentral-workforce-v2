@@ -974,10 +974,10 @@ export async function getEmployeePayPeriods(employeeId?: string) {
 /**
  * Validate enhanced payroll breakdown for accuracy
  */
-export function validateEnhancedPayrollBreakdown(data: EnhancedPayrollData): {
+export async function validateEnhancedPayrollBreakdown(data: EnhancedPayrollData): Promise<{
   isValid: boolean;
   errors: string[];
-} {
+}> {
   const errors: string[] = [];
 
   // Validate department totals match overall totals
