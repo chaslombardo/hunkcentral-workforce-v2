@@ -55,7 +55,9 @@ import type { PayrollCalculation } from '@/lib/payCalculator';
 import { DepartmentBreakdown, type DepartmentBreakdownData } from './payroll-breakdown/department-breakdown';
 import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
 import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
+import { TipsDetailView } from './payroll-breakdown/tips-detail-view';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
+import type { TipEntry } from '@/lib/payCalculator';
 
 // Mock data for current user - replace with actual user data
 const mockUser: User = {
@@ -217,6 +219,80 @@ const mockWorkPatternStats: WorkPatternStats = {
   highestTipDay: new Date('2025-01-03'),
   highestPayDay: new Date('2025-01-06'),
 };
+
+// Mock tips breakdown data
+const mockTipsBreakdown: TipEntry[] = [
+  {
+    date: new Date('2025-01-02'),
+    jobId: 'J2025-001',
+    clientName: 'Smith Residence',
+    totalJobTips: 80,
+    teamMembers: 4,
+    myShare: 20,
+    jobType: 'junk',
+    logId: 'log-1',
+  },
+  {
+    date: new Date('2025-01-02'),
+    jobId: 'J2025-002',
+    clientName: 'Downtown Office',
+    totalJobTips: 60,
+    teamMembers: 3,
+    myShare: 20,
+    jobType: 'junk',
+    logId: 'log-1',
+  },
+  {
+    date: new Date('2025-01-03'),
+    jobId: 'J2025-003',
+    clientName: 'Johnson Family',
+    totalJobTips: 100,
+    teamMembers: 4,
+    myShare: 25,
+    jobType: 'junk',
+    logId: 'log-2',
+  },
+  {
+    date: new Date('2025-01-03'),
+    jobId: 'J2025-004',
+    clientName: 'Corporate Move',
+    totalJobTips: 120,
+    teamMembers: 4,
+    myShare: 30,
+    jobType: 'junk',
+    logId: 'log-2',
+  },
+  {
+    date: new Date('2025-01-06'),
+    jobId: 'M2025-001',
+    clientName: 'Miller Apartment',
+    totalJobTips: 40,
+    teamMembers: 2,
+    myShare: 20,
+    jobType: 'move',
+    logId: 'log-3',
+  },
+  {
+    date: new Date('2025-01-06'),
+    jobId: 'J2025-005',
+    clientName: 'Wilson House',
+    totalJobTips: 30,
+    teamMembers: 2,
+    myShare: 15,
+    jobType: 'junk',
+    logId: 'log-3',
+  },
+  {
+    date: new Date('2025-01-07'),
+    jobId: 'M2025-002',
+    clientName: 'Davis Relocation',
+    totalJobTips: 90,
+    teamMembers: 3,
+    myShare: 30,
+    jobType: 'move',
+    logId: 'log-4',
+  },
+];
 
 export function MyPayrollView() {
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(mockPayPeriods[0]);
@@ -386,6 +462,7 @@ export function MyPayrollView() {
               <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
                 <TabsTrigger value="breakdown">Pay Breakdown</TabsTrigger>
                 <TabsTrigger value="daily">Daily History</TabsTrigger>
+                <TabsTrigger value="tips">Tips Details</TabsTrigger>
                 <TabsTrigger value="history">Pay History</TabsTrigger>
                 <TabsTrigger value="performance">Performance</TabsTrigger>
               </TabsList>
@@ -530,6 +607,16 @@ export function MyPayrollView() {
                 workPatternStats={mockWorkPatternStats}
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
+                payPeriodStart={selectedPeriod.startDate}
+                payPeriodEnd={selectedPeriod.endDate}
+              />
+            </TabsContent>
+
+            {/* Tips Details Tab */}
+            <TabsContent value="tips" className="flex flex-col px-4 lg:px-6">
+              <TipsDetailView
+                tips={mockTipsBreakdown}
+                totalTips={userPayroll.tips}
                 payPeriodStart={selectedPeriod.startDate}
                 payPeriodEnd={selectedPeriod.endDate}
               />
