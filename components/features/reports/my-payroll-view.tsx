@@ -60,6 +60,7 @@ import { DepartmentBreakdown, type DepartmentBreakdownData } from './payroll-bre
 import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
 import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
 import { TipsDetailView } from './payroll-breakdown/tips-detail-view';
+import { PayPeriodAnalysis } from './payroll-breakdown/pay-period-analysis';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
 // import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
@@ -373,7 +374,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
 
   // Load detailed data when accessing breakdown tabs
   React.useEffect(() => {
-    if (!userId || !['breakdown', 'daily', 'tips'].includes(activeTab)) return;
+    if (!userId || !['breakdown', 'daily', 'tips', 'rates', 'performance'].includes(activeTab)) return;
     if (detailedData) return; // Already loaded
     
     const loadDetails = async () => {
@@ -638,8 +639,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
 
           {/* Enhanced Tabs with Progressive Loading */}
           <Tabs 
-            value={activeTab} 
-            onValueChange={setActiveTab}
+            defaultValue="breakdown"
             className="w-full flex-col justify-start gap-6"
           >
             <div className="flex flex-col gap-4 px-4 lg:px-6 sm:flex-row sm:items-center sm:justify-between">
@@ -648,7 +648,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   <span className="hidden sm:inline">Pay </span>Breakdown
                 </TabsTrigger>
                 <TabsTrigger value="daily" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Daily </span>History
+                  <span className="hidden sm:inline">Daily </span>Work
                 </TabsTrigger>
                 <TabsTrigger value="tips" className="text-xs sm:text-sm">
                   Tips<span className="hidden sm:inline"> Details</span>
@@ -715,33 +715,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   />
                 )}
 
-                {/* Rate Information Panel */}
-                {isLoadingDetails ? (
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-40" />
-                      <Skeleton className="h-4 w-56" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="text-center">
-                              <Skeleton className="h-6 w-8 mx-auto mb-1" />
-                              <Skeleton className="h-3 w-16 mx-auto" />
-                            </div>
-                          ))}
-                        </div>
-                        <Skeleton className="h-32 w-full" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <RateInformationPanel
-                    user={summaryData?.employee || userPayroll.employee}
-                    departmentHours={userPayroll.hoursByDepartment}
-                  />
-                )}
+
 
                 {/* Traditional Pay Breakdown */}
                 <Card>
@@ -974,6 +948,8 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 />
               )}
             </TabsContent>
+
+
 
             {/* Pay History Tab */}
             <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
