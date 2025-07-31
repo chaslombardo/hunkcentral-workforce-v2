@@ -30,7 +30,7 @@ interface AuditTrailLinkProps {
   entry: AuditTrailEntry;
   showDetails?: boolean;
   variant?: 'button' | 'badge' | 'link';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'lg';
 }
 
 export function AuditTrailLink({
@@ -59,7 +59,7 @@ export function AuditTrailLink({
         );
       default:
         return (
-          <Button variant="ghost" size={size}>
+          <Button variant="ghost" size={size === 'lg' ? 'lg' : 'sm'}>
             <Eye className="mr-1 h-3 w-3" />
             {size !== 'sm' && 'View Details'}
           </Button>

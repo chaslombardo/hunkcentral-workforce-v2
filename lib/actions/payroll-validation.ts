@@ -10,7 +10,7 @@ import {
   type ValidationError 
 } from '@/lib/payrollValidation';
 import { logDailyLogChange } from '@/lib/auditLogger';
-import type { User, PayPeriod, DailyLog, CommissionEntry } from '@/types';
+import type { User, PayPeriod, DailyLog, CommissionEntry, Department, JobType } from '@/types';
 
 /**
  * Validate payroll calculation for a specific employee and pay period
@@ -341,7 +341,7 @@ export async function validateEmployeePayroll(
       hours: log.hours.map(hour => ({
         ...hour,
         log: {} as DailyLog, // Circular reference - will be set by parent
-        department: hour.department as any,
+        department: hour.department as Department,
         hours: Number(hour.hours),
         employee: {
           ...hour.employee,
@@ -365,7 +365,7 @@ export async function validateEmployeePayroll(
       })),
       jobs: log.jobs.map(job => ({
         ...job,
-        jobType: job.jobType as any,
+        jobType: job.jobType as JobType,
         revenue: Number(job.revenue),
         tips: Number(job.tips),
         junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
@@ -577,7 +577,7 @@ export async function getDiscrepancyReports(
     const formattedReports: DiscrepancyReport[] = reports.map(report => ({
       employeeId: report.employeeId,
       payPeriodId: report.payPeriodId,
-      discrepancies: report.discrepancies as ValidationError[],
+      discrepancies: Array.isArray(report.discrepancies) ? (report.discrepancies as unknown as ValidationError[]) : [],
       severity: report.severity as DiscrepancyReport['severity'],
       reportedAt: report.createdAt,
       status: report.status as DiscrepancyReport['status'],

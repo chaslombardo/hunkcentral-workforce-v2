@@ -1016,3 +1016,63 @@ export async function validateEnhancedPayrollBreakdown(data: EnhancedPayrollData
 
   return { isValid: errors.length === 0, errors };
 }
+/**
+ * Validate enhanced payroll breakdown data (synchronous version)
+ */
+export function validateEnhancedPayrollBreakdownSync(data: unknown): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!data) {
+    errors.push('Payroll data is required');
+    return { isValid: false, errors };
+  }
+
+  // Type guard for data structure
+  const typedData = data as {
+    employee?: { id?: string };
+    totalHours?: number;
+    tips?: number;
+    totalPay?: number;
+    grossWages?: number;
+    commission?: number;
+    bonuses?: number;
+    departmentBreakdown?: Array<{ hours?: number }>;
+    tipsDetails?: Array<{ myShare?: number }>;
+  };
+
+  // Validate employee data
+  if (!typedData.employee || !typedData.employee.id) {
+    errors.push('Employee information is required');
+  }
+
+  // Validate department breakdown
+  if (typedData.departmentBreakdown && Array.isArray(typedData.departmentBreakdown)) {
+    const totalDepartmentHours = typedData.departmentBreakdown.reduce((sum: number, dept: { hours?: number }) => sum + (dept.hours || 0), 0);
+    if (Math.abs(totalDepartmentHours - (typedData.totalHours || 0)) > 0.01) {
+      errors.push('Department hours do not match total hours');
+    }
+  }
+
+  // Validate tips breakdown
+  if (typedData.tipsDetails && Array.isArray(typedData.tipsDetails)) {
+    const totalTipsFromBreakdown = typedData.tipsDetails.reduce((sum: number, tip: { myShare?: number }) => sum + (tip.myShare || 0), 0);
+    if (Math.abs(totalTipsFromBreakdown - (typedData.tips || 0)) > 0.01) {
+      errors.push('Tips breakdown does not match total tips');
+    }
+  }
+
+  // Validate pay calculations
+  if (typeof typedData.totalPay === 'number' && typeof typedData.grossWages === 'number' && 
+      typeof typedData.tips === 'number' && typeof typedData.commission === 'number' && 
+      typeof typedData.bonuses === 'number') {
+    const calculatedTotal = typedData.grossWages + typedData.tips + typedData.commission + typedData.bonuses;
+    if (Math.abs(calculatedTotal - typedData.totalPay) > 0.01) {
+      errors.push('Total pay calculation does not match component sum');
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}

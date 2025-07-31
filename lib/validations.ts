@@ -139,3 +139,6 @@ export type DailyLogFormData = z.infer<typeof DailyLogFormSchema>;
 export type CreateUserFormData = z.infer<typeof CreateUserSchema>;
 export type UpdateUserFormData = z.infer<typeof UpdateUserSchema>;
 export type UserSearchFormData = z.infer<typeof UserSearchSchema>;
+
+// Alias for backward compatibility with tests
+export const UserFormSchema = CreateUserSchema;

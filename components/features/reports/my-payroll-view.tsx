@@ -434,18 +434,26 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     setShowDiscrepancyDialog(true);
   }, []);
 
-  const handleSubmitDiscrepancyReport = React.useCallback(async (reportData: any) => {
+  const handleSubmitDiscrepancyReport = React.useCallback(async (reportData: { description: string; priority: string; category: string; requestCallback?: boolean; expectedOutcome?: string; contactEmail?: string }) => {
     if (!userId) return;
     
-    const result = await submitDiscrepancyReport(userId, selectedPeriod.id, reportData);
+    const fullReportData = {
+      ...reportData,
+      priority: reportData.priority as 'low' | 'medium' | 'high' | 'critical',
+      category: reportData.category as 'calculation' | 'data_integrity' | 'rate_issue' | 'hours_mismatch' | 'tips_error' | 'other',
+      requestCallback: reportData.requestCallback || false,
+      errors: discrepancyErrors,
+    };
+    
+    const result = await submitDiscrepancyReport(userId, selectedPeriod.id, fullReportData);
     if (!result.success) {
       throw new Error(result.error || 'Failed to submit report');
     }
-  }, [userId, selectedPeriod.id]);
+  }, [userId, selectedPeriod.id, discrepancyErrors]);
 
   const handleViewAuditTrail = React.useCallback((entry: AuditTrailEntry) => {
     // Navigate to audit trail or show detailed view
-    console.log('View audit trail for entry:', entry);
+    // TODO: Implement audit trail navigation
   }, []);
 
   return (

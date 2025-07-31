@@ -47,8 +47,8 @@ const discrepancyReportSchema = z.object({
   category: z.enum(['calculation', 'data_integrity', 'rate_issue', 'hours_mismatch', 'tips_error', 'other']),
   description: z.string().min(10, 'Please provide a detailed description (minimum 10 characters)'),
   expectedOutcome: z.string().optional(),
-  contactEmail: z.string().email('Please enter a valid email address').optional(),
-  requestCallback: z.boolean().default(false),
+  contactEmail: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  requestCallback: z.boolean(),
 });
 
 type DiscrepancyReportFormData = z.infer<typeof discrepancyReportSchema>;
@@ -135,7 +135,7 @@ export function DiscrepancyReportDialog({
         await onSubmit({ ...data, errors });
       } else {
         // Default submission logic - would typically send to an API
-        console.log('Discrepancy report submitted:', { ...data, errors, employeeId, payPeriodId });
+        // TODO: Implement API call for discrepancy report submission
       }
 
       toast({

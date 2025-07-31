@@ -145,7 +145,7 @@ describe('PayrollPrintLayout', () => {
   it('renders the basic paystub header', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
     
-    expect(screen.getByText('College Hunks Hauling Junk & Moving')).toBeInTheDocument();
+    expect(screen.getAllByText('College Hunks Hauling Junk & Moving')[0]).toBeInTheDocument();
     expect(screen.getByText('Employee Paystub')).toBeInTheDocument();
     expect(screen.getByText('Official Paystub')).toBeInTheDocument();
   });

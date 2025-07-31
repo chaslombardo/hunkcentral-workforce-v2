@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { 
   calculateEnhancedPayroll,
-  calculateHourlyWage,
-  validateEnhancedPayrollBreakdown
+  calculateHourlyWage
 } from '@/lib/payCalculator';
 import { 
   getDetailedPayrollBreakdown,
-  validateEnhancedPayrollBreakdown as validatePayrollAction
+  validateEnhancedPayrollBreakdown as validatePayrollAction,
+  validateEnhancedPayrollBreakdownSync
 } from '@/lib/actions/payroll';
 import type { User, DailyLog, CommissionEntry, Department } from '@/types';
 
@@ -280,7 +280,7 @@ describe('Enhanced Payroll Calculations', () => {
     });
   });
 
-  describe('validateEnhancedPayrollBreakdown', () => {
+  describe('validateEnhancedPayrollBreakdownSync', () => {
     it('should validate correct payroll breakdown', () => {
       const mockData = {
         employeeId: 'user-1',

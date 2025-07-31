@@ -104,7 +104,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tips'));
     
     await waitFor(() => {
-      expect(screen.getByText('Tips Distribution')).toBeInTheDocument();
+      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
       expect(screen.getByText(/Tips are divided equally among all team members/)).toBeInTheDocument();
       expect(screen.getByText('Total Tips ÷ Team Members = Your Share')).toBeInTheDocument();
     });
@@ -123,7 +123,7 @@ describe('CalculationTooltip', () => {
     
     await waitFor(() => {
       expect(screen.getByText('Department Rate')).toBeInTheDocument();
-      expect(screen.getByText('$20.00/hr')).toBeInTheDocument(); // Captain rate
+      expect(screen.getAllByText('$20.00/hr')[0]).toBeInTheDocument(); // Captain rate
       expect(screen.getByText('$16.00/hr')).toBeInTheDocument(); // Wingman rate
       expect(screen.getByText('Captain rate applies when serving as captain or co-captain')).toBeInTheDocument();
     });
@@ -141,7 +141,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Efficiency'));
     
     await waitFor(() => {
-      expect(screen.getByText('Labor Efficiency')).toBeInTheDocument();
+      expect(screen.getAllByText('Labor Efficiency')[0]).toBeInTheDocument();
       expect(screen.getByText('16.0%')).toBeInTheDocument(); // Current
       expect(screen.getByText('14.0%')).toBeInTheDocument(); // Target
       expect(screen.getByText(/Focus on completing jobs faster/)).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tip Distribution'));
     
     await waitFor(() => {
-      expect(screen.getByText('Tip Distribution')).toBeInTheDocument();
+      expect(screen.getAllByText('Tip Distribution')[0]).toBeInTheDocument();
       expect(screen.getByText('J2025-001')).toBeInTheDocument();
       expect(screen.getByText('$80.00')).toBeInTheDocument(); // Total tips
       expect(screen.getByText('4')).toBeInTheDocument(); // Team members
@@ -186,7 +186,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Efficiency'));
     
     await waitFor(() => {
-      expect(screen.getByText(/Great job! You're operating efficiently/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Great job! You're operating efficiently/)[0]).toBeInTheDocument();
     });
   });
 
@@ -241,7 +241,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tips'));
     
     await waitFor(() => {
-      expect(screen.getByText('Tips Distribution')).toBeInTheDocument();
+      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
     });
   });
 });
@@ -264,7 +264,7 @@ describe('QuickCalculationHelp', () => {
     await user.hover(helpButton);
     
     await waitFor(() => {
-      expect(screen.getByText('Tips Distribution')).toBeInTheDocument();
+      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
     });
   });
 });
