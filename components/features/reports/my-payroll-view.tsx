@@ -52,6 +52,7 @@ import {
   Award,
   AlertCircle,
   Loader2,
+  Shield,
 } from 'lucide-react';
 import { formatCurrency, formatDate, calculateTrend } from '@/lib/formatters';
 import type { PayPeriod, User, Department } from '@/types';
@@ -61,9 +62,14 @@ import { RateInformationPanel } from './payroll-breakdown/rate-information-panel
 import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
 import { TipsDetailView } from './payroll-breakdown/tips-detail-view';
 import { PayPeriodAnalysis } from './payroll-breakdown/pay-period-analysis';
+import { PayrollValidationPanel } from './payroll-breakdown/payroll-validation-panel';
 import { PayrollExportDialog } from './payroll-export-dialog';
+import { DiscrepancyReportDialog } from './discrepancy-report-dialog';
+import { AuditTrailLink, AuditTrailSummary } from './audit-trail-link';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
+import type { PayrollValidationResult, ValidationError, AuditTrailEntry } from '@/lib/payrollValidation';
+import { validateEmployeePayroll, submitDiscrepancyReport } from '@/lib/actions/payroll-validation';
 // import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
 // import { getDailyWorkBreakdown } from '@/lib/actions/daily-work';
 
@@ -324,6 +330,7 @@ interface DetailedPayrollData {
   dailyWorkHistory: DailyWorkEntry[];
   tipsDetails: TipEntry[];
   workPatternStats: WorkPatternStats;
+  validationResult?: PayrollValidationResult;
 }
 
 export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps = {}) {
@@ -331,6 +338,8 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [activeTab, setActiveTab] = React.useState('breakdown');
   const [showExportDialog, setShowExportDialog] = React.useState(false);
+  const [showDiscrepancyDialog, setShowDiscrepancyDialog] = React.useState(false);
+  const [discrepancyErrors, setDiscrepancyErrors] = React.useState<ValidationError[]>([]);
   
   // Progressive loading states
   const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(null);
@@ -376,25 +385,39 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
 
   // Load detailed data when accessing breakdown tabs
   React.useEffect(() => {
-    if (!userId || !['breakdown', 'daily', 'tips', 'rates', 'performance'].includes(activeTab)) return;
+    if (!userId || !['breakdown', 'daily', 'tips', 'rates', 'performance', 'validation'].includes(activeTab)) return;
     if (detailedData) return; // Already loaded
     
     const loadDetails = async () => {
       setIsLoadingDetails(true);
       setDetailsError(null);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Use mock data for now
-      setDetailedData({
-        departmentBreakdown: mockDepartmentBreakdown,
-        dailyWorkHistory: mockDailyWorkEntries,
-        tipsDetails: mockTipsBreakdown,
-        workPatternStats: mockWorkPatternStats,
-      });
-      
-      setIsLoadingDetails(false);
+      try {
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Load validation data if on validation tab
+        let validationResult: PayrollValidationResult | undefined;
+        if (activeTab === 'validation' && userId) {
+          const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
+          if (validationResponse.success) {
+            validationResult = validationResponse.data;
+          }
+        }
+        
+        // Use mock data for now
+        setDetailedData({
+          departmentBreakdown: mockDepartmentBreakdown,
+          dailyWorkHistory: mockDailyWorkEntries,
+          tipsDetails: mockTipsBreakdown,
+          workPatternStats: mockWorkPatternStats,
+          validationResult,
+        });
+      } catch (error) {
+        setDetailsError('Failed to load detailed payroll data');
+      } finally {
+        setIsLoadingDetails(false);
+      }
     };
 
     loadDetails();
@@ -404,6 +427,26 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   React.useEffect(() => {
     setDetailedData(null);
   }, [selectedPeriod.id]);
+
+  // Handle discrepancy reporting
+  const handleReportDiscrepancy = React.useCallback((errors: ValidationError[]) => {
+    setDiscrepancyErrors(errors);
+    setShowDiscrepancyDialog(true);
+  }, []);
+
+  const handleSubmitDiscrepancyReport = React.useCallback(async (reportData: any) => {
+    if (!userId) return;
+    
+    const result = await submitDiscrepancyReport(userId, selectedPeriod.id, reportData);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to submit report');
+    }
+  }, [userId, selectedPeriod.id]);
+
+  const handleViewAuditTrail = React.useCallback((entry: AuditTrailEntry) => {
+    // Navigate to audit trail or show detailed view
+    console.log('View audit trail for entry:', entry);
+  }, []);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -648,7 +691,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             className="w-full flex-col justify-start gap-6"
           >
             <div className="flex flex-col gap-4 px-4 lg:px-6 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 sm:w-auto">
+              <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 sm:w-auto">
                 <TabsTrigger value="breakdown" className="text-xs sm:text-sm">
                   <span className="hidden sm:inline">Pay </span>Breakdown
                 </TabsTrigger>
@@ -663,6 +706,9 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 </TabsTrigger>
                 <TabsTrigger value="performance" className="text-xs sm:text-sm">
                   Performance
+                </TabsTrigger>
+                <TabsTrigger value="validation" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Data </span>Validation
                 </TabsTrigger>
               </TabsList>
               
@@ -1153,6 +1199,109 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 </Card>
               </div>
             </TabsContent>
+
+            {/* Data Validation Tab */}
+            <TabsContent value="validation" className="flex flex-col px-4 lg:px-6">
+              {detailsError ? (
+                <Alert className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {detailsError}. Unable to load validation data.
+                  </AlertDescription>
+                </Alert>
+              ) : isLoadingDetails ? (
+                <div className="space-y-6">
+                  {/* Validation Panel Skeleton */}
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-5 w-5 rounded-full" />
+                          <div>
+                            <Skeleton className="h-6 w-32" />
+                            <Skeleton className="h-4 w-48 mt-1" />
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Skeleton className="h-5 w-20" />
+                          <Skeleton className="h-4 w-16 mt-1" />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-2 w-full" />
+                          <Skeleton className="h-3 w-48" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="text-center">
+                              <Skeleton className="h-8 w-8 mx-auto mb-1" />
+                              <Skeleton className="h-4 w-16 mx-auto" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Audit Trail Skeleton */}
+                  <Card>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-40" />
+                      <Skeleton className="h-4 w-56" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="flex justify-between items-center p-3 border rounded">
+                            <div className="space-y-1">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-3 w-32" />
+                            </div>
+                            <Skeleton className="h-6 w-16" />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Validation Panel */}
+                  {detailedData?.validationResult ? (
+                    <PayrollValidationPanel
+                      validationResult={detailedData.validationResult}
+                      onReportDiscrepancy={handleReportDiscrepancy}
+                      onViewAuditTrail={handleViewAuditTrail}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-center text-muted-foreground">
+                          <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <div className="text-lg font-medium">Validation Unavailable</div>
+                          <div className="text-sm">
+                            Payroll validation data could not be loaded for this period.
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Audit Trail Summary */}
+                  {detailedData?.validationResult?.auditTrail && (
+                    <AuditTrailSummary
+                      entries={detailedData.validationResult.auditTrail}
+                      employeeId={userId || ''}
+                      payPeriodId={selectedPeriod.id}
+                    />
+                  )}
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -1167,6 +1316,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         dailyWorkHistory={detailedData?.dailyWorkHistory}
         tipsDetails={detailedData?.tipsDetails}
         currentUser={summaryData?.employee || userPayroll.employee}
+      />
+
+      {/* Discrepancy Report Dialog */}
+      <DiscrepancyReportDialog
+        open={showDiscrepancyDialog}
+        onOpenChange={setShowDiscrepancyDialog}
+        errors={discrepancyErrors}
+        employeeId={userId || ''}
+        payPeriodId={selectedPeriod.id}
+        onSubmit={handleSubmitDiscrepancyReport}
       />
     </div>
   );

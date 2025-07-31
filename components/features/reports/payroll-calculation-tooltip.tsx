@@ -30,7 +30,7 @@ import type { Department } from '@/types';
 
 interface CalculationTooltipProps {
   type: 'labor-cost' | 'bonus' | 'tips' | 'department-rate' | 'efficiency' | 'tip-distribution';
-  data?: any;
+  data?: LaborCostData | BonusData | TipDistributionData | DepartmentRateData | null;
   children: React.ReactNode;
   side?: 'top' | 'right' | 'bottom' | 'left';
 }
@@ -380,14 +380,7 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
 }
 
 // Helper component for quick calculation help
-export function QuickCalculationHelp({ type }: { type: string }) {
-  const helpText = {
-    'labor-cost': 'Hours worked × Hourly rate',
-    'bonus': '(Goal% - Actual%) × Revenue',
-    'tips': 'Total tips ÷ Team members',
-    'efficiency': 'Labor cost ÷ Revenue × 100',
-  };
-
+export function QuickCalculationHelp() {
   return (
     <CalculationTooltip type="tips">
       <Button variant="ghost" size="sm" className="h-6 w-6 p-0">

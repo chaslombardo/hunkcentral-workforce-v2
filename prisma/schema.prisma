@@ -50,6 +50,9 @@ model User {
   logHours          LogHour[]
   commissionEntries CommissionEntry[]
   auditLogs         AuditLog[]
+  discrepancyReportsEmployee DiscrepancyReport[] @relation("DiscrepancyReportEmployee")
+  discrepancyReportsReporter DiscrepancyReport[] @relation("DiscrepancyReportReporter")
+  discrepancyReportsResolver DiscrepancyReport[] @relation("DiscrepancyReportResolver")
 }
 
 // Daily Logs
@@ -149,6 +152,38 @@ model PayPeriod {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  discrepancyReports DiscrepancyReport[]
+}
+
+// Discrepancy Reports
+model DiscrepancyReport {
+  id              String   @id @default(uuid())
+  employeeId      String
+  employee        User     @relation("DiscrepancyReportEmployee", fields: [employeeId], references: [id])
+  payPeriodId     String
+  payPeriod       PayPeriod @relation(fields: [payPeriodId], references: [id])
+  reportedById    String
+  reportedBy      User     @relation("DiscrepancyReportReporter", fields: [reportedById], references: [id])
+  
+  priority        String   // 'low', 'medium', 'high', 'critical'
+  category        String   // 'calculation', 'data_integrity', 'rate_issue', 'hours_mismatch', 'tips_error', 'other'
+  description     String
+  expectedOutcome String?
+  contactEmail    String?
+  requestCallback Boolean  @default(false)
+  
+  discrepancies   Json     // Array of ValidationError objects
+  severity        String   // 'low', 'medium', 'high', 'critical'
+  status          String   // 'open', 'investigating', 'resolved', 'dismissed'
+  resolution      String?
+  resolvedById    String?
+  resolvedBy      User?    @relation("DiscrepancyReportResolver", fields: [resolvedById], references: [id])
+  resolvedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // Audit Log
