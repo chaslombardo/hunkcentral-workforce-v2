@@ -61,6 +61,7 @@ import { RateInformationPanel } from './payroll-breakdown/rate-information-panel
 import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
 import { TipsDetailView } from './payroll-breakdown/tips-detail-view';
 import { PayPeriodAnalysis } from './payroll-breakdown/pay-period-analysis';
+import { PayrollExportDialog } from './payroll-export-dialog';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
 // import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
@@ -329,6 +330,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(initialPayPeriod || mockPayPeriods[0]);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [activeTab, setActiveTab] = React.useState('breakdown');
+  const [showExportDialog, setShowExportDialog] = React.useState(false);
   
   // Progressive loading states
   const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(null);
@@ -446,7 +448,10 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   </SelectContent>
                 </Select>
 
-                <Button size="sm">
+                <Button 
+                  size="sm"
+                  onClick={() => setShowExportDialog(true)}
+                >
                   <Download className="mr-2 h-4 w-4" />
                   Download Paystub
                 </Button>
@@ -1151,6 +1156,18 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
           </Tabs>
         </div>
       </div>
+
+      {/* Enhanced Export Dialog */}
+      <PayrollExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        payrollData={[userPayroll]}
+        selectedPeriod={selectedPeriod}
+        departmentBreakdown={detailedData?.departmentBreakdown}
+        dailyWorkHistory={detailedData?.dailyWorkHistory}
+        tipsDetails={detailedData?.tipsDetails}
+        currentUser={summaryData?.employee || userPayroll.employee}
+      />
     </div>
   );
 }
