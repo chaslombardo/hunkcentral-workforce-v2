@@ -55,30 +55,85 @@
   - Create data accuracy verification tools for employees
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
 
-- [ ] 9. Optimize mobile experience and responsive design
+- [x] 9. Optimize mobile experience and responsive design
   - Implement mobile-first responsive layouts for all new components
   - Add touch-optimized interactions and navigation
   - Create collapsible sections and progressive disclosure for mobile
   - Optimize loading performance and add appropriate loading states
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
 
-- [ ] 10. Add comprehensive error handling and fallback states
+- [x] 10. Refactor mobile optimizations to use pure shadcn/ui patterns
+  - Remove all custom mobile optimization components (MobileOptimizedContainer, TouchOptimizedButton, MobileProgressiveDisclosure)
+  - Replace custom components with direct shadcn/ui Button, Collapsible, and responsive classes
+  - Ensure all mobile touch targets and responsive behavior still work with pure shadcn/ui
+  - Update all payroll breakdown components to use standard shadcn/ui patterns only
+  - Verify mobile functionality remains intact after removing custom abstractions
+  - _Requirements: 6.1, 6.2, 6.3, 6.4 (maintaining mobile experience with proper shadcn/ui patterns)_
+
+- [x] 11. Add error handling and fallback states
   - Implement graceful degradation when detailed data is unavailable
   - Add error boundaries and user-friendly error messages
   - Create fallback views that show summary data when breakdowns fail
   - Add retry mechanisms and offline capability for mobile users
   - _Requirements: 8.1, 8.6, 8.7_
 
-- [ ] 11. Create comprehensive test suite for payroll breakdown features
+- [x] 12. Create comprehensive test suite for payroll breakdown features
   - Write unit tests for all new components and calculation functions
   - Add integration tests for complete payroll calculation workflows
   - Create end-to-end tests for user interactions with detailed breakdowns
   - Test mobile responsiveness and touch interactions
   - _Requirements: All requirements - testing validates implementation_
 
-- [ ] 12. Implement performance optimizations and caching
+- [x] 13. Implement performance optimizations and caching
   - Add intelligent caching for closed pay periods and historical data
   - Implement progressive loading strategies for large datasets
   - Optimize database queries with proper indexing
   - Add performance monitoring and optimization for mobile devices
   - _Requirements: 5.7, 6.7_
+
+- [x] 14. Fix components to use proper shadcn/ui blocks and components
+  - Review all payroll breakdown components and replace custom implementations with proper shadcn/ui blocks where available
+  - Use shadcn/ui MCP server to get component demos before implementing any components
+  - Ensure all components follow shadcn/ui patterns and class names
+  - Fix failing tests by using proper shadcn/ui structure
+  - Prioritize blocks over individual components where possible
+  - _Requirements: All requirements - proper UI implementation_
+
+- [x] 15. Fix multiple "Total Pay" elements test failure
+  - Update test in **tests**/components/my-payroll-view.test.tsx to use more specific selectors
+  - Change `screen.getByText('Total Pay')` to `screen.getAllByText('Total Pay')[0]` or use more specific queries
+  - Add data-testid attributes to distinguish between header "Total Pay" and summary card "Total Pay"
+  - Verify the test can find the correct "Total Pay" element in the summary cards section
+  - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [x] 16. Fix missing test IDs in mocked components (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+  - Update mocked DepartmentBreakdown component to include data-testid="department-breakdown"
+  - Update mocked DailyWorkCalendar component to include data-testid="daily-work-calendar"
+  - Update mocked TipsDetailView component to include data-testid="tips-detail-view"
+  - Update mocked RateInformationPanel component to include data-testid="rate-information-panel"
+  - Ensure all mocked components render the expected test IDs for tab content verification
+  - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [ ] 17. Fix React act() warnings and async state updates (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+  - Mock the useOfflineDetection hook to prevent async fetch calls during tests
+  - Wrap component renders in act() where state updates occur during mounting
+  - Add proper async/await handling for components that trigger state updates
+  - Mock the connectivity check function to return synchronous results in tests
+  - Ensure all useEffect hooks that cause state updates are properly handled in test environment
+  - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [ ] 18. Fix offline detection hook test environment issues (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+  - Create a mock for useOfflineDetection hook that returns stable offline state
+  - Mock the fetch call to /api/health that's causing "Invalid URL" errors in tests
+  - Add vi.mock for hooks/useOfflineDetection.ts in test setup
+  - Ensure the mock returns consistent isOffline: false and hasOfflineData: false values
+  - Prevent the hook from making actual network requests during test execution
+  - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [ ] 19. Fix tab navigation and component rendering in tests (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+  - Verify that tab switching works correctly in the test environment
+  - Ensure TabsContent components render their children when the tab is active
+  - Fix any issues with conditional rendering based on activeTab state
+  - Add proper test assertions for tab content visibility after tab switches
+  - Ensure mocked components are rendered within the correct TabsContent containers
+  - _Requirements: All requirements - ensure test coverage validates implementation_
