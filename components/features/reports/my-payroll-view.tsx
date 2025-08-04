@@ -42,7 +42,24 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useOfflineDetection } from '@/hooks/useOfflineDetection';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import {
   Clock,
   DollarSign,
@@ -51,8 +68,11 @@ import {
   TrendingDown,
   Award,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   Shield,
+  WifiOff,
+  RefreshCw,
 } from 'lucide-react';
 import { formatCurrency, formatDate, calculateTrend } from '@/lib/formatters';
 import type { PayPeriod, User, Department } from '@/types';
@@ -66,6 +86,14 @@ import { PayrollValidationPanel } from './payroll-breakdown/payroll-validation-p
 import { PayrollExportDialog } from './payroll-export-dialog';
 import { DiscrepancyReportDialog } from './discrepancy-report-dialog';
 import { AuditTrailLink, AuditTrailSummary } from './audit-trail-link';
+import { PayrollErrorBoundary, PayrollComponentErrorBoundary } from './payroll-error-boundary';
+import { 
+  PayrollSummaryFallback, 
+  DepartmentBreakdownFallback, 
+  DailyWorkFallback, 
+  TipsDetailFallback,
+  PayrollLoadingSkeleton 
+} from './payroll-fallback-views';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
 import type { PayrollValidationResult, ValidationError, AuditTrailEntry } from '@/lib/payrollValidation';
@@ -334,6 +362,8 @@ interface DetailedPayrollData {
 }
 
 export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps = {}) {
+  const isMobile = useIsMobile();
+  const offlineState = useOfflineDetection();
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(initialPayPeriod || mockPayPeriods[0]);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [activeTab, setActiveTab] = React.useState('breakdown');
@@ -341,92 +371,317 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   const [showDiscrepancyDialog, setShowDiscrepancyDialog] = React.useState(false);
   const [discrepancyErrors, setDiscrepancyErrors] = React.useState<ValidationError[]>([]);
   
-  // Progressive loading states
-  const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(null);
-  const [detailedData, setDetailedData] = React.useState<DetailedPayrollData | null>(null);
+  // Use mock data for now - in real implementation, this would be replaced with actual API calls
+  const userPayroll = mockUserPayroll;
+  const trend = calculateTrend(userPayroll.totalPay, mockHistoricalData[0].totalPay);
+  
+  // Enhanced loading states with retry capabilities
+  const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(() => {
+    // Initialize with mock data to ensure UI renders immediately
+    return {
+      employeeId: userPayroll.employeeId,
+      employee: userPayroll.employee,
+      payPeriod: selectedPeriod,
+      totalHours: userPayroll.totalHours,
+      totalPay: userPayroll.totalPay,
+      grossWages: userPayroll.grossWages,
+      tips: userPayroll.tips,
+      commission: userPayroll.commission,
+      bonuses: userPayroll.bonuses,
+    };
+  });
+  const [detailedData, setDetailedData] = React.useState<DetailedPayrollData | null>(() => {
+    // Initialize with mock data to ensure tabs render immediately
+    return {
+      departmentBreakdown: mockDepartmentBreakdown || [],
+      dailyWorkHistory: mockDailyWorkEntries || [],
+      tipsDetails: mockTipsBreakdown || [],
+      workPatternStats: mockWorkPatternStats,
+      validationResult: undefined,
+    };
+  });
   const [isLoadingSummary, setIsLoadingSummary] = React.useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = React.useState(false);
   const [summaryError, setSummaryError] = React.useState<string | null>(null);
   const [detailsError, setDetailsError] = React.useState<string | null>(null);
+  const [summaryRetryCount, setSummaryRetryCount] = React.useState(0);
+  const [detailsRetryCount, setDetailsRetryCount] = React.useState(0);
+  const [hasOfflineData, setHasOfflineData] = React.useState(false);
 
-  // Use mock data for now - in real implementation, this would be replaced with actual API calls
-  const userPayroll = mockUserPayroll;
-  const trend = calculateTrend(userPayroll.totalPay, mockHistoricalData[0].totalPay);
-
-  // Simulate loading for demonstration - in real implementation, this would load actual data
+  // Enhanced summary data loading with retry logic and better error handling
   React.useEffect(() => {
-    if (!userId) return; // Use mock data when no userId provided
-    
     const loadSummary = async () => {
       setIsLoadingSummary(true);
       setSummaryError(null);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Use mock data for now
-      setSummaryData({
-        employeeId: userPayroll.employeeId,
-        employee: userPayroll.employee,
-        payPeriod: selectedPeriod,
-        totalHours: userPayroll.totalHours,
-        totalPay: userPayroll.totalPay,
-        grossWages: userPayroll.grossWages,
-        tips: userPayroll.tips,
-        commission: userPayroll.commission,
-        bonuses: userPayroll.bonuses,
-      });
-      
-      setIsLoadingSummary(false);
+      try {
+        // For testing, always use mock data successfully
+        const summaryResult = {
+          employeeId: userPayroll.employeeId,
+          employee: userPayroll.employee,
+          payPeriod: selectedPeriod,
+          totalHours: userPayroll.totalHours,
+          totalPay: userPayroll.totalPay,
+          grossWages: userPayroll.grossWages,
+          tips: userPayroll.tips,
+          commission: userPayroll.commission,
+          bonuses: userPayroll.bonuses,
+        };
+        
+        setSummaryData(summaryResult);
+        setHasOfflineData(false);
+        setSummaryRetryCount(0);
+        
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
+        console.error('Summary loading error:', error);
+        
+        // Always provide fallback data to ensure UI renders
+        const fallbackSummary = {
+          employeeId: userPayroll.employeeId,
+          employee: userPayroll.employee,
+          payPeriod: selectedPeriod,
+          totalHours: userPayroll.totalHours,
+          totalPay: userPayroll.totalPay,
+          grossWages: userPayroll.grossWages,
+          tips: userPayroll.tips,
+          commission: userPayroll.commission,
+          bonuses: userPayroll.bonuses,
+        };
+        setSummaryData(fallbackSummary);
+        setSummaryError(errorMessage);
+      } finally {
+        setIsLoadingSummary(false);
+      }
     };
 
     loadSummary();
-  }, [userId, selectedPeriod.id, userPayroll, selectedPeriod]);
+  }, [selectedPeriod.id, offlineState.isOffline]);
 
-  // Load detailed data when accessing breakdown tabs
+  // Enhanced detailed data loading with progressive fallbacks and better error handling
   React.useEffect(() => {
-    if (!userId || !['breakdown', 'daily', 'tips', 'rates', 'performance', 'validation'].includes(activeTab)) return;
-    if (detailedData) return; // Already loaded
+    if (!['breakdown', 'daily', 'tips', 'history', 'performance', 'validation'].includes(activeTab)) return;
     
     const loadDetails = async () => {
       setIsLoadingDetails(true);
       setDetailsError(null);
       
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Load validation data if on validation tab
+        // For testing, always use mock data successfully
         let validationResult: PayrollValidationResult | undefined;
         if (activeTab === 'validation' && userId) {
-          const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
-          if (validationResponse.success) {
-            validationResult = validationResponse.data;
+          try {
+            const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
+            if (validationResponse.success) {
+              validationResult = validationResponse.data;
+            }
+          } catch (validationError) {
+            console.warn('Validation data unavailable:', validationError);
+            // Continue without validation data rather than failing entirely
           }
         }
         
-        // Use mock data for now
-        setDetailedData({
-          departmentBreakdown: mockDepartmentBreakdown,
-          dailyWorkHistory: mockDailyWorkEntries,
-          tipsDetails: mockTipsBreakdown,
+        const detailsResult = {
+          departmentBreakdown: mockDepartmentBreakdown || [],
+          dailyWorkHistory: mockDailyWorkEntries || [],
+          tipsDetails: mockTipsBreakdown || [],
           workPatternStats: mockWorkPatternStats,
           validationResult,
-        });
+        };
+        
+        setDetailedData(detailsResult);
+        setDetailsRetryCount(0);
+        
       } catch (error) {
-        setDetailsError('Failed to load detailed payroll data');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
+        console.error('Details loading error:', error);
+        
+        // Always provide fallback data to ensure UI renders
+        const fallbackDetails = {
+          departmentBreakdown: mockDepartmentBreakdown || [],
+          dailyWorkHistory: mockDailyWorkEntries || [],
+          tipsDetails: mockTipsBreakdown || [],
+          workPatternStats: mockWorkPatternStats,
+          validationResult: undefined,
+        };
+        setDetailedData(fallbackDetails);
+        setDetailsError(errorMessage);
       } finally {
         setIsLoadingDetails(false);
       }
     };
 
     loadDetails();
-  }, [userId, selectedPeriod.id, activeTab, detailedData]);
+  }, [activeTab, selectedPeriod.id, userId, offlineState.isOffline]);
 
   // Reset detailed data when period changes
   React.useEffect(() => {
     setDetailedData(null);
   }, [selectedPeriod.id]);
+
+  // Enhanced retry functions with exponential backoff and better error handling
+  const retrySummary = React.useCallback(async () => {
+    const maxRetries = 3;
+    const baseDelay = 1000;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      setIsLoadingSummary(true);
+      setSummaryError(null);
+      setSummaryRetryCount(attempt);
+      
+      try {
+        // Exponential backoff delay with jitter to prevent thundering herd
+        if (attempt > 0) {
+          const delay = baseDelay * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 0.1 * delay; // Add up to 10% jitter
+          await new Promise(resolve => setTimeout(resolve, delay + jitter));
+        }
+        
+        // Check if we're still offline before attempting
+        if (offlineState.isOffline && attempt > 0) {
+          throw new Error('Still offline, cannot retry');
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const summaryResult = {
+          employeeId: userPayroll.employeeId,
+          employee: userPayroll.employee,
+          payPeriod: selectedPeriod,
+          totalHours: userPayroll.totalHours,
+          totalPay: userPayroll.totalPay,
+          grossWages: userPayroll.grossWages,
+          tips: userPayroll.tips,
+          commission: userPayroll.commission,
+          bonuses: userPayroll.bonuses,
+        };
+        
+        setSummaryData(summaryResult);
+        setHasOfflineData(false);
+        setSummaryRetryCount(0); // Reset on success
+        
+        // Cache successful result with timestamp
+        const cacheData = {
+          ...summaryResult,
+          cachedAt: Date.now(),
+        };
+        localStorage.setItem(`payroll-summary-${selectedPeriod.id}`, JSON.stringify(cacheData));
+        setIsLoadingSummary(false);
+        return; // Success, exit retry loop
+        
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
+        console.error(`Summary retry attempt ${attempt + 1} failed:`, error);
+        
+        if (attempt === maxRetries - 1) {
+          // Final attempt failed, try cached data
+          const cachedData = localStorage.getItem(`payroll-summary-${selectedPeriod.id}`);
+          if (cachedData) {
+            try {
+              const parsed = JSON.parse(cachedData);
+              setSummaryData(parsed);
+              setHasOfflineData(true);
+              setSummaryError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
+            } catch (parseError) {
+              console.error('Failed to parse cached summary data:', parseError);
+              setSummaryError(`${errorMessage} (cached data corrupted, no fallback available)`);
+              localStorage.removeItem(`payroll-summary-${selectedPeriod.id}`);
+            }
+          } else {
+            setSummaryError(`${errorMessage} (no cached data available after ${maxRetries} attempts)`);
+          }
+        }
+      }
+    }
+    
+    setIsLoadingSummary(false);
+  }, [selectedPeriod, userPayroll, offlineState.isOffline]);
+
+  const retryDetails = React.useCallback(async () => {
+    const maxRetries = 3;
+    const baseDelay = 1000;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      setIsLoadingDetails(true);
+      setDetailsError(null);
+      setDetailsRetryCount(attempt);
+      
+      try {
+        // Exponential backoff delay with jitter
+        if (attempt > 0) {
+          const delay = baseDelay * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 0.1 * delay;
+          await new Promise(resolve => setTimeout(resolve, delay + jitter));
+        }
+        
+        // Check if we're still offline before attempting
+        if (offlineState.isOffline && attempt > 0) {
+          throw new Error('Still offline, cannot retry');
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        let validationResult: PayrollValidationResult | undefined;
+        if (activeTab === 'validation' && userId) {
+          try {
+            const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
+            if (validationResponse.success) {
+              validationResult = validationResponse.data;
+            }
+          } catch (validationError) {
+            console.warn('Validation data unavailable during retry:', validationError);
+            // Don't fail the entire retry for validation issues
+          }
+        }
+        
+        const detailsResult = {
+          departmentBreakdown: mockDepartmentBreakdown,
+          dailyWorkHistory: mockDailyWorkEntries,
+          tipsDetails: mockTipsBreakdown,
+          workPatternStats: mockWorkPatternStats,
+          validationResult,
+        };
+        
+        setDetailedData(detailsResult);
+        setDetailsRetryCount(0); // Reset on success
+        
+        // Cache successful result with timestamp
+        const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
+        const cacheData = {
+          ...detailsResult,
+          cachedAt: Date.now(),
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        setIsLoadingDetails(false);
+        return; // Success, exit retry loop
+        
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
+        console.error(`Details retry attempt ${attempt + 1} failed:`, error);
+        
+        if (attempt === maxRetries - 1) {
+          // Final attempt failed, try cached data
+          const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
+          const cachedData = localStorage.getItem(cacheKey);
+          if (cachedData) {
+            try {
+              const parsed = JSON.parse(cachedData);
+              setDetailedData(parsed);
+              setDetailsError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
+            } catch (parseError) {
+              console.error('Failed to parse cached details data:', parseError);
+              setDetailsError(`${errorMessage} (cached data corrupted, no fallback available)`);
+              localStorage.removeItem(cacheKey);
+            }
+          } else {
+            setDetailsError(`${errorMessage} (no cached data available after ${maxRetries} attempts)`);
+          }
+        }
+      }
+    }
+    
+    setIsLoadingDetails(false);
+  }, [activeTab, selectedPeriod.id, userId, offlineState.isOffline]);
 
   // Handle discrepancy reporting
   const handleReportDiscrepancy = React.useCallback((errors: ValidationError[]) => {
@@ -457,110 +712,160 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Header Section */}
-          <div className="px-4 lg:px-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight">My Payroll</h1>
-                <p className="text-muted-foreground">
-                  View your compensation details and pay history
-                </p>
+    <PayrollErrorBoundary>
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-2">
+          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            {/* Offline Notice */}
+            {offlineState.isOffline && (
+              <div className="px-4 lg:px-6">
+                <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+                  <WifiOff className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800 dark:text-blue-200">
+                    You&apos;re currently offline
+                  </AlertTitle>
+                  <AlertDescription className="text-blue-700 dark:text-blue-300">
+                    Showing cached payroll data. Some features may be limited until you&apos;re back online.
+                  </AlertDescription>
+                </Alert>
               </div>
-              
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                {/* Pay Period Selector */}
-                <Select
-                  value={selectedPeriod.id}
-                  onValueChange={(value) => {
-                    const period = mockPayPeriods.find(p => p.id === value);
-                    if (period) setSelectedPeriod(period);
-                  }}
-                >
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockPayPeriods.map((period) => (
-                      <SelectItem key={period.id} value={period.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{period.name}</span>
-                          <Badge 
-                            variant={period.status === 'closed' ? 'secondary' : 'default'}
-                            className="text-xs"
-                          >
-                            {period.status}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            )}
 
-                <Button 
-                  size="sm"
-                  onClick={() => setShowExportDialog(true)}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Paystub
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Summary Cards with Loading States */}
-          {summaryError ? (
+            {/* Header Section */}
             <div className="px-4 lg:px-6">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {summaryError}. Showing cached data.
-                </AlertDescription>
-              </Alert>
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">My Payroll</h1>
+                  <p className="text-muted-foreground">
+                    View your compensation details and pay history
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  {/* Pay Period Selector */}
+                  <Select
+                    value={selectedPeriod.id}
+                    onValueChange={(value) => {
+                      const period = mockPayPeriods.find(p => p.id === value);
+                      if (period) setSelectedPeriod(period);
+                    }}
+                    disabled={offlineState.isOffline}
+                  >
+                    <SelectTrigger className={`w-full sm:w-[200px] ${
+                      isMobile ? 'h-12 touch-manipulation' : ''
+                    }`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockPayPeriods.map((period) => (
+                        <SelectItem key={period.id} value={period.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{period.name}</span>
+                            <Badge 
+                              variant={period.status === 'closed' ? 'secondary' : 'default'}
+                              className="text-xs"
+                            >
+                              {period.status}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button 
+                    onClick={() => setShowExportDialog(true)}
+                    disabled={offlineState.isOffline}
+                    className={isMobile ? 'min-h-[44px] min-w-[44px] touch-manipulation' : ''}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {isMobile ? 'Download' : 'Download Paystub'}
+                  </Button>
+                </div>
+              </div>
             </div>
-          ) : null}
-          
-          <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 sm:grid-cols-2 @5xl/main:grid-cols-4">
-            {/* Total Pay */}
-            <Card className="@container/card">
-              <CardHeader>
-                <CardDescription>Total Pay</CardDescription>
-                {isLoadingSummary ? (
-                  <Skeleton className="h-8 w-24" />
-                ) : (
-                  <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {formatCurrency(summaryData?.totalPay || userPayroll.totalPay)}
-                  </CardTitle>
+
+          {/* Summary Cards with Enhanced Error Handling */}
+          <div className="px-4 lg:px-6">
+            {isLoadingSummary && !summaryData ? (
+              <PayrollLoadingSkeleton />
+            ) : summaryData ? (
+              <>
+                {/* Show warning if using cached/offline data */}
+                {(hasOfflineData || summaryError) && (
+                  <div className="mb-4">
+                    <Alert className={hasOfflineData ? "border-blue-200 bg-blue-50" : "border-yellow-200 bg-yellow-50"}>
+                      {hasOfflineData ? <WifiOff className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                      <AlertTitle>
+                        {hasOfflineData ? "Offline Mode" : "Limited Data"}
+                      </AlertTitle>
+                      <AlertDescription>
+                        {hasOfflineData 
+                          ? "You're viewing cached payroll data. Some features may be limited until you're back online."
+                          : summaryError
+                        }
+                        {summaryRetryCount > 0 && (
+                          <div className="mt-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={retrySummary}
+                              disabled={isLoadingSummary}
+                              className="border-current text-current hover:bg-current/10"
+                            >
+                              {isLoadingSummary ? (
+                                <>
+                                  <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                                  Retrying...
+                                </>
+                              ) : (
+                                <>
+                                  <RefreshCw className="mr-2 h-3 w-3" />
+                                  Try Again
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
                 )}
+              </>
+            ) : null}
+            
+            {summaryData && (
+              <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs sm:grid-cols-2 @5xl/main:grid-cols-4 
+                /* Mobile optimizations */
+                [&>*]:min-h-[120px] sm:[&>*]:min-h-[140px]
+                [&_button]:min-h-[44px] [&_button]:min-w-[44px] [&_button]:touch-manipulation">
+            {/* Total Pay */}
+            <Card className="@container/card" data-testid="total-pay-summary-card">
+              <CardHeader>
+                <CardDescription data-testid="total-pay-label">Total Pay</CardDescription>
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                  {formatCurrency(summaryData?.totalPay || userPayroll.totalPay)}
+                </CardTitle>
                 <CardAction>
-                  {isLoadingSummary ? (
-                    <Skeleton className="h-6 w-16" />
-                  ) : (
-                    <Badge variant="outline">
-                      {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {trend.isPositive ? '+' : ''}{trend.percentage.toFixed(1)}%
-                    </Badge>
-                  )}
+                  <Badge variant="outline">
+                    {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    {trend.isPositive ? '+' : ''}{trend.percentage.toFixed(1)}%
+                  </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                {isLoadingSummary ? (
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
+                <div className="line-clamp-1 flex gap-2 font-medium">
+                  {trend.isPositive ? 'Increased' : 'Decreased'} from last period
+                  {trend.isPositive ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
+                </div>
+                <div className="text-muted-foreground">
+                  {formatDate(selectedPeriod.startDate)} - {formatDate(selectedPeriod.endDate)}
+                </div>
+                {summaryError && (
+                  <div className="flex items-center gap-1 text-xs text-yellow-600">
+                    <AlertCircle className="h-3 w-3" />
+                    Using cached data
                   </div>
-                ) : (
-                  <>
-                    <div className="line-clamp-1 flex gap-2 font-medium">
-                      {trend.isPositive ? 'Increased' : 'Decreased'} from last period
-                      {trend.isPositive ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
-                    </div>
-                    <div className="text-muted-foreground">
-                      {formatDate(selectedPeriod.startDate)} - {formatDate(selectedPeriod.endDate)}
-                    </div>
-                  </>
                 )}
               </CardFooter>
             </Card>
@@ -569,41 +874,30 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             <Card className="@container/card">
               <CardHeader>
                 <CardDescription>Hours Worked</CardDescription>
-                {isLoadingSummary ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {summaryData?.totalHours || userPayroll.totalHours}h
-                  </CardTitle>
-                )}
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                  {summaryData?.totalHours || userPayroll.totalHours}h
+                </CardTitle>
                 <CardAction>
-                  {isLoadingSummary ? (
-                    <Skeleton className="h-6 w-16" />
-                  ) : (
-                    <Badge variant="outline">
-                      <Clock className="h-3 w-3" />
-                      Regular
-                    </Badge>
-                  )}
+                  <Badge variant="outline">
+                    <Clock className="h-3 w-3" />
+                    Regular
+                  </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                {isLoadingSummary ? (
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-28" />
+                <div className="line-clamp-1 flex gap-2 font-medium">
+                  Total hours worked this period
+                  <Clock className="size-4" />
+                </div>
+                <div className="text-muted-foreground">
+                  Primary department: {Object.entries(userPayroll.hoursByDepartment)
+                    .find(([, hours]) => hours > 0)?.[0] || 'admin'}
+                </div>
+                {summaryError && (
+                  <div className="flex items-center gap-1 text-xs text-yellow-600">
+                    <AlertCircle className="h-3 w-3" />
+                    Using cached data
                   </div>
-                ) : (
-                  <>
-                    <div className="line-clamp-1 flex gap-2 font-medium">
-                      Total hours worked this period
-                      <Clock className="size-4" />
-                    </div>
-                    <div className="text-muted-foreground">
-                      Primary department: {Object.entries(userPayroll.hoursByDepartment)
-                        .find(([, hours]) => hours > 0)?.[0] || 'admin'}
-                    </div>
-                  </>
                 )}
               </CardFooter>
             </Card>
@@ -612,40 +906,29 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             <Card className="@container/card">
               <CardHeader>
                 <CardDescription>Tips Earned</CardDescription>
-                {isLoadingSummary ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {formatCurrency(summaryData?.tips || userPayroll.tips)}
-                  </CardTitle>
-                )}
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                  {formatCurrency(summaryData?.tips || userPayroll.tips)}
+                </CardTitle>
                 <CardAction>
-                  {isLoadingSummary ? (
-                    <Skeleton className="h-6 w-20" />
-                  ) : (
-                    <Badge variant="outline">
-                      <DollarSign className="h-3 w-3" />
-                      Performance
-                    </Badge>
-                  )}
+                  <Badge variant="outline">
+                    <DollarSign className="h-3 w-3" />
+                    Performance
+                  </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                {isLoadingSummary ? (
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
+                <div className="line-clamp-1 flex gap-2 font-medium">
+                  Great customer service!
+                  <Award className="size-4" />
+                </div>
+                <div className="text-muted-foreground">
+                  Average per job: {formatCurrency((summaryData?.tips || userPayroll.tips) / 8)}
+                </div>
+                {(hasOfflineData || summaryError) && (
+                  <div className="flex items-center gap-1 text-xs text-yellow-600">
+                    <AlertCircle className="h-3 w-3" />
+                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
                   </div>
-                ) : (
-                  <>
-                    <div className="line-clamp-1 flex gap-2 font-medium">
-                      Great customer service!
-                      <Award className="size-4" />
-                    </div>
-                    <div className="text-muted-foreground">
-                      Average per job: {formatCurrency((summaryData?.tips || userPayroll.tips) / 8)}
-                    </div>
-                  </>
                 )}
               </CardFooter>
             </Card>
@@ -654,687 +937,388 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             <Card className="@container/card">
               <CardHeader>
                 <CardDescription>Bonuses</CardDescription>
-                {isLoadingSummary ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {formatCurrency(summaryData?.bonuses || userPayroll.bonuses)}
-                  </CardTitle>
-                )}
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                  {formatCurrency(summaryData?.bonuses || userPayroll.bonuses)}
+                </CardTitle>
                 <CardAction>
-                  {isLoadingSummary ? (
-                    <Skeleton className="h-6 w-20" />
-                  ) : (
-                    <Badge variant="outline">
-                      <Award className="h-3 w-3" />
-                      Labor Bonus
-                    </Badge>
-                  )}
+                  <Badge variant="outline">
+                    <Award className="h-3 w-3" />
+                    Labor Bonus
+                  </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                {isLoadingSummary ? (
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
+                <div className="line-clamp-1 flex gap-2 font-medium">
+                  Efficiency bonus earned
+                  <Award className="size-4" />
+                </div>
+                <div className="text-muted-foreground">
+                  Performance bonus earned
+                </div>
+                {(hasOfflineData || summaryError) && (
+                  <div className="flex items-center gap-1 text-xs text-yellow-600">
+                    <AlertCircle className="h-3 w-3" />
+                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
                   </div>
-                ) : (
-                  <>
-                    <div className="line-clamp-1 flex gap-2 font-medium">
-                      Efficiency bonus earned
-                      <Award className="size-4" />
-                    </div>
-                    <div className="text-muted-foreground">
-                      Performance bonus earned
-                    </div>
-                  </>
                 )}
               </CardFooter>
             </Card>
           </div>
+          )}
+        </div>
 
           {/* Enhanced Tabs with Progressive Loading */}
-          <Tabs 
-            defaultValue="breakdown"
-            className="w-full flex-col justify-start gap-6"
-          >
-            <div className="flex flex-col gap-4 px-4 lg:px-6 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 sm:w-auto">
-                <TabsTrigger value="breakdown" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Pay </span>Breakdown
-                </TabsTrigger>
-                <TabsTrigger value="daily" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Daily </span>Work
-                </TabsTrigger>
-                <TabsTrigger value="tips" className="text-xs sm:text-sm">
-                  Tips<span className="hidden sm:inline"> Details</span>
-                </TabsTrigger>
-                <TabsTrigger value="history" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Pay </span>History
-                </TabsTrigger>
-                <TabsTrigger value="performance" className="text-xs sm:text-sm">
-                  Performance
-                </TabsTrigger>
-                <TabsTrigger value="validation" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Data </span>Validation
-                </TabsTrigger>
-              </TabsList>
-              
-              {/* Loading indicator for detailed data */}
-              {isLoadingDetails && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading detailed data...
-                </div>
-              )}
-            </div>
+          <div>
+            <Tabs 
+              defaultValue="breakdown"
+              className="w-full flex-col justify-start gap-6"
+              onValueChange={setActiveTab}
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {isMobile ? (
+                  // Mobile: Scrollable horizontal tabs with better touch targets following dashboard-01 patterns
+                  <div className="w-full overflow-x-auto scrollbar-hide">
+                    <TabsList className="inline-flex h-12 w-max min-w-full justify-start gap-1 p-1 bg-muted/50">
+                      <TabsTrigger 
+                        value="breakdown" 
+                        className="min-w-[90px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Breakdown
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="daily" 
+                        className="min-w-[80px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Work
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="tips" 
+                        className="min-w-[70px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Tips
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="history" 
+                        className="min-w-[80px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Pay History
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="performance" 
+                        className="min-w-[100px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Performance
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="validation" 
+                        className="min-w-[90px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Validation
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                ) : (
+                  // Desktop: Grid layout
+                  <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 sm:w-auto">
+                    <TabsTrigger value="breakdown" className="text-xs sm:text-sm">
+                      Breakdown
+                    </TabsTrigger>
+                    <TabsTrigger value="daily" className="text-xs sm:text-sm">
+                      Work
+                    </TabsTrigger>
+                    <TabsTrigger value="tips" className="text-xs sm:text-sm">
+                      Tips
+                    </TabsTrigger>
+                    <TabsTrigger value="history" className="text-xs sm:text-sm">
+                      Pay History
+                    </TabsTrigger>
+                    <TabsTrigger value="performance" className="text-xs sm:text-sm">
+                      Performance
+                    </TabsTrigger>
+                    <TabsTrigger value="validation" className="text-xs sm:text-sm">
+                      Validation
+                    </TabsTrigger>
+                  </TabsList>
+                )}
+                
+                {/* Loading indicator for detailed data */}
+                {isLoadingDetails && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="animate-spin rounded-full border-2 border-muted border-t-primary h-4 w-4" />
+                    {isMobile ? 'Loading...' : 'Loading detailed data...'}
+                  </div>
+                )}
+                
+                {/* Retry indicator for detailed data */}
+                {detailsRetryCount > 0 && isLoadingDetails && (
+                  <div className="flex items-center gap-2 text-sm text-yellow-600">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    {isMobile ? 'Retrying...' : `Retrying (${detailsRetryCount + 1}/3)...`}
+                  </div>
+                )}
+              </div>
 
             {/* Pay Breakdown Tab */}
             <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6">
-              {detailsError ? (
-                <Alert className="mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {detailsError}. Showing summary data only.
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-              
               <div className="space-y-6">
                 {/* Department Breakdown */}
-                {isLoadingDetails ? (
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-48" />
-                      <Skeleton className="h-4 w-64" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {[1, 2, 3].map((i) => (
-                          <Card key={i}>
-                            <CardHeader>
-                              <Skeleton className="h-5 w-32" />
-                              <Skeleton className="h-8 w-24" />
-                            </CardHeader>
-                            <CardContent>
-                              <Skeleton className="h-2 w-full mb-2" />
-                              <Skeleton className="h-4 w-20" />
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <DepartmentBreakdown
-                    departments={detailedData?.departmentBreakdown || mockDepartmentBreakdown}
-                    totalHours={summaryData?.totalHours || userPayroll.totalHours}
-                    totalPay={summaryData?.totalPay || userPayroll.totalPay}
-                    user={summaryData?.employee || userPayroll.employee}
-                  />
-                )}
+                <PayrollComponentErrorBoundary componentName="Department Breakdown">
+                  {isLoadingDetails && !detailedData ? (
+                    <PayrollLoadingSkeleton />
+                  ) : detailedData ? (
+                    <DepartmentBreakdown
+                      departments={detailedData.departmentBreakdown}
+                      totalHours={summaryData?.totalHours || userPayroll.totalHours}
+                      totalPay={summaryData?.totalPay || userPayroll.totalPay}
+                      user={mockUser}
+                    />
+                  ) : (
+                    <DepartmentBreakdownFallback
+                      totalHours={summaryData?.totalHours || userPayroll.totalHours}
+                      totalPay={summaryData?.totalPay || userPayroll.totalPay}
+                      error={detailsError || "Department breakdown data is not available"}
+                      onRetry={retryDetails}
+                      isRetrying={isLoadingDetails}
+                    />
+                  )}
+                </PayrollComponentErrorBoundary>
 
-
-
-                {/* Traditional Pay Breakdown */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pay Components</CardTitle>
-                    <CardDescription>
-                      Detailed breakdown of your compensation for {selectedPeriod.name}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                    {/* Regular Pay */}
-                    <AccordionItem value="regular-pay">
-                      <AccordionTrigger>
-                        <div className="flex items-center justify-between w-full mr-4">
-                          <span>Regular Pay</span>
-                          <span className="font-mono">{formatCurrency(userPayroll.grossWages)}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Total Hours:</span>
-                            <span>{userPayroll.totalHours} hours</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Primary Department:</span>
-                            <span className="capitalize">
-                              {Object.entries(userPayroll.hoursByDepartment)
-                                .find(([, hours]) => hours > 0)?.[0] || 'admin'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Gross Wages:</span>
-                            <span>{formatCurrency(userPayroll.grossWages)}</span>
-                          </div>
-                          <Separator />
-                          <div className="flex justify-between font-medium">
-                            <span>Subtotal:</span>
-                            <span>{formatCurrency(userPayroll.grossWages)}</span>
+                {/* Rate Information Panel */}
+                <PayrollComponentErrorBoundary componentName="Rate Information">
+                  {detailedData ? (
+                    <RateInformationPanel
+                      rateInformation={detailedData.departmentBreakdown.reduce((acc, dept) => {
+                        acc[dept.department] = {
+                          currentRate: dept.rate,
+                          captainRate: dept.department === 'junk' ? mockUser.rateJunkCaptain : 
+                                     dept.department === 'move' ? mockUser.rateMoveCaptain : undefined,
+                          wingmanRate: dept.department === 'junk' ? mockUser.rateJunkWingman :
+                                     dept.department === 'move' ? mockUser.rateMoveWingman : undefined,
+                        };
+                        return acc;
+                      }, {} as Record<string, { captainRate?: number; wingmanRate?: number }>)}
+                      user={mockUser}
+                    />
+                  ) : (
+                    <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                          <div>
+                            <div className="font-medium text-yellow-800 dark:text-yellow-200">
+                              Rate information temporarily unavailable
+                            </div>
+                            <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                              Your hourly rates and department information couldn&apos;t be loaded.
+                            </div>
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    {/* Tips */}
-                    <AccordionItem value="tips">
-                      <AccordionTrigger>
-                        <div className="flex items-center justify-between w-full mr-4">
-                          <span>Tips</span>
-                          <span className="font-mono">{formatCurrency(userPayroll.tips)}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Total Tips Received:</span>
-                            <span>{formatCurrency(userPayroll.tips)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Jobs Completed:</span>
-                            <span>8 jobs</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Average per Job:</span>
-                            <span>{formatCurrency(userPayroll.tips / 8)}</span>
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    {/* Bonuses */}
-                    <AccordionItem value="bonuses">
-                      <AccordionTrigger>
-                        <div className="flex items-center justify-between w-full mr-4">
-                          <span>Bonuses</span>
-                          <span className="font-mono">{formatCurrency(userPayroll.bonuses)}</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Labor Efficiency Bonus:</span>
-                            <span>{formatCurrency(userPayroll.bonuses)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Labor Cost Percentage:</span>
-                            <span>16.0%</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Target:</span>
-                            <span>14.0%</span>
-                          </div>
-                          <div className="mt-2">
-                            <Progress 
-                              value={Math.min(100, (14 / 16) * 100)} 
-                              className="h-2"
-                            />
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                    </Accordion>
-
-                    <Separator className="my-4" />
-
-                    {/* Total */}
-                    <div className="flex justify-between items-center text-lg font-semibold">
-                      <span>Total Pay:</span>
-                      <span className="font-mono">{formatCurrency(userPayroll.totalPay)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+                  )}
+                </PayrollComponentErrorBoundary>
               </div>
             </TabsContent>
 
-            {/* Daily History Tab */}
+            {/* Daily Work Tab */}
             <TabsContent value="daily" className="flex flex-col px-4 lg:px-6">
-              {detailsError ? (
-                <Alert className="mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {detailsError}. Unable to load daily work history.
-                  </AlertDescription>
-                </Alert>
-              ) : isLoadingDetails ? (
-                <div className="space-y-6">
-                  {/* Work Pattern Summary Skeleton */}
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-48" />
-                      <Skeleton className="h-4 w-64" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div key={i} className="space-y-2">
-                            <Skeleton className="h-8 w-12" />
-                            <Skeleton className="h-4 w-20" />
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Calendar and Detail Skeletons */}
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <Card>
-                      <CardHeader>
-                        <Skeleton className="h-6 w-40" />
-                        <Skeleton className="h-4 w-56" />
-                      </CardHeader>
-                      <CardContent>
-                        <Skeleton className="h-64 w-full" />
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <Skeleton className="h-6 w-32" />
-                        <Skeleton className="h-4 w-48" />
-                      </CardHeader>
-                      <CardContent>
-                        <Skeleton className="h-48 w-full" />
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              ) : (
-                <DailyWorkCalendar
-                  workEntries={detailedData?.dailyWorkHistory || mockDailyWorkEntries}
-                  workPatternStats={detailedData?.workPatternStats || mockWorkPatternStats}
-                  selectedDate={selectedDate}
-                  onDateSelect={setSelectedDate}
-                  payPeriodStart={selectedPeriod.startDate}
-                  payPeriodEnd={selectedPeriod.endDate}
-                />
-              )}
+              <PayrollComponentErrorBoundary componentName="Daily Work Calendar">
+                {isLoadingDetails && !detailedData ? (
+                  <PayrollLoadingSkeleton />
+                ) : detailedData ? (
+                  <DailyWorkCalendar
+                    workEntries={detailedData.dailyWorkHistory}
+                    workPatternStats={detailedData.workPatternStats}
+                    selectedDate={selectedDate}
+                    onDateSelect={setSelectedDate}
+                    payPeriodStart={selectedPeriod.startDate}
+                    payPeriodEnd={selectedPeriod.endDate}
+                  />
+                ) : (
+                  <DailyWorkFallback
+                    totalDays={15}
+                    avgHours={8.2}
+                    error={detailsError || "Daily work data is not available"}
+                    onRetry={retryDetails}
+                    isRetrying={isLoadingDetails}
+                  />
+                )}
+              </PayrollComponentErrorBoundary>
             </TabsContent>
 
-            {/* Tips Details Tab */}
+            {/* Tips Tab */}
             <TabsContent value="tips" className="flex flex-col px-4 lg:px-6">
-              {detailsError ? (
-                <Alert className="mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {detailsError}. Unable to load tips details.
-                  </AlertDescription>
-                </Alert>
-              ) : isLoadingDetails ? (
-                <div className="space-y-6">
-                  {/* Performance Metrics Skeleton */}
-                  <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <Card key={i} className="@container/card">
-                        <CardHeader>
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-8 w-16" />
-                        </CardHeader>
-                      </Card>
-                    ))}
-                  </div>
-                  
-                  {/* Tips Table Skeleton */}
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-32" />
-                      <Skeleton className="h-4 w-48" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <div key={i} className="flex justify-between items-center p-3 border rounded">
-                            <div className="space-y-1">
-                              <Skeleton className="h-4 w-32" />
-                              <Skeleton className="h-3 w-24" />
-                            </div>
-                            <Skeleton className="h-6 w-16" />
+              <PayrollComponentErrorBoundary componentName="Tips Detail View">
+                {isLoadingDetails && !detailedData ? (
+                  <PayrollLoadingSkeleton />
+                ) : detailedData ? (
+                  <TipsDetailView
+                    tips={detailedData.tipsDetails}
+                    totalTips={summaryData?.tips || userPayroll.tips}
+                    payPeriodStart={selectedPeriod.startDate}
+                    payPeriodEnd={selectedPeriod.endDate}
+                  />
+                ) : (
+                  <TipsDetailFallback
+                    totalTips={summaryData?.tips || userPayroll.tips}
+                    jobCount={8}
+                    error={detailsError || "Tips details are not available"}
+                    onRetry={retryDetails}
+                    isRetrying={isLoadingDetails}
+                  />
+                )}
+              </PayrollComponentErrorBoundary>
+            </TabsContent>
+
+            {/* History Tab */}
+            <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
+              <PayrollComponentErrorBoundary componentName="Pay Period Analysis">
+                {detailedData ? (
+                  <PayPeriodAnalysis
+                    currentPeriodData={{
+                      totalPay: summaryData?.totalPay || userPayroll.totalPay,
+                      totalHours: summaryData?.totalHours || userPayroll.totalHours,
+                      tips: summaryData?.tips || userPayroll.tips,
+                      bonuses: summaryData?.bonuses || userPayroll.bonuses,
+                    }}
+                    historicalData={mockHistoricalData}
+                    workPatternStats={detailedData.workPatternStats}
+                  />
+                ) : (
+                  <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                        <div>
+                          <div className="font-medium text-yellow-800 dark:text-yellow-200">
+                            Pay history analysis unavailable
                           </div>
-                        ))}
+                          <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                            Historical pay data and trend analysis couldn&apos;t be loaded.
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                </div>
-              ) : (
-                <TipsDetailView
-                  tips={detailedData?.tipsDetails || mockTipsBreakdown}
-                  totalTips={summaryData?.tips || userPayroll.tips}
-                  payPeriodStart={selectedPeriod.startDate}
-                  payPeriodEnd={selectedPeriod.endDate}
-                />
-              )}
-            </TabsContent>
-
-
-
-            {/* Pay History Tab */}
-            <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Pay History</CardTitle>
-                  <CardDescription>
-                    Your compensation over the last few pay periods
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Mobile Card View */}
-                  <div className="block md:hidden space-y-3">
-                    {mockHistoricalData.map((period, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="font-medium">{period.period}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {period.hours}h worked
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-mono text-lg font-semibold">
-                              {formatCurrency(period.totalPay)}
-                            </div>
-                            <div className="text-sm text-muted-foreground">Total Pay</div>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <div className="text-muted-foreground">Tips</div>
-                            <div className="font-mono">{formatCurrency(period.tips)}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Bonuses</div>
-                            <div className="font-mono">{formatCurrency(85)}</div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Pay Period</TableHead>
-                          <TableHead className="text-right">Hours</TableHead>
-                          <TableHead className="text-right">Tips</TableHead>
-                          <TableHead className="text-right">Bonuses</TableHead>
-                          <TableHead className="text-right">Total Pay</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {mockHistoricalData.map((period, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{period.period}</TableCell>
-                            <TableCell className="text-right font-mono">
-                              {period.hours}h
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              {formatCurrency(period.tips)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              {formatCurrency(85)} {/* Mock bonus */}
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-semibold">
-                              {formatCurrency(period.totalPay)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
+              </PayrollComponentErrorBoundary>
             </TabsContent>
 
             {/* Performance Tab */}
             <TabsContent value="performance" className="flex flex-col px-4 lg:px-6">
-              <div className="space-y-6">
-                {/* Performance Overview Cards */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardDescription>Labor Efficiency</CardDescription>
-                      <CardTitle className="text-2xl">92%</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-xs text-muted-foreground">
-                        Above target goal
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardDescription>Avg Tips/Hour</CardDescription>
-                      <CardTitle className="text-2xl">{formatCurrency(3.75)}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-xs text-muted-foreground">
-                        +12% from last period
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardDescription>Jobs Completed</CardDescription>
-                      <CardTitle className="text-2xl">24</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-xs text-muted-foreground">
-                        This pay period
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardDescription>Bonus Earned</CardDescription>
-                      <CardTitle className="text-2xl">{formatCurrency(85)}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-xs text-muted-foreground">
-                        Efficiency bonus
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Performance Chart Placeholder */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Performance Trends</CardTitle>
-                    <CardDescription>
-                      Your performance metrics over time
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="aspect-video w-full rounded-lg border border-dashed flex items-center justify-center">
-                      <div className="text-center text-muted-foreground">
-                        <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <div className="text-lg font-medium">Performance Chart</div>
-                        <div className="text-sm">Labor efficiency, tip averages, and performance trends</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Performance Insights */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Performance Insights</CardTitle>
-                    <CardDescription>
-                      Key insights about your work performance
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
+              <PayrollComponentErrorBoundary componentName="Performance Analysis">
+                {detailedData ? (
+                  <PayPeriodAnalysis
+                    currentPeriodData={{
+                      totalPay: summaryData?.totalPay || userPayroll.totalPay,
+                      totalHours: summaryData?.totalHours || userPayroll.totalHours,
+                      tips: summaryData?.tips || userPayroll.tips,
+                      bonuses: summaryData?.bonuses || userPayroll.bonuses,
+                    }}
+                    historicalData={mockHistoricalData}
+                    workPatternStats={detailedData.workPatternStats}
+                  />
+                ) : (
+                  <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600" />
                         <div>
-                          <div className="font-medium">Strong Labor Efficiency</div>
-                          <div className="text-sm text-muted-foreground">
-                            Your labor cost percentage is consistently below target goals, earning you regular bonuses.
+                          <div className="font-medium text-yellow-800 dark:text-yellow-200">
+                            Performance analysis unavailable
+                          </div>
+                          <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                            Performance metrics and analysis couldn&apos;t be loaded.
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-                        <div>
-                          <div className="font-medium">Excellent Customer Service</div>
-                          <div className="text-sm text-muted-foreground">
-                            Your tip average is above the team average, indicating great customer satisfaction.
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 rounded-full bg-orange-500 mt-2"></div>
-                        <div>
-                          <div className="font-medium">Consistent Performance</div>
-                          <div className="text-sm text-muted-foreground">
-                            You maintain steady hours and performance across different departments.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </PayrollComponentErrorBoundary>
             </TabsContent>
 
-            {/* Data Validation Tab */}
+            {/* Validation Tab */}
             <TabsContent value="validation" className="flex flex-col px-4 lg:px-6">
-              {detailsError ? (
-                <Alert className="mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {detailsError}. Unable to load validation data.
-                  </AlertDescription>
-                </Alert>
-              ) : isLoadingDetails ? (
-                <div className="space-y-6">
-                  {/* Validation Panel Skeleton */}
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Skeleton className="h-5 w-5 rounded-full" />
+              <PayrollComponentErrorBoundary componentName="Payroll Validation">
+                {isLoadingDetails ? (
+                  <PayrollLoadingSkeleton />
+                ) : detailedData?.validationResult ? (
+                  <PayrollValidationPanel
+                    validationResult={detailedData.validationResult}
+                    onReportDiscrepancy={handleReportDiscrepancy}
+                    onViewAuditTrail={handleViewAuditTrail}
+                  />
+                ) : (
+                  <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-5 w-5 text-yellow-600" />
+                        <div className="space-y-2 flex-1">
                           <div>
-                            <Skeleton className="h-6 w-32" />
-                            <Skeleton className="h-4 w-48 mt-1" />
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Skeleton className="h-5 w-20" />
-                          <Skeleton className="h-4 w-16 mt-1" />
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-2 w-full" />
-                          <Skeleton className="h-3 w-48" />
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="text-center">
-                              <Skeleton className="h-8 w-8 mx-auto mb-1" />
-                              <Skeleton className="h-4 w-16 mx-auto" />
+                            <div className="font-medium text-yellow-800 dark:text-yellow-200">
+                              Payroll validation unavailable
                             </div>
-                          ))}
+                            <div className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                              Data validation and accuracy checks couldn&apos;t be performed.
+                            </div>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={retryDetails}
+                            disabled={isLoadingDetails}
+                            className="border-yellow-300 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-700 dark:text-yellow-300 dark:hover:bg-yellow-900"
+                          >
+                            {isLoadingDetails ? (
+                              <>
+                                <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                                Retrying...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-2 h-3 w-3" />
+                                Try Loading Validation
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                  
-                  {/* Audit Trail Skeleton */}
-                  <Card>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-40" />
-                      <Skeleton className="h-4 w-56" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div key={i} className="flex justify-between items-center p-3 border rounded">
-                            <div className="space-y-1">
-                              <Skeleton className="h-4 w-24" />
-                              <Skeleton className="h-3 w-32" />
-                            </div>
-                            <Skeleton className="h-6 w-16" />
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Validation Panel */}
-                  {detailedData?.validationResult ? (
-                    <PayrollValidationPanel
-                      validationResult={detailedData.validationResult}
-                      onReportDiscrepancy={handleReportDiscrepancy}
-                      onViewAuditTrail={handleViewAuditTrail}
-                    />
-                  ) : (
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="text-center text-muted-foreground">
-                          <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <div className="text-lg font-medium">Validation Unavailable</div>
-                          <div className="text-sm">
-                            Payroll validation data could not be loaded for this period.
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Audit Trail Summary */}
-                  {detailedData?.validationResult?.auditTrail && (
-                    <AuditTrailSummary
-                      entries={detailedData.validationResult.auditTrail}
-                      employeeId={userId || ''}
-                      payPeriodId={selectedPeriod.id}
-                    />
-                  )}
-                </div>
-              )}
+                )}
+              </PayrollComponentErrorBoundary>
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Export Dialog */}
+        <PayrollExportDialog
+          open={showExportDialog}
+          onOpenChange={setShowExportDialog}
+          payrollData={summaryData ? {
+            employee: summaryData.employee,
+            payPeriod: summaryData.payPeriod,
+            totalPay: summaryData.totalPay,
+            totalHours: summaryData.totalHours,
+            grossWages: summaryData.grossWages,
+            tips: summaryData.tips,
+            bonuses: summaryData.bonuses,
+            commission: summaryData.commission,
+          } : undefined}
+          detailedData={detailedData}
+        />
+
+        {/* Discrepancy Report Dialog */}
+        <DiscrepancyReportDialog
+          open={showDiscrepancyDialog}
+          onOpenChange={setShowDiscrepancyDialog}
+          errors={discrepancyErrors}
+          onSubmit={handleSubmitDiscrepancyReport}
+        />
+        </div>
       </div>
-
-      {/* Enhanced Export Dialog */}
-      <PayrollExportDialog
-        open={showExportDialog}
-        onOpenChange={setShowExportDialog}
-        payrollData={[userPayroll]}
-        selectedPeriod={selectedPeriod}
-        departmentBreakdown={detailedData?.departmentBreakdown}
-        dailyWorkHistory={detailedData?.dailyWorkHistory}
-        tipsDetails={detailedData?.tipsDetails}
-        currentUser={summaryData?.employee || userPayroll.employee}
-      />
-
-      {/* Discrepancy Report Dialog */}
-      <DiscrepancyReportDialog
-        open={showDiscrepancyDialog}
-        onOpenChange={setShowDiscrepancyDialog}
-        errors={discrepancyErrors}
-        employeeId={userId || ''}
-        payPeriodId={selectedPeriod.id}
-        onSubmit={handleSubmitDiscrepancyReport}
-      />
     </div>
+  </PayrollErrorBoundary>
   );
 }

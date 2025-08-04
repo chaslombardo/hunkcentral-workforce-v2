@@ -237,10 +237,10 @@ function BonusExplanation({ data }: { data: BonusData }) {
 
 function TipsExplanation() {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid="tips-explanation">
       <div className="flex items-center gap-2">
         <DollarSign className="h-4 w-4" />
-        <h4 className="font-semibold text-sm">Tips Distribution</h4>
+        <h4 className="font-semibold text-sm" data-testid="tips-distribution-heading">Tips Distribution</h4>
       </div>
       <p className="text-xs text-muted-foreground">
         Tips are divided equally among all team members working on a job. 
@@ -297,10 +297,10 @@ function EfficiencyExplanation({ data }: { data: LaborCostData }) {
   const isEfficient = data.actualPercentage <= data.goalPercentage;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid="efficiency-explanation">
       <div className="flex items-center gap-2">
         <TrendingUp className="h-4 w-4" />
-        <h4 className="font-semibold text-sm">Labor Efficiency</h4>
+        <h4 className="font-semibold text-sm" data-testid="labor-efficiency-heading">Labor Efficiency</h4>
       </div>
       <div className="text-xs space-y-1">
         <div className="flex justify-between">
@@ -328,10 +328,10 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
   if (!data) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="tip-distribution-explanation">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4" />
-        <h4 className="font-semibold">Tip Distribution</h4>
+        <h4 className="font-semibold" data-testid="tip-distribution-heading">Tip Distribution</h4>
       </div>
       
       <div className="space-y-2 text-sm">
@@ -380,9 +380,9 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
 }
 
 // Helper component for quick calculation help
-export function QuickCalculationHelp() {
+export function QuickCalculationHelp({ type = 'tips' }: { type?: 'labor-cost' | 'bonus' | 'tips' | 'department-rate' | 'efficiency' | 'tip-distribution' }) {
   return (
-    <CalculationTooltip type="tips">
+    <CalculationTooltip type={type}>
       <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
         <HelpCircle className="h-3 w-3" />
       </Button>

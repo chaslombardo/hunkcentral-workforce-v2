@@ -1,0 +1,104 @@
+/* Mobile-specific optimizations using shadcn/ui patterns from dashboard-01 */
+
+/* Smooth scrolling for mobile tabs - from dashboard-01 data-table */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile optimizations following dashboard-01 patterns */
+@media (max-width: 768px) {
+  /* Calendar optimizations - enhanced from dashboard-01 patterns */
+  .rdp {
+    --rdp-cell-size: 48px; /* Increased from 44px for better touch targets */
+    --rdp-accent-color: var(--primary);
+    --rdp-background-color: var(--primary);
+  }
+  
+  .rdp-button {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 16px; /* Better readability */
+    touch-action: manipulation;
+  }
+  
+  /* Mobile table improvements - from dashboard-01 data-table */
+  .mobile-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Touch-friendly form controls - following shadcn/ui input patterns */
+  input[type="text"],
+  input[type="search"],
+  select,
+  textarea {
+    min-height: 48px; /* Increased from 44px */
+    font-size: 16px; /* Prevents zoom on iOS */
+    touch-action: manipulation;
+  }
+  
+  /* Button sizing from dashboard-01 patterns - enhanced */
+  button {
+    min-height: 48px; /* Increased from 44px */
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+  
+  /* Card optimizations for mobile */
+  .mobile-card-optimization {
+    min-height: 120px; /* Ensure cards have adequate height */
+    touch-action: manipulation;
+  }
+  
+  /* Tab optimizations for mobile */
+  .mobile-tabs [role="tablist"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .mobile-tabs [role="tablist"]::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .mobile-tabs [role="tab"] {
+    min-width: 80px;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+}
+
+/* Essential mobile optimizations following shadcn/ui patterns */
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .ios-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .ios-input-fix {
+    font-size: 16px; /* Prevents zoom */
+  }
+}
+
+/* Performance optimizations for mobile */
+.mobile-optimized-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Better mobile focus states using shadcn/ui focus-visible patterns */
+@media (max-width: 768px) {
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}

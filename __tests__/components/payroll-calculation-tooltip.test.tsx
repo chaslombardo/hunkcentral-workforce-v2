@@ -68,7 +68,7 @@ describe('CalculationTooltip', () => {
       expect(screen.getByText('$20.00/hr')).toBeInTheDocument();
       expect(screen.getByText('$160.00')).toBeInTheDocument(); // 8 * 20
       expect(screen.getByText('16.0%')).toBeInTheDocument();
-      expect(screen.getByText('14.0%')).toBeInTheDocument();
+      expect(screen.getAllByText('14.0%')[0]).toBeInTheDocument();
     });
   });
 
@@ -85,7 +85,7 @@ describe('CalculationTooltip', () => {
     
     await waitFor(() => {
       expect(screen.getByText('Labor Efficiency Bonus')).toBeInTheDocument();
-      expect(screen.getByText('14.0%')).toBeInTheDocument(); // Goal
+      expect(screen.getAllByText('14.0%')[0]).toBeInTheDocument(); // Goal
       expect(screen.getByText('12.0%')).toBeInTheDocument(); // Actual
       expect(screen.getByText('+2.0%')).toBeInTheDocument(); // Efficiency gain
       expect(screen.getByText('$20.00')).toBeInTheDocument(); // Bonus amount
@@ -104,9 +104,9 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tips'));
     
     await waitFor(() => {
-      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
-      expect(screen.getByText(/Tips are divided equally among all team members/)).toBeInTheDocument();
-      expect(screen.getByText('Total Tips ÷ Team Members = Your Share')).toBeInTheDocument();
+      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/Tips are divided equally among all team members/)[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Total Tips ÷ Team Members = Your Share')[0]).toBeInTheDocument();
     });
   });
 
@@ -141,10 +141,10 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Efficiency'));
     
     await waitFor(() => {
-      expect(screen.getAllByText('Labor Efficiency')[0]).toBeInTheDocument();
-      expect(screen.getByText('16.0%')).toBeInTheDocument(); // Current
-      expect(screen.getByText('14.0%')).toBeInTheDocument(); // Target
-      expect(screen.getByText(/Focus on completing jobs faster/)).toBeInTheDocument();
+      expect(screen.getAllByTestId('labor-efficiency-heading')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('16.0%')[0]).toBeInTheDocument(); // Current
+      expect(screen.getAllByText('14.0%')[0]).toBeInTheDocument(); // Target
+      expect(screen.getAllByText(/Focus on completing jobs faster/)[0]).toBeInTheDocument();
     });
   });
 
@@ -160,11 +160,11 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tip Distribution'));
     
     await waitFor(() => {
-      expect(screen.getAllByText('Tip Distribution')[0]).toBeInTheDocument();
+      expect(screen.getByTestId('tip-distribution-heading')).toBeInTheDocument();
       expect(screen.getByText('J2025-001')).toBeInTheDocument();
       expect(screen.getByText('$80.00')).toBeInTheDocument(); // Total tips
       expect(screen.getByText('4')).toBeInTheDocument(); // Team members
-      expect(screen.getByText('$20.00')).toBeInTheDocument(); // My share
+      expect(screen.getAllByText('$20.00')[0]).toBeInTheDocument(); // My share (first occurrence)
       expect(screen.getByText('John Smith (captain)')).toBeInTheDocument();
       expect(screen.getByText('Jane Doe (wingman)')).toBeInTheDocument();
     });
@@ -241,7 +241,7 @@ describe('CalculationTooltip', () => {
     await user.hover(screen.getByText('Tips'));
     
     await waitFor(() => {
-      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
+      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
     });
   });
 });
@@ -264,7 +264,7 @@ describe('QuickCalculationHelp', () => {
     await user.hover(helpButton);
     
     await waitFor(() => {
-      expect(screen.getAllByText('Tips Distribution')[0]).toBeInTheDocument();
+      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
     });
   });
 });
@@ -333,7 +333,7 @@ describe('CalculationTooltip Requirements Validation', () => {
       await user.hover(screen.getByText(type));
       
       await waitFor(() => {
-        expect(screen.getByText(expectedText)).toBeInTheDocument();
+        expect(screen.getAllByRole('heading', { name: new RegExp(expectedText, 'i') })[0]).toBeInTheDocument();
       });
       
       unmount();

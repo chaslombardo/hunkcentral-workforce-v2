@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import {
   Card,
   CardAction,
@@ -34,20 +34,27 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import {
   HelpCircle,
   DollarSign,
   Users,
   Calendar,
   TrendingUp,
-  TrendingDown,
+
   Award,
   ExternalLink,
   Search,
   Filter,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { TipEntry } from '@/lib/payCalculator';
 
@@ -70,6 +77,20 @@ export function TipsDetailView({
   const [sortBy, setSortBy] = React.useState<SortOption>('date');
   const [filterBy, setFilterBy] = React.useState<FilterOption>('all');
   const [searchQuery, setSearchQuery] = React.useState('');
+
+  // Handle undefined or null tips array
+  if (!tips || !Array.isArray(tips)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <DollarSign className="h-8 w-8 mx-auto mb-2" />
+            <p>Tips data is not available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Calculate performance metrics
   const totalJobs = tips.length;
@@ -133,8 +154,8 @@ export function TipsDetailView({
 
   return (
     <div className="space-y-6">
-      {/* Performance Metrics Cards */}
-      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {/* Performance Metrics Cards */}
+        <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {/* Total Tips */}
         <Card className="@container/card">
           <CardHeader>
@@ -233,7 +254,7 @@ export function TipsDetailView({
             </div>
             
             {/* Controls */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex gap-2 flex-col sm:flex-row sm:items-center">
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -245,31 +266,33 @@ export function TipsDetailView({
                 />
               </div>
 
-              {/* Filter */}
-              <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="All Jobs" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Jobs</SelectItem>
-                  <SelectItem value="junk">Junk Only</SelectItem>
-                  <SelectItem value="move">Move Only</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                {/* Filter */}
+                <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
+                  <SelectTrigger className="w-full sm:w-[140px]">
+                    <Filter className="h-4 w-4" />
+                    <SelectValue placeholder="All Jobs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Jobs</SelectItem>
+                    <SelectItem value="junk">Junk Only</SelectItem>
+                    <SelectItem value="move">Move Only</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              {/* Sort */}
-              <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue placeholder="By Date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">By Date</SelectItem>
-                  <SelectItem value="amount">By Amount</SelectItem>
-                  <SelectItem value="client">By Client</SelectItem>
-                  <SelectItem value="jobType">By Job Type</SelectItem>
-                </SelectContent>
-              </Select>
+                {/* Sort */}
+                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                  <SelectTrigger className="w-full sm:w-[140px]">
+                    <SelectValue placeholder="By Date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date">By Date</SelectItem>
+                    <SelectItem value="amount">By Amount</SelectItem>
+                    <SelectItem value="client">By Client</SelectItem>
+                    <SelectItem value="jobType">By Job Type</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -288,62 +311,47 @@ export function TipsDetailView({
               {/* Mobile Card View */}
               <div className="block md:hidden space-y-3">
                 {filteredAndSortedTips.map((tip, index) => (
-                  <Card key={`mobile-${tip.logId}-${tip.jobId}-${index}`} className="p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="font-medium" data-testid={`mobile-client-${tip.clientName}`}>{tip.clientName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(tip.date)} • Job #{tip.jobId}
+                  <Card key={`mobile-${tip.logId}-${tip.jobId}-${index}`} className="@container/card">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-base truncate @[250px]/card:text-lg" data-testid={`mobile-client-${tip.clientName}`}>
+                            {tip.clientName}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(tip.date)} • Job #{tip.jobId}
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-mono text-lg font-semibold" data-testid={`mobile-amount-${tip.myShare}`}>
-                          {formatCurrency(tip.myShare)}
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <div className="font-mono text-xl font-semibold @[250px]/card:text-2xl" data-testid={`mobile-amount-${tip.myShare}`}>
+                            {formatCurrency(tip.myShare)}
+                          </div>
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {tip.jobType}
+                          </Badge>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          {tip.jobType}
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-4">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button className="flex items-center gap-1" type="button">
-                                <DollarSign className="h-3 w-3" />
-                                <span>{formatCurrency(tip.totalJobTips)}</span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Total job tips before team split</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button className="flex items-center gap-1" type="button">
-                                <Users className="h-3 w-3" />
-                                <span>{tip.teamMembers}</span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Team members sharing tips</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
                       </div>
                       
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/logs/${tip.logId}`}>
-                          <ExternalLink className="h-3 w-3" />
-                          View Log
-                        </Link>
-                      </Button>
-                    </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                            <DollarSign className="h-4 w-4" />
+                            <span className="font-medium">{formatCurrency(tip.totalJobTips)}</span>
+                          </div>
+                          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                            <Users className="h-4 w-4" />
+                            <span className="font-medium">{tip.teamMembers}</span>
+                          </div>
+                        </div>
+                        
+                        <Button variant="ghost" asChild>
+                          <Link href={`/logs/${tip.logId}`}>
+                            <ExternalLink className="h-4 w-4" />
+                            View Log
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
                   </Card>
                 ))}
               </div>
@@ -459,38 +467,38 @@ export function TipsDetailView({
         </CardContent>
       </Card>
 
-      {/* Tip Distribution Formula Explanation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HelpCircle className="h-5 w-5" />
-            How Tips Are Calculated
-          </CardTitle>
-          <CardDescription>
-            Understanding how your tip share is determined
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <h4 className="font-medium">Tip Distribution Formula</h4>
-              <div className="text-sm text-muted-foreground space-y-1">
-                <div>• Tips are shared equally among all team members working that job section</div>
-                <div data-testid="tip-formula">• Your share = Total Job Tips ÷ Number of Team Members</div>
-                <div>• Co-captains receive the same share as other team members</div>
+        {/* Tip Distribution Formula Explanation */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5" />
+              How Tips Are Calculated
+            </CardTitle>
+            <CardDescription>
+              Understanding how your tip share is determined
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <h4 className="font-medium">Tip Distribution Formula</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>• Tips are shared equally among all team members working that job section</div>
+                  <div data-testid="tip-formula">• Your share = Total Job Tips ÷ Number of Team Members</div>
+                  <div>• Co-captains receive the same share as other team members</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">Example Calculation</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>• Job collected $60 in tips</div>
+                  <div>• 3 team members worked the job</div>
+                  <div>• Your share: $60 ÷ 3 = $20.00</div>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-medium">Example Calculation</h4>
-              <div className="text-sm text-muted-foreground space-y-1">
-                <div>• Job collected $60 in tips</div>
-                <div>• 3 team members worked the job</div>
-                <div>• Your share: $60 ÷ 3 = $20.00</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
   );
 }

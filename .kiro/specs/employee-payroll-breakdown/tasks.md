@@ -137,3 +137,57 @@
   - Add proper test assertions for tab content visibility after tab switches
   - Ensure mocked components are rendered within the correct TabsContent containers
   - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [x] 20. Fix critical syntax error in payroll-error-recovery.test.ts (COMMIT BLOCKING)
+  - Fix malformed JSX on line 132: `render(<MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />);`
+  - Ensure proper JSX syntax and component props are correctly formatted
+  - Verify the test file compiles without syntax errors
+  - Run the specific test to ensure it executes properly
+  - _Requirements: All requirements - critical build fix_
+
+- [x] 21. Fix Playwright configuration error in captain-journey.test.ts (COMMIT BLOCKING)
+  - Fix the Playwright test configuration issue preventing test.describe() from being called
+  - Ensure proper Playwright test setup and imports
+  - Verify the E2E test can run without configuration errors
+  - Check for conflicting Playwright versions or configuration issues
+  - _Requirements: All requirements - critical test configuration fix_
+
+- [x] 22. Fix multiple element selection issues in tests
+  - Replace `getByText()` with `getAllByText()[0]` or more specific selectors for elements that appear multiple times
+  - Fix "Tips Distribution", "$720.00", "Performance Bonuses", "College Hunks Hauling Junk & Moving" multiple element errors
+  - Add data-testid attributes to distinguish between similar elements
+  - Use more specific query methods like `getByRole()` with name options where appropriate
+  - Update all affected test files to use proper element selection
+  - _Requirements: ensure test coverage validates implementation_
+
+- [x] 23. Fix missing validation functions and schema errors (COMMIT BLOCKING)
+  - Implement missing `validatePayrollAction` function referenced in enhanced-payroll-calculations.test.ts
+  - Fix Zod validation schema error messages to match test expectations
+  - Ensure validation functions return proper error objects with expected message formats
+  - Update validation tests to match actual Zod error message formats
+  - _Requirements: All requirements - ensure validation works correctly_
+
+- [ ] 24. Replace all custom components with proper shadcn/ui blocks and components (Use shadcn/ui MCP server)
+  - Use shadcn/ui MCP server to get proper blocks and component demos before implementing
+  - Replace any custom mobile optimization components with standard shadcn/ui patterns
+  - Replace custom error boundary components with proper shadcn/ui Alert and Card patterns
+  - Replace custom loading skeleton components with proper shadcn/ui Skeleton component
+  - Replace custom tooltip and popover components with proper shadcn/ui Tooltip and Popover components
+  - Ensure all components follow shadcn/ui New York theme patterns
+  - _Requirements: All requirements - proper UI implementation with shadcn/ui_
+
+- [x] 25. Fix missing test IDs and mock issues (COMMIT BLOCKING)
+  - Add proper data-testid attributes to skeleton components for test identification
+  - Fix offline detection hook mocking to prevent network requests during tests
+  - Mock localStorage operations properly in test environment
+  - Add missing test IDs for payroll export dialog elements
+  - Fix print layout component test element selection issues
+  - _Requirements: All requirements - ensure test coverage validates implementation_
+
+- [ ] 26. Fix database and integration test issues
+  - Fix Prisma Decimal comparison issues in integration tests
+  - Fix database constraint violations in log workflow tests
+  - Ensure proper test data cleanup between test runs
+  - Fix commission calculation and matching logic in integration tests
+  - Update payroll calculation tests to handle proper data types
+  - _Requirements: All requirements - ensure integration tests pass_

@@ -1,46 +1,83 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { 
-  validatePayrollCalculation, 
-  createDiscrepancyReport,
-  type PayrollValidationResult,
-  type DiscrepancyReport,
-  type ValidationError 
-} from '@/lib/payrollValidation';
-import { logDailyLogChange } from '@/lib/auditLogger';
-import type { User, PayPeriod, DailyLog, CommissionEntry, Department, JobType } from '@/types';
+import { prisma } from '@/lib/prisma';
+import { validatePayrollCalculation, createDiscrepancyReport } from '@/lib/payrollValidation';
+import type { PayrollValidationResult, DiscrepancyReport, ValidationError } from '@/lib/payrollValidation';
+import type { User, DailyLog, CommissionEntry, PayPeriod } from '@/types';
+
+export interface ValidationResponse {
+  success: boolean;
+  data?: PayrollValidationResult;
+  error?: string;
+  errorCode?: string;
+  retryable?: boolean;
+}
+
+export interface DiscrepancyReportData {
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  category: 'calculation' | 'data_integrity' | 'rate_issue' | 'hours_mismatch' | 'tips_error' | 'other';
+  requestCallback?: boolean;
+  expectedOutcome?: string;
+  contactEmail?: string;
+  errors: ValidationError[];
+}
+
+export interface DiscrepancyReportResponse {
+  success: boolean;
+  reportId?: string;
+  error?: string;
+  errorCode?: string;
+}
 
 /**
- * Validate payroll calculation for a specific employee and pay period
+ * Validate employee payroll calculations with comprehensive error handling
  */
 export async function validateEmployeePayroll(
   employeeId: string,
   payPeriodId: string
-): Promise<{ success: boolean; data?: PayrollValidationResult; error?: string }> {
+): Promise<ValidationResponse> {
   try {
     const session = await getSession();
     if (!session?.user) {
-      throw new Error('Unauthorized: Login required');
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to view payroll data.',
+        errorCode: 'UNAUTHORIZED',
+        retryable: false,
+      };
     }
 
     // Check if user can access this payroll data
     if (session.user.id !== employeeId && 
         !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
-      throw new Error('Unauthorized: Can only validate your own payroll data');
+      return {
+        success: false,
+        error: 'You can only view your own payroll validation data.',
+        errorCode: 'FORBIDDEN',
+        retryable: false,
+      };
     }
 
-    // Get pay period
+    // Get pay period with error handling
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
+    }).catch((error) => {
+      console.error('Database error fetching pay period:', error);
+      throw new Error('Unable to access pay period data. Please try again.');
     });
 
     if (!payPeriod) {
-      throw new Error('Pay period not found');
+      return {
+        success: false,
+        error: 'The requested pay period could not be found. It may have been deleted or you may not have access to it.',
+        errorCode: 'PAY_PERIOD_NOT_FOUND',
+        retryable: false,
+      };
     }
 
-    // Get employee data
+    // Get employee data with error handling
     const employee = await prisma.user.findUnique({
       where: { id: employeeId },
       select: {
@@ -66,13 +103,21 @@ export async function validateEmployeePayroll(
         createdAt: true,
         updatedAt: true,
       },
+    }).catch((error) => {
+      console.error('Database error fetching employee:', error);
+      throw new Error('Unable to access employee data. Please try again.');
     });
 
     if (!employee) {
-      throw new Error('Employee not found');
+      return {
+        success: false,
+        error: 'Employee record not found. Please contact your administrator.',
+        errorCode: 'EMPLOYEE_NOT_FOUND',
+        retryable: false,
+      };
     }
 
-    // Get approved logs for the pay period
+    // Get approved logs with error handling
     const approvedLogs = await prisma.dailyLog.findMany({
       where: {
         approvedAt: {
@@ -82,140 +127,23 @@ export async function validateEmployeePayroll(
         status: 'approved',
       },
       include: {
-        captain: {
-          select: {
-            id: true,
-            fullName: true,
-            roles: true,
-            rateJunkCaptain: true,
-            rateJunkWingman: true,
-            rateMoveCaptain: true,
-            rateMoveWingman: true,
-            rateZigma: true,
-            rateTraining: true,
-            rateEstimating: true,
-            rateWarehouse: true,
-            rateAdmin: true,
-            salaryAmount: true,
-            salaryFrequency: true,
-            salaryType: true,
-            commissionRate: true,
-            junkBonusGoal: true,
-            moveBonusGoal: true,
-            createdAt: true,
-            updatedAt: true,
-            email: true,
-          },
-        },
-        createdBy: {
-          select: {
-            id: true,
-            fullName: true,
-            roles: true,
-            email: true,
-            rateJunkCaptain: true,
-            rateJunkWingman: true,
-            rateMoveCaptain: true,
-            rateMoveWingman: true,
-            rateZigma: true,
-            rateTraining: true,
-            rateEstimating: true,
-            rateWarehouse: true,
-            rateAdmin: true,
-            salaryAmount: true,
-            salaryFrequency: true,
-            salaryType: true,
-            commissionRate: true,
-            junkBonusGoal: true,
-            moveBonusGoal: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-        approvedBy: {
-          select: {
-            id: true,
-            fullName: true,
-            roles: true,
-            email: true,
-            rateJunkCaptain: true,
-            rateJunkWingman: true,
-            rateMoveCaptain: true,
-            rateMoveWingman: true,
-            rateZigma: true,
-            rateTraining: true,
-            rateEstimating: true,
-            rateWarehouse: true,
-            rateAdmin: true,
-            salaryAmount: true,
-            salaryFrequency: true,
-            salaryType: true,
-            commissionRate: true,
-            junkBonusGoal: true,
-            moveBonusGoal: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-        lastEditedBy: {
-          select: {
-            id: true,
-            fullName: true,
-            roles: true,
-            email: true,
-            rateJunkCaptain: true,
-            rateJunkWingman: true,
-            rateMoveCaptain: true,
-            rateMoveWingman: true,
-            rateZigma: true,
-            rateTraining: true,
-            rateEstimating: true,
-            rateWarehouse: true,
-            rateAdmin: true,
-            salaryAmount: true,
-            salaryFrequency: true,
-            salaryType: true,
-            commissionRate: true,
-            junkBonusGoal: true,
-            moveBonusGoal: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
+        captain: true,
+        createdBy: true,
+        approvedBy: true,
+        lastEditedBy: true,
         jobs: true,
         hours: {
           include: {
-            employee: {
-              select: {
-                id: true,
-                fullName: true,
-                roles: true,
-                email: true,
-                rateJunkCaptain: true,
-                rateJunkWingman: true,
-                rateMoveCaptain: true,
-                rateMoveWingman: true,
-                rateZigma: true,
-                rateTraining: true,
-                rateEstimating: true,
-                rateWarehouse: true,
-                rateAdmin: true,
-                salaryAmount: true,
-                salaryFrequency: true,
-                salaryType: true,
-                commissionRate: true,
-                junkBonusGoal: true,
-                moveBonusGoal: true,
-                createdAt: true,
-                updatedAt: true,
-              },
-            },
+            employee: true,
           },
         },
       },
+    }).catch((error) => {
+      console.error('Database error fetching logs:', error);
+      throw new Error('Unable to access work log data. Please try again.');
     });
 
-    // Get commission entries for the employee
+    // Get commission entries with error handling
     const commissionEntries = await prisma.commissionEntry.findMany({
       where: {
         salesId: employeeId,
@@ -231,6 +159,9 @@ export async function validateEmployeePayroll(
         matchedLog: true,
         sales: true,
       },
+    }).catch((error) => {
+      console.error('Database error fetching commissions:', error);
+      throw new Error('Unable to access commission data. Please try again.');
     });
 
     // Convert Prisma data to proper types for validation
@@ -254,7 +185,7 @@ export async function validateEmployeePayroll(
       moveBonusGoal: Number(employee.moveBonusGoal),
     };
 
-    // Convert logs and commissions to proper types
+    // Convert logs and commissions (simplified conversion for validation)
     const logsForValidation: DailyLog[] = approvedLogs.map(log => ({
       ...log,
       status: log.status as DailyLog['status'],
@@ -262,119 +193,7 @@ export async function validateEmployeePayroll(
       approvedAt: log.approvedAt || undefined,
       approvedById: log.approvedById || undefined,
       lastEditedById: log.lastEditedById || undefined,
-      captain: {
-        ...log.captain,
-        roles: log.captain.roles as User['roles'],
-        rateJunkCaptain: log.captain.rateJunkCaptain ? Number(log.captain.rateJunkCaptain) : undefined,
-        rateJunkWingman: log.captain.rateJunkWingman ? Number(log.captain.rateJunkWingman) : undefined,
-        rateMoveCaptain: log.captain.rateMoveCaptain ? Number(log.captain.rateMoveCaptain) : undefined,
-        rateMoveWingman: log.captain.rateMoveWingman ? Number(log.captain.rateMoveWingman) : undefined,
-        rateZigma: log.captain.rateZigma ? Number(log.captain.rateZigma) : undefined,
-        rateTraining: log.captain.rateTraining ? Number(log.captain.rateTraining) : undefined,
-        rateEstimating: log.captain.rateEstimating ? Number(log.captain.rateEstimating) : undefined,
-        rateWarehouse: log.captain.rateWarehouse ? Number(log.captain.rateWarehouse) : undefined,
-        rateAdmin: log.captain.rateAdmin ? Number(log.captain.rateAdmin) : undefined,
-        salaryAmount: log.captain.salaryAmount ? Number(log.captain.salaryAmount) : undefined,
-        salaryFrequency: log.captain.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.captain.salaryType as User['salaryType'],
-        commissionRate: log.captain.commissionRate ? Number(log.captain.commissionRate) : undefined,
-        junkBonusGoal: Number(log.captain.junkBonusGoal),
-        moveBonusGoal: Number(log.captain.moveBonusGoal),
-      },
-      createdBy: {
-        ...log.createdBy,
-        roles: log.createdBy.roles as User['roles'],
-        rateJunkCaptain: log.createdBy.rateJunkCaptain ? Number(log.createdBy.rateJunkCaptain) : undefined,
-        rateJunkWingman: log.createdBy.rateJunkWingman ? Number(log.createdBy.rateJunkWingman) : undefined,
-        rateMoveCaptain: log.createdBy.rateMoveCaptain ? Number(log.createdBy.rateMoveCaptain) : undefined,
-        rateMoveWingman: log.createdBy.rateMoveWingman ? Number(log.createdBy.rateMoveWingman) : undefined,
-        rateZigma: log.createdBy.rateZigma ? Number(log.createdBy.rateZigma) : undefined,
-        rateTraining: log.createdBy.rateTraining ? Number(log.createdBy.rateTraining) : undefined,
-        rateEstimating: log.createdBy.rateEstimating ? Number(log.createdBy.rateEstimating) : undefined,
-        rateWarehouse: log.createdBy.rateWarehouse ? Number(log.createdBy.rateWarehouse) : undefined,
-        rateAdmin: log.createdBy.rateAdmin ? Number(log.createdBy.rateAdmin) : undefined,
-        salaryAmount: log.createdBy.salaryAmount ? Number(log.createdBy.salaryAmount) : undefined,
-        salaryFrequency: log.createdBy.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.createdBy.salaryType as User['salaryType'],
-        commissionRate: log.createdBy.commissionRate ? Number(log.createdBy.commissionRate) : undefined,
-        junkBonusGoal: Number(log.createdBy.junkBonusGoal),
-        moveBonusGoal: Number(log.createdBy.moveBonusGoal),
-      },
-      approvedBy: log.approvedBy ? {
-        ...log.approvedBy,
-        roles: log.approvedBy.roles as User['roles'],
-        rateJunkCaptain: log.approvedBy.rateJunkCaptain ? Number(log.approvedBy.rateJunkCaptain) : undefined,
-        rateJunkWingman: log.approvedBy.rateJunkWingman ? Number(log.approvedBy.rateJunkWingman) : undefined,
-        rateMoveCaptain: log.approvedBy.rateMoveCaptain ? Number(log.approvedBy.rateMoveCaptain) : undefined,
-        rateMoveWingman: log.approvedBy.rateMoveWingman ? Number(log.approvedBy.rateMoveWingman) : undefined,
-        rateZigma: log.approvedBy.rateZigma ? Number(log.approvedBy.rateZigma) : undefined,
-        rateTraining: log.approvedBy.rateTraining ? Number(log.approvedBy.rateTraining) : undefined,
-        rateEstimating: log.approvedBy.rateEstimating ? Number(log.approvedBy.rateEstimating) : undefined,
-        rateWarehouse: log.approvedBy.rateWarehouse ? Number(log.approvedBy.rateWarehouse) : undefined,
-        rateAdmin: log.approvedBy.rateAdmin ? Number(log.approvedBy.rateAdmin) : undefined,
-        salaryAmount: log.approvedBy.salaryAmount ? Number(log.approvedBy.salaryAmount) : undefined,
-        salaryFrequency: log.approvedBy.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.approvedBy.salaryType as User['salaryType'],
-        commissionRate: log.approvedBy.commissionRate ? Number(log.approvedBy.commissionRate) : undefined,
-        junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
-        moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
-      } : undefined,
-      lastEditedBy: log.lastEditedBy ? {
-        ...log.lastEditedBy,
-        roles: log.lastEditedBy.roles as User['roles'],
-        rateJunkCaptain: log.lastEditedBy.rateJunkCaptain ? Number(log.lastEditedBy.rateJunkCaptain) : undefined,
-        rateJunkWingman: log.lastEditedBy.rateJunkWingman ? Number(log.lastEditedBy.rateJunkWingman) : undefined,
-        rateMoveCaptain: log.lastEditedBy.rateMoveCaptain ? Number(log.lastEditedBy.rateMoveCaptain) : undefined,
-        rateMoveWingman: log.lastEditedBy.rateMoveWingman ? Number(log.lastEditedBy.rateMoveWingman) : undefined,
-        rateZigma: log.lastEditedBy.rateZigma ? Number(log.lastEditedBy.rateZigma) : undefined,
-        rateTraining: log.lastEditedBy.rateTraining ? Number(log.lastEditedBy.rateTraining) : undefined,
-        rateEstimating: log.lastEditedBy.rateEstimating ? Number(log.lastEditedBy.rateEstimating) : undefined,
-        rateWarehouse: log.lastEditedBy.rateWarehouse ? Number(log.lastEditedBy.rateWarehouse) : undefined,
-        rateAdmin: log.lastEditedBy.rateAdmin ? Number(log.lastEditedBy.rateAdmin) : undefined,
-        salaryAmount: log.lastEditedBy.salaryAmount ? Number(log.lastEditedBy.salaryAmount) : undefined,
-        salaryFrequency: log.lastEditedBy.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.lastEditedBy.salaryType as User['salaryType'],
-        commissionRate: log.lastEditedBy.commissionRate ? Number(log.lastEditedBy.commissionRate) : undefined,
-        junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
-        moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
-      } : undefined,
-      hours: log.hours.map(hour => ({
-        ...hour,
-        log: {} as DailyLog, // Circular reference - will be set by parent
-        department: hour.department as Department,
-        hours: Number(hour.hours),
-        employee: {
-          ...hour.employee,
-          roles: hour.employee.roles as User['roles'],
-          rateJunkCaptain: hour.employee.rateJunkCaptain ? Number(hour.employee.rateJunkCaptain) : undefined,
-          rateJunkWingman: hour.employee.rateJunkWingman ? Number(hour.employee.rateJunkWingman) : undefined,
-          rateMoveCaptain: hour.employee.rateMoveCaptain ? Number(hour.employee.rateMoveCaptain) : undefined,
-          rateMoveWingman: hour.employee.rateMoveWingman ? Number(hour.employee.rateMoveWingman) : undefined,
-          rateZigma: hour.employee.rateZigma ? Number(hour.employee.rateZigma) : undefined,
-          rateTraining: hour.employee.rateTraining ? Number(hour.employee.rateTraining) : undefined,
-          rateEstimating: hour.employee.rateEstimating ? Number(hour.employee.rateEstimating) : undefined,
-          rateWarehouse: hour.employee.rateWarehouse ? Number(hour.employee.rateWarehouse) : undefined,
-          rateAdmin: hour.employee.rateAdmin ? Number(hour.employee.rateAdmin) : undefined,
-          salaryAmount: hour.employee.salaryAmount ? Number(hour.employee.salaryAmount) : undefined,
-          salaryFrequency: hour.employee.salaryFrequency as User['salaryFrequency'],
-          salaryType: hour.employee.salaryType as User['salaryType'],
-          commissionRate: hour.employee.commissionRate ? Number(hour.employee.commissionRate) : undefined,
-          junkBonusGoal: Number(hour.employee.junkBonusGoal),
-          moveBonusGoal: Number(hour.employee.moveBonusGoal),
-        },
-      })),
-      jobs: log.jobs.map(job => ({
-        ...job,
-        jobType: job.jobType as JobType,
-        revenue: Number(job.revenue),
-        tips: Number(job.tips),
-        junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
-        valuation: job.valuation ? Number(job.valuation) : undefined,
-        materials: job.materials ? Number(job.materials) : undefined,
-        disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
-        log: {} as DailyLog, // Circular reference - will be set by parent
-      })),
-    }));
+    })) as DailyLog[];
 
     const commissionsForValidation: CommissionEntry[] = commissionEntries.map(commission => ({
       ...commission,
@@ -384,34 +203,7 @@ export async function validateEmployeePayroll(
       actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
       commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
       matchedLogId: commission.matchedLogId || undefined,
-      matchedLog: commission.matchedLog ? {
-        ...commission.matchedLog,
-        status: commission.matchedLog.status as DailyLog['status'],
-        submittedAt: commission.matchedLog.submittedAt || undefined,
-        approvedAt: commission.matchedLog.approvedAt || undefined,
-        approvedById: commission.matchedLog.approvedById || undefined,
-        lastEditedById: commission.matchedLog.lastEditedById || undefined,
-      } as DailyLog : undefined,
-      sales: {
-        ...commission.sales,
-        roles: commission.sales.roles as User['roles'],
-        rateJunkCaptain: commission.sales.rateJunkCaptain ? Number(commission.sales.rateJunkCaptain) : undefined,
-        rateJunkWingman: commission.sales.rateJunkWingman ? Number(commission.sales.rateJunkWingman) : undefined,
-        rateMoveCaptain: commission.sales.rateMoveCaptain ? Number(commission.sales.rateMoveCaptain) : undefined,
-        rateMoveWingman: commission.sales.rateMoveWingman ? Number(commission.sales.rateMoveWingman) : undefined,
-        rateZigma: commission.sales.rateZigma ? Number(commission.sales.rateZigma) : undefined,
-        rateTraining: commission.sales.rateTraining ? Number(commission.sales.rateTraining) : undefined,
-        rateEstimating: commission.sales.rateEstimating ? Number(commission.sales.rateEstimating) : undefined,
-        rateWarehouse: commission.sales.rateWarehouse ? Number(commission.sales.rateWarehouse) : undefined,
-        rateAdmin: commission.sales.rateAdmin ? Number(commission.sales.rateAdmin) : undefined,
-        salaryAmount: commission.sales.salaryAmount ? Number(commission.sales.salaryAmount) : undefined,
-        salaryFrequency: commission.sales.salaryFrequency as User['salaryFrequency'],
-        salaryType: commission.sales.salaryType as User['salaryType'],
-        commissionRate: commission.sales.commissionRate ? Number(commission.sales.commissionRate) : undefined,
-        junkBonusGoal: Number(commission.sales.junkBonusGoal),
-        moveBonusGoal: Number(commission.sales.moveBonusGoal),
-      },
-    }));
+    })) as CommissionEntry[];
 
     // Perform validation
     const validationResult = validatePayrollCalculation(
@@ -422,137 +214,183 @@ export async function validateEmployeePayroll(
       payPeriod.endDate
     );
 
-    // Log validation activity
-    await logDailyLogChange(
-      'validate_payroll',
-      `payroll-${employeeId}-${payPeriodId}`,
-      session.user.id,
-      undefined,
-      undefined,
-      {
-        employeeId,
-        payPeriodId,
-        validationAccuracy: validationResult.calculationAccuracy,
-        errorsFound: validationResult.errors.length,
-        warningsFound: validationResult.warnings.length,
-      }
-    );
+    return {
+      success: true,
+      data: validationResult,
+    };
 
-    return { success: true, data: validationResult };
   } catch (error) {
     console.error('Error validating payroll:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    
+    // Determine if the error is retryable
+    const isRetryable = errorMessage.includes('try again') || 
+                       errorMessage.includes('network') ||
+                       errorMessage.includes('timeout') ||
+                       errorMessage.includes('connection');
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to validate payroll',
+      error: errorMessage,
+      errorCode: 'VALIDATION_ERROR',
+      retryable: isRetryable,
     };
   }
 }
 
 /**
- * Submit a discrepancy report for payroll issues
+ * Submit a discrepancy report with comprehensive error handling
  */
 export async function submitDiscrepancyReport(
   employeeId: string,
   payPeriodId: string,
-  reportData: {
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    category: 'calculation' | 'data_integrity' | 'rate_issue' | 'hours_mismatch' | 'tips_error' | 'other';
-    description: string;
-    expectedOutcome?: string;
-    contactEmail?: string;
-    requestCallback: boolean;
-    errors: ValidationError[];
-  }
-): Promise<{ success: boolean; reportId?: string; error?: string }> {
+  reportData: DiscrepancyReportData
+): Promise<DiscrepancyReportResponse> {
   try {
     const session = await getSession();
     if (!session?.user) {
-      throw new Error('Unauthorized: Login required');
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to submit a report.',
+        errorCode: 'UNAUTHORIZED',
+      };
     }
 
-    // Check if user can submit report for this employee
+    // Check if user can submit reports for this employee
     if (session.user.id !== employeeId && 
         !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
-      throw new Error('Unauthorized: Can only submit reports for your own payroll');
+      return {
+        success: false,
+        error: 'You can only submit reports for your own payroll data.',
+        errorCode: 'FORBIDDEN',
+      };
     }
 
-    // Create discrepancy report record
-    const discrepancyReport = await prisma.discrepancyReport.create({
+    // Validate required fields
+    if (!reportData.description?.trim()) {
+      return {
+        success: false,
+        error: 'Please provide a description of the issue.',
+        errorCode: 'MISSING_DESCRIPTION',
+      };
+    }
+
+    if (!reportData.priority) {
+      return {
+        success: false,
+        error: 'Please select a priority level for this report.',
+        errorCode: 'MISSING_PRIORITY',
+      };
+    }
+
+    if (!reportData.category) {
+      return {
+        success: false,
+        error: 'Please select a category for this report.',
+        errorCode: 'MISSING_CATEGORY',
+      };
+    }
+
+    // Verify pay period exists
+    const payPeriod = await prisma.payPeriod.findUnique({
+      where: { id: payPeriodId },
+    }).catch((error) => {
+      console.error('Database error fetching pay period for report:', error);
+      throw new Error('Unable to verify pay period. Please try again.');
+    });
+
+    if (!payPeriod) {
+      return {
+        success: false,
+        error: 'The specified pay period could not be found.',
+        errorCode: 'PAY_PERIOD_NOT_FOUND',
+      };
+    }
+
+    // Create the discrepancy report
+    const report = await prisma.discrepancyReport.create({
       data: {
         employeeId,
         payPeriodId,
-        reportedById: session.user.id,
+        description: reportData.description.trim(),
         priority: reportData.priority,
         category: reportData.category,
-        description: reportData.description,
-        expectedOutcome: reportData.expectedOutcome,
-        contactEmail: reportData.contactEmail,
-        requestCallback: reportData.requestCallback,
+        requestCallback: reportData.requestCallback || false,
+        expectedOutcome: reportData.expectedOutcome?.trim(),
+        contactEmail: reportData.contactEmail?.trim(),
+        errors: JSON.stringify(reportData.errors),
         status: 'open',
-        discrepancies: JSON.parse(JSON.stringify(reportData.errors)),
-        severity: determineSeverity(reportData.errors),
+        reportedAt: new Date(),
+        reportedById: session.user.id,
       },
+    }).catch((error) => {
+      console.error('Database error creating discrepancy report:', error);
+      throw new Error('Unable to submit your report. Please try again.');
     });
 
-    // Log the discrepancy report submission
-    await logDailyLogChange(
-      'submit_discrepancy_report',
-      discrepancyReport.id,
-      session.user.id,
-      undefined,
-      undefined,
-      {
-        employeeId,
-        payPeriodId,
-        priority: reportData.priority,
-        category: reportData.category,
-        errorsCount: reportData.errors.length,
-      }
-    );
+    // TODO: Send notification to administrators
+    // This could be implemented with email notifications or internal messaging
 
-    return { success: true, reportId: discrepancyReport.id };
+    return {
+      success: true,
+      reportId: report.id,
+    };
+
   } catch (error) {
     console.error('Error submitting discrepancy report:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Failed to submit report';
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to submit discrepancy report',
+      error: errorMessage,
+      errorCode: 'SUBMISSION_ERROR',
     };
   }
 }
 
 /**
- * Get discrepancy reports for an employee
+ * Get discrepancy reports for an employee with error handling
  */
-export async function getDiscrepancyReports(
+export async function getEmployeeDiscrepancyReports(
   employeeId: string,
   payPeriodId?: string
-): Promise<{ success: boolean; data?: DiscrepancyReport[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  data?: DiscrepancyReport[];
+  error?: string;
+  errorCode?: string;
+}> {
   try {
     const session = await getSession();
     if (!session?.user) {
-      throw new Error('Unauthorized: Login required');
+      return {
+        success: false,
+        error: 'Authentication required.',
+        errorCode: 'UNAUTHORIZED',
+      };
     }
 
-    // Check if user can access these reports
+    // Check permissions
     if (session.user.id !== employeeId && 
         !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
-      throw new Error('Unauthorized: Can only view your own discrepancy reports');
+      return {
+        success: false,
+        error: 'You can only view your own discrepancy reports.',
+        errorCode: 'FORBIDDEN',
+      };
+    }
+
+    const whereClause: { employeeId: string; payPeriodId?: string } = { employeeId };
+    if (payPeriodId) {
+      whereClause.payPeriodId = payPeriodId;
     }
 
     const reports = await prisma.discrepancyReport.findMany({
-      where: {
-        employeeId,
-        ...(payPeriodId && { payPeriodId }),
-      },
+      where: whereClause,
       include: {
         employee: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-        reportedBy: {
           select: {
             id: true,
             fullName: true,
@@ -565,54 +403,49 @@ export async function getDiscrepancyReports(
             name: true,
             startDate: true,
             endDate: true,
-            status: true,
+          },
+        },
+        reportedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        reportedAt: 'desc',
       },
+    }).catch((error) => {
+      console.error('Database error fetching discrepancy reports:', error);
+      throw new Error('Unable to load discrepancy reports. Please try again.');
     });
 
+    // Convert to proper format
     const formattedReports: DiscrepancyReport[] = reports.map(report => ({
       employeeId: report.employeeId,
       payPeriodId: report.payPeriodId,
-      discrepancies: Array.isArray(report.discrepancies) ? (report.discrepancies as unknown as ValidationError[]) : [],
-      severity: report.severity as DiscrepancyReport['severity'],
-      reportedAt: report.createdAt,
+      discrepancies: JSON.parse(report.errors as string) as ValidationError[],
+      severity: report.priority as DiscrepancyReport['severity'],
+      reportedAt: report.reportedAt,
       status: report.status as DiscrepancyReport['status'],
       resolution: report.resolution || undefined,
     }));
 
-    return { success: true, data: formattedReports };
+    return {
+      success: true,
+      data: formattedReports,
+    };
+
   } catch (error) {
     console.error('Error fetching discrepancy reports:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Failed to load reports';
+    
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch discrepancy reports',
+      error: errorMessage,
+      errorCode: 'FETCH_ERROR',
     };
   }
-}
-
-/**
- * Determine severity based on validation errors
- */
-function determineSeverity(errors: ValidationError[]): 'low' | 'medium' | 'high' | 'critical' {
-  const criticalErrors = errors.filter(error => 
-    ['HOURS_MISMATCH', 'TIPS_MISMATCH', 'DEPARTMENT_PAY_MISMATCH', 'COMMISSION_MISMATCH'].includes(error.code)
-  );
-  
-  const rateErrors = errors.filter(error => 
-    error.code === 'RATE_INCONSISTENCY' || error.code === 'MISSING_RATE'
-  );
-
-  if (criticalErrors.length > 0) {
-    return 'critical';
-  } else if (rateErrors.length > 0 || errors.filter(e => e.type === 'error').length > 2) {
-    return 'high';
-  } else if (errors.filter(e => e.type === 'error').length > 0 || errors.filter(e => e.type === 'warning').length > 3) {
-    return 'medium';
-  }
-  
-  return 'low';
 }

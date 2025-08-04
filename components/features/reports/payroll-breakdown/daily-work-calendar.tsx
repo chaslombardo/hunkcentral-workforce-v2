@@ -2,9 +2,17 @@
 
 import * as React from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardAction,
+  CardContent, 
+  CardDescription, 
+  CardFooter,
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { 
@@ -17,7 +25,14 @@ import {
   Award
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import type { Department } from '@/types';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 
@@ -40,6 +55,34 @@ export function DailyWorkCalendar({
   payPeriodStart,
   payPeriodEnd,
 }: DailyWorkCalendarProps) {
+  const isMobile = useIsMobile();
+  
+  // Handle undefined or null work entries array
+  if (!workEntries || !Array.isArray(workEntries)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <Calendar className="h-8 w-8 mx-auto mb-2" />
+            <p>Daily work data is not available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle undefined work pattern stats
+  const safeWorkPatternStats = workPatternStats || {
+    totalDaysWorked: 0,
+    avgHoursPerDay: 8,
+    mostCommonDepartment: 'admin',
+    totalJobsCompleted: 0,
+    avgTipsPerDay: 0,
+    busiestDay: new Date(),
+    highestTipDay: new Date(),
+    highestPayDay: new Date(),
+  };
+  
   // Create lookup map for work entries by date
   const workEntryMap = React.useMemo(() => {
     const map = new Map<string, DailyWorkEntry>();
@@ -55,8 +98,8 @@ export function DailyWorkCalendar({
 
   // Calculate modifiers for calendar styling
   const workDays = workEntries.map(entry => entry.date);
-  const highTipDays = workEntries.filter(entry => entry.tips > workPatternStats.avgTipsPerDay * 1.5).map(entry => entry.date);
-  const highHourDays = workEntries.filter(entry => entry.totalHours > workPatternStats.avgHoursPerDay * 1.2).map(entry => entry.date);
+  const highTipDays = workEntries.filter(entry => entry.tips > safeWorkPatternStats.avgTipsPerDay * 1.5).map(entry => entry.date);
+  const highHourDays = workEntries.filter(entry => entry.totalHours > safeWorkPatternStats.avgHoursPerDay * 1.2).map(entry => entry.date);
 
   return (
     <div className="space-y-6">
@@ -72,27 +115,36 @@ export function DailyWorkCalendar({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <div className="text-2xl font-bold">{workPatternStats.totalDaysWorked}</div>
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <div className="text-center">
+              <div className="font-bold text-2xl">
+                {safeWorkPatternStats.totalDaysWorked}
+              </div>
               <div className="text-sm text-muted-foreground">Days Worked</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold">{workPatternStats.avgHoursPerDay.toFixed(1)}h</div>
+            <div className="text-center">
+              <div className="font-bold text-2xl">
+                {safeWorkPatternStats.avgHoursPerDay.toFixed(1)}h
+              </div>
               <div className="text-sm text-muted-foreground">Avg Hours/Day</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold capitalize">{workPatternStats.mostCommonDepartment}</div>
+            <div className="text-center">
+              <div className="font-bold capitalize text-2xl">
+                {safeWorkPatternStats.mostCommonDepartment}
+              </div>
               <div className="text-sm text-muted-foreground">Primary Dept</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold">{formatCurrency(workPatternStats.avgTipsPerDay)}</div>
+            <div className="text-center">
+              <div className="font-bold text-2xl">
+                {formatCurrency(safeWorkPatternStats.avgTipsPerDay)}
+              </div>
               <div className="text-sm text-muted-foreground">Avg Tips/Day</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Calendar and Details */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Calendar */}
         <Card>
@@ -137,14 +189,7 @@ export function DailyWorkCalendar({
                   fontWeight: '600'
                 },
               }}
-              className={cn(
-                "w-full",
-                // Mobile optimizations
-                "[--cell-size:44px] md:[--cell-size:40px]", // Larger touch targets on mobile
-                "touch-manipulation", // Optimize for touch
-                "[&_button]:min-h-[44px] [&_button]:min-w-[44px]", // Ensure minimum touch target size
-                "[&_button]:touch-manipulation" // Optimize button touches
-              )}
+              className="rounded-lg border shadow-sm"
             />
             
             {/* Legend */}
@@ -206,20 +251,28 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
     <div className="space-y-4">
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <div className="text-2xl font-bold">{entry.totalHours}h</div>
+        <div className="text-center">
+          <div className="font-bold text-2xl">
+            {entry.totalHours}h
+          </div>
           <div className="text-sm text-muted-foreground">Total Hours</div>
         </div>
-        <div className="space-y-1">
-          <div className="text-2xl font-bold">{formatCurrency(entry.grossPay)}</div>
+        <div className="text-center">
+          <div className="font-bold text-2xl">
+            {formatCurrency(entry.grossPay)}
+          </div>
           <div className="text-sm text-muted-foreground">Gross Pay</div>
         </div>
-        <div className="space-y-1">
-          <div className="text-2xl font-bold">{formatCurrency(entry.tips)}</div>
+        <div className="text-center">
+          <div className="font-bold text-2xl">
+            {formatCurrency(entry.tips)}
+          </div>
           <div className="text-sm text-muted-foreground">Tips Earned</div>
         </div>
-        <div className="space-y-1">
-          <div className="text-2xl font-bold">{entry.jobsCompleted}</div>
+        <div className="text-center">
+          <div className="font-bold text-2xl">
+            {entry.jobsCompleted}
+          </div>
           <div className="text-sm text-muted-foreground">Jobs Done</div>
         </div>
       </div>
@@ -269,14 +322,14 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
 
       {/* Quick Actions */}
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" asChild>
           <a href={`/logs/${entry.logId}`}>
             <MapPin className="h-4 w-4 mr-2" />
             View Log
           </a>
         </Button>
         {entry.tips > 0 && (
-          <Button variant="outline" size="sm">
+          <Button variant="outline">
             <DollarSign className="h-4 w-4 mr-2" />
             Tip Details
           </Button>

@@ -8,15 +8,13 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
   HoverCard,
@@ -26,12 +24,16 @@ import {
 import { Separator } from '@/components/ui/separator';
 import {
   Clock,
-  DollarSign,
   Info,
   Star,
-  TrendingUp,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import type { Department, User } from '@/types';
 
 export interface DepartmentBreakdownData {
@@ -74,7 +76,7 @@ function DepartmentCard({
   department, 
   totalHours, 
   totalPay,
-  user 
+  user
 }: { 
   department: DepartmentBreakdownData; 
   totalHours: number; 
@@ -111,20 +113,20 @@ function DepartmentCard({
   return (
     <Card className={`@container/card ${department.isPrimary ? 'border-[#026937] border-2' : ''}`}>
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${colorClass}`} />
-            <CardTitle className="text-base font-medium">
-              {departmentLabel}
-            </CardTitle>
-            {department.isPrimary && (
-              <Badge className="bg-[#026937] hover:bg-[#026937]/90 text-xs">
-                <Star className="h-3 w-3 mr-1" />
-                Primary
-              </Badge>
-            )}
-          </div>
-          
+        <CardTitle className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${colorClass} flex-shrink-0`} />
+          <span className="truncate">{departmentLabel}</span>
+          {department.isPrimary && (
+            <Badge className="bg-[#026937] hover:bg-[#026937]/90 text-xs flex-shrink-0">
+              <Star className="h-3 w-3 mr-1" />
+              Primary
+            </Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          {department.hours}h @ {formatCurrency(department.rate)}/hr
+        </CardDescription>
+        <CardAction>
           <HoverCard>
             <HoverCardTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -161,41 +163,28 @@ function DepartmentCard({
               </div>
             </HoverCardContent>
           </HoverCard>
-        </div>
-        
-        <div className="flex justify-between items-end">
-          <div>
-            <div className="text-2xl font-semibold tabular-nums">
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="text-center">
+            <div className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
               {formatCurrency(department.grossPay)}
             </div>
-            <div className="text-sm text-muted-foreground">
-              {department.hours}h @ {formatCurrency(department.rate)}/hr
-            </div>
-          </div>
-          
-          <CardAction>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="mt-2">
               <Clock className="h-3 w-3 mr-1" />
               {department.percentage.toFixed(1)}%
             </Badge>
-          </CardAction>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span>Hours Distribution:</span>
-            <span>{department.percentage.toFixed(1)}% of total</span>
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Hours Distribution:</span>
+              <span>{department.percentage.toFixed(1)}% of total</span>
+            </div>
             <Progress 
               value={department.percentage} 
               className="h-2"
-              style={{
-                '--progress-background': colorClass.replace('bg-', ''),
-              } as React.CSSProperties}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{department.hours} hours</span>
@@ -219,6 +208,20 @@ export function DepartmentBreakdown({
   totalPay,
   user 
 }: DepartmentBreakdownProps) {
+  // Handle undefined or null departments array
+  if (!departments || !Array.isArray(departments)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <Clock className="h-8 w-8 mx-auto mb-2" />
+            <p>Department breakdown data is not available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   // Filter out departments with no hours
   const activeDepartments = departments.filter(dept => dept.hours > 0);
   
@@ -240,8 +243,8 @@ export function DepartmentBreakdown({
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
-        {/* Summary Header */}
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold">Department Breakdown</h3>
@@ -249,17 +252,16 @@ export function DepartmentBreakdown({
               Hours and pay across {activeDepartments.length} departments
             </p>
           </div>
-          
           <div className="text-right">
             <div className="text-sm text-muted-foreground">Total Pay</div>
-            <div className="text-xl font-semibold tabular-nums">
+            <div className="font-semibold tabular-nums text-xl">
               {formatCurrency(totalPay)}
             </div>
           </div>
         </div>
 
         {/* Department Cards Grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {sortedDepartments.map((department) => (
             <DepartmentCard
               key={department.department}
@@ -274,29 +276,36 @@ export function DepartmentBreakdown({
         {/* Summary Statistics */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Department Summary</CardTitle>
+            <CardTitle>Department Summary</CardTitle>
+            <CardDescription>
+              Overview of your work distribution and performance
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="grid gap-4 text-sm grid-cols-2 md:grid-cols-4">
               <div className="text-center">
-                <div className="text-lg font-semibold">{activeDepartments.length}</div>
-                <div className="text-muted-foreground">Departments</div>
+                <div className="font-semibold text-lg">
+                  {activeDepartments.length}
+                </div>
+                <div className="text-muted-foreground text-xs">Departments</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold">{totalHours}h</div>
-                <div className="text-muted-foreground">Total Hours</div>
+                <div className="font-semibold text-lg">
+                  {totalHours}h
+                </div>
+                <div className="text-muted-foreground text-xs">Total Hours</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold">
+                <div className="font-semibold text-lg">
                   {formatCurrency(totalPay / totalHours)}
                 </div>
-                <div className="text-muted-foreground">Avg Rate</div>
+                <div className="text-muted-foreground text-xs">Avg Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold capitalize">
+                <div className="font-semibold capitalize text-lg">
                   {sortedDepartments[0]?.department || 'N/A'}
                 </div>
-                <div className="text-muted-foreground">Primary Dept</div>
+                <div className="text-muted-foreground text-xs">Primary Dept</div>
               </div>
             </div>
           </CardContent>

@@ -174,7 +174,7 @@ model DiscrepancyReport {
   contactEmail    String?
   requestCallback Boolean  @default(false)
   
-  discrepancies   Json     // Array of ValidationError objects
+  errors          Json     // Array of ValidationError objects
   severity        String   // 'low', 'medium', 'high', 'critical'
   status          String   // 'open', 'investigating', 'resolved', 'dismissed'
   resolution      String?

@@ -74,7 +74,7 @@ export function PayrollPrintLayout({
       <div className="print:border print:p-4 print:mb-4 print-avoid-break">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-2xl font-bold print:text-xl">College Hunks Hauling Junk & Moving</h1>
+            <h1 className="text-2xl font-bold print:text-xl" data-testid="company-name">College Hunks Hauling Junk & Moving</h1>
             <p className="text-muted-foreground print:text-black">Employee Paystub</p>
           </div>
           <div className="text-right text-sm print:text-xs">
@@ -170,7 +170,7 @@ export function PayrollPrintLayout({
             <span className="font-mono">{formatCurrency(payrollData.tips)}</span>
           </div>
           <div className="flex justify-between py-2 print:border-b">
-            <span>Performance Bonuses</span>
+            <span data-testid="performance-bonuses-label">Performance Bonuses</span>
             <span className="font-mono">{formatCurrency(payrollData.bonuses)}</span>
           </div>
           <div className="flex justify-between py-2 print:border-b">
@@ -303,25 +303,25 @@ export function PayrollPrintLayout({
           
           <div className="space-y-4 text-sm print:text-xs">
             <div>
-              <h3 className="font-semibold mb-2">Regular Pay Calculation</h3>
+              <h3 className="font-semibold mb-2" data-testid="regular-pay-calculation-section">Regular Pay Calculation</h3>
               <p>Regular pay is calculated by multiplying hours worked by your hourly rate for each department. 
               Captain rates apply when you serve as a captain or co-captain, otherwise wingman rates are used.</p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-2">Tips Distribution</h3>
+              <h3 className="font-semibold mb-2" data-testid="tips-distribution-section">Tips Distribution</h3>
               <p>Tips from each job are divided equally among all team members who worked on that job, 
               regardless of role. This includes captains, co-captains, and wingmen.</p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-2">Performance Bonuses</h3>
+              <h3 className="font-semibold mb-2" data-testid="performance-bonuses-section">Performance Bonuses</h3>
               <p>Labor efficiency bonuses are earned when the labor cost percentage is below the target goal. 
               Bonus = (Goal% - Actual%) × Revenue. Only captains are eligible for efficiency bonuses.</p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-2">Department Goals</h3>
+              <h3 className="font-semibold mb-2" data-testid="department-goals-section">Department Goals</h3>
               <ul className="list-disc list-inside ml-4">
                 <li>Junk operations target: 14% labor cost</li>
                 <li>Move operations target: 24% labor cost</li>

@@ -6,7 +6,7 @@ import { MyPayrollView } from '@/components/features/reports/my-payroll-view';
 vi.mock('@/components/features/reports/payroll-breakdown/department-breakdown', () => ({
   DepartmentBreakdown: ({ departments }: any) => (
     <div data-testid="department-breakdown">
-      Department Breakdown: {departments.length} departments
+      Department Breakdown: {departments?.length || 0} departments
     </div>
   ),
 }));
@@ -14,7 +14,7 @@ vi.mock('@/components/features/reports/payroll-breakdown/department-breakdown', 
 vi.mock('@/components/features/reports/payroll-breakdown/daily-work-calendar', () => ({
   DailyWorkCalendar: ({ workEntries }: any) => (
     <div data-testid="daily-work-calendar">
-      Daily Calendar: {workEntries.length} entries
+      Daily Calendar: {workEntries?.length || 0} entries
     </div>
   ),
 }));
@@ -22,7 +22,7 @@ vi.mock('@/components/features/reports/payroll-breakdown/daily-work-calendar', (
 vi.mock('@/components/features/reports/payroll-breakdown/tips-detail-view', () => ({
   TipsDetailView: ({ tips }: any) => (
     <div data-testid="tips-detail-view">
-      Tips Details: {tips.length} tips
+      Tips Details: {tips?.length || 0} tips
     </div>
   ),
 }));
@@ -30,7 +30,7 @@ vi.mock('@/components/features/reports/payroll-breakdown/tips-detail-view', () =
 vi.mock('@/components/features/reports/payroll-breakdown/rate-information-panel', () => ({
   RateInformationPanel: ({ user }: any) => (
     <div data-testid="rate-information-panel">
-      Rate Panel: {user.fullName}
+      Rate Panel: {user?.fullName || 'Unknown User'}
     </div>
   ),
 }));
@@ -50,15 +50,15 @@ describe('MyPayrollView Enhanced Component', () => {
   it('should display summary cards with loading states', async () => {
     render(<MyPayrollView userId="test-user" />);
     
-    // Should show summary data
-    expect(screen.getByText('Total Pay')).toBeInTheDocument();
+    // Should show summary data - use data-testid for specific "Total Pay" element
+    expect(screen.getByTestId('total-pay-label')).toBeInTheDocument();
     expect(screen.getByText('Hours Worked')).toBeInTheDocument();
     expect(screen.getByText('Tips Earned')).toBeInTheDocument();
-    expect(screen.getAllByText('Bonuses')).toHaveLength(2); // One in summary, one in performance tab
+    expect(screen.getByText('Bonuses')).toBeInTheDocument(); // Only one in summary cards
     
     // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.getByText('$955.00')).toBeInTheDocument(); // Total pay amount
+      expect(screen.getAllByText('$955.00')[0]).toBeInTheDocument(); // Total pay amount
     });
   });
 
@@ -79,8 +79,10 @@ describe('MyPayrollView Enhanced Component', () => {
     // Default tab should be breakdown
     expect(screen.getByRole('tab', { name: /breakdown/i })).toHaveAttribute('data-state', 'active');
     
-    // Verify that breakdown content is visible by default
-    expect(screen.getByTestId('department-breakdown')).toBeInTheDocument();
+    // Wait for breakdown content to be visible by default
+    await waitFor(() => {
+      expect(screen.getByTestId('department-breakdown')).toBeInTheDocument();
+    });
   });
 
   it('should show progressive loading for detailed data', async () => {

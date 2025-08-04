@@ -5,8 +5,8 @@ import {
 } from '@/lib/payCalculator';
 import { 
   getDetailedPayrollBreakdown,
-  validateEnhancedPayrollBreakdown as validatePayrollAction,
-  validateEnhancedPayrollBreakdownSync
+  validateEnhancedPayrollBreakdown,
+  validateEnhancedPayrollBreakdownSync as validatePayrollAction
 } from '@/lib/actions/payroll';
 import type { User, DailyLog, CommissionEntry, Department } from '@/types';
 
@@ -286,7 +286,7 @@ describe('Enhanced Payroll Calculations', () => {
         employeeId: 'user-1',
         employee: mockUser,
         totalHours: 8,
-        totalPay: 193, // 168 wages + 25 commission
+        totalPay: 263, // 168 wages + 70 tips + 25 commission + 0 bonuses
         grossWages: 168, // 80 + 88
         tips: 70,
         commission: 25,

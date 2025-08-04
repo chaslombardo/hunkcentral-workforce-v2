@@ -37,3 +37,47 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  key: vi.fn(),
+  length: 0,
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+  writable: true,
+});
+
+// Mock offline detection hook
+vi.mock('@/hooks/useOfflineDetection', () => ({
+  useOfflineDetection: vi.fn(() => ({
+    isOnline: true,
+    isOffline: false,
+    wasOffline: false,
+    lastOnlineAt: new Date(),
+    lastOfflineAt: null,
+  })),
+  useConnectivityActions: vi.fn(() => ({
+    isOnline: true,
+    isOffline: false,
+    wasOffline: false,
+    lastOnlineAt: new Date(),
+    lastOfflineAt: null,
+    showOfflineNotice: false,
+    dismissOfflineNotice: vi.fn(),
+  })),
+}));
+
+// Mock fetch for offline detection
+global.fetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+  } as Response)
+);

@@ -142,9 +142,9 @@ describe('PayrollExportDialog', () => {
     render(<PayrollExportDialog {...defaultProps} />);
     
     // Should default to PDF paystub for current user
-    expect(screen.getByDisplayValue('PDF Document (.pdf)')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Personal Paystub')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('My Payroll Only')).toBeInTheDocument();
+    expect(screen.getByText('PDF Document (.pdf)')).toBeInTheDocument();
+    expect(screen.getByText('Personal Paystub')).toBeInTheDocument();
+    expect(screen.getByText('My Payroll Only')).toBeInTheDocument();
   });
 
   it('allows changing export format', async () => {
@@ -152,7 +152,7 @@ describe('PayrollExportDialog', () => {
     render(<PayrollExportDialog {...defaultProps} />);
     
     // Click on format selector
-    const formatSelect = screen.getByDisplayValue('PDF Document (.pdf)');
+    const formatSelect = screen.getByText('PDF Document (.pdf)');
     await user.click(formatSelect);
     
     // Select Excel format
@@ -166,7 +166,7 @@ describe('PayrollExportDialog', () => {
     render(<PayrollExportDialog {...defaultProps} />);
     
     // Click on type selector
-    const typeSelect = screen.getByDisplayValue('Personal Paystub');
+    const typeSelect = screen.getByText('Personal Paystub');
     await user.click(typeSelect);
     
     // Select detailed breakdown
@@ -283,7 +283,7 @@ describe('PayrollExportDialog', () => {
     expect(screen.queryByText('Department Filter')).not.toBeInTheDocument();
     
     // Change to department scope
-    const scopeSelect = screen.getByDisplayValue('My Payroll Only');
+    const scopeSelect = screen.getByText('My Payroll Only');
     await user.click(scopeSelect);
     await user.click(screen.getByText('My Department'));
     
@@ -298,7 +298,7 @@ describe('PayrollExportDialog', () => {
     fireEvent.click(screen.getByText('Preview & Export'));
     
     // Should show 1 employee for current user scope
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getAllByText('1')[0]).toBeInTheDocument();
   });
 
   it('shows help information', async () => {
@@ -386,13 +386,14 @@ describe('PayrollExportDialog Requirements Validation', () => {
     
     // Should have calculation details option
     fireEvent.click(screen.getByText('Content & Data'));
-    expect(screen.getByLabelText('Calculation Details & Explanations')).toBeInTheDocument();
+    expect(screen.getByText('Calculation Details & Explanations')).toBeInTheDocument();
   });
 
   it('meets requirement 7.4: Implements print-friendly layouts', () => {
     render(<PayrollExportDialog {...defaultProps} />);
     
     // Should have print option
+    fireEvent.click(screen.getByText('Preview'));
     expect(screen.getByText('Print Preview')).toBeInTheDocument();
   });
 

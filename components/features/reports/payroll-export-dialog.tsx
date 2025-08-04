@@ -227,20 +227,20 @@ export function PayrollExportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2" data-testid="export-dialog-title">
             <Download className="h-5 w-5" />
             Export Payroll Report
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription data-testid="export-dialog-description">
             Export payroll data for {selectedPeriod?.name || 'the current pay period'}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">Basic Options</TabsTrigger>
-            <TabsTrigger value="content">Content & Data</TabsTrigger>
-            <TabsTrigger value="preview">Preview & Export</TabsTrigger>
+        <Tabs defaultValue="basic" className="w-full" data-testid="export-tabs">
+          <TabsList className="grid w-full grid-cols-3" data-testid="export-tabs-list">
+            <TabsTrigger value="basic" data-testid="basic-options-tab">Basic Options</TabsTrigger>
+            <TabsTrigger value="content" data-testid="content-data-tab">Content & Data</TabsTrigger>
+            <TabsTrigger value="preview" data-testid="preview-export-tab">Preview & Export</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="space-y-6 mt-6">
@@ -251,7 +251,7 @@ export function PayrollExportDialog({
                 value={options.format}
                 onValueChange={(value: ExportFormat) => updateOption('format', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="format-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -279,7 +279,7 @@ export function PayrollExportDialog({
                 value={options.type}
                 onValueChange={(value: ExportType) => updateOption('type', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="type-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -304,7 +304,7 @@ export function PayrollExportDialog({
                 value={options.scope}
                 onValueChange={(value: ExportScope) => updateOption('scope', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="scope-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -330,7 +330,7 @@ export function PayrollExportDialog({
                   value={options.departmentFilter}
                   onValueChange={(value: string) => updateOption('departmentFilter', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="department-filter-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -475,19 +475,20 @@ export function PayrollExportDialog({
                 value={options.notes}
                 onChange={(e) => updateOption('notes', e.target.value)}
                 className="min-h-[80px]"
+                data-testid="export-notes-textarea"
               />
             </div>
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-6 mt-6">
             {/* Export Preview */}
-            <Card>
+            <Card data-testid="export-preview-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2" data-testid="export-preview-title">
                   <FileText className="h-5 w-5" />
                   Export Preview
                 </CardTitle>
-                <CardDescription>
+                <CardDescription data-testid="export-preview-description">
                   Review your export settings before generating the file
                 </CardDescription>
               </CardHeader>
@@ -572,15 +573,15 @@ export function PayrollExportDialog({
 
             {/* Progress Bar (shown during export) */}
             {isExporting && (
-              <Card>
+              <Card data-testid="export-progress-card">
                 <CardContent className="pt-6">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span>Generating export...</span>
-                      <span>{exportProgress}%</span>
+                      <span data-testid="export-progress-label">Generating export...</span>
+                      <span data-testid="export-progress-percentage">{exportProgress}%</span>
                     </div>
-                    <Progress value={exportProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground">
+                    <Progress value={exportProgress} className="h-2" data-testid="export-progress-bar" />
+                    <p className="text-xs text-muted-foreground" data-testid="export-progress-message">
                       {exportProgress < 30 && 'Collecting payroll data...'}
                       {exportProgress >= 30 && exportProgress < 60 && 'Processing department breakdowns...'}
                       {exportProgress >= 60 && exportProgress < 90 && 'Generating document...'}
@@ -603,11 +604,12 @@ export function PayrollExportDialog({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <DialogFooter data-testid="export-dialog-footer">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isExporting}
+            data-testid="export-cancel-button"
           >
             Cancel
           </Button>
@@ -615,6 +617,7 @@ export function PayrollExportDialog({
             onClick={handleExport}
             disabled={isExporting}
             className="min-w-24"
+            data-testid="export-submit-button"
           >
             {isExporting ? (
               <>
