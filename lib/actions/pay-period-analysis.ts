@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { calculatePayroll } from '@/lib/payCalculator';
+import { convertCommissionDecimalFields, convertUserDecimalFields } from '@/lib/decimal-utils';
 import type { 
   User, 
   Department, 
@@ -323,11 +324,9 @@ async function getPayrollPeriodData(
   // Convert commission entries
   const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
     ...commission,
+    ...convertCommissionDecimalFields(commission),
     jobType: commission.jobType as CommissionEntry['jobType'],
     status: commission.status as CommissionEntry['status'],
-    estimatedRevenue: Number(commission.estimatedRevenue),
-    actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
-    commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
     matchedLogId: commission.matchedLogId || undefined,
     matchedLog: commission.matchedLog ? {
       ...commission.matchedLog,

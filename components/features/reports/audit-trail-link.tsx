@@ -211,7 +211,6 @@ interface AuditTrailSummaryProps {
 export function AuditTrailSummary({
   entries,
   employeeId,
-  payPeriodId,
 }: AuditTrailSummaryProps) {
   const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
   const totalGrossPay = entries.reduce((sum, entry) => sum + entry.grossPay, 0);

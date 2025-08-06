@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
@@ -15,7 +14,7 @@ import {
   Printer
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import type { PayPeriod, User as UserType } from '@/types';
+import type { PayPeriod } from '@/types';
 import type { PayrollCalculation, TipEntry } from '@/lib/payCalculator';
 import type { DepartmentBreakdownData } from './payroll-breakdown/department-breakdown';
 import type { DailyWorkEntry } from '@/lib/actions/daily-work';

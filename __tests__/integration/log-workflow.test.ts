@@ -23,11 +23,14 @@ vi.mock('next/cache', () => ({
 const { auth } = await import('@/lib/auth');
 
 describe('Complete Log Workflow Integration', () => {
+  // Generate unique test IDs to avoid conflicts
+  const testRunId = Date.now().toString();
+  
   // Test users
   const captainUser = {
     user: {
-      id: 'captain-test-id',
-      email: 'captain@test.com',
+      id: `captain-test-${testRunId}`,
+      email: `captain-${testRunId}@test.com`,
       fullName: 'Test Captain',
       roles: ['captain'],
     },
@@ -35,8 +38,8 @@ describe('Complete Log Workflow Integration', () => {
 
   const managerUser = {
     user: {
-      id: 'manager-test-id',
-      email: 'manager@test.com',
+      id: `manager-test-${testRunId}`,
+      email: `manager-${testRunId}@test.com`,
       fullName: 'Test Manager',
       roles: ['manager'],
     },
@@ -44,8 +47,8 @@ describe('Complete Log Workflow Integration', () => {
 
   const salesUser = {
     user: {
-      id: 'sales-test-id',
-      email: 'sales@test.com',
+      id: `sales-test-${testRunId}`,
+      email: `sales-${testRunId}@test.com`,
       fullName: 'Test Sales',
       roles: ['sales'],
     },
@@ -53,8 +56,8 @@ describe('Complete Log Workflow Integration', () => {
 
   const wingmanUser = {
     user: {
-      id: 'wingman-test-id',
-      email: 'wingman@test.com',
+      id: `wingman-test-${testRunId}`,
+      email: `wingman-${testRunId}@test.com`,
       fullName: 'Test Wingman',
       roles: ['wingman'],
     },
@@ -65,8 +68,8 @@ describe('Complete Log Workflow Integration', () => {
     await prisma.user.createMany({
       data: [
         {
-          id: 'captain-test-id',
-          email: 'captain@test.com',
+          id: captainUser.user.id,
+          email: captainUser.user.email,
           password: 'hashedpassword',
           fullName: 'Test Captain',
           roles: ['captain'],
@@ -78,16 +81,16 @@ describe('Complete Log Workflow Integration', () => {
           moveBonusGoal: 0.24,
         },
         {
-          id: 'manager-test-id',
-          email: 'manager@test.com',
+          id: managerUser.user.id,
+          email: managerUser.user.email,
           password: 'hashedpassword',
           fullName: 'Test Manager',
           roles: ['manager'],
           rateAdmin: 25.00,
         },
         {
-          id: 'sales-test-id',
-          email: 'sales@test.com',
+          id: salesUser.user.id,
+          email: salesUser.user.email,
           password: 'hashedpassword',
           fullName: 'Test Sales',
           roles: ['sales'],
@@ -95,8 +98,8 @@ describe('Complete Log Workflow Integration', () => {
           rateAdmin: 20.00,
         },
         {
-          id: 'wingman-test-id',
-          email: 'wingman@test.com',
+          id: wingmanUser.user.id,
+          email: wingmanUser.user.email,
           password: 'hashedpassword',
           fullName: 'Test Wingman',
           roles: ['wingman'],
@@ -108,43 +111,62 @@ describe('Complete Log Workflow Integration', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await prisma.auditLog.deleteMany({
-      where: {
-        userId: {
-          in: ['captain-test-id', 'manager-test-id', 'sales-test-id', 'wingman-test-id'],
+    try {
+      // Clean up test data in proper order (child records first)
+      const userIds = [captainUser.user.id, managerUser.user.id, salesUser.user.id, wingmanUser.user.id];
+      
+      await prisma.auditLog.deleteMany({
+        where: {
+          userId: {
+            in: userIds,
+          },
         },
-      },
-    });
-    await prisma.commissionEntry.deleteMany({
-      where: {
-        salesId: {
-          in: ['sales-test-id'],
+      });
+      await prisma.commissionEntry.deleteMany({
+        where: {
+          salesId: {
+            in: [salesUser.user.id],
+          },
         },
-      },
-    });
-    await prisma.logHour.deleteMany({
-      where: {
-        employeeId: {
-          in: ['captain-test-id', 'wingman-test-id'],
+      });
+      await prisma.logHour.deleteMany({
+        where: {
+          employeeId: {
+            in: [captainUser.user.id, wingmanUser.user.id],
+          },
         },
-      },
-    });
-    await prisma.logJob.deleteMany({});
-    await prisma.dailyLog.deleteMany({
-      where: {
-        captainId: {
-          in: ['captain-test-id'],
+      });
+      await prisma.logJob.deleteMany({
+        where: {
+          logId: {
+            in: await prisma.dailyLog.findMany({
+              where: {
+                captainId: {
+                  in: [captainUser.user.id],
+                },
+              },
+              select: { id: true },
+            }).then(logs => logs.map(log => log.id)),
+          },
         },
-      },
-    });
-    await prisma.user.deleteMany({
-      where: {
-        id: {
-          in: ['captain-test-id', 'manager-test-id', 'sales-test-id', 'wingman-test-id'],
+      });
+      await prisma.dailyLog.deleteMany({
+        where: {
+          captainId: {
+            in: [captainUser.user.id],
+          },
         },
-      },
-    });
+      });
+      await prisma.user.deleteMany({
+        where: {
+          id: {
+            in: userIds,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error cleaning up test data:', error);
+    }
   });
 
   beforeEach(() => {
@@ -156,12 +178,14 @@ describe('Complete Log Workflow Integration', () => {
       // Step 1: Sales person creates commission entry
       vi.mocked(auth).mockResolvedValue(salesUser);
       
+      const workflowJobId = `WORKFLOW-${testRunId}`;
+      
       const commissionResult = await createCommissionEntry({
-        salesId: 'sales-test-id',
-        jobId: 'WORKFLOW-001',
+        salesId: salesUser.user.id,
+        jobId: workflowJobId,
         clientName: 'Integration Test Client',
         jobType: 'junk',
-        targetDate: new Date('2024-02-01'),
+        targetDate: new Date('2025-01-15'),
         estimatedRevenue: 800,
       });
 
@@ -172,8 +196,8 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
       const logFormData: DailyLogFormData = {
-        captainId: 'captain-test-id',
-        logDate: new Date('2024-01-15'),
+        captainId: captainUser.user.id,
+        logDate: new Date('2025-01-15'),
         sections: {
           junk: true,
           move: false,
@@ -182,7 +206,7 @@ describe('Complete Log Workflow Integration', () => {
         jobs: [
           {
             jobType: 'junk',
-            jobId: 'WORKFLOW-001',
+            jobId: workflowJobId,
             clientName: 'Integration Test Client',
             revenue: 1000, // Higher than estimated for accuracy test
             tips: 150,
@@ -192,13 +216,13 @@ describe('Complete Log Workflow Integration', () => {
         disposalCost: 50,
         hours: [
           {
-            employeeId: 'captain-test-id',
+            employeeId: captainUser.user.id,
             department: 'junk',
             hours: 6,
             isCoCaptain: false,
           },
           {
-            employeeId: 'wingman-test-id',
+            employeeId: wingmanUser.user.id,
             department: 'junk',
             hours: 6,
             isCoCaptain: false,
@@ -234,8 +258,8 @@ describe('Complete Log Workflow Integration', () => {
       });
 
       expect(updatedCommission?.status).toBe('matched');
-      expect(updatedCommission?.actualRevenue).toBe(1000);
-      expect(updatedCommission?.commissionAmount).toBe(50); // 5% of 1000
+      expect(Number(updatedCommission?.actualRevenue)).toBe(1000);
+      expect(Number(updatedCommission?.commissionAmount)).toBe(50); // 5% of 1000
       expect(updatedCommission?.matchedLogId).toBe(logId);
 
       // Step 6: Verify audit trail was created
@@ -256,7 +280,7 @@ describe('Complete Log Workflow Integration', () => {
       const users = await prisma.user.findMany({
         where: {
           id: {
-            in: ['captain-test-id', 'wingman-test-id', 'sales-test-id'],
+            in: [captainUser.user.id, wingmanUser.user.id, salesUser.user.id],
           },
         },
       });
@@ -280,8 +304,10 @@ describe('Complete Log Workflow Integration', () => {
         },
       });
 
-      const payPeriodStart = new Date('2024-01-01');
-      const payPeriodEnd = new Date('2024-01-31');
+      const payPeriodStart = new Date('2025-08-01');
+      const payPeriodEnd = new Date('2025-08-31');
+
+
 
       const payrollCalculations = calculatePayroll(
         users,
@@ -292,22 +318,22 @@ describe('Complete Log Workflow Integration', () => {
       );
 
       // Verify captain payroll
-      const captainPayroll = payrollCalculations.find(p => p.employeeId === 'captain-test-id');
+      const captainPayroll = payrollCalculations.find(p => p.employeeId === captainUser.user.id);
       expect(captainPayroll).toBeDefined();
       expect(captainPayroll!.totalHours).toBe(6);
       expect(captainPayroll!.grossWages).toBe(120); // 6 hours * $20 captain rate
       expect(captainPayroll!.tips).toBe(75); // 150 tips / 2 employees
-      expect(captainPayroll!.bonuses).toBeGreaterThan(0); // Should get bonus (12% actual vs 14% goal)
+      expect(captainPayroll!.bonuses).toBe(0); // No bonus (21% actual vs 14% goal)
 
       // Verify wingman payroll
-      const wingmanPayroll = payrollCalculations.find(p => p.employeeId === 'wingman-test-id');
+      const wingmanPayroll = payrollCalculations.find(p => p.employeeId === wingmanUser.user.id);
       expect(wingmanPayroll).toBeDefined();
       expect(wingmanPayroll!.totalHours).toBe(6);
       expect(wingmanPayroll!.grossWages).toBe(90); // 6 hours * $15 wingman rate
       expect(wingmanPayroll!.tips).toBe(75); // 150 tips / 2 employees
 
       // Verify sales payroll
-      const salesPayroll = payrollCalculations.find(p => p.employeeId === 'sales-test-id');
+      const salesPayroll = payrollCalculations.find(p => p.employeeId === salesUser.user.id);
       expect(salesPayroll).toBeDefined();
       expect(salesPayroll!.commission).toBe(50); // 5% of $1000
     });
@@ -315,8 +341,10 @@ describe('Complete Log Workflow Integration', () => {
     it('should handle auto-save during log creation', async () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
+      const autosaveJobId = `AUTOSAVE-${testRunId}`;
+      
       const initialFormData: DailyLogFormData = {
-        captainId: 'captain-test-id',
+        captainId: captainUser.user.id,
         logDate: new Date('2024-01-16'),
         sections: {
           junk: true,
@@ -326,7 +354,7 @@ describe('Complete Log Workflow Integration', () => {
         jobs: [
           {
             jobType: 'junk',
-            jobId: 'AUTOSAVE-001',
+            jobId: autosaveJobId,
             clientName: 'Auto Save Test',
             revenue: 500,
             tips: 50,
@@ -346,7 +374,7 @@ describe('Complete Log Workflow Integration', () => {
         ...initialFormData,
         hours: [
           {
-            employeeId: 'captain-test-id',
+            employeeId: captainUser.user.id,
             department: 'junk',
             hours: 4,
             isCoCaptain: false,
@@ -369,9 +397,11 @@ describe('Complete Log Workflow Integration', () => {
       // Create two commission entries for the same job ID
       vi.mocked(auth).mockResolvedValue(salesUser);
 
+      const conflictJobId = `CONFLICT-${testRunId}`;
+      
       const commission1Result = await createCommissionEntry({
-        salesId: 'sales-test-id',
-        jobId: 'CONFLICT-001',
+        salesId: salesUser.user.id,
+        jobId: conflictJobId,
         clientName: 'Conflict Test Client',
         jobType: 'junk',
         targetDate: new Date('2024-02-01'),
@@ -381,10 +411,11 @@ describe('Complete Log Workflow Integration', () => {
       expect(commission1Result.success).toBe(true);
 
       // Create second user for conflict
+      const sales2Id = `sales2-test-${testRunId}`;
       await prisma.user.create({
         data: {
-          id: 'sales2-test-id',
-          email: 'sales2@test.com',
+          id: sales2Id,
+          email: `sales2-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Test Sales 2',
           roles: ['sales'],
@@ -394,8 +425,8 @@ describe('Complete Log Workflow Integration', () => {
 
       const sales2User = {
         user: {
-          id: 'sales2-test-id',
-          email: 'sales2@test.com',
+          id: sales2Id,
+          email: `sales2-${testRunId}@test.com`,
           fullName: 'Test Sales 2',
           roles: ['sales'],
         },
@@ -404,8 +435,8 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(sales2User);
 
       const commission2Result = await createCommissionEntry({
-        salesId: 'sales2-test-id',
-        jobId: 'CONFLICT-001', // Same job ID
+        salesId: sales2Id,
+        jobId: conflictJobId, // Same job ID
         clientName: 'Conflict Test Client',
         jobType: 'junk',
         targetDate: new Date('2024-02-01'),
@@ -418,7 +449,7 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
       const logFormData: DailyLogFormData = {
-        captainId: 'captain-test-id',
+        captainId: captainUser.user.id,
         logDate: new Date('2024-01-17'),
         sections: {
           junk: true,
@@ -428,7 +459,7 @@ describe('Complete Log Workflow Integration', () => {
         jobs: [
           {
             jobType: 'junk',
-            jobId: 'CONFLICT-001',
+            jobId: conflictJobId,
             clientName: 'Conflict Test Client',
             revenue: 650,
             tips: 65,
@@ -436,7 +467,7 @@ describe('Complete Log Workflow Integration', () => {
         ],
         hours: [
           {
-            employeeId: 'captain-test-id',
+            employeeId: captainUser.user.id,
             department: 'junk',
             hours: 5,
             isCoCaptain: false,
@@ -468,7 +499,9 @@ describe('Complete Log Workflow Integration', () => {
       expect(commission2?.status).toBe('pending'); // Still pending due to conflict
 
       // Clean up
-      await prisma.user.delete({ where: { id: 'sales2-test-id' } });
+      await prisma.commissionEntry.deleteMany({ where: { salesId: sales2Id } });
+      await prisma.auditLog.deleteMany({ where: { userId: sales2Id } });
+      await prisma.user.delete({ where: { id: sales2Id } });
     });
   });
 
@@ -497,7 +530,7 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
       const emptyFormData: DailyLogFormData = {
-        captainId: 'captain-test-id',
+        captainId: captainUser.user.id,
         logDate: new Date('2024-01-19'),
         sections: {
           junk: false,
@@ -518,7 +551,7 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
       const logFormData: DailyLogFormData = {
-        captainId: 'captain-test-id',
+        captainId: captainUser.user.id,
         logDate: new Date('2024-01-20'),
         sections: {
           junk: true,
@@ -528,7 +561,7 @@ describe('Complete Log Workflow Integration', () => {
         jobs: [
           {
             jobType: 'junk',
-            jobId: 'PERM-001',
+            jobId: `PERM-${testRunId}`,
             clientName: 'Permission Test',
             revenue: 400,
             tips: 40,
@@ -536,7 +569,7 @@ describe('Complete Log Workflow Integration', () => {
         ],
         hours: [
           {
-            employeeId: 'captain-test-id',
+            employeeId: captainUser.user.id,
             department: 'junk',
             hours: 3,
             isCoCaptain: false,

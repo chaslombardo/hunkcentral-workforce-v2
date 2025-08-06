@@ -60,7 +60,7 @@ export function OfflineStatusCard() {
         title: "Sync Complete",
         description: "All offline data has been synchronized.",
       })
-    } catch (error) {
+    } catch {
       toast({
         title: "Sync Failed",
         description: "Some data could not be synchronized. Please try again.",

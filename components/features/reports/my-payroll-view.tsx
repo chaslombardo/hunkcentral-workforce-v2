@@ -19,47 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Progress } from '@/components/ui/progress';
+
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+
 import {
   Clock,
   DollarSign,
@@ -69,7 +40,7 @@ import {
   Award,
   AlertCircle,
   AlertTriangle,
-  Loader2,
+
   Shield,
   WifiOff,
   RefreshCw,
@@ -85,10 +56,9 @@ import { PayPeriodAnalysis } from './payroll-breakdown/pay-period-analysis';
 import { PayrollValidationPanel } from './payroll-breakdown/payroll-validation-panel';
 import { PayrollExportDialog } from './payroll-export-dialog';
 import { DiscrepancyReportDialog } from './discrepancy-report-dialog';
-import { AuditTrailLink, AuditTrailSummary } from './audit-trail-link';
+
 import { PayrollErrorBoundary, PayrollComponentErrorBoundary } from './payroll-error-boundary';
 import { 
-  PayrollSummaryFallback, 
   DepartmentBreakdownFallback, 
   DailyWorkFallback, 
   TipsDetailFallback,
@@ -96,7 +66,7 @@ import {
 } from './payroll-fallback-views';
 import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
-import type { PayrollValidationResult, ValidationError, AuditTrailEntry } from '@/lib/payrollValidation';
+import type { PayrollValidationResult, ValidationError } from '@/lib/payrollValidation';
 import { validateEmployeePayroll, submitDiscrepancyReport } from '@/lib/actions/payroll-validation';
 // import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
 // import { getDailyWorkBreakdown } from '@/lib/actions/daily-work';
@@ -456,7 +426,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     };
 
     loadSummary();
-  }, [selectedPeriod.id, offlineState.isOffline]);
+  }, [selectedPeriod, offlineState.isOffline, userPayroll.employeeId, userPayroll.employee, userPayroll.totalHours, userPayroll.totalPay, userPayroll.grossWages, userPayroll.tips, userPayroll.commission, userPayroll.bonuses]);
 
   // Enhanced detailed data loading with progressive fallbacks and better error handling
   React.useEffect(() => {
@@ -706,7 +676,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     }
   }, [userId, selectedPeriod.id, discrepancyErrors]);
 
-  const handleViewAuditTrail = React.useCallback((entry: AuditTrailEntry) => {
+  const handleViewAuditTrail = React.useCallback(() => {
     // Navigate to audit trail or show detailed view
     // TODO: Implement audit trail navigation
   }, []);
@@ -1087,16 +1057,10 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 <PayrollComponentErrorBoundary componentName="Rate Information">
                   {detailedData ? (
                     <RateInformationPanel
-                      rateInformation={detailedData.departmentBreakdown.reduce((acc, dept) => {
-                        acc[dept.department] = {
-                          currentRate: dept.rate,
-                          captainRate: dept.department === 'junk' ? mockUser.rateJunkCaptain : 
-                                     dept.department === 'move' ? mockUser.rateMoveCaptain : undefined,
-                          wingmanRate: dept.department === 'junk' ? mockUser.rateJunkWingman :
-                                     dept.department === 'move' ? mockUser.rateMoveWingman : undefined,
-                        };
+                      departmentHours={detailedData.departmentBreakdown.reduce((acc, dept) => {
+                        acc[dept.department as Department] = dept.hours;
                         return acc;
-                      }, {} as Record<string, { captainRate?: number; wingmanRate?: number }>)}
+                      }, {} as Record<Department, number>)}
                       user={mockUser}
                     />
                   ) : (
@@ -1175,14 +1139,9 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               <PayrollComponentErrorBoundary componentName="Pay Period Analysis">
                 {detailedData ? (
                   <PayPeriodAnalysis
-                    currentPeriodData={{
-                      totalPay: summaryData?.totalPay || userPayroll.totalPay,
-                      totalHours: summaryData?.totalHours || userPayroll.totalHours,
-                      tips: summaryData?.tips || userPayroll.tips,
-                      bonuses: summaryData?.bonuses || userPayroll.bonuses,
-                    }}
-                    historicalData={mockHistoricalData}
-                    workPatternStats={detailedData.workPatternStats}
+                    userId={userId || '1'}
+                    currentPeriod={selectedPeriod}
+                    availablePeriods={mockPayPeriods}
                   />
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
@@ -1209,14 +1168,9 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               <PayrollComponentErrorBoundary componentName="Performance Analysis">
                 {detailedData ? (
                   <PayPeriodAnalysis
-                    currentPeriodData={{
-                      totalPay: summaryData?.totalPay || userPayroll.totalPay,
-                      totalHours: summaryData?.totalHours || userPayroll.totalHours,
-                      tips: summaryData?.tips || userPayroll.tips,
-                      bonuses: summaryData?.bonuses || userPayroll.bonuses,
-                    }}
-                    historicalData={mockHistoricalData}
-                    workPatternStats={detailedData.workPatternStats}
+                    userId={userId || '1'}
+                    currentPeriod={selectedPeriod}
+                    availablePeriods={mockPayPeriods}
                   />
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
@@ -1296,17 +1250,12 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         <PayrollExportDialog
           open={showExportDialog}
           onOpenChange={setShowExportDialog}
-          payrollData={summaryData ? {
-            employee: summaryData.employee,
-            payPeriod: summaryData.payPeriod,
-            totalPay: summaryData.totalPay,
-            totalHours: summaryData.totalHours,
-            grossWages: summaryData.grossWages,
-            tips: summaryData.tips,
-            bonuses: summaryData.bonuses,
-            commission: summaryData.commission,
-          } : undefined}
-          detailedData={detailedData}
+          payrollData={summaryData ? [userPayroll] : []}
+          selectedPeriod={selectedPeriod}
+          departmentBreakdown={detailedData?.departmentBreakdown}
+          dailyWorkHistory={detailedData?.dailyWorkHistory}
+          tipsDetails={detailedData?.tipsDetails}
+          currentUser={mockUser}
         />
 
         {/* Discrepancy Report Dialog */}
@@ -1314,6 +1263,8 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
           open={showDiscrepancyDialog}
           onOpenChange={setShowDiscrepancyDialog}
           errors={discrepancyErrors}
+          employeeId={userId || '1'}
+          payPeriodId={selectedPeriod.id}
           onSubmit={handleSubmitDiscrepancyReport}
         />
         </div>

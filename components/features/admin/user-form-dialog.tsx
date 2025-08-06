@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { IconPlus, IconEdit } from '@tabler/icons-react';
 import { Decimal } from '@prisma/client/runtime/library';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,

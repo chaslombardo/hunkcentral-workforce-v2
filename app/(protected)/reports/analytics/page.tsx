@@ -13,7 +13,6 @@ import {
   Clock,
   Target,
   AlertCircle,
-  Calendar,
   Download
 } from 'lucide-react';
 

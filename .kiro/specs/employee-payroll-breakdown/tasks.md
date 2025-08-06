@@ -114,7 +114,7 @@
   - Ensure all mocked components render the expected test IDs for tab content verification
   - _Requirements: All requirements - ensure test coverage validates implementation_
 
-- [ ] 17. Fix React act() warnings and async state updates (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+- [x] 17. Fix React act() warnings and async state updates (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
   - Mock the useOfflineDetection hook to prevent async fetch calls during tests
   - Wrap component renders in act() where state updates occur during mounting
   - Add proper async/await handling for components that trigger state updates
@@ -122,7 +122,7 @@
   - Ensure all useEffect hooks that cause state updates are properly handled in test environment
   - _Requirements: All requirements - ensure test coverage validates implementation_
 
-- [ ] 18. Fix offline detection hook test environment issues (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+- [x] 18. Fix offline detection hook test environment issues (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
   - Create a mock for useOfflineDetection hook that returns stable offline state
   - Mock the fetch call to /api/health that's causing "Invalid URL" errors in tests
   - Add vi.mock for hooks/useOfflineDetection.ts in test setup
@@ -130,7 +130,7 @@
   - Prevent the hook from making actual network requests during test execution
   - _Requirements: All requirements - ensure test coverage validates implementation_
 
-- [ ] 19. Fix tab navigation and component rendering in tests (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
+- [x] 19. Fix tab navigation and component rendering in tests (Remember to use shadnc/ui mcp for blocks and components with component demos, never use custom components, if you see one it must be switched back to shadcn)
   - Verify that tab switching works correctly in the test environment
   - Ensure TabsContent components render their children when the tab is active
   - Fix any issues with conditional rendering based on activeTab state
@@ -167,7 +167,7 @@
   - Update validation tests to match actual Zod error message formats
   - _Requirements: All requirements - ensure validation works correctly_
 
-- [ ] 24. Replace all custom components with proper shadcn/ui blocks and components (Use shadcn/ui MCP server)
+- [x] 24. Replace all custom components with proper shadcn/ui blocks and components (Use shadcn/ui MCP server)
   - Use shadcn/ui MCP server to get proper blocks and component demos before implementing
   - Replace any custom mobile optimization components with standard shadcn/ui patterns
   - Replace custom error boundary components with proper shadcn/ui Alert and Card patterns
@@ -184,10 +184,34 @@
   - Fix print layout component test element selection issues
   - _Requirements: All requirements - ensure test coverage validates implementation_
 
-- [ ] 26. Fix database and integration test issues
+- [x] 26. Fix database and integration test issues
   - Fix Prisma Decimal comparison issues in integration tests
   - Fix database constraint violations in log workflow tests
   - Ensure proper test data cleanup between test runs
   - Fix commission calculation and matching logic in integration tests
   - Update payroll calculation tests to handle proper data types
   - _Requirements: All requirements - ensure integration tests pass_
+- [x] 27. Fix TypeScript compilation errors (COMMIT BLOCKING)
+  - Fix commission.ts line 156: Replace `{ jobId: data.jobId }` with proper unique identifier for findUnique query
+  - Fix payroll-validation.ts line 189: Resolve Decimal type conversion issues in DailyLog mapping
+  - Fix payroll-validation.ts line 198: Resolve Decimal type conversion issues in CommissionEntry mapping
+  - Fix payroll-validation.ts line 324: Replace 'reportedAt' with correct property name in DiscrepancyReport creation
+  - Fix payroll-validation.ts line 417: Remove invalid 'reportedAt' from orderBy clause
+  - Fix payroll-validation.ts line 430: Remove reference to non-existent 'reportedAt' property
+  - _Requirements: All requirements - ensure code compiles without TypeScript errors_
+
+- [x] 28. Clean up ESLint warnings and unused imports
+  - Remove unused imports across all component files (CardDescription, Calendar, Badge, etc.)
+  - Remove unused variables in component functions (error, employeeId, payPeriodId, etc.)
+  - Fix React hooks exhaustive-deps warnings in my-payroll-view.tsx
+  - Replace console.log statements with console.warn or console.error in offlinePayrollManager.ts
+  - Remove unused type imports and function parameters marked with underscore
+  - Clean up unused shadcn/ui component imports in payroll breakdown components
+  - _Requirements: All requirements - maintain clean, production-ready code_
+
+- [x] 29. Fix Prisma schema and database type consistency
+  - Ensure all Decimal fields in database are properly handled in TypeScript types
+  - Update type definitions to match actual Prisma schema field types
+  - Fix any remaining database constraint issues from schema changes
+  - Verify all foreign key relationships are properly defined and used
+  - _Requirements: All requirements - ensure database and type consistency_

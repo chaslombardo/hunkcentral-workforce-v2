@@ -126,7 +126,7 @@ model CommissionEntry {
   id               String    @id @default(uuid())
   salesId          String
   sales            User      @relation(fields: [salesId], references: [id])
-  jobId            String    @unique
+  jobId            String
   clientName       String
   jobType          String
   targetDate       DateTime  @db.Date

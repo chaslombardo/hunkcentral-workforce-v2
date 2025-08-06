@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { calculatePayroll, calculateEnhancedPayroll, calculateHourlyWage } from '@/lib/payCalculator';
+import { convertUserDecimalFields, convertCommissionDecimalFields } from '@/lib/decimal-utils';
 import type { 
   User, 
   Department, 
@@ -135,24 +136,12 @@ export async function getDetailedPayrollBreakdown(
       throw new Error('Employee not found');
     }
 
-    // Convert Decimal values to numbers for calculation functions
+    // Convert Decimal values to numbers for calculation functions using utility
     const employeeForCalculation: User = {
-      ...employee,
+      ...convertUserDecimalFields(employee),
       roles: employee.roles as User['roles'],
-      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
-      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
-      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
-      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
-      rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
-      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
-      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
-      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
-      rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
-      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
       salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
       salaryType: employee.salaryType as User['salaryType'],
-      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
-      junkBonusGoal: Number(employee.junkBonusGoal),
       moveBonusGoal: Number(employee.moveBonusGoal),
     };
     
@@ -463,11 +452,9 @@ async function getEnhancedPayrollData(
 
   const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
     ...commission,
+    ...convertCommissionDecimalFields(commission),
     jobType: commission.jobType as CommissionEntry['jobType'],
     status: commission.status as CommissionEntry['status'],
-    estimatedRevenue: Number(commission.estimatedRevenue),
-    actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
-    commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
     matchedLogId: commission.matchedLogId || undefined,
     matchedLog: commission.matchedLog ? {
       ...commission.matchedLog,
@@ -509,7 +496,7 @@ async function getEnhancedPayrollData(
 
   // Convert enhanced payroll to our interface format
   const departmentBreakdown: DepartmentBreakdown[] = Object.entries(enhancedPayroll.departmentBreakdown)
-    .filter(([_, data]) => data.hours > 0)
+    .filter(([, data]) => data.hours > 0)
     .map(([dept, data]) => ({
       department: dept as Department,
       hours: data.hours,
@@ -526,19 +513,40 @@ async function getEnhancedPayrollData(
   }
 
   const dailyWorkHistory: DailyWorkEntry[] = Object.entries(enhancedPayroll.dailyBreakdown)
-    .map(([dateStr, data]) => ({
-      date: new Date(dateStr),
-      departments: Object.entries(data.departments)
-        .filter(([_, hours]) => hours > 0)
-        .map(([dept, hours]) => ({
-          department: dept as Department,
-          hours,
-          rate: calculateHourlyWage(employee, dept as Department, false),
-        })),
-      tips: data.tips,
-      logIds: [], // Would need to track this separately if needed
-      role: 'wingman' as const, // Would need to determine from log data
-    }))
+    .map(([dateStr, data]) => {
+      // Determine role based on log data for this date
+      const dateObj = new Date(dateStr);
+      const logsForDate = approvedLogs.filter(log => 
+        log.logDate.toDateString() === dateObj.toDateString()
+      );
+      
+      let role: 'captain' | 'co-captain' | 'wingman' = 'wingman';
+      
+      // Check if employee was captain on any log for this date
+      if (logsForDate.some(log => log.captainId === employee.id)) {
+        role = 'captain';
+      } else {
+        // Check if employee was co-captain on any hours for this date
+        const hoursForDate = logsForDate.flatMap(log => log.hours || []);
+        if (hoursForDate.some(hour => hour.employeeId === employee.id && hour.isCoCaptain)) {
+          role = 'co-captain';
+        }
+      }
+      
+      return {
+        date: dateObj,
+        departments: Object.entries(data.departments)
+          .filter(([, hours]) => hours > 0)
+          .map(([dept, hours]) => ({
+            department: dept as Department,
+            hours,
+            rate: calculateHourlyWage(employee, dept as Department, role === 'captain' || role === 'co-captain'),
+          })),
+        tips: data.tips,
+        logIds: logsForDate.map(log => log.id),
+        role,
+      };
+    })
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 
   const tipsDetails: TipEntry[] = enhancedPayroll.tipsBreakdown;
@@ -869,11 +877,9 @@ export async function getPayrollSummary(
 
     const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
       ...commission,
+      ...convertCommissionDecimalFields(commission),
       jobType: commission.jobType as CommissionEntry['jobType'],
       status: commission.status as CommissionEntry['status'],
-      estimatedRevenue: Number(commission.estimatedRevenue),
-      actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
-      commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
       matchedLogId: commission.matchedLogId || undefined,
       matchedLog: commission.matchedLog ? {
         ...commission.matchedLog,

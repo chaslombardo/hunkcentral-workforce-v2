@@ -18,12 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -38,17 +32,12 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   TrendingUp,
   TrendingDown,
-  Calendar,
   DollarSign,
   Clock,
   Award,
@@ -59,8 +48,8 @@ import {
   AlertCircle,
   Info,
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import type { PayPeriod, User, Department } from '@/types';
+import { formatCurrency } from '@/lib/formatters';
+import type { PayPeriod, Department } from '@/types';
 
 // Types for pay period analysis
 export interface PayPeriodComparison {
@@ -173,21 +162,7 @@ const chartConfig = {
   },
 };
 
-const departmentColors = {
-  junk: '#026937',
-  move: '#ea7200',
-  zigma: '#10b981',
-  training: '#8b5cf6',
-  estimating: '#f59e0b',
-  warehouse: '#ef4444',
-  admin: '#6b7280',
-};
-
 export function PayPeriodAnalysis({
-  userId,
-  currentPeriod,
-  availablePeriods,
-  comparisonData,
   isLoading = false,
   error,
 }: PayPeriodAnalysisProps) {

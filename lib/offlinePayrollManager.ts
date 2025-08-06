@@ -67,7 +67,7 @@ export class OfflinePayrollManager {
       // Update sync timestamp
       localStorage.setItem(`${this.CACHE_PREFIX}last-sync-${payPeriodId}`, Date.now().toString());
       
-      console.log(`Cached ${type} data for user ${userId}, period ${payPeriodId}${tabName ? `, tab ${tabName}` : ''}`);
+      console.warn(`Cached ${type} data for user ${userId}, period ${payPeriodId}${tabName ? `, tab ${tabName}` : ''}`);
     } catch (error) {
       console.error('Failed to cache payroll data:', error);
       // If localStorage is full, try to clear old cache
@@ -96,14 +96,14 @@ export class OfflinePayrollManager {
       
       // Check if cache is expired
       if (this.isCacheExpired(parsedCache)) {
-        console.log(`Cache expired for ${cacheKey}, removing`);
+        console.warn(`Cache expired for ${cacheKey}, removing`);
         localStorage.removeItem(cacheKey);
         return null;
       }
 
       // Check version compatibility
       if (parsedCache.version !== this.CACHE_VERSION) {
-        console.log(`Cache version mismatch for ${cacheKey}, removing`);
+        console.warn(`Cache version mismatch for ${cacheKey}, removing`);
         localStorage.removeItem(cacheKey);
         return null;
       }
@@ -158,7 +158,7 @@ export class OfflinePayrollManager {
       keys.forEach(key => localStorage.removeItem(key));
       localStorage.removeItem(`${this.CACHE_PREFIX}last-sync-${payPeriodId}`);
       
-      console.log(`Cleared cache for pay period ${payPeriodId}`);
+      console.warn(`Cleared cache for pay period ${payPeriodId}`);
     } catch (error) {
       console.error('Failed to clear pay period cache:', error);
     }
@@ -175,7 +175,7 @@ export class OfflinePayrollManager {
       
       keys.forEach(key => localStorage.removeItem(key));
       
-      console.log('Cleared all payroll cache');
+      console.warn('Cleared all payroll cache');
     } catch (error) {
       console.error('Failed to clear all cache:', error);
     }
@@ -202,7 +202,7 @@ export class OfflinePayrollManager {
               clearedCount++;
             }
           }
-        } catch (error) {
+        } catch {
           // Remove corrupted cache entries
           localStorage.removeItem(key);
           clearedCount++;
@@ -210,7 +210,7 @@ export class OfflinePayrollManager {
       }
       
       if (clearedCount > 0) {
-        console.log(`Cleared ${clearedCount} expired/corrupted cache entries`);
+        console.warn(`Cleared ${clearedCount} expired/corrupted cache entries`);
       }
     } catch (error) {
       console.error('Failed to clear expired cache:', error);
@@ -253,7 +253,7 @@ export class OfflinePayrollManager {
     fetchFn: () => Promise<unknown>
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
-      console.log(`Attempting to sync data for user ${userId}, period ${payPeriodId}`);
+      console.warn(`Attempting to sync data for user ${userId}, period ${payPeriodId}`);
       
       const freshData = await fetchFn();
       
@@ -316,7 +316,7 @@ export class OfflinePayrollManager {
             expiredCount++;
           }
         }
-      } catch (error) {
+      } catch {
         // Count corrupted entries as expired
         expiredCount++;
       }
@@ -350,7 +350,8 @@ export class OfflinePayrollManager {
 export const offlinePayrollManager = OfflinePayrollManager.getInstance();
 
 // Hook for using offline payroll manager in React components
+import * as React from 'react';
+
 export function useOfflinePayrollManager() {
-  const React = require('react');
   return React.useMemo(() => offlinePayrollManager, []);
 }

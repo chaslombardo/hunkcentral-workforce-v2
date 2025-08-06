@@ -2,9 +2,15 @@
 
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { validatePayrollCalculation, createDiscrepancyReport } from '@/lib/payrollValidation';
+import { validatePayrollCalculation } from '@/lib/payrollValidation';
 import type { PayrollValidationResult, DiscrepancyReport, ValidationError } from '@/lib/payrollValidation';
-import type { User, DailyLog, CommissionEntry, PayPeriod } from '@/types';
+import type { User, DailyLog, CommissionEntry } from '@/types';
+import { 
+  convertUserDecimalFields, 
+  convertLogJobDecimalFields, 
+  convertLogHourDecimalFields,
+  convertCommissionDecimalFields 
+} from '@/lib/decimal-utils';
 
 export interface ValidationResponse {
   success: boolean;
@@ -186,24 +192,123 @@ export async function validateEmployeePayroll(
     };
 
     // Convert logs and commissions (simplified conversion for validation)
-    const logsForValidation: DailyLog[] = approvedLogs.map(log => ({
+    // Using unknown first to handle complex type conversions with circular references
+    const logsForValidation: DailyLog[] = (approvedLogs.map(log => ({
       ...log,
       status: log.status as DailyLog['status'],
       submittedAt: log.submittedAt || undefined,
       approvedAt: log.approvedAt || undefined,
       approvedById: log.approvedById || undefined,
       lastEditedById: log.lastEditedById || undefined,
-    })) as DailyLog[];
+      // Convert captain's Decimal fields to numbers using utility
+      captain: {
+        ...convertUserDecimalFields(log.captain),
+        salaryFrequency: log.captain.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.captain.salaryType as User['salaryType'],
+        roles: log.captain.roles as User['roles'],
+      },
+      // Convert approvedBy user if exists
+      approvedBy: log.approvedBy ? {
+        ...log.approvedBy,
+        rateJunkCaptain: log.approvedBy.rateJunkCaptain ? Number(log.approvedBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.approvedBy.rateJunkWingman ? Number(log.approvedBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.approvedBy.rateMoveCaptain ? Number(log.approvedBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.approvedBy.rateMoveWingman ? Number(log.approvedBy.rateMoveWingman) : undefined,
+        rateZigma: log.approvedBy.rateZigma ? Number(log.approvedBy.rateZigma) : undefined,
+        rateTraining: log.approvedBy.rateTraining ? Number(log.approvedBy.rateTraining) : undefined,
+        rateEstimating: log.approvedBy.rateEstimating ? Number(log.approvedBy.rateEstimating) : undefined,
+        rateWarehouse: log.approvedBy.rateWarehouse ? Number(log.approvedBy.rateWarehouse) : undefined,
+        rateAdmin: log.approvedBy.rateAdmin ? Number(log.approvedBy.rateAdmin) : undefined,
+        salaryAmount: log.approvedBy.salaryAmount ? Number(log.approvedBy.salaryAmount) : undefined,
+        commissionRate: log.approvedBy.commissionRate ? Number(log.approvedBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
+        moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
+        salaryFrequency: log.approvedBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.approvedBy.salaryType as User['salaryType'],
+        roles: log.approvedBy.roles as User['roles'],
+      } : undefined,
+      // Convert createdBy user
+      createdBy: {
+        ...log.createdBy,
+        rateJunkCaptain: log.createdBy.rateJunkCaptain ? Number(log.createdBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.createdBy.rateJunkWingman ? Number(log.createdBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.createdBy.rateMoveCaptain ? Number(log.createdBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.createdBy.rateMoveWingman ? Number(log.createdBy.rateMoveWingman) : undefined,
+        rateZigma: log.createdBy.rateZigma ? Number(log.createdBy.rateZigma) : undefined,
+        rateTraining: log.createdBy.rateTraining ? Number(log.createdBy.rateTraining) : undefined,
+        rateEstimating: log.createdBy.rateEstimating ? Number(log.createdBy.rateEstimating) : undefined,
+        rateWarehouse: log.createdBy.rateWarehouse ? Number(log.createdBy.rateWarehouse) : undefined,
+        rateAdmin: log.createdBy.rateAdmin ? Number(log.createdBy.rateAdmin) : undefined,
+        salaryAmount: log.createdBy.salaryAmount ? Number(log.createdBy.salaryAmount) : undefined,
+        commissionRate: log.createdBy.commissionRate ? Number(log.createdBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.createdBy.junkBonusGoal),
+        moveBonusGoal: Number(log.createdBy.moveBonusGoal),
+        salaryFrequency: log.createdBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.createdBy.salaryType as User['salaryType'],
+        roles: log.createdBy.roles as User['roles'],
+      },
+      // Convert lastEditedBy user if exists
+      lastEditedBy: log.lastEditedBy ? {
+        ...log.lastEditedBy,
+        rateJunkCaptain: log.lastEditedBy.rateJunkCaptain ? Number(log.lastEditedBy.rateJunkCaptain) : undefined,
+        rateJunkWingman: log.lastEditedBy.rateJunkWingman ? Number(log.lastEditedBy.rateJunkWingman) : undefined,
+        rateMoveCaptain: log.lastEditedBy.rateMoveCaptain ? Number(log.lastEditedBy.rateMoveCaptain) : undefined,
+        rateMoveWingman: log.lastEditedBy.rateMoveWingman ? Number(log.lastEditedBy.rateMoveWingman) : undefined,
+        rateZigma: log.lastEditedBy.rateZigma ? Number(log.lastEditedBy.rateZigma) : undefined,
+        rateTraining: log.lastEditedBy.rateTraining ? Number(log.lastEditedBy.rateTraining) : undefined,
+        rateEstimating: log.lastEditedBy.rateEstimating ? Number(log.lastEditedBy.rateEstimating) : undefined,
+        rateWarehouse: log.lastEditedBy.rateWarehouse ? Number(log.lastEditedBy.rateWarehouse) : undefined,
+        rateAdmin: log.lastEditedBy.rateAdmin ? Number(log.lastEditedBy.rateAdmin) : undefined,
+        salaryAmount: log.lastEditedBy.salaryAmount ? Number(log.lastEditedBy.salaryAmount) : undefined,
+        commissionRate: log.lastEditedBy.commissionRate ? Number(log.lastEditedBy.commissionRate) : undefined,
+        junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
+        moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
+        salaryFrequency: log.lastEditedBy.salaryFrequency as User['salaryFrequency'],
+        salaryType: log.lastEditedBy.salaryType as User['salaryType'],
+        roles: log.lastEditedBy.roles as User['roles'],
+      } : undefined,
+      // Convert job Decimal fields to numbers using utility
+      jobs: log.jobs.map(job => convertLogJobDecimalFields(job)),
+      // Convert hour Decimal fields to numbers using utility
+      hours: log.hours.map(hour => ({
+        ...convertLogHourDecimalFields(hour),
+        employee: {
+          ...convertUserDecimalFields(hour.employee),
+          salaryFrequency: hour.employee.salaryFrequency as User['salaryFrequency'],
+          salaryType: hour.employee.salaryType as User['salaryType'],
+          roles: hour.employee.roles as User['roles'],
+        },
+      })),
+    })) as unknown) as DailyLog[];
 
-    const commissionsForValidation: CommissionEntry[] = commissionEntries.map(commission => ({
+    const commissionsForValidation: CommissionEntry[] = (commissionEntries.map(commission => ({
       ...commission,
+      ...convertCommissionDecimalFields(commission),
       jobType: commission.jobType as CommissionEntry['jobType'],
       status: commission.status as CommissionEntry['status'],
-      estimatedRevenue: Number(commission.estimatedRevenue),
-      actualRevenue: commission.actualRevenue ? Number(commission.actualRevenue) : undefined,
-      commissionAmount: commission.commissionAmount ? Number(commission.commissionAmount) : undefined,
       matchedLogId: commission.matchedLogId || undefined,
-    })) as CommissionEntry[];
+      // Convert matchedLog if exists
+      matchedLog: commission.matchedLog ? {
+        ...commission.matchedLog,
+        status: commission.matchedLog.status as DailyLog['status'],
+        submittedAt: commission.matchedLog.submittedAt || undefined,
+        approvedAt: commission.matchedLog.approvedAt || undefined,
+        approvedById: commission.matchedLog.approvedById || undefined,
+        lastEditedById: commission.matchedLog.lastEditedById || undefined,
+        // Add required fields that are missing from the basic matchedLog
+        captain: {} as User, // This will be populated by the validation logic if needed
+        createdBy: {} as User, // This will be populated by the validation logic if needed
+        jobs: [], // This will be populated by the validation logic if needed
+        hours: [], // This will be populated by the validation logic if needed
+      } : undefined,
+      // Convert sales user Decimal fields to numbers using utility
+      sales: {
+        ...convertUserDecimalFields(commission.sales),
+        salaryFrequency: commission.sales.salaryFrequency as User['salaryFrequency'],
+        salaryType: commission.sales.salaryType as User['salaryType'],
+        roles: commission.sales.roles as User['roles'],
+      },
+    })) as unknown) as CommissionEntry[];
 
     // Perform validation
     const validationResult = validatePayrollCalculation(
@@ -320,8 +425,8 @@ export async function submitDiscrepancyReport(
         expectedOutcome: reportData.expectedOutcome?.trim(),
         contactEmail: reportData.contactEmail?.trim(),
         errors: JSON.stringify(reportData.errors),
+        severity: reportData.priority, // Use priority as severity
         status: 'open',
-        reportedAt: new Date(),
         reportedById: session.user.id,
       },
     }).catch((error) => {
@@ -414,7 +519,7 @@ export async function getEmployeeDiscrepancyReports(
         },
       },
       orderBy: {
-        reportedAt: 'desc',
+        createdAt: 'desc',
       },
     }).catch((error) => {
       console.error('Database error fetching discrepancy reports:', error);
@@ -427,7 +532,7 @@ export async function getEmployeeDiscrepancyReports(
       payPeriodId: report.payPeriodId,
       discrepancies: JSON.parse(report.errors as string) as ValidationError[],
       severity: report.priority as DiscrepancyReport['severity'],
-      reportedAt: report.reportedAt,
+      reportedAt: report.createdAt, // Use createdAt instead of reportedAt
       status: report.status as DiscrepancyReport['status'],
       resolution: report.resolution || undefined,
     }));

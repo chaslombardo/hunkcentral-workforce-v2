@@ -4,10 +4,8 @@ import * as React from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { 
   Card, 
-  CardAction,
   CardContent, 
   CardDescription, 
-  CardFooter,
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
@@ -25,12 +23,7 @@ import {
   Award
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
@@ -55,22 +48,7 @@ export function DailyWorkCalendar({
   payPeriodStart,
   payPeriodEnd,
 }: DailyWorkCalendarProps) {
-  const isMobile = useIsMobile();
   
-  // Handle undefined or null work entries array
-  if (!workEntries || !Array.isArray(workEntries)) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center text-muted-foreground">
-            <Calendar className="h-8 w-8 mx-auto mb-2" />
-            <p>Daily work data is not available</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   // Handle undefined work pattern stats
   const safeWorkPatternStats = workPatternStats || {
     totalDaysWorked: 0,
@@ -85,6 +63,9 @@ export function DailyWorkCalendar({
   
   // Create lookup map for work entries by date
   const workEntryMap = React.useMemo(() => {
+    if (!workEntries || !Array.isArray(workEntries)) {
+      return new Map<string, DailyWorkEntry>();
+    }
     const map = new Map<string, DailyWorkEntry>();
     workEntries.forEach(entry => {
       const dateKey = entry.date.toDateString();
@@ -92,6 +73,20 @@ export function DailyWorkCalendar({
     });
     return map;
   }, [workEntries]);
+
+  // Handle undefined or null work entries array
+  if (!workEntries || !Array.isArray(workEntries)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <Calendar className="h-8 w-8 mx-auto mb-2" />
+            <p>Daily work data is not available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Get work entry for selected date
   const selectedEntry = selectedDate ? workEntryMap.get(selectedDate.toDateString()) : null;

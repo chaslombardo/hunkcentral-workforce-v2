@@ -33,7 +33,6 @@ import {
   Info,
   Shield,
   Star,
-  Users,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { useIsMobile } from '@/hooks/use-mobile';

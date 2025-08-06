@@ -24,10 +24,13 @@ vi.mock('next/cache', () => ({
 const { auth } = await import('@/lib/auth');
 
 describe('Payroll Workflow Integration', () => {
+  // Generate unique test IDs to avoid conflicts
+  const testRunId = Date.now().toString();
+  
   const managerUser = {
     user: {
-      id: 'payroll-manager-id',
-      email: 'payroll-manager@test.com',
+      id: `payroll-manager-${testRunId}`,
+      email: `payroll-manager-${testRunId}@test.com`,
       fullName: 'Payroll Manager',
       roles: ['manager'],
     },
@@ -35,8 +38,8 @@ describe('Payroll Workflow Integration', () => {
 
   const salesUser = {
     user: {
-      id: 'payroll-sales-id',
-      email: 'payroll-sales@test.com',
+      id: `payroll-sales-${testRunId}`,
+      email: `payroll-sales-${testRunId}@test.com`,
       fullName: 'Payroll Sales',
       roles: ['sales'],
     },
@@ -48,8 +51,8 @@ describe('Payroll Workflow Integration', () => {
       data: [
         // Hourly captain with bonuses
         {
-          id: 'payroll-captain-id',
-          email: 'payroll-captain@test.com',
+          id: `payroll-captain-${testRunId}`,
+          email: `payroll-captain-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Payroll Captain',
           roles: ['captain'],
@@ -62,8 +65,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Hourly wingman
         {
-          id: 'payroll-wingman-id',
-          email: 'payroll-wingman@test.com',
+          id: `payroll-wingman-${testRunId}`,
+          email: `payroll-wingman-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Payroll Wingman',
           roles: ['wingman'],
@@ -72,8 +75,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Base salary employee
         {
-          id: 'payroll-salary-base-id',
-          email: 'payroll-salary-base@test.com',
+          id: `payroll-salary-base-${testRunId}`,
+          email: `payroll-salary-base-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Base Salary Employee',
           roles: ['admin'],
@@ -84,8 +87,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Guaranteed salary employee
         {
-          id: 'payroll-salary-guaranteed-id',
-          email: 'payroll-salary-guaranteed@test.com',
+          id: `payroll-salary-guaranteed-${testRunId}`,
+          email: `payroll-salary-guaranteed-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Guaranteed Salary Employee',
           roles: ['estimating'],
@@ -96,8 +99,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Supplemental salary employee
         {
-          id: 'payroll-salary-supplemental-id',
-          email: 'payroll-salary-supplemental@test.com',
+          id: `payroll-salary-supplemental-${testRunId}`,
+          email: `payroll-salary-supplemental-${testRunId}@test.com`,
           password: 'hashedpassword',
           fullName: 'Supplemental Salary Employee',
           roles: ['warehouse'],
@@ -108,8 +111,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Sales with commission
         {
-          id: 'payroll-sales-id',
-          email: 'payroll-sales@test.com',
+          id: salesUser.user.id,
+          email: salesUser.user.email,
           password: 'hashedpassword',
           fullName: 'Payroll Sales',
           roles: ['sales'],
@@ -118,8 +121,8 @@ describe('Payroll Workflow Integration', () => {
         },
         // Manager
         {
-          id: 'payroll-manager-id',
-          email: 'payroll-manager@test.com',
+          id: managerUser.user.id,
+          email: managerUser.user.email,
           password: 'hashedpassword',
           fullName: 'Payroll Manager',
           roles: ['manager'],

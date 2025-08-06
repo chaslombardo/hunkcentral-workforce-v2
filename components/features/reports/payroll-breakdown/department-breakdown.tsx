@@ -8,7 +8,6 @@ import {
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -28,12 +27,7 @@ import {
   Star,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+
 import type { Department, User } from '@/types';
 
 export interface DepartmentBreakdownData {

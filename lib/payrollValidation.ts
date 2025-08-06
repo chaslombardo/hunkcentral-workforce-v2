@@ -1,6 +1,6 @@
 // Payroll calculation validation and error detection
 import type { User, Department, DailyLog, CommissionEntry } from '@/types';
-import type { PayrollCalculation, EnhancedPayrollCalculation } from './payCalculator';
+import type { PayrollCalculation } from './payCalculator';
 import { calculatePayroll, calculateEnhancedPayroll } from './payCalculator';
 
 export interface ValidationError {

@@ -68,7 +68,7 @@ export function PayPeriodManager() {
       } else {
         toast.error(result.error || "Failed to load pay periods")
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load pay periods")
     } finally {
       setLoading(false)
@@ -85,7 +85,7 @@ export function PayPeriodManager() {
       } else {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to create pay period")
     }
   }
@@ -99,7 +99,7 @@ export function PayPeriodManager() {
       } else {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update pay period status")
     }
   }
@@ -113,7 +113,7 @@ export function PayPeriodManager() {
       } else {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete pay period")
     }
   }

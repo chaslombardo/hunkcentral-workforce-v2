@@ -33,14 +33,10 @@ import {
   FileText, 
   Loader2, 
   Printer,
-  FileImage,
   Settings,
-  Info,
   HelpCircle,
   Calendar,
-  Users,
-  DollarSign,
-  Clock
+  Users
 } from 'lucide-react';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation, TipEntry } from '@/lib/payCalculator';
@@ -89,10 +85,6 @@ export function PayrollExportDialog({
   onOpenChange,
   payrollData,
   selectedPeriod,
-  departmentBreakdown,
-  dailyWorkHistory,
-  tipsDetails,
-  currentUser,
 }: PayrollExportDialogProps) {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = React.useState(false);

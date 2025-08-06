@@ -66,8 +66,6 @@ export function DiscrepancyReportDialog({
   open,
   onOpenChange,
   errors,
-  employeeId,
-  payPeriodId,
   onSubmit,
 }: DiscrepancyReportDialogProps) {
   const { toast } = useToast();
@@ -145,7 +143,7 @@ export function DiscrepancyReportDialog({
 
       onOpenChange(false);
       form.reset();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Submission Failed',
         description: 'Failed to submit discrepancy report. Please try again.',
@@ -166,21 +164,6 @@ export function DiscrepancyReportDialog({
         return <Info className="h-4 w-4 text-blue-500" />;
       default:
         return <Info className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'text-red-600 bg-red-50 border-red-200';
-      case 'high':
-        return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'medium':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low':
-        return 'text-green-600 bg-green-50 border-green-200';
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 

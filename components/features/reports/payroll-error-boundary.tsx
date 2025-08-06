@@ -350,7 +350,7 @@ export function PayrollComponentErrorBoundary({
 }) {
   return (
     <PayrollErrorBoundary
-      fallback={({ error, resetError }) => (
+      fallback={({ resetError }) => (
         <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">

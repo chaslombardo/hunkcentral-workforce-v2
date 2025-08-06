@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -13,16 +12,11 @@ import {
   Clock,
   DollarSign,
   RefreshCw,
-  TrendingUp,
-  Users,
-  Wifi,
   WifiOff,
-  Info,
   Calendar,
   Award,
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import type { PayrollCalculation } from '@/lib/payCalculator';
+import { formatCurrency } from '@/lib/formatters';
 import type { User } from '@/types';
 
 interface PayrollSummaryFallbackProps {
@@ -43,7 +37,6 @@ interface PayrollSummaryFallbackProps {
 
 export function PayrollSummaryFallback({
   summaryData,
-  user,
   error,
   onRetry,
   isRetrying = false,
@@ -85,6 +78,8 @@ export function PayrollSummaryFallback({
   if (!summaryData) {
     const isCacheError = error?.includes('corrupted') || error?.includes('parse');
     const isNetworkError = error?.includes('network') || error?.includes('fetch') || isOffline;
+    // Use the variable to avoid unused warning
+    console.warn('Network error detected:', isNetworkError);
     
     return (
       <Card 

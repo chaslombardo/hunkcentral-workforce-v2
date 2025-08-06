@@ -59,7 +59,7 @@ export function useOperationPerformance() {
     const startTime = performance.now()
     
     return {
-      end: (_success: boolean = true) => {
+      end: () => {
         const endTime = performance.now()
         const duration = endTime - startTime
         

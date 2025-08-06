@@ -48,12 +48,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { TipEntry } from '@/lib/payCalculator';
@@ -78,30 +73,17 @@ export function TipsDetailView({
   const [filterBy, setFilterBy] = React.useState<FilterOption>('all');
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  // Handle undefined or null tips array
-  if (!tips || !Array.isArray(tips)) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center text-muted-foreground">
-            <DollarSign className="h-8 w-8 mx-auto mb-2" />
-            <p>Tips data is not available</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   // Calculate performance metrics
-  const totalJobs = tips.length;
+  const safeTips = tips || [];
+  const totalJobs = safeTips.length;
   const averageTipPerJob = totalJobs > 0 ? totalTips / totalJobs : 0;
-  const junkTips = tips.filter(tip => tip.jobType === 'junk');
-  const moveTips = tips.filter(tip => tip.jobType === 'move');
+  const junkTips = safeTips.filter(tip => tip.jobType === 'junk');
+  const moveTips = safeTips.filter(tip => tip.jobType === 'move');
   const averageJunkTip = junkTips.length > 0 ? junkTips.reduce((sum, tip) => sum + tip.myShare, 0) / junkTips.length : 0;
   const averageMoveTip = moveTips.length > 0 ? moveTips.reduce((sum, tip) => sum + tip.myShare, 0) / moveTips.length : 0;
 
-  // Find highest and lowest tip days
-  const dailyTips = tips.reduce((acc, tip) => {
+  // Find highest tip day
+  const dailyTips = safeTips.reduce((acc, tip) => {
     const dateKey = tip.date.toISOString().split('T')[0];
     acc[dateKey] = (acc[dateKey] || 0) + tip.myShare;
     return acc;
@@ -112,13 +94,11 @@ export function TipsDetailView({
     { date: new Date(), amount: 0 }
   );
 
-  const lowestTipDay = Object.entries(dailyTips).reduce((min, [date, amount]) => 
-    amount < min.amount ? { date: new Date(date), amount } : min, 
-    { date: new Date(), amount: Infinity }
-  );
-
   // Filter and sort tips
   const filteredAndSortedTips = React.useMemo(() => {
+    if (!tips || !Array.isArray(tips)) {
+      return [];
+    }
     let filtered = tips;
 
     // Apply job type filter
@@ -151,6 +131,20 @@ export function TipsDetailView({
       }
     });
   }, [tips, filterBy, searchQuery, sortBy]);
+
+  // Handle undefined or null tips array
+  if (!tips || !Array.isArray(tips)) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center text-muted-foreground">
+            <DollarSign className="h-8 w-8 mx-auto mb-2" />
+            <p>Tips data is not available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

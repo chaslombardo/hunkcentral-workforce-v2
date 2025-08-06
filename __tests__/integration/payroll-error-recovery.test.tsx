@@ -89,14 +89,14 @@ describe('Payroll Error Recovery Integration', () => {
     bonuses: 50,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mockLocalStorage.getItem.mockReturnValue(null);
     mockLocalStorage.setItem.mockImplementation(() => {});
     mockLocalStorage.removeItem.mockImplementation(() => {});
     
     // Reset offline detection to online by default
-    const { useOfflineDetection } = require('@/hooks/useOfflineDetection');
+    const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
     useOfflineDetection.mockReturnValue({
       isOnline: true,
       isOffline: false,
@@ -259,7 +259,7 @@ describe('Payroll Error Recovery Integration', () => {
 
   describe('Offline Mode Recovery', () => {
     it('should handle offline to online transition', async () => {
-      const { useOfflineDetection } = require('@/hooks/useOfflineDetection');
+      const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
       
       // Start offline
       useOfflineDetection.mockReturnValue({
@@ -323,7 +323,7 @@ describe('Payroll Error Recovery Integration', () => {
     });
 
     it('should provide offline-specific error messages', async () => {
-      const { useOfflineDetection } = require('@/hooks/useOfflineDetection');
+      const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
       
       useOfflineDetection.mockReturnValue({
         isOnline: false,

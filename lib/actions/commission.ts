@@ -7,6 +7,7 @@ import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/valid
 import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
 import { canModifyDataForDate } from '@/lib/actions/pay-periods';
+import { convertCommissionDecimalFields, convertUserDecimalFields } from '@/lib/decimal-utils';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {
@@ -24,14 +25,8 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
       throw new Error('Cannot create commission entry for this date - pay period is locked or closed');
     }
 
-    // Check if job ID already exists
-    const existingEntry = await prisma.commissionEntry.findUnique({
-      where: { jobId: validatedData.jobId },
-    });
-
-    if (existingEntry) {
-      throw new Error('Job ID already exists. Duplicate entries are not allowed.');
-    }
+    // Note: We allow duplicate job IDs from different sales people
+    // Conflicts will be detected and handled during the commission matching process
 
     // Create the commission entry
     const commissionEntry = await prisma.commissionEntry.create({
@@ -115,13 +110,8 @@ export async function getCommissionEntries(userId?: string) {
       },
     });
 
-    // Convert Decimal fields to numbers
-    const commissionEntries = entries.map(entry => ({
-      ...entry,
-      estimatedRevenue: Number(entry.estimatedRevenue),
-      actualRevenue: entry.actualRevenue ? Number(entry.actualRevenue) : null,
-      commissionAmount: entry.commissionAmount ? Number(entry.commissionAmount) : null,
-    }));
+    // Convert Decimal fields to numbers using utility
+    const commissionEntries = entries.map(entry => convertCommissionDecimalFields(entry));
 
     return { success: true, data: commissionEntries };
   } catch (error) {
@@ -158,7 +148,7 @@ export async function updateCommissionEntry(id: string, data: Partial<Commission
 
     // If updating jobId, check for duplicates
     if (data.jobId && data.jobId !== existingEntry.jobId) {
-      const duplicateEntry = await prisma.commissionEntry.findUnique({
+      const duplicateEntry = await prisma.commissionEntry.findFirst({
         where: { jobId: data.jobId },
       });
 
@@ -284,9 +274,11 @@ export async function getSalesUsers() {
       },
     });
 
-    // Convert Decimal to number
+    // Convert Decimal to number for commission rate only and return only needed fields
     const salesUsers = users.map(user => ({
-      ...user,
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
       commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
     }));
 
