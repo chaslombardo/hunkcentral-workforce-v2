@@ -7,7 +7,7 @@ import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/valid
 import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
 import { canModifyDataForDate } from '@/lib/actions/pay-periods';
-import { convertCommissionDecimalFields, convertUserDecimalFields } from '@/lib/decimal-utils';
+import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {

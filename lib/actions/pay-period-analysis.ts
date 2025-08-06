@@ -4,7 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { calculatePayroll } from '@/lib/payCalculator';
-import { convertCommissionDecimalFields, convertUserDecimalFields } from '@/lib/decimal-utils';
+import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
 import type { 
   User, 
   Department, 
