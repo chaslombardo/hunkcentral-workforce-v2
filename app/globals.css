@@ -19,6 +19,20 @@
     --accent: 28 100% 46%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
+    
+    /* Brand color mappings */
+    --brand-primary: 152 95% 15%; /* hunks-green-600 in HSL */
+    --brand-primary-foreground: 210 20% 98%;
+    --brand-primary-light: 152 95% 20%; /* hunks-green-500 in HSL */
+    --brand-primary-dark: 152 95% 12%; /* hunks-green-700 in HSL */
+    --brand-secondary: 28 100% 46%; /* hunks-orange-500 in HSL */
+    --brand-secondary-foreground: 210 20% 98%;
+    --brand-secondary-light: 28 100% 52%; /* hunks-orange-400 in HSL */
+    --brand-secondary-dark: 28 100% 36%; /* hunks-orange-600 in HSL */
+    --brand-success: 152 95% 15%; /* Same as brand-primary */
+    --brand-success-foreground: 210 20% 98%;
+    --brand-warning: 28 100% 46%; /* Same as brand-secondary */
+    --brand-warning-foreground: 210 20% 98%;
     --destructive-foreground: 210 20% 98%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
@@ -54,6 +68,20 @@
     --accent: 28 100% 46%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
+    
+    /* Brand color mappings - Dark mode */
+    --brand-primary: 152 95% 20%; /* Lighter in dark mode */
+    --brand-primary-foreground: 224 71.4% 4.1%;
+    --brand-primary-light: 152 95% 25%; /* hunks-green-400 in HSL */
+    --brand-primary-dark: 152 95% 15%; /* hunks-green-600 in HSL */
+    --brand-secondary: 28 100% 52%; /* Lighter in dark mode */
+    --brand-secondary-foreground: 224 71.4% 4.1%;
+    --brand-secondary-light: 28 100% 58%; /* hunks-orange-300 in HSL */
+    --brand-secondary-dark: 28 100% 46%; /* hunks-orange-500 in HSL */
+    --brand-success: 152 95% 20%; /* Same as brand-primary */
+    --brand-success-foreground: 224 71.4% 4.1%;
+    --brand-warning: 28 100% 52%; /* Same as brand-secondary */
+    --brand-warning-foreground: 224 71.4% 4.1%;
     --destructive-foreground: 210 20% 98%;
     --border: 215 27.9% 16.9%;
     --input: 215 27.9% 16.9%;
