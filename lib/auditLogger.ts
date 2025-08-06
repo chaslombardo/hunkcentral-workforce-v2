@@ -22,7 +22,10 @@ export async function createAuditLog(data: AuditLogData) {
       },
     });
   } catch (error) {
-    console.error('Failed to create audit log:', error);
+    // Only log in development to reduce console noise in production
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Audit log creation failed (non-critical):', error instanceof Error ? error.message : error);
+    }
     // Don't throw error to avoid breaking main functionality
   }
 }

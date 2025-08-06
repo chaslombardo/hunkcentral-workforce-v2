@@ -23,17 +23,24 @@ export function EntityAuditHistory({
 }: EntityAuditHistoryProps) {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
+      setError(null);
       try {
         const result = await getEntityAuditHistory(entityType, entityId);
         if (result.success) {
           setAuditLogs(result.data);
         }
       } catch (error) {
-        console.error('Failed to fetch audit history:', error);
+        // Only log in development, show user-friendly message in production
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to fetch audit history:', error);
+        }
+        // Set error state for user feedback instead of just logging
+        setError('Unable to load audit history. Please try again later.');
       } finally {
         setLoading(false);
       }

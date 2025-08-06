@@ -35,18 +35,25 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
     recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
   const fetchActivityData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await getUserActivitySummary(userId, startDate, endDate);
       if (result.success) {
         setActivityData(result.data);
       }
     } catch (error) {
-      console.error('Failed to fetch user activity:', error);
+      // Only log in development, show user-friendly message in production
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch user activity:', error);
+      }
+      // Set error state for user feedback instead of just logging
+      setError('Unable to load user activity. Please try again later.');
     } finally {
       setLoading(false);
     }

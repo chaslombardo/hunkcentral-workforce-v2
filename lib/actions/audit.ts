@@ -105,7 +105,10 @@ export async function getAuditLogs(
       },
     };
   } catch (error) {
-    console.error('Failed to fetch audit logs:', error);
+    // Only log detailed errors in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to fetch audit logs:', error);
+    }
     return {
       success: false,
       data: { logs: [], total: 0 },
@@ -169,7 +172,10 @@ export async function getEntityAuditHistory(
       data: logs as AuditLog[],
     };
   } catch (error) {
-    console.error('Failed to fetch entity audit history:', error);
+    // Only log detailed errors in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to fetch entity audit history:', error);
+    }
     return {
       success: false,
       data: [],

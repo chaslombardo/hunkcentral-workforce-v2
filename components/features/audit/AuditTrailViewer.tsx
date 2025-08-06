@@ -37,12 +37,14 @@ export function AuditTrailViewer({
   const searchParams = useSearchParams();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchAuditLogs = async () => {
       setLoading(true);
+      setError(null);
       try {
         const filters = {
           entityType: entityType || searchParams.get('entityType') || undefined,
@@ -59,7 +61,12 @@ export function AuditTrailViewer({
           setTotalPages(Math.ceil(result.data.total / limit));
         }
       } catch (error) {
-        console.error('Failed to fetch audit logs:', error);
+        // Only log in development, show user-friendly message in production
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to fetch audit logs:', error);
+        }
+        // Set error state for user feedback instead of just logging
+        setError('Unable to load audit logs. Please try again later.');
       } finally {
         setLoading(false);
       }
