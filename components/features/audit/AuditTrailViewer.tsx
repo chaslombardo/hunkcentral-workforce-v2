@@ -147,6 +147,17 @@ export function AuditTrailViewer({
     return <div className="text-center py-8">Loading audit trail...</div>;
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-destructive mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
