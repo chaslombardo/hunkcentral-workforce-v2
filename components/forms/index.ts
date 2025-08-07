@@ -3,5 +3,8 @@ export { FormFeedback, useFormFeedback, formFeedbackPresets } from './form-feedb
 export { useFormToast, useFormSubmission, formToastPresets } from './form-toast';
 export { FormFeedbackDemo } from './form-feedback-demo';
 export { SuccessAnimation, ConfettiSuccess, InlineSuccessCheck, LoadingToSuccess } from './success-animation';
+export { MobileForm, useMobileForm } from './mobile-form';
+export { MobileFormValidation, useMobileFormValidation, mobileValidationRules } from './mobile-form-validation';
+export { MobileFormDemo } from './mobile-form-demo';
 export type { SmartInputProps, ValidationRule } from './smart-input';
 export { SmartInputDemo } from './smart-input-demo';

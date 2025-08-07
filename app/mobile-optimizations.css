@@ -34,12 +34,38 @@
   
   /* Touch-friendly form controls - following shadcn/ui input patterns */
   input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
   input[type="search"],
   select,
   textarea {
     min-height: 48px; /* Increased from 44px */
     font-size: 16px; /* Prevents zoom on iOS */
     touch-action: manipulation;
+    /* Better focus states for mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Specific iOS input optimizations */
+  input[type="email"] {
+    text-transform: none; /* Prevent auto-capitalization */
+    autocapitalize: none;
+    autocorrect: off;
+  }
+  
+  input[type="tel"] {
+    text-transform: none;
+    autocapitalize: none;
+    autocorrect: off;
+  }
+  
+  input[type="url"] {
+    text-transform: none;
+    autocapitalize: none;
+    autocorrect: off;
   }
   
   /* Button sizing from dashboard-01 patterns - enhanced */
@@ -47,6 +73,33 @@
     min-height: 48px; /* Increased from 44px */
     min-width: 48px;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Form label optimizations */
+  label {
+    font-size: 16px; /* Consistent with inputs */
+    line-height: 1.5;
+    touch-action: manipulation;
+  }
+  
+  /* Select dropdown optimizations */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+  }
+  
+  /* Textarea optimizations */
+  textarea {
+    resize: vertical;
+    min-height: 96px; /* 2x input height */
+    line-height: 1.5;
   }
   
   /* Card optimizations for mobile */
@@ -85,6 +138,20 @@
   .ios-input-fix {
     font-size: 16px; /* Prevents zoom */
   }
+  
+  /* Fix iOS input styling issues */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea {
+    -webkit-appearance: none;
+    -webkit-border-radius: 0;
+    border-radius: 0.375rem; /* Restore border radius */
+  }
 }
 
 /* Performance optimizations for mobile */
@@ -93,12 +160,122 @@
   scroll-behavior: smooth;
 }
 
+/* Mobile form container optimizations */
+.mobile-form-optimization {
+  /* Ensure forms are touch-friendly */
+  touch-action: manipulation;
+  
+  /* Better spacing for mobile */
+  padding: 1rem;
+}
+
+@media (max-width: 640px) {
+  .mobile-form-optimization {
+    padding: 0.75rem;
+  }
+}
+
 /* Better mobile focus states using shadcn/ui focus-visible patterns */
 @media (max-width: 768px) {
   button:focus-visible,
   input:focus-visible,
-  select:focus-visible {
+  select:focus-visible,
+  textarea:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+    /* Enhanced focus ring for mobile */
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  
+  /* Remove default focus styles that interfere */
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+  }
+  
+  /* Better tap targets for checkboxes and radio buttons */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 20px;
+    min-height: 20px;
+    transform: scale(1.2);
+  }
+  
+  /* Label improvements for mobile */
+  label {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Form validation message optimizations */
+  .mobile-validation-message {
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+  }
+}
+
+/* Auto-save indicator optimizations */
+.auto-save-indicator {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .auto-save-indicator {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* Mobile keyboard optimizations */
+@media (max-width: 768px) {
+  /* Prevent viewport jumping when keyboard appears */
+  .mobile-form-container {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+  
+  /* Better spacing when keyboard is visible */
+  .keyboard-visible .mobile-form-container {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  /* Larger text for better readability */
+  .mobile-accessible-text {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Better contrast for mobile screens */
+  .mobile-high-contrast {
+    color: var(--foreground);
+    background: var(--background);
+  }
+  
+  /* Improved button states for mobile */
+  button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Better disabled states */
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }

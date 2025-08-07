@@ -36,6 +36,8 @@ export interface SmartInputProps extends Omit<React.ComponentProps<'input'>, 'on
   showPasswordToggle?: boolean;
   loading?: boolean;
   debounceMs?: number;
+  mobileOptimized?: boolean;
+  keyboardType?: 'default' | 'email' | 'numeric' | 'tel' | 'url' | 'search';
 }
 
 interface ValidationState {
@@ -63,6 +65,8 @@ export function SmartInput({
   showPasswordToggle = false,
   loading = false,
   debounceMs = 300,
+  mobileOptimized = true,
+  keyboardType = 'default',
   className,
   type = 'text',
   id,
@@ -234,6 +238,29 @@ export function SmartInput({
   const statusIcon = getStatusIcon();
   const inputType = showPasswordToggle && type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
+  // Determine the appropriate input type for mobile keyboards
+  const getMobileInputType = () => {
+    if (keyboardType !== 'default') {
+      switch (keyboardType) {
+        case 'email':
+          return 'email';
+        case 'numeric':
+          return 'number';
+        case 'tel':
+          return 'tel';
+        case 'url':
+          return 'url';
+        case 'search':
+          return 'search';
+        default:
+          return inputType;
+      }
+    }
+    return inputType;
+  };
+
+  const finalInputType = getMobileInputType();
+
   // Build aria-describedby
   const ariaDescribedBy = React.useMemo(() => {
     const ids: string[] = [];
@@ -259,13 +286,14 @@ export function SmartInput({
       <div className="relative">
         <Input
           id={inputId}
-          type={inputType}
+          type={finalInputType}
           value={value}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
           aria-describedby={ariaDescribedBy}
           aria-invalid={hasError ? 'true' : 'false'}
+          mobileOptimized={mobileOptimized}
           className={cn(
             "pr-10", // Space for status icon
             hasError && "border-destructive focus-visible:ring-destructive/20",

@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { 
-  CheckCircle2, 
   AlertCircle, 
   AlertTriangle,
   Info, 
@@ -13,7 +12,7 @@ import {
   ExternalLink,
   Lightbulb
 } from 'lucide-react';
-import { SuccessAnimation, InlineSuccessCheck } from './success-animation';
+import { InlineSuccessCheck } from './success-animation';
 
 export interface FormFeedbackProps {
   type: 'success' | 'error' | 'warning' | 'info';
