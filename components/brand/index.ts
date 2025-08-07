@@ -2,3 +2,5 @@ export { BrandButton, brandButtonVariants, type BrandButtonProps } from "./brand
 export { BrandButtonDemo } from "./brand-button-demo"
 export { BrandLoading, brandLoadingVariants, type BrandLoadingProps } from "./brand-loading"
 export { BrandLoadingDemo } from "./brand-loading-demo"
+export { MetricCard, MetricCardSkeleton, METRIC_PRESETS, type MetricCardProps } from "./metric-card"
+export { MetricCardDemo } from "./metric-card-demo"

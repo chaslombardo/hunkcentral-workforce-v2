@@ -20,7 +20,7 @@
   - Commit changes with descriptive message
   - _Requirements: 1.2, 4.4_
 
-- [-] 3. Create branded loading components
+- [x] 3. Create branded loading components
   - Implement BrandLoading component with spinner, dots, and pulse variants
   - Use College Hunks colors for all loading animations
   - Add size variants (sm, md, lg) for different contexts
@@ -29,7 +29,7 @@
   - Commit changes with descriptive message
   - _Requirements: 1.4, 7.5_
 
-- [ ] 4. Develop enhanced metric cards for dashboard
+- [-] 4. Develop enhanced metric cards for dashboard
   - Use shadcn/ui dashboard-01 block as foundation for MetricCard component
   - Extend shadcn/ui Card, CardHeader, CardContent with brand styling
   - Add trend indicators using shadcn/ui Badge and icons with brand colors
