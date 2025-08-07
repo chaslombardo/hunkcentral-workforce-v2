@@ -29,7 +29,7 @@
   - Commit changes with descriptive message
   - _Requirements: 1.4, 7.5_
 
-- [-] 4. Develop enhanced metric cards for dashboard
+- [x] 4. Develop enhanced metric cards for dashboard
   - Use shadcn/ui dashboard-01 block as foundation for MetricCard component
   - Extend shadcn/ui Card, CardHeader, CardContent with brand styling
   - Add trend indicators using shadcn/ui Badge and icons with brand colors
@@ -40,7 +40,7 @@
   - Commit changes with descriptive message
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 5. Create enhanced status indicator system
+- [-] 5. Create enhanced status indicator system
   - Extend shadcn/ui Badge component to create StatusIndicator with brand theming
   - Map status types to appropriate brand colors using shadcn/ui color system
   - Add animation support using shadcn/ui animation utilities for pending states

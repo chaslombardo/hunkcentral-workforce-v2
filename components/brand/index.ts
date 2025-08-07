@@ -4,3 +4,5 @@ export { BrandLoading, brandLoadingVariants, type BrandLoadingProps } from "./br
 export { BrandLoadingDemo } from "./brand-loading-demo"
 export { MetricCard, MetricCardSkeleton, METRIC_PRESETS, type MetricCardProps } from "./metric-card"
 export { MetricCardDemo } from "./metric-card-demo"
+export { StatusIndicator, StatusIndicators, getStatusType, type StatusIndicatorProps, type StatusType } from "./status-indicator"
+export { default as StatusIndicatorDemo } from "./status-indicator-demo"
