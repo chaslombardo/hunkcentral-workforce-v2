@@ -25,20 +25,22 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-// Mobile navigation data (same logic as AppSidebar)
+// Mobile navigation data (same logic as AppSidebar with grouped structure)
 const getNavigationData = (userRoles: string[] = []) => {
   const isAdmin = userRoles.includes('admin')
   const isManager = userRoles.includes('manager')
   const isCaptain = userRoles.includes('captain')
   const isSales = userRoles.includes('sales')
 
-  const navItems = []
+  const navigationGroups = []
 
-  navItems.push({
+  // Daily Operations Group
+  const dailyOperations = []
+  
+  dailyOperations.push({
     title: "Dashboard",
     url: "/dashboard",
     icon: Building2,
-    isActive: true,
   })
 
   if (isCaptain || isManager || isAdmin) {
@@ -51,8 +53,10 @@ const getNavigationData = (userRoles: string[] = []) => {
     if (isManager || isAdmin) {
       logItems.push({ title: "Review Logs", url: "/logs/review" })
     }
+    
+    logItems.push({ title: "View Logs", url: "/logs" })
 
-    navItems.push({
+    dailyOperations.push({
       title: "Daily Logs",
       url: "/logs",
       items: logItems,
@@ -60,40 +64,68 @@ const getNavigationData = (userRoles: string[] = []) => {
   }
 
   if (isSales || isAdmin) {
-    navItems.push({
+    dailyOperations.push({
       title: "Commission",
       url: "/commission",
       items: [
         { title: "Create Entry", url: "/commission/create" },
-        { title: "Track Status", url: "/commission/list" },
+        { title: "Track Commission", url: "/commission/list" },
       ],
     })
   }
 
+  if (dailyOperations.length > 0) {
+    navigationGroups.push({
+      title: "Daily Operations",
+      items: dailyOperations
+    })
+  }
+
+  // Reports & Analytics Group
+  const reportsAnalytics = []
+  
+  // Employee self-service payroll (always available)
+  reportsAnalytics.push({
+    title: "My Payroll",
+    url: "/reports/my-payroll",
+  })
+
+  // Management reports for managers and admins
   if (isManager || isAdmin) {
-    navItems.push({
-      title: "Reports",
-      url: "/reports",
+    reportsAnalytics.push({
+      title: "Payroll Reports",
+      url: "/reports/payroll",
       items: [
-        { title: "Payroll Reports", url: "/reports/payroll" },
-        { title: "My Payroll", url: "/reports/my-payroll" },
+        { title: "Current Period", url: "/reports/payroll" },
+        { title: "Analytics", url: "/reports/analytics" },
       ],
     })
   }
 
+  if (reportsAnalytics.length > 0) {
+    navigationGroups.push({
+      title: "Reports & Analytics",
+      items: reportsAnalytics
+    })
+  }
+
+  // Administration Group
   if (isAdmin) {
-    navItems.push({
+    navigationGroups.push({
       title: "Administration",
-      url: "/admin",
-      items: [
-        { title: "User Management", url: "/admin/users" },
-        { title: "Pay Periods", url: "/admin/pay-periods" },
-        { title: "Audit Trail", url: "/admin/audit" },
-      ],
+      items: [{
+        title: "User Management",
+        url: "/admin/users",
+        items: [
+          { title: "All Users", url: "/admin/users" },
+          { title: "Pay Periods", url: "/admin/pay-periods" },
+          { title: "Audit Trail", url: "/admin/audit" },
+        ],
+      }]
     })
   }
 
-  return { navMain: navItems }
+  return { navigationGroups }
 }
 
 interface MobileNavItemProps {
@@ -225,14 +257,26 @@ export function EnhancedMobileHeader() {
             <Separator />
             
             <div className="flex-1 overflow-y-auto p-4">
-              <nav className="space-y-2">
-                {navigationData.navMain.map((item) => (
-                  <MobileNavItem
-                    key={item.title}
-                    item={item}
-                    pathname={pathname}
-                    onNavigate={handleNavigate}
-                  />
+              <nav className="space-y-4">
+                {navigationData.navigationGroups.map((group, groupIndex) => (
+                  <div key={group.title}>
+                    <div className="px-2 py-1 text-xs font-semibold text-[#026937] uppercase tracking-wider">
+                      {group.title}
+                    </div>
+                    <div className="space-y-1 mt-2">
+                      {group.items.map((item) => (
+                        <MobileNavItem
+                          key={item.title}
+                          item={item}
+                          pathname={pathname}
+                          onNavigate={handleNavigate}
+                        />
+                      ))}
+                    </div>
+                    {groupIndex < navigationData.navigationGroups.length - 1 && (
+                      <Separator className="mt-4 bg-[#026937]/20" />
+                    )}
+                  </div>
                 ))}
               </nav>
             </div>

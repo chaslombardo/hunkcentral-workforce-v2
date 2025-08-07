@@ -12,74 +12,91 @@ import { NavMain } from "@/components/layout/nav-main"
 import { NavUser } from "@/components/layout/nav-user"
 import { useSession } from "@/hooks/useSession"
 
-// Mobile navigation data (same logic as AppSidebar)
+// Mobile navigation data (same logic as AppSidebar with grouped structure)
 const getNavigationData = (userRoles: string[] = []) => {
   const isAdmin = userRoles.includes('admin')
   const isManager = userRoles.includes('manager')
   const isCaptain = userRoles.includes('captain')
   const isSales = userRoles.includes('sales')
 
-  const navItems = []
-
-  navItems.push({
+  // Daily Operations - Core workflow items
+  const dailyOperations = []
+  
+  // Dashboard is always available
+  dailyOperations.push({
     title: "Dashboard",
     url: "/dashboard",
     icon: Building2,
-    isActive: true,
+    items: [],
   })
 
+  // Daily Logs for captains and managers
   if (isCaptain || isManager || isAdmin) {
-    const logItems = []
-    
-    if (isCaptain || isAdmin) {
-      logItems.push({ title: "Create Log", url: "/logs/create" })
-    }
-    
-    if (isManager || isAdmin) {
-      logItems.push({ title: "Review Logs", url: "/logs/review" })
-    }
-
-    navItems.push({
+    dailyOperations.push({
       title: "Daily Logs",
       url: "/logs",
-      items: logItems,
+      items: [
+        ...(isCaptain || isAdmin ? [
+          { title: "Create Log", url: "/logs/create" }
+        ] : []),
+        ...(isManager || isAdmin ? [
+          { title: "Review Logs", url: "/logs/review" }
+        ] : []),
+        { title: "View Logs", url: "/logs" },
+      ],
     })
   }
 
+  // Commission tracking for sales staff
   if (isSales || isAdmin) {
-    navItems.push({
+    dailyOperations.push({
       title: "Commission",
       url: "/commission",
       items: [
         { title: "Create Entry", url: "/commission/create" },
-        { title: "Track Status", url: "/commission/list" },
+        { title: "Track Commission", url: "/commission/list" },
       ],
     })
   }
 
+  // Reports & Analytics - Data and insights
+  const reportsAnalytics = []
+
+  // Employee self-service payroll (always available)
+  reportsAnalytics.push({
+    title: "My Payroll",
+    url: "/reports/my-payroll",
+    items: [],
+  })
+
+  // Management reports for managers and admins
   if (isManager || isAdmin) {
-    navItems.push({
-      title: "Reports",
-      url: "/reports",
+    reportsAnalytics.push({
+      title: "Payroll Reports",
+      url: "/reports/payroll",
       items: [
-        { title: "Payroll Reports", url: "/reports/payroll" },
-        { title: "My Payroll", url: "/reports/my-payroll" },
+        { title: "Current Period", url: "/reports/payroll" },
+        { title: "Analytics", url: "/reports/analytics" },
       ],
     })
   }
 
+  // Administration - System management
+  const administration = []
+  
   if (isAdmin) {
-    navItems.push({
-      title: "Administration",
-      url: "/admin",
+    administration.push({
+      title: "User Management",
+      url: "/admin/users",
       items: [
-        { title: "User Management", url: "/admin/users" },
+        { title: "All Users", url: "/admin/users" },
         { title: "Pay Periods", url: "/admin/pay-periods" },
+        { title: "Audit Trail", url: "/admin/audit" },
       ],
     })
   }
 
-  return { navMain: navItems }
+  return { dailyOperations, reportsAnalytics, administration }
 }
 
 export function MobileHeader() {
@@ -123,7 +140,22 @@ export function MobileHeader() {
             </div>
             
             <div className="flex-1 py-4">
-              <NavMain items={navigationData.navMain} />
+              <NavMain 
+                title="Daily Operations" 
+                items={navigationData.dailyOperations} 
+              />
+              {navigationData.reportsAnalytics.length > 0 && (
+                <NavMain 
+                  title="Reports & Analytics" 
+                  items={navigationData.reportsAnalytics} 
+                />
+              )}
+              {navigationData.administration.length > 0 && (
+                <NavMain 
+                  title="Administration" 
+                  items={navigationData.administration} 
+                />
+              )}
             </div>
             
             <div className="border-t pt-4">
