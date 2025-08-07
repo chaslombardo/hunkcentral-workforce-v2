@@ -5,6 +5,7 @@ import {
   UnifiedQuickActionsFAB 
 } from "@/components/layout/unified-mobile-navigation"
 import { MobileNetworkIndicator } from "@/components/ui/offline-indicator"
+import { NavigationProvider } from "@/contexts/navigation-context"
 
 export default function ProtectedLayout({
   children,
@@ -12,7 +13,7 @@ export default function ProtectedLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <NavigationProvider>
       {/* Mobile network indicator */}
       <MobileNetworkIndicator />
       
@@ -36,6 +37,6 @@ export default function ProtectedLayout({
       {/* Unified mobile navigation */}
       <UnifiedBottomNavigation />
       <UnifiedQuickActionsFAB />
-    </>
+    </NavigationProvider>
   )
 }

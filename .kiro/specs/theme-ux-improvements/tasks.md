@@ -70,7 +70,7 @@
   - Commit changes with descriptive message
   - _Requirements: 2.3_
 
-- [-] 8. Unify mobile navigation experience
+- [x] 8. Unify mobile navigation experience
   - Create single, consistent mobile navigation pattern
   - Replace dual navigation system with unified bottom navigation
   - Implement proper touch targets (48px minimum) for all mobile nav items
@@ -79,7 +79,7 @@
   - Commit changes with descriptive message
   - _Requirements: 2.4, 5.1, 5.2_
 
-- [ ] 9. Add navigation state management
+- [-] 9. Add navigation state management
   - Implement active state tracking for current page/section
   - Add navigation badges for pending items (e.g., logs awaiting review)
   - Create navigation context for sharing state across components

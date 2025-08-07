@@ -20,6 +20,8 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
+import { NavigationItemWithBadge } from "@/components/layout/navigation-badge"
+import { useNavigation } from "@/contexts/navigation-context"
 
 export function NavMain({
   title,
@@ -38,9 +40,30 @@ export function NavMain({
   }[]
 }) {
   const pathname = usePathname()
+  const { state, isActiveRoute } = useNavigation()
 
   if (items.length === 0) {
     return null
+  }
+
+  // Helper function to get badge info for navigation items
+  const getBadgeInfo = (url: string) => {
+    // Map navigation URLs to badge IDs
+    const badgeMap: Record<string, string> = {
+      '/logs': 'logs-review',
+      '/logs/review': 'logs-review',
+      '/logs/create': 'logs-draft',
+      '/commission': 'commission-pending',
+      '/commission/list': 'commission-pending',
+    }
+
+    const badgeId = badgeMap[url]
+    if (!badgeId || !state.badges[badgeId]) {
+      return { count: 0, type: 'pending' as const }
+    }
+
+    const badge = state.badges[badgeId]
+    return { count: badge.count, type: badge.type }
   }
 
   return (
@@ -51,8 +74,9 @@ export function NavMain({
         </SidebarGroupLabel>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
+            const isActive = isActiveRoute(item.url)
             const hasSubItems = item.items && item.items.length > 0
+            const badgeInfo = getBadgeInfo(item.url)
 
             return (
               <Collapsible
@@ -70,15 +94,29 @@ export function NavMain({
                       className="hover:bg-[#026937]/10 data-[active=true]:bg-[#026937]/15 data-[active=true]:text-[#026937] data-[active=true]:font-medium"
                     >
                       {hasSubItems ? (
-                        <div>
-                          {item.icon && <item.icon className="text-[#026937]" />}
-                          <span>{item.title}</span>
-                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-[#026937]" />
-                        </div>
+                        <NavigationItemWithBadge 
+                          badgeCount={badgeInfo.count} 
+                          badgeType={badgeInfo.type}
+                          className="w-full"
+                        >
+                          <div className="flex items-center w-full">
+                            {item.icon && <item.icon className="text-[#026937]" />}
+                            <span>{item.title}</span>
+                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-[#026937]" />
+                          </div>
+                        </NavigationItemWithBadge>
                       ) : (
-                        <Link href={item.url}>
-                          {item.icon && <item.icon className="text-[#026937]" />}
-                          <span>{item.title}</span>
+                        <Link href={item.url} className="w-full">
+                          <NavigationItemWithBadge 
+                            badgeCount={badgeInfo.count} 
+                            badgeType={badgeInfo.type}
+                            className="w-full"
+                          >
+                            <div className="flex items-center w-full">
+                              {item.icon && <item.icon className="text-[#026937]" />}
+                              <span>{item.title}</span>
+                            </div>
+                          </NavigationItemWithBadge>
                         </Link>
                       )}
                     </SidebarMenuButton>
@@ -88,6 +126,8 @@ export function NavMain({
                       <SidebarMenuSub>
                         {item.items?.map((subItem) => {
                           const isSubActive = pathname === subItem.url
+                          const subBadgeInfo = getBadgeInfo(subItem.url)
+                          
                           return (
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton 
@@ -95,8 +135,14 @@ export function NavMain({
                                 isActive={isSubActive}
                                 className="hover:bg-[#026937]/10 data-[active=true]:bg-[#026937]/15 data-[active=true]:text-[#026937] data-[active=true]:font-medium"
                               >
-                                <Link href={subItem.url}>
-                                  <span>{subItem.title}</span>
+                                <Link href={subItem.url} className="w-full">
+                                  <NavigationItemWithBadge 
+                                    badgeCount={subBadgeInfo.count} 
+                                    badgeType={subBadgeInfo.type}
+                                    className="w-full"
+                                  >
+                                    <span>{subItem.title}</span>
+                                  </NavigationItemWithBadge>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>

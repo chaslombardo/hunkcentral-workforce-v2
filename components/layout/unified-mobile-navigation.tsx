@@ -29,8 +29,10 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { NavUser } from "@/components/layout/nav-user"
 import { SmartBreadcrumbs } from "@/components/layout/smart-breadcrumbs"
+import { NavigationItemWithBadge } from "@/components/layout/navigation-badge"
 import { useSession } from "@/hooks/useSession"
 import { useHapticFeedback } from "@/hooks/useHapticFeedback"
+import { useNavigation } from "@/contexts/navigation-context"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -259,6 +261,7 @@ export function UnifiedBottomNavigation() {
   const { user } = useSession()
   const pathname = usePathname()
   const { tapFeedback } = useHapticFeedback()
+  const { state, isActiveRoute } = useNavigation()
   
   if (!user) {
     return null
@@ -269,11 +272,29 @@ export function UnifiedBottomNavigation() {
   // Update active state based on current path
   const updatedNavItems = bottomNavItems.map(item => ({
     ...item,
-    isActive: item.url !== "#" && (pathname === item.url || pathname.startsWith(item.url + "/"))
+    isActive: item.url !== "#" && isActiveRoute(item.url)
   }))
 
   const handleNavClick = () => {
     tapFeedback()
+  }
+
+  // Helper function to get badge info for mobile navigation items
+  const getBadgeInfo = (url: string) => {
+    const badgeMap: Record<string, string> = {
+      '/logs': 'logs-review',
+      '/commission': 'commission-pending',
+      '/reports/my-payroll': '', // No badges for payroll
+      '/dashboard': '', // No badges for dashboard
+    }
+
+    const badgeId = badgeMap[url]
+    if (!badgeId || !state.badges[badgeId]) {
+      return { count: 0, type: 'pending' as const }
+    }
+
+    const badge = state.badges[badgeId]
+    return { count: badge.count, type: badge.type }
   }
 
   return (
@@ -285,20 +306,25 @@ export function UnifiedBottomNavigation() {
               <MoreMenuButton key={item.title} />
             ) : (
               <Link key={item.title} href={item.url} onClick={handleNavClick}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "flex flex-col items-center gap-1 h-12 w-16 p-1 text-xs font-normal touch-manipulation",
-                    "min-h-[48px] min-w-[48px]", // Ensure 48px minimum touch target
-                    item.isActive 
-                      ? "text-[#026937] bg-[#026937]/10" 
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
+                <NavigationItemWithBadge 
+                  badgeCount={getBadgeInfo(item.url).count} 
+                  badgeType={getBadgeInfo(item.url).type}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="truncate">{item.title}</span>
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "flex flex-col items-center gap-1 h-12 w-16 p-1 text-xs font-normal touch-manipulation",
+                      "min-h-[48px] min-w-[48px]", // Ensure 48px minimum touch target
+                      item.isActive 
+                        ? "text-[#026937] bg-[#026937]/10" 
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="truncate">{item.title}</span>
+                  </Button>
+                </NavigationItemWithBadge>
               </Link>
             )
           ))}
@@ -409,6 +435,7 @@ function MobileNavItem({ item, onNavigate }: MobileNavItemProps) {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = React.useState(false)
   const { tapFeedback, selectionFeedback } = useHapticFeedback()
+  const { state } = useNavigation()
   const isActive = pathname === item.url || (item.items && item.items.some(subItem => pathname === subItem.url))
 
   const handleExpandClick = () => {
@@ -421,61 +448,106 @@ function MobileNavItem({ item, onNavigate }: MobileNavItemProps) {
     onNavigate()
   }
 
+  // Helper function to get badge info for mobile navigation items
+  const getBadgeInfo = (url: string) => {
+    const badgeMap: Record<string, string> = {
+      '/logs': 'logs-review',
+      '/logs/review': 'logs-review',
+      '/logs/create': 'logs-draft',
+      '/commission': 'commission-pending',
+      '/commission/list': 'commission-pending',
+    }
+
+    const badgeId = badgeMap[url]
+    if (!badgeId || !state.badges[badgeId]) {
+      return { count: 0, type: 'pending' as const }
+    }
+
+    const badge = state.badges[badgeId]
+    return { count: badge.count, type: badge.type }
+  }
+
   if (item.items && item.items.length > 0) {
+    const badgeInfo = getBadgeInfo(item.url)
+    
     return (
       <div className="space-y-1">
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-between h-12 px-4 text-left font-normal touch-manipulation",
-            "min-h-[48px]", // Ensure 48px minimum touch target
-            isActive && "bg-accent text-accent-foreground"
-          )}
-          onClick={handleExpandClick}
+        <NavigationItemWithBadge 
+          badgeCount={badgeInfo.count} 
+          badgeType={badgeInfo.type}
+          className="w-full"
         >
-          <div className="flex items-center gap-3">
-            {item.icon && <item.icon className="h-5 w-5" />}
-            <span>{item.title}</span>
-          </div>
-          <Menu className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-90")} />
-        </Button>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-between h-12 px-4 text-left font-normal touch-manipulation",
+              "min-h-[48px]", // Ensure 48px minimum touch target
+              isActive && "bg-accent text-accent-foreground"
+            )}
+            onClick={handleExpandClick}
+          >
+            <div className="flex items-center gap-3">
+              {item.icon && <item.icon className="h-5 w-5" />}
+              <span>{item.title}</span>
+            </div>
+            <Menu className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-90")} />
+          </Button>
+        </NavigationItemWithBadge>
         {isExpanded && (
           <div className="ml-8 space-y-1">
-            {item.items.map((subItem) => (
-              <Link key={subItem.url} href={subItem.url} onClick={handleNavClick}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start h-10 px-4 text-left font-normal text-sm touch-manipulation",
-                    "min-h-[48px]", // Ensure 48px minimum touch target
-                    pathname === subItem.url && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  {subItem.title}
-                </Button>
-              </Link>
-            ))}
+            {item.items.map((subItem) => {
+              const subBadgeInfo = getBadgeInfo(subItem.url)
+              
+              return (
+                <Link key={subItem.url} href={subItem.url} onClick={handleNavClick}>
+                  <NavigationItemWithBadge 
+                    badgeCount={subBadgeInfo.count} 
+                    badgeType={subBadgeInfo.type}
+                    className="w-full"
+                  >
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start h-10 px-4 text-left font-normal text-sm touch-manipulation",
+                        "min-h-[48px]", // Ensure 48px minimum touch target
+                        pathname === subItem.url && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      {subItem.title}
+                    </Button>
+                  </NavigationItemWithBadge>
+                </Link>
+              )
+            })}
           </div>
         )}
       </div>
     )
   }
 
+  const badgeInfo = getBadgeInfo(item.url)
+
   return (
     <Link href={item.url} onClick={handleNavClick}>
-      <Button
-        variant="ghost"
-        className={cn(
-          "w-full justify-start h-12 px-4 text-left font-normal touch-manipulation",
-          "min-h-[48px]", // Ensure 48px minimum touch target
-          isActive && "bg-accent text-accent-foreground"
-        )}
+      <NavigationItemWithBadge 
+        badgeCount={badgeInfo.count} 
+        badgeType={badgeInfo.type}
+        className="w-full"
       >
-        <div className="flex items-center gap-3">
-          {item.icon && <item.icon className="h-5 w-5" />}
-          <span>{item.title}</span>
-        </div>
-      </Button>
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start h-12 px-4 text-left font-normal touch-manipulation",
+            "min-h-[48px]", // Ensure 48px minimum touch target
+            isActive && "bg-accent text-accent-foreground"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            {item.icon && <item.icon className="h-5 w-5" />}
+            <span>{item.title}</span>
+          </div>
+        </Button>
+      </NavigationItemWithBadge>
     </Link>
   )
 }
