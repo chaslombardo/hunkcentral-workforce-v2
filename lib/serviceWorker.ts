@@ -47,7 +47,7 @@ export class ServiceWorkerManager {
 
       return this.registration
     } catch (error) {
-      console.error('Service Worker registration failed:', error)
+      // Service Worker registration failed
       return null
     }
   }
@@ -116,7 +116,7 @@ export class ServiceWorkerManager {
       await syncManager?.register('log-submission')
       await syncManager?.register('commission-submission')
     } catch (error) {
-      console.error('Background sync registration failed:', error)
+      // Background sync registration failed
     }
   }
 
@@ -161,7 +161,7 @@ export class ServiceWorkerManager {
           timestamp: Date.now()
         }))
       } catch (error) {
-        console.error('Failed to store offline data:', error)
+        // Failed to store offline data
       }
     }
   }
@@ -175,7 +175,7 @@ export class ServiceWorkerManager {
           return parsed.data
         }
       } catch (error) {
-        console.error('Failed to retrieve offline data:', error)
+        // Failed to retrieve offline data
       }
     }
     return null

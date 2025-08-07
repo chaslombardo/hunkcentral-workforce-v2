@@ -92,7 +92,7 @@ export async function createPayPeriod(input: CreatePayPeriodInput) {
     revalidatePath("/admin/pay-periods")
     return { success: true, data: payPeriod as PayPeriod }
   } catch (error) {
-    console.error("Error creating pay period:", error)
+    // Error creating pay period
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to create pay period" 
@@ -134,7 +134,7 @@ export async function updatePayPeriodStatus(input: UpdatePayPeriodStatusInput) {
     revalidatePath("/admin/pay-periods")
     return { success: true, data: payPeriod as PayPeriod }
   } catch (error) {
-    console.error("Error updating pay period status:", error)
+    // Error updating pay period status
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to update pay period status" 
@@ -155,7 +155,7 @@ export async function getPayPeriods() {
 
     return { success: true, data: payPeriods as PayPeriod[] }
   } catch (error) {
-    console.error("Error fetching pay periods:", error)
+    // Error fetching pay periods
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to fetch pay periods" 
@@ -189,7 +189,7 @@ export async function deletePayPeriod(id: string) {
     revalidatePath("/admin/pay-periods")
     return { success: true }
   } catch (error) {
-    console.error("Error deleting pay period:", error)
+    // Error deleting pay period
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to delete pay period" 
@@ -214,7 +214,7 @@ export async function getPayPeriodById(id: string) {
 
     return { success: true, data: payPeriod as PayPeriod }
   } catch (error) {
-    console.error("Error fetching pay period:", error)
+    // Error fetching pay period
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to fetch pay period" 
@@ -237,7 +237,7 @@ export async function canModifyDataForDate(date: Date) {
 
     return !payPeriod // Can modify if no locked/closed period found
   } catch (error) {
-    console.error("Error checking data modification permissions:", error)
+    // Error checking data modification permissions
     return false // Default to not allowing modifications on error
   }
 }

@@ -73,7 +73,7 @@ export async function createUser(data: CreateUserFormData) {
     revalidatePath('/admin/users');
     return { success: true, user: { id: user.id, email: user.email, fullName: user.fullName } };
   } catch (error) {
-    console.error('Error creating user:', error);
+    // Error creating user
     if (error instanceof Error) {
       return { 
         success: false, 
@@ -163,7 +163,7 @@ export async function updateUser(data: UpdateUserFormData) {
     revalidatePath('/admin/users');
     return { success: true, user: { id: updatedUser.id, email: updatedUser.email, fullName: updatedUser.fullName } };
   } catch (error) {
-    console.error('Error updating user:', error);
+    // Error updating user
     if (error instanceof Error) {
       return { 
         success: false, 
@@ -233,7 +233,7 @@ export async function deleteUser(userId: string) {
     revalidatePath('/admin/users');
     return { success: true };
   } catch (error) {
-    console.error('Error deleting user:', error);
+    // Error deleting user
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to delete user' 
@@ -329,7 +329,7 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
       },
     };
   } catch (error) {
-    console.error('Error fetching users:', error);
+    // Error fetching users
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to fetch users' 
@@ -378,7 +378,7 @@ export async function getUserById(userId: string) {
 
     return { success: true, user };
   } catch (error) {
-    console.error('Error fetching user:', error);
+    // Error fetching user
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to fetch user' 
@@ -444,7 +444,7 @@ export async function copyUserSettings(fromUserId: string, toUserId: string) {
     revalidatePath('/admin/users');
     return { success: true };
   } catch (error) {
-    console.error('Error copying user settings:', error);
+    // Error copying user settings
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to copy user settings' 

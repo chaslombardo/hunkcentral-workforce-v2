@@ -259,7 +259,7 @@ export async function getDailyWorkBreakdown(
       },
     };
   } catch (error) {
-    console.error('Error fetching daily work breakdown:', error);
+    // Error fetching daily work breakdown
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch daily work breakdown',

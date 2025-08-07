@@ -44,7 +44,7 @@ export function useOfflinePayrollData(payPeriodId: string) {
           }
         }
       } catch (error) {
-        console.warn('Failed to load cached payroll data:', error);
+        // Failed to load cached payroll data
       }
     };
 
@@ -70,7 +70,7 @@ export function useOfflinePayrollData(payPeriodId: string) {
         payPeriodId,
       }));
     } catch (error) {
-      console.warn('Failed to cache payroll data:', error);
+      // Failed to cache payroll data
     }
   }, [payPeriodId]);
 
@@ -84,7 +84,7 @@ export function useOfflinePayrollData(payPeriodId: string) {
       const cached = localStorage.getItem(key);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
-      console.warn('Failed to get cached payroll data:', error);
+      // Failed to get cached payroll data
       return null;
     }
   }, [payPeriodId]);
@@ -102,7 +102,7 @@ export function useOfflinePayrollData(payPeriodId: string) {
       setCachedData(null);
       setLastSyncAt(null);
     } catch (error) {
-      console.warn('Failed to clear cached payroll data:', error);
+      // Failed to clear cached payroll data
     }
   }, [payPeriodId]);
 

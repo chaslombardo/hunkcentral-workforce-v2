@@ -53,7 +53,7 @@ export class PayrollErrorBoundary extends React.Component<
     });
 
     // Log error for debugging
-    console.error('PayrollErrorBoundary caught an error:', error, errorInfo);
+    // PayrollErrorBoundary caught an error
     
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
@@ -104,7 +104,7 @@ function PayrollErrorFallback({
     try {
       resetError();
     } catch (retryError) {
-      console.error('Retry failed:', retryError);
+      // Retry failed
     } finally {
       setIsRetrying(false);
     }
@@ -119,7 +119,7 @@ function PayrollErrorFallback({
       );
       keys.forEach(key => localStorage.removeItem(key));
     } catch (cacheError) {
-      console.warn('Failed to clear cache before reload:', cacheError);
+      // Failed to clear cache before reload
     }
     
     window.location.reload();
@@ -143,7 +143,7 @@ function PayrollErrorFallback({
       // Attempt retry after clearing cache
       handleRetry();
     } catch (cacheError) {
-      console.error('Failed to clear cache:', cacheError);
+      // Failed to clear cache
     }
   };
 
@@ -382,7 +382,7 @@ export function PayrollComponentErrorBoundary({
         </Card>
       )}
       onError={(error, errorInfo) => {
-        console.error(`Error in ${componentName}:`, error, errorInfo);
+        // Component error occurred
       }}
     >
       {children}

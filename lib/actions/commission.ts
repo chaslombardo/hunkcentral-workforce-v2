@@ -57,7 +57,7 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
     revalidatePath('/commission');
     return { success: true, data: commissionEntry };
   } catch (error) {
-    console.error('Error creating commission entry:', error);
+    // Error creating commission entry
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
@@ -115,7 +115,7 @@ export async function getCommissionEntries(userId?: string) {
 
     return { success: true, data: commissionEntries };
   } catch (error) {
-    console.error('Error fetching commission entries:', error);
+    // Error fetching commission entries
     return { success: false, error: 'Failed to fetch commission entries' };
   }
 }
@@ -184,7 +184,7 @@ export async function updateCommissionEntry(id: string, data: Partial<Commission
     revalidatePath('/commission');
     return { success: true, data: updatedEntry };
   } catch (error) {
-    console.error('Error updating commission entry:', error);
+    // Error updating commission entry
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
@@ -240,7 +240,7 @@ export async function deleteCommissionEntry(id: string) {
     revalidatePath('/commission');
     return { success: true };
   } catch (error) {
-    console.error('Error deleting commission entry:', error);
+    // Error deleting commission entry
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
@@ -284,7 +284,7 @@ export async function getSalesUsers() {
 
     return { success: true, data: salesUsers };
   } catch (error) {
-    console.error('Error fetching sales users:', error);
+    // Error fetching sales users
     return { success: false, error: 'Failed to fetch sales users' };
   }
 }

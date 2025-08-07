@@ -54,7 +54,7 @@ export function PayrollSummaryFallback({
     try {
       await onRetry();
     } catch (retryError) {
-      console.error('Retry failed in fallback:', retryError);
+      // Retry failed in fallback
     }
   }, [onRetry]);
 
@@ -70,7 +70,7 @@ export function PayrollSummaryFallback({
       // Wait a moment then retry
       setTimeout(handleRetry, 500);
     } catch (cacheError) {
-      console.error('Failed to clear cache:', cacheError);
+      // Failed to clear cache
       handleRetry(); // Try anyway
     }
   }, [handleRetry]);
@@ -79,7 +79,7 @@ export function PayrollSummaryFallback({
     const isCacheError = error?.includes('corrupted') || error?.includes('parse');
     const isNetworkError = error?.includes('network') || error?.includes('fetch') || isOffline;
     // Use the variable to avoid unused warning
-    console.warn('Network error detected:', isNetworkError);
+    // Network error detected
     
     return (
       <Card 

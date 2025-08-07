@@ -131,7 +131,7 @@ export async function saveDraftLog(
       } 
     };
   } catch (error) {
-    console.error('Error saving draft log:', error);
+    // Error saving draft log
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to save draft' 
@@ -209,7 +209,7 @@ export async function submitLog(
       };
     }
   } catch (error) {
-    console.error('Error submitting log:', error);
+    // Error submitting log
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to submit log' 
@@ -281,7 +281,7 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
       }
     };
   } catch (error) {
-    console.error('Error loading log:', error);
+    // Error loading log
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to load log' 
@@ -358,7 +358,7 @@ export async function getLogsForReview(): Promise<LogActionResult> {
       data: reviewData
     };
   } catch (error) {
-    console.error('Error getting logs for review:', error);
+    // Error getting logs for review
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to get logs for review' 
@@ -442,7 +442,7 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
       }
     };
   } catch (error) {
-    console.error('Error approving log:', error);
+    // Error approving log
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to approve log' 
@@ -513,7 +513,7 @@ export async function rejectLog(logId: string, comments: string): Promise<LogAct
       }
     };
   } catch (error) {
-    console.error('Error rejecting log:', error);
+    // Error rejecting log
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to reject log' 
@@ -554,7 +554,7 @@ export async function bulkApproveLogs(logIds: string[], comments?: string): Prom
       }
     };
   } catch (error) {
-    console.error('Error bulk approving logs:', error);
+    // Error bulk approving logs
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to bulk approve logs' 
@@ -599,7 +599,7 @@ export async function bulkRejectLogs(logIds: string[], comments: string): Promis
       }
     };
   } catch (error) {
-    console.error('Error bulk rejecting logs:', error);
+    // Error bulk rejecting logs
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to bulk reject logs' 

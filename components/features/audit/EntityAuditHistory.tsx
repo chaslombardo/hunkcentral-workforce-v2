@@ -38,7 +38,7 @@ export function EntityAuditHistory({
       } catch (error) {
         // Only log in development, show user-friendly message in production
         if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to fetch audit history:', error);
+          // Failed to fetch audit history
         }
         // Set error state for user feedback instead of just logging
         setError('Unable to load audit history. Please try again later.');

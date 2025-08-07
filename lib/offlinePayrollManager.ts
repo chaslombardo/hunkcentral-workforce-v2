@@ -67,9 +67,9 @@ export class OfflinePayrollManager {
       // Update sync timestamp
       localStorage.setItem(`${this.CACHE_PREFIX}last-sync-${payPeriodId}`, Date.now().toString());
       
-      console.warn(`Cached ${type} data for user ${userId}, period ${payPeriodId}${tabName ? `, tab ${tabName}` : ''}`);
+      // Cached data successfully
     } catch (error) {
-      console.error('Failed to cache payroll data:', error);
+      // Failed to cache payroll data
       // If localStorage is full, try to clear old cache
       this.clearExpiredCache();
     }
@@ -96,21 +96,21 @@ export class OfflinePayrollManager {
       
       // Check if cache is expired
       if (this.isCacheExpired(parsedCache)) {
-        console.warn(`Cache expired for ${cacheKey}, removing`);
+        // Cache expired, removing
         localStorage.removeItem(cacheKey);
         return null;
       }
 
       // Check version compatibility
       if (parsedCache.version !== this.CACHE_VERSION) {
-        console.warn(`Cache version mismatch for ${cacheKey}, removing`);
+        // Cache version mismatch, removing
         localStorage.removeItem(cacheKey);
         return null;
       }
 
       return parsedCache;
     } catch (error) {
-      console.error('Failed to retrieve cached data:', error);
+      // Failed to retrieve cached data
       // If parsing fails, remove corrupted cache
       const cacheKey = this.getCacheKey(type, userId, payPeriodId, tabName);
       localStorage.removeItem(cacheKey);
@@ -158,9 +158,9 @@ export class OfflinePayrollManager {
       keys.forEach(key => localStorage.removeItem(key));
       localStorage.removeItem(`${this.CACHE_PREFIX}last-sync-${payPeriodId}`);
       
-      console.warn(`Cleared cache for pay period ${payPeriodId}`);
+      // Cleared cache for pay period
     } catch (error) {
-      console.error('Failed to clear pay period cache:', error);
+      // Failed to clear pay period cache
     }
   }
 
@@ -175,9 +175,9 @@ export class OfflinePayrollManager {
       
       keys.forEach(key => localStorage.removeItem(key));
       
-      console.warn('Cleared all payroll cache');
+      // Cleared all payroll cache
     } catch (error) {
-      console.error('Failed to clear all cache:', error);
+      // Failed to clear all cache
     }
   }
 
@@ -210,10 +210,10 @@ export class OfflinePayrollManager {
       }
       
       if (clearedCount > 0) {
-        console.warn(`Cleared ${clearedCount} expired/corrupted cache entries`);
+        // Cleared expired/corrupted cache entries
       }
     } catch (error) {
-      console.error('Failed to clear expired cache:', error);
+      // Failed to clear expired cache
     }
   }
 
@@ -253,7 +253,7 @@ export class OfflinePayrollManager {
     fetchFn: () => Promise<unknown>
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     try {
-      console.warn(`Attempting to sync data for user ${userId}, period ${payPeriodId}`);
+      // Attempting to sync data
       
       const freshData = await fetchFn();
       
@@ -263,7 +263,7 @@ export class OfflinePayrollManager {
       return { success: true, data: freshData };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sync failed';
-      console.error('Sync failed:', error);
+      // Sync failed
       
       // Try to return cached data as fallback
       const cached = await this.getCachedData('summary', userId, payPeriodId);

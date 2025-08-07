@@ -63,7 +63,7 @@ export function AuditTrailViewer({
       } catch (error) {
         // Only log in development, show user-friendly message in production
         if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to fetch audit logs:', error);
+          // Failed to fetch audit logs
         }
         // Set error state for user feedback instead of just logging
         setError('Unable to load audit logs. Please try again later.');

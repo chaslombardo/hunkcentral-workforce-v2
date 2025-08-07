@@ -30,7 +30,7 @@ self.addEventListener('install', (event) => {
         return self.skipWaiting()
       })
       .catch((error) => {
-        console.error('Service Worker: Error caching static assets', error)
+        // Service Worker: Error caching static assets
       })
   )
 })
@@ -276,11 +276,11 @@ async function syncLogSubmissions() {
           await cache.delete(request)
         }
       } catch (error) {
-        console.error('Service Worker: Failed to sync log submission', error)
+        // Service Worker: Failed to sync log submission
       }
     }
   } catch (error) {
-    console.error('Service Worker: Error syncing log submissions', error)
+    // Service Worker: Error syncing log submissions
   }
 }
 
@@ -301,11 +301,11 @@ async function syncCommissionSubmissions() {
           await cache.delete(request)
         }
       } catch (error) {
-        console.error('Service Worker: Failed to sync commission submission', error)
+        // Service Worker: Failed to sync commission submission
       }
     }
   } catch (error) {
-    console.error('Service Worker: Error syncing commission submissions', error)
+    // Service Worker: Error syncing commission submissions
   }
 }
 

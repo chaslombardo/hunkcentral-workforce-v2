@@ -47,7 +47,7 @@ export function PayrollReportDashboard() {
           }
         }
       } catch (error) {
-        console.error('Error loading payroll data:', error);
+        // Error loading payroll data
       } finally {
         setIsLoading(false);
       }

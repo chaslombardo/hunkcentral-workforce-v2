@@ -212,7 +212,7 @@ export async function getPayPeriodComparison(
 
     return { success: true, data: comparison };
   } catch (error) {
-    console.error('Error fetching pay period comparison:', error);
+    // Error fetching pay period comparison
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch pay period comparison',
@@ -621,7 +621,7 @@ export async function getHistoricalPayrollData(
 
     return { success: true, data: historicalData };
   } catch (error) {
-    console.error('Error fetching historical payroll data:', error);
+    // Error fetching historical payroll data
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch historical payroll data',

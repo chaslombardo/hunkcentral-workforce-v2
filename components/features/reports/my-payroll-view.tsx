@@ -404,7 +404,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
-        console.error('Summary loading error:', error);
+        // Summary loading error
         
         // Always provide fallback data to ensure UI renders
         const fallbackSummary = {
@@ -446,7 +446,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               validationResult = validationResponse.data;
             }
           } catch (validationError) {
-            console.warn('Validation data unavailable:', validationError);
+            // Validation data unavailable
             // Continue without validation data rather than failing entirely
           }
         }
@@ -464,7 +464,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
-        console.error('Details loading error:', error);
+        // Details loading error
         
         // Always provide fallback data to ensure UI renders
         const fallbackDetails = {
@@ -541,7 +541,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
-        console.error(`Summary retry attempt ${attempt + 1} failed:`, error);
+        // Summary retry attempt failed
         
         if (attempt === maxRetries - 1) {
           // Final attempt failed, try cached data
@@ -553,7 +553,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               setHasOfflineData(true);
               setSummaryError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
             } catch (parseError) {
-              console.error('Failed to parse cached summary data:', parseError);
+              // Failed to parse cached summary data
               setSummaryError(`${errorMessage} (cached data corrupted, no fallback available)`);
               localStorage.removeItem(`payroll-summary-${selectedPeriod.id}`);
             }
@@ -599,7 +599,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               validationResult = validationResponse.data;
             }
           } catch (validationError) {
-            console.warn('Validation data unavailable during retry:', validationError);
+            // Validation data unavailable during retry
             // Don't fail the entire retry for validation issues
           }
         }
@@ -627,7 +627,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
-        console.error(`Details retry attempt ${attempt + 1} failed:`, error);
+        // Details retry attempt failed
         
         if (attempt === maxRetries - 1) {
           // Final attempt failed, try cached data
@@ -639,7 +639,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               setDetailedData(parsed);
               setDetailsError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
             } catch (parseError) {
-              console.error('Failed to parse cached details data:', parseError);
+              // Failed to parse cached details data
               setDetailsError(`${errorMessage} (cached data corrupted, no fallback available)`);
               localStorage.removeItem(cacheKey);
             }

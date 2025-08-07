@@ -17,7 +17,7 @@ export function PerformanceMonitor() {
       
       // Warn about slow page loads
       if (loadTime > 3000) {
-        console.warn(`Slow page load detected: ${loadTime.toFixed(2)}ms`)
+        // Slow page load detected
         
         // Only show toast in development
         if (process.env.NODE_ENV === 'development') {
@@ -36,7 +36,7 @@ export function PerformanceMonitor() {
     const score = getPerformanceScore()
     
     if (score < 60) {
-      console.warn(`Poor performance score: ${score}/100`)
+      // Poor performance score detected
     }
   }, [metrics, getPerformanceScore])
 
@@ -65,7 +65,7 @@ export function useOperationPerformance() {
         
         // Log slow operations
         if (duration > 1000) {
-          console.warn(`Slow operation: ${operationName} took ${duration.toFixed(2)}ms`)
+          // Slow operation detected
         }
         
         return duration

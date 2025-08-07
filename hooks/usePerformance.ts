@@ -133,7 +133,7 @@ export function usePerformance() {
       
       // Log to analytics or monitoring service
       if (loadTime > 1000) {
-        console.warn(`Slow page load detected for ${pageName}: ${loadTime.toFixed(2)}ms`)
+        // Slow page load detected
       }
       
       return loadTime
@@ -149,7 +149,7 @@ export function usePerformance() {
       
       // Log slow API calls
       if (duration > 2000) {
-        console.warn(`Slow API call detected for ${apiName}: ${duration.toFixed(2)}ms`)
+        // Slow API call detected
       }
       
       return duration

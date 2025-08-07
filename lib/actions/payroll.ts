@@ -152,7 +152,7 @@ export async function getDetailedPayrollBreakdown(
 
     return { success: true, data: detailedData };
   } catch (error) {
-    console.error('Error fetching detailed payroll breakdown:', error);
+    // Error fetching detailed payroll breakdown
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch payroll breakdown',
@@ -936,7 +936,7 @@ export async function getPayrollSummary(
       },
     };
   } catch (error) {
-    console.error('Error fetching payroll summary:', error);
+    // Error fetching payroll summary
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch payroll summary',
@@ -969,7 +969,7 @@ export async function getEmployeePayPeriods(employeeId?: string) {
 
     return { success: true, data: payPeriods };
   } catch (error) {
-    console.error('Error fetching employee pay periods:', error);
+    // Error fetching employee pay periods
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch pay periods',

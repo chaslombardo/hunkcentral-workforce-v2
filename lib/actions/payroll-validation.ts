@@ -70,7 +70,7 @@ export async function validateEmployeePayroll(
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
     }).catch((error) => {
-      console.error('Database error fetching pay period:', error);
+      // Database error fetching pay period
       throw new Error('Unable to access pay period data. Please try again.');
     });
 
@@ -110,7 +110,7 @@ export async function validateEmployeePayroll(
         updatedAt: true,
       },
     }).catch((error) => {
-      console.error('Database error fetching employee:', error);
+      // Database error fetching employee
       throw new Error('Unable to access employee data. Please try again.');
     });
 
@@ -145,7 +145,7 @@ export async function validateEmployeePayroll(
         },
       },
     }).catch((error) => {
-      console.error('Database error fetching logs:', error);
+      // Database error fetching logs
       throw new Error('Unable to access work log data. Please try again.');
     });
 
@@ -166,7 +166,7 @@ export async function validateEmployeePayroll(
         sales: true,
       },
     }).catch((error) => {
-      console.error('Database error fetching commissions:', error);
+      // Database error fetching commissions
       throw new Error('Unable to access commission data. Please try again.');
     });
 
@@ -325,7 +325,7 @@ export async function validateEmployeePayroll(
     };
 
   } catch (error) {
-    console.error('Error validating payroll:', error);
+    // Error validating payroll
     
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     
@@ -401,7 +401,7 @@ export async function submitDiscrepancyReport(
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
     }).catch((error) => {
-      console.error('Database error fetching pay period for report:', error);
+      // Database error fetching pay period for report
       throw new Error('Unable to verify pay period. Please try again.');
     });
 
@@ -430,7 +430,7 @@ export async function submitDiscrepancyReport(
         reportedById: session.user.id,
       },
     }).catch((error) => {
-      console.error('Database error creating discrepancy report:', error);
+      // Database error creating discrepancy report
       throw new Error('Unable to submit your report. Please try again.');
     });
 
@@ -443,7 +443,7 @@ export async function submitDiscrepancyReport(
     };
 
   } catch (error) {
-    console.error('Error submitting discrepancy report:', error);
+    // Error submitting discrepancy report
     
     const errorMessage = error instanceof Error ? error.message : 'Failed to submit report';
     
@@ -522,7 +522,7 @@ export async function getEmployeeDiscrepancyReports(
         createdAt: 'desc',
       },
     }).catch((error) => {
-      console.error('Database error fetching discrepancy reports:', error);
+      // Database error fetching discrepancy reports
       throw new Error('Unable to load discrepancy reports. Please try again.');
     });
 
@@ -543,7 +543,7 @@ export async function getEmployeeDiscrepancyReports(
     };
 
   } catch (error) {
-    console.error('Error fetching discrepancy reports:', error);
+    // Error fetching discrepancy reports
     
     const errorMessage = error instanceof Error ? error.message : 'Failed to load reports';
     

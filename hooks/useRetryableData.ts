@@ -227,7 +227,7 @@ export function useGracefulDegradation<T, F>(
       const result = await primaryFn();
       setData(result);
     } catch (primaryError) {
-      console.warn('Primary data source failed, trying fallback:', primaryError);
+      // Primary data source failed, trying fallback
       
       try {
         // Try fallback function

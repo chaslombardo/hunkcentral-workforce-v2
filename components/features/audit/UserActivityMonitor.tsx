@@ -50,7 +50,7 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
     } catch (error) {
       // Only log in development, show user-friendly message in production
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to fetch user activity:', error);
+        // Failed to fetch user activity
       }
       // Set error state for user feedback instead of just logging
       setError('Unable to load user activity. Please try again later.');

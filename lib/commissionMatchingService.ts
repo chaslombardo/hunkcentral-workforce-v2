@@ -119,7 +119,7 @@ export async function handleLogApprovalCommissionMatching(
       matchResult,
     };
   } catch (error) {
-    console.error('Error in commission matching service:', error);
+    // Error in commission matching service
     
     return {
       success: false,
@@ -265,7 +265,7 @@ export async function resolveCommissionConflict(
       notifications,
     };
   } catch (error) {
-    console.error('Error resolving commission conflict:', error);
+    // Error resolving commission conflict
     
     return {
       success: false,
@@ -417,7 +417,7 @@ export async function getCommissionConflicts(): Promise<{
       conflicts,
     };
   } catch (error) {
-    console.error('Error getting commission conflicts:', error);
+    // Error getting commission conflicts
     
     return {
       success: false,
@@ -494,7 +494,7 @@ export async function getCommissionMatchingStats(): Promise<{
       },
     };
   } catch (error) {
-    console.error('Error getting commission matching stats:', error);
+    // Error getting commission matching stats
     
     return {
       success: false,

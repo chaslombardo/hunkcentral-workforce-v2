@@ -78,7 +78,7 @@ export function useOfflineDetection(): OfflineState {
         if (navigator.onLine) {
           // Browser thinks we're online but request failed
           // This could indicate poor connectivity or server issues
-          console.warn('Connectivity check failed despite navigator.onLine being true:', error);
+          // Connectivity check failed despite navigator.onLine being true
         }
         setIsOnline(false);
         setWasOffline(true);
