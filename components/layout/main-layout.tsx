@@ -2,14 +2,7 @@
 
 import * as React from "react"
 import { AppSidebar } from "@/components/layout/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { SmartBreadcrumbs } from "@/components/layout/smart-breadcrumbs"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -21,13 +14,9 @@ import { OfflineIndicator, ConnectionQualityIndicator } from "@/components/ui/of
 
 interface MainLayoutProps {
   children: React.ReactNode
-  breadcrumbs?: {
-    label: string
-    href?: string
-  }[]
 }
 
-export function MainLayout({ children, breadcrumbs = [] }: MainLayoutProps) {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -39,28 +28,7 @@ export function MainLayout({ children, breadcrumbs = [] }: MainLayoutProps) {
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-            {breadcrumbs.length > 0 && (
-              <Breadcrumb>
-                <BreadcrumbList>
-                  {breadcrumbs.map((breadcrumb, index) => (
-                    <React.Fragment key={index}>
-                      <BreadcrumbItem className={index === 0 ? "hidden md:block" : ""}>
-                        {breadcrumb.href ? (
-                          <BreadcrumbLink href={breadcrumb.href}>
-                            {breadcrumb.label}
-                          </BreadcrumbLink>
-                        ) : (
-                          <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
-                        )}
-                      </BreadcrumbItem>
-                      {index < breadcrumbs.length - 1 && (
-                        <BreadcrumbSeparator className="hidden md:block" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </BreadcrumbList>
-              </Breadcrumb>
-            )}
+            <SmartBreadcrumbs />
           </div>
           <div className="flex items-center gap-2 px-4">
             <OfflineIndicator />

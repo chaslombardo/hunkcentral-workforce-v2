@@ -20,6 +20,7 @@ import {
 
 import { Separator } from "@/components/ui/separator"
 import { NavUser } from "@/components/layout/nav-user"
+import { SmartBreadcrumbs } from "@/components/layout/smart-breadcrumbs"
 import { useSession } from "@/hooks/useSession"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -216,28 +217,29 @@ export function EnhancedMobileHeader() {
   }
 
   return (
-    <div className="flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-      <div className="flex items-center gap-2">
-        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#026937] text-white">
-          <Building2 className="size-4" />
+    <div className="md:hidden">
+      <div className="flex h-16 items-center justify-between border-b bg-background px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#026937] text-white">
+            <Building2 className="size-4" />
+          </div>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-medium text-[#026937]">College Hunks</span>
+            <span className="truncate text-xs text-muted-foreground">Workforce Management</span>
+          </div>
         </div>
-        <div className="grid flex-1 text-left text-sm leading-tight">
-          <span className="truncate font-medium text-[#026937]">College Hunks</span>
-          <span className="truncate text-xs text-muted-foreground">Workforce Management</span>
-        </div>
-      </div>
 
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-12 w-12 md:hidden" // Larger touch target
-          >
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-12 w-12" // Larger touch target
+            >
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
+          </SheetTrigger>
         <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
           <div className="flex h-full flex-col">
             <SheetHeader className="p-6 pb-4">
@@ -288,7 +290,17 @@ export function EnhancedMobileHeader() {
             </div>
           </div>
         </SheetContent>
-      </Sheet>
+        </Sheet>
+      </div>
+      
+      {/* Mobile breadcrumbs - shown below header */}
+      <div className="border-b bg-background px-4 py-2">
+        <SmartBreadcrumbs 
+          className="flex sm:hidden" 
+          maxItems={3} 
+          showIcons={false}
+        />
+      </div>
     </div>
   )
 }

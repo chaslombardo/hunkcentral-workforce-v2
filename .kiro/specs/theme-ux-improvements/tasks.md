@@ -51,7 +51,7 @@
 
 ## Phase 2: Navigation & Information Architecture (Week 2)
 
-- [-] 6. Simplify sidebar navigation structure
+- [x] 6. Simplify sidebar navigation structure
   - Use shadcn/ui sidebar-07 block as foundation for enhanced navigation
   - Reorganize navigation items using shadcn/ui Sidebar, SidebarContent patterns
   - Implement role-based filtering using existing shadcn/ui conditional rendering
@@ -61,7 +61,7 @@
   - Commit changes with descriptive message
   - _Requirements: 2.1, 2.2, 2.5_
 
-- [ ] 7. Implement smart breadcrumb system
+- [-] 7. Implement smart breadcrumb system
   - Create SmartBreadcrumbs component with dynamic path generation
   - Add support for parameterized routes (e.g., log details, user profiles)
   - Include icons in breadcrumb items for better visual hierarchy
