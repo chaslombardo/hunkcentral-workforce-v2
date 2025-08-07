@@ -1,2 +1,4 @@
 export { BrandButton, brandButtonVariants, type BrandButtonProps } from "./brand-button"
 export { BrandButtonDemo } from "./brand-button-demo"
+export { BrandLoading, brandLoadingVariants, type BrandLoadingProps } from "./brand-loading"
+export { BrandLoadingDemo } from "./brand-loading-demo"
