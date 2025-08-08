@@ -13,6 +13,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { InlineSuccessCheck } from './success-animation';
+import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
 
 export interface FormFeedbackProps {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -71,7 +72,7 @@ const feedbackVariants = {
   }
 };
 
-export function FormFeedback({
+export const FormFeedback = React.memo(function FormFeedback({
   type,
   title,
   message,
@@ -84,8 +85,26 @@ export function FormFeedback({
   showAnimation = true,
   className
 }: FormFeedbackProps) {
-  const variant = feedbackVariants[type];
-  const Icon = variant.icon;
+  const monitor = usePerformanceMonitor('FormFeedback');
+  const startMarkRef = React.useRef<string>('');
+
+  // Performance monitoring
+  React.useLayoutEffect(() => {
+    startMarkRef.current = monitor.startRender();
+  });
+
+  React.useLayoutEffect(() => {
+    monitor.endRender(startMarkRef.current);
+  });
+
+  // Warn about large props in development
+  React.useEffect(() => {
+    bundleAnalysis.warnLargeProps('FormFeedback', { actions, suggestions }, 300);
+  }, [actions, suggestions]);
+
+  // Memoize variant and icon
+  const variant = React.useMemo(() => feedbackVariants[type], [type]);
+  const Icon = React.useMemo(() => variant.icon, [variant]);
 
   // Auto-dismiss success messages after 5 seconds
   React.useEffect(() => {
@@ -209,7 +228,7 @@ export function FormFeedback({
       )}
     </Alert>
   );
-}
+});
 
 // Preset configurations for common form feedback scenarios
 export const formFeedbackPresets = {

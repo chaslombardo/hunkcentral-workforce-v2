@@ -3,6 +3,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
 
 const brandLoadingVariants = cva(
   "inline-flex items-center justify-center",
@@ -110,7 +111,7 @@ const SpinnerIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
-const BrandLoading = React.forwardRef<HTMLDivElement, BrandLoadingProps>(
+const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingProps>(
   ({ 
     className, 
     variant, 
@@ -120,7 +121,24 @@ const BrandLoading = React.forwardRef<HTMLDivElement, BrandLoadingProps>(
     respectReducedMotion = true,
     ...props 
   }, ref) => {
-    // Check for reduced motion preference
+    const monitor = usePerformanceMonitor('BrandLoading');
+    const startMarkRef = React.useRef<string>('');
+
+    // Performance monitoring
+    React.useLayoutEffect(() => {
+      startMarkRef.current = monitor.startRender();
+    });
+
+    React.useLayoutEffect(() => {
+      monitor.endRender(startMarkRef.current);
+    });
+
+    // Warn about large props in development
+    React.useEffect(() => {
+      bundleAnalysis.warnLargeProps('BrandLoading', props, 200);
+    }, [props]);
+
+    // Check for reduced motion preference - memoized
     const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
     
     React.useEffect(() => {
@@ -137,7 +155,8 @@ const BrandLoading = React.forwardRef<HTMLDivElement, BrandLoadingProps>(
       }
     }, [respectReducedMotion])
 
-    const renderLoadingIndicator = () => {
+    // Memoize the loading indicator to prevent unnecessary re-renders
+    const renderLoadingIndicator = React.useMemo(() => {
       // If user prefers reduced motion, show static version
       if (prefersReducedMotion && respectReducedMotion) {
         return (
@@ -187,7 +206,13 @@ const BrandLoading = React.forwardRef<HTMLDivElement, BrandLoadingProps>(
             </div>
           )
       }
-    }
+    }, [prefersReducedMotion, respectReducedMotion, variant, size, color, className])
+
+    // Memoize text color class
+    const textColorClass = React.useMemo(() => 
+      cn("text-sm", color === "white" ? "text-white" : "text-muted-foreground"),
+      [color]
+    );
 
     return (
       <div
@@ -197,16 +222,16 @@ const BrandLoading = React.forwardRef<HTMLDivElement, BrandLoadingProps>(
         aria-label={text ? `Loading: ${text}` : "Loading"}
         {...props}
       >
-        {renderLoadingIndicator()}
+        {renderLoadingIndicator}
         {text && (
-          <span className={cn("text-sm", color === "white" ? "text-white" : "text-muted-foreground")}>
+          <span className={textColorClass}>
             {text}
           </span>
         )}
       </div>
     )
   }
-)
+));
 
 BrandLoading.displayName = "BrandLoading"
 

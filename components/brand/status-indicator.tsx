@@ -24,6 +24,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor";
 
 // Status type definitions based on common application statuses
 export type StatusType = 
@@ -148,7 +149,7 @@ export interface StatusIndicatorProps
  * StatusIndicator component that extends shadcn/ui Badge with brand theming
  * and consistent status visualization patterns.
  */
-export function StatusIndicator({
+export const StatusIndicator = React.memo(function StatusIndicator({
   status,
   text,
   showIcon = true,
@@ -158,35 +159,65 @@ export function StatusIndicator({
   className,
   ...props
 }: StatusIndicatorProps) {
-  const IconComponent = CustomIcon || statusIcons[status];
-  const displayText = text || status.charAt(0).toUpperCase() + status.slice(1);
+  const monitor = usePerformanceMonitor('StatusIndicator');
+  const startMarkRef = React.useRef<string>('');
+
+  // Performance monitoring
+  React.useLayoutEffect(() => {
+    startMarkRef.current = monitor.startRender();
+  });
+
+  React.useLayoutEffect(() => {
+    monitor.endRender(startMarkRef.current);
+  });
+
+  // Warn about large props in development
+  React.useEffect(() => {
+    bundleAnalysis.warnLargeProps('StatusIndicator', props, 200);
+  }, [props]);
+
+  // Memoize icon component selection
+  const IconComponent = React.useMemo(() => CustomIcon || statusIcons[status], [CustomIcon, status]);
   
-  // Determine if this status should be animated
-  const shouldAnimate = animated && (status === 'processing' || status === 'pending');
+  // Memoize display text
+  const displayText = React.useMemo(() => 
+    text || status.charAt(0).toUpperCase() + status.slice(1), 
+    [text, status]
+  );
+  
+  // Memoize animation state
+  const shouldAnimate = React.useMemo(() => 
+    animated && (status === 'processing' || status === 'pending'), 
+    [animated, status]
+  );
+
+  // Memoize icon size classes
+  const iconSizeClass = React.useMemo(() => cn(
+    "flex-shrink-0",
+    size === 'sm' ? "h-3 w-3" : size === 'lg' ? "h-4 w-4" : "h-3.5 w-3.5",
+    shouldAnimate && "animate-spin"
+  ), [size, shouldAnimate]);
+
+  // Memoize badge classes
+  const badgeClassName = React.useMemo(() => cn(
+    statusIndicatorVariants({ status, size, animated: shouldAnimate }),
+    "border",
+    className
+  ), [status, size, shouldAnimate, className]);
   
   return (
     <Badge
-      className={cn(
-        statusIndicatorVariants({ status, size, animated: shouldAnimate }),
-        "border",
-        className
-      )}
+      className={badgeClassName}
       data-testid="status-indicator"
       {...props}
     >
       {showIcon && IconComponent && (
-        <IconComponent 
-          className={cn(
-            "flex-shrink-0",
-            size === 'sm' ? "h-3 w-3" : size === 'lg' ? "h-4 w-4" : "h-3.5 w-3.5",
-            shouldAnimate && "animate-spin"
-          )} 
-        />
+        <IconComponent className={iconSizeClass} />
       )}
       <span className="truncate">{displayText}</span>
     </Badge>
   );
-}
+});
 
 /**
  * Utility function to get appropriate status type from string values

@@ -19,6 +19,7 @@ import {
   CardTitle 
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
 
 // Types extending shadcn/ui component props
 export interface MetricCardProps extends React.ComponentProps<typeof Card> {
@@ -84,8 +85,8 @@ const getTrendIcon = (type: 'increase' | 'decrease' | 'neutral') => {
   }
 }
 
-// Loading skeleton component
-function MetricCardSkeleton({ className }: { className?: string }) {
+// Loading skeleton component - memoized for performance
+const MetricCardSkeleton = React.memo(function MetricCardSkeleton({ className }: { className?: string }) {
   return (
     <Card className={cn("border-l-4", className)}>
       <CardHeader>
@@ -109,44 +110,66 @@ function MetricCardSkeleton({ className }: { className?: string }) {
       </CardFooter>
     </Card>
   )
-}
+})
 
-export function MetricCard({
+const MetricCard = React.memo(function MetricCard({
   title,
   value,
   description,
   change,
   icon: Icon,
   color = 'neutral',
-  trend: _trend, // Reserved for future mini-chart implementation
+  trend, // Reserved for future mini-chart implementation
   loading = false,
   footer,
   className,
   ...props
 }: MetricCardProps) {
-  const colorClasses = colorVariants[color]
-  const TrendIcon = change ? getTrendIcon(change.type) : null
+  const monitor = usePerformanceMonitor('MetricCard');
+  const startMarkRef = React.useRef<string>('');
+
+  // Performance monitoring
+  React.useLayoutEffect(() => {
+    startMarkRef.current = monitor.startRender();
+  });
+
+  React.useLayoutEffect(() => {
+    monitor.endRender(startMarkRef.current);
+  });
+
+  // Warn about large props in development
+  React.useEffect(() => {
+    bundleAnalysis.warnLargeProps('MetricCard', props, 500);
+  }, [props]);
+
+  // Memoized calculations to prevent unnecessary re-computations
+  const colorClasses = React.useMemo(() => colorVariants[color], [color]);
+  const TrendIcon = React.useMemo(() => change ? getTrendIcon(change.type) : null, [change]);
+
+  // Memoized formatters
+  const formatChange = React.useCallback((changeValue: number) => {
+    const sign = changeValue > 0 ? '+' : ''
+    return `${sign}${changeValue}%`
+  }, []);
+
+  // Memoized display value calculation
+  const displayValue = React.useMemo(() => {
+    return typeof value === 'number' 
+      ? value === 0 
+        ? '0' 
+        : value.toLocaleString()
+      : value || '—'
+  }, [value]);
+
+  // Memoized empty state check
+  const isEmpty = React.useMemo(() => {
+    return (typeof value === 'number' && value === 0) || !value
+  }, [value]);
 
   // Show loading skeleton
   if (loading) {
     return <MetricCardSkeleton className={cn(colorClasses.border, className)} />
   }
-
-  // Format the change value with proper sign
-  const formatChange = (changeValue: number) => {
-    const sign = changeValue > 0 ? '+' : ''
-    return `${sign}${changeValue}%`
-  }
-
-  // Handle empty/zero values
-  const displayValue = typeof value === 'number' 
-    ? value === 0 
-      ? '0' 
-      : value.toLocaleString()
-    : value || '—'
-
-  // Determine if this is an empty state
-  const isEmpty = (typeof value === 'number' && value === 0) || !value
 
   return (
     <Card 
@@ -213,10 +236,10 @@ export function MetricCard({
       )}
     </Card>
   )
-}
+});
 
-// Export the skeleton for external use
-export { MetricCardSkeleton }
+// Export the memoized component and skeleton
+export { MetricCard, MetricCardSkeleton }
 
 // Preset configurations for common metrics
 export const METRIC_PRESETS = {

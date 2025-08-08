@@ -13,6 +13,7 @@ import {
   EyeOff,
   Loader2 
 } from 'lucide-react';
+import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
 
 export interface ValidationRule {
   test: (value: string) => boolean | Promise<boolean>;
@@ -50,7 +51,7 @@ interface ValidationState {
   hasBeenFocused: boolean;
 }
 
-export function SmartInput({
+export const SmartInput = React.memo(function SmartInput({
   label,
   error,
   success,
@@ -72,6 +73,22 @@ export function SmartInput({
   id,
   ...props
 }: SmartInputProps) {
+  const monitor = usePerformanceMonitor('SmartInput');
+  const startMarkRef = React.useRef<string>('');
+
+  // Performance monitoring
+  React.useLayoutEffect(() => {
+    startMarkRef.current = monitor.startRender();
+  });
+
+  React.useLayoutEffect(() => {
+    monitor.endRender(startMarkRef.current);
+  });
+
+  // Warn about large props in development
+  React.useEffect(() => {
+    bundleAnalysis.warnLargeProps('SmartInput', props, 500);
+  }, [props]);
   const [value, setValue] = React.useState(props.value?.toString() || '');
   const [showPassword, setShowPassword] = React.useState(false);
   const [validationState, setValidationState] = React.useState<ValidationState>({
@@ -377,7 +394,7 @@ export function SmartInput({
       )}
     </div>
   );
-}
+});
 
 // Common validation rules
 export const commonValidationRules = {
