@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField, useResponsiveTable } from '@/components/ui/responsive-table';
+import { CommissionTableSkeleton } from '@/components/ui/skeleton-components';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +72,8 @@ interface CommissionListProps {
 export function CommissionList({ entries, onEdit, onDelete, onView }: CommissionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(false);
+  const { isMobile } = useResponsiveTable();
 
   const filteredEntries = entries.filter((entry) => {
     const matchesSearch = 
@@ -85,11 +89,11 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Pending</Badge>;
       case 'matched':
-        return <Badge className="bg-[#026937] hover:bg-[#026937]/90">Matched</Badge>;
+        return <Badge className="bg-hunks-green hover:bg-hunks-green/90">Matched</Badge>;
       case 'approved':
-        return <Badge className="bg-[#ea7200] hover:bg-[#ea7200]/90">Approved</Badge>;
+        return <Badge className="bg-hunks-orange hover:bg-hunks-orange/90">Approved</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -115,11 +119,15 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
   const matchedEntries = entries.filter(e => e.status === 'matched').length;
   const totalCommission = entries.reduce((sum, entry) => sum + (entry.commissionAmount || 0), 0);
 
+  if (loading) {
+    return <CommissionTableSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Summary Cards - Following dashboard-01 patterns */}
       <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
-        <Card className="@container/card">
+        <Card className="@container/card border-l-4 border-l-hunks-orange">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
           </CardHeader>
@@ -128,7 +136,7 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
             <p className="text-xs text-muted-foreground">Commission bookings</p>
           </CardContent>
         </Card>
-        <Card className="@container/card">
+        <Card className="@container/card border-l-4 border-l-yellow-400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
@@ -137,21 +145,21 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
             <p className="text-xs text-muted-foreground">Awaiting job completion</p>
           </CardContent>
         </Card>
-        <Card className="@container/card">
+        <Card className="@container/card border-l-4 border-l-hunks-green">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Matched</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#026937] tabular-nums @[250px]/card:text-3xl">{matchedEntries}</div>
+            <div className="text-2xl font-bold text-hunks-green tabular-nums @[250px]/card:text-3xl">{matchedEntries}</div>
             <p className="text-xs text-muted-foreground">Successfully matched</p>
           </CardContent>
         </Card>
-        <Card className="@container/card">
+        <Card className="@container/card border-l-4 border-l-hunks-orange">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Commission</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#ea7200] tabular-nums @[250px]/card:text-3xl">{formatCurrency(totalCommission)}</div>
+            <div className="text-2xl font-bold text-hunks-orange tabular-nums @[250px]/card:text-3xl">{formatCurrency(totalCommission)}</div>
             <p className="text-xs text-muted-foreground">Earned commission</p>
           </CardContent>
         </Card>
@@ -180,117 +188,192 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
         </div>
       </div>
 
-      {/* Commission Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Job ID</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Sales Person</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Target Date</TableHead>
-              <TableHead>Estimated</TableHead>
-              <TableHead>Actual</TableHead>
-              <TableHead>Commission</TableHead>
-              <TableHead>Accuracy</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEntries.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                  No commission entries found
-                </TableCell>
+      {/* Desktop Table */}
+      <div className="hidden md:block">
+        <ResponsiveTable branded minWidth="1200px">
+          <Table variant="branded">
+            <TableHeader variant="branded">
+              <TableRow variant="branded">
+                <TableHead variant="branded">Job ID</TableHead>
+                <TableHead variant="branded">Client</TableHead>
+                <TableHead variant="branded">Sales Person</TableHead>
+                <TableHead variant="branded">Type</TableHead>
+                <TableHead variant="branded">Target Date</TableHead>
+                <TableHead variant="branded">Estimated</TableHead>
+                <TableHead variant="branded">Actual</TableHead>
+                <TableHead variant="branded">Commission</TableHead>
+                <TableHead variant="branded">Accuracy</TableHead>
+                <TableHead variant="branded">Status</TableHead>
+                <TableHead variant="branded" className="w-[50px]"></TableHead>
               </TableRow>
-            ) : (
-              filteredEntries.map((entry) => {
-                const accuracy = getBookingAccuracy(entry.estimatedRevenue, entry.actualRevenue);
-                
-                return (
-                  <TableRow key={entry.id}>
-                    <TableCell className="font-medium">{entry.jobId}</TableCell>
-                    <TableCell>{entry.clientName}</TableCell>
-                    <TableCell>{entry.sales.fullName}</TableCell>
-                    <TableCell className="capitalize">{entry.jobType}</TableCell>
-                    <TableCell>{format(new Date(entry.targetDate), 'MMM d, yyyy')}</TableCell>
-                    <TableCell>{formatCurrency(entry.estimatedRevenue)}</TableCell>
-                    <TableCell>{formatCurrency(entry.actualRevenue)}</TableCell>
-                    <TableCell>{formatCurrency(entry.commissionAmount)}</TableCell>
-                    <TableCell>
-                      {accuracy !== null ? (
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <div className="cursor-pointer">
-                              <Progress value={accuracy} className="w-16" />
-                              <span className="text-xs text-muted-foreground">
-                                {accuracy.toFixed(0)}%
-                              </span>
-                            </div>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-80">
-                            <div className="space-y-2">
-                              <h4 className="text-sm font-semibold">Booking Accuracy</h4>
-                              <div className="text-sm">
-                                <div>Estimated: {formatCurrency(entry.estimatedRevenue)}</div>
-                                <div>Actual: {formatCurrency(entry.actualRevenue)}</div>
-                                <div>Accuracy: {accuracy.toFixed(1)}%</div>
+            </TableHeader>
+            <TableBody>
+              {filteredEntries.length === 0 ? (
+                <TableRow variant="branded">
+                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                    No commission entries found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredEntries.map((entry) => {
+                  const accuracy = getBookingAccuracy(entry.estimatedRevenue, entry.actualRevenue);
+                  
+                  return (
+                    <TableRow key={entry.id} variant="branded">
+                      <TableCell className="font-medium">{entry.jobId}</TableCell>
+                      <TableCell>{entry.clientName}</TableCell>
+                      <TableCell>{entry.sales.fullName}</TableCell>
+                      <TableCell className="capitalize">{entry.jobType}</TableCell>
+                      <TableCell>{format(new Date(entry.targetDate), 'MMM d, yyyy')}</TableCell>
+                      <TableCell>{formatCurrency(entry.estimatedRevenue)}</TableCell>
+                      <TableCell>{formatCurrency(entry.actualRevenue)}</TableCell>
+                      <TableCell className="font-medium text-hunks-orange">{formatCurrency(entry.commissionAmount)}</TableCell>
+                      <TableCell>
+                        {accuracy !== null ? (
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <div className="cursor-pointer">
+                                <Progress value={accuracy} className="w-16" />
+                                <span className="text-xs text-muted-foreground">
+                                  {accuracy.toFixed(0)}%
+                                </span>
                               </div>
-                              {entry.matchedLog && (
-                                <div className="text-xs text-muted-foreground border-t pt-2">
-                                  Matched to log by {entry.matchedLog.captain.fullName} on{' '}
-                                  {format(new Date(entry.matchedLog.logDate), 'MMM d, yyyy')}
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80">
+                              <div className="space-y-2">
+                                <h4 className="text-sm font-semibold">Booking Accuracy</h4>
+                                <div className="text-sm">
+                                  <div>Estimated: {formatCurrency(entry.estimatedRevenue)}</div>
+                                  <div>Actual: {formatCurrency(entry.actualRevenue)}</div>
+                                  <div>Accuracy: {accuracy.toFixed(1)}%</div>
                                 </div>
-                              )}
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(entry.status)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {onView && (
-                            <DropdownMenuItem onClick={() => onView(entry)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                          )}
-                          {onEdit && entry.status === 'pending' && (
-                            <DropdownMenuItem onClick={() => onEdit(entry)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                          )}
-                          {onDelete && entry.status === 'pending' && (
-                            <DropdownMenuItem 
-                              onClick={() => onDelete(entry.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                                {entry.matchedLog && (
+                                  <div className="text-xs text-muted-foreground border-t pt-2">
+                                    Matched to log by {entry.matchedLog.captain.fullName} on{' '}
+                                    {format(new Date(entry.matchedLog.logDate), 'MMM d, yyyy')}
+                                  </div>
+                                )}
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(entry.status)}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {onView && (
+                              <DropdownMenuItem onClick={() => onView(entry)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                            )}
+                            {onEdit && entry.status === 'pending' && (
+                              <DropdownMenuItem onClick={() => onEdit(entry)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            {onDelete && entry.status === 'pending' && (
+                              <DropdownMenuItem 
+                                onClick={() => onDelete(entry.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </ResponsiveTable>
       </div>
+
+      {/* Mobile Cards */}
+      <MobileTableCard>
+        {filteredEntries.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No commission entries found
+          </div>
+        ) : (
+          filteredEntries.map((entry) => {
+            const accuracy = getBookingAccuracy(entry.estimatedRevenue, entry.actualRevenue);
+            
+            return (
+              <MobileTableItem key={entry.id} branded>
+                <MobileTableField label="Job ID" value={<span className="font-medium">{entry.jobId}</span>} />
+                <MobileTableField label="Client" value={entry.clientName} />
+                <MobileTableField label="Sales Person" value={entry.sales.fullName} />
+                <MobileTableField label="Type" value={<span className="capitalize">{entry.jobType}</span>} />
+                <MobileTableField label="Target Date" value={format(new Date(entry.targetDate), 'MMM d, yyyy')} />
+                <MobileTableField label="Estimated" value={formatCurrency(entry.estimatedRevenue)} />
+                <MobileTableField label="Actual" value={formatCurrency(entry.actualRevenue)} />
+                <MobileTableField 
+                  label="Commission" 
+                  value={<span className="font-medium text-hunks-orange">{formatCurrency(entry.commissionAmount)}</span>} 
+                />
+                {accuracy !== null && (
+                  <MobileTableField 
+                    label="Accuracy" 
+                    value={
+                      <div className="flex items-center gap-2">
+                        <Progress value={accuracy} className="w-16" />
+                        <span className="text-xs">{accuracy.toFixed(0)}%</span>
+                      </div>
+                    } 
+                  />
+                )}
+                <MobileTableField label="Status" value={getStatusBadge(entry.status)} />
+                <div className="flex justify-end pt-2 border-t border-hunks-green-200">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {onView && (
+                        <DropdownMenuItem onClick={() => onView(entry)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </DropdownMenuItem>
+                      )}
+                      {onEdit && entry.status === 'pending' && (
+                        <DropdownMenuItem onClick={() => onEdit(entry)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && entry.status === 'pending' && (
+                        <DropdownMenuItem 
+                          onClick={() => onDelete(entry.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </MobileTableItem>
+            );
+          })
+        )}
+      </MobileTableCard>
     </div>
   );
 }

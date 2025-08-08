@@ -126,7 +126,7 @@
 
 ## Phase 4: Dashboard & Data Display (Week 3-4)
 
-- [-] 14. Integrate real data into dashboard metrics
+- [x] 14. Integrate real data into dashboard metrics
   - Connect MetricCard components to actual data sources
   - Implement proper loading states while data is fetching
   - Add error handling for failed data requests
@@ -135,7 +135,7 @@
   - Commit changes with descriptive message
   - _Requirements: 3.1, 3.4, 3.5_
 
-- [ ] 15. Enhance data table displays
+- [-] 15. Enhance data table displays
   - Apply brand styling to existing table components
   - Implement responsive table behavior for mobile devices
   - Add proper loading skeletons for table data

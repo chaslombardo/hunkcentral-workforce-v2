@@ -1,10 +1,28 @@
 "use client"
 
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+const tableVariants = cva(
+  "w-full caption-bottom text-sm",
+  {
+    variants: {
+      variant: {
+        default: "",
+        branded: "border-separate border-spacing-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+interface TableProps extends React.ComponentProps<"table">, VariantProps<typeof tableVariants> {}
+
+function Table({ className, variant, ...props }: TableProps) {
   return (
     <div
       data-slot="table-container"
@@ -12,18 +30,35 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn(tableVariants({ variant }), className)}
         {...props}
       />
     </div>
   )
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+const tableHeaderVariants = cva(
+  "[&_tr]:border-b",
+  {
+    variants: {
+      variant: {
+        default: "",
+        branded: "bg-hunks-green-50 [&_tr]:border-hunks-green-200",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+interface TableHeaderProps extends React.ComponentProps<"thead">, VariantProps<typeof tableHeaderVariants> {}
+
+function TableHeader({ className, variant, ...props }: TableHeaderProps) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn(tableHeaderVariants({ variant }), className)}
       {...props}
     />
   )
@@ -52,29 +87,81 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+const tableRowVariants = cva(
+  "border-b transition-colors",
+  {
+    variants: {
+      variant: {
+        default: "hover:bg-muted/50 data-[state=selected]:bg-muted",
+        branded: "hover:bg-hunks-green-50/50 data-[state=selected]:bg-hunks-green-50 border-hunks-green-100",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+interface TableRowProps extends React.ComponentProps<"tr">, VariantProps<typeof tableRowVariants> {}
+
+function TableRow({ className, variant, ...props }: TableRowProps) {
   return (
     <tr
       data-slot="table-row"
-      className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
-      )}
+      className={cn(tableRowVariants({ variant }), className)}
       {...props}
     />
   )
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+const tableHeadVariants = cva(
+  "h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+  {
+    variants: {
+      variant: {
+        default: "text-foreground",
+        branded: "text-hunks-green-800 font-semibold",
+        sortable: "text-hunks-green-800 font-semibold cursor-pointer hover:text-hunks-green-900 select-none",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+interface TableHeadProps extends React.ComponentProps<"th">, VariantProps<typeof tableHeadVariants> {
+  sortable?: boolean;
+  sortDirection?: 'asc' | 'desc' | null;
+}
+
+function TableHead({ className, variant, sortable, sortDirection, children, ...props }: TableHeadProps) {
+  const headVariant = sortable ? 'sortable' : variant;
+  
   return (
     <th
       data-slot="table-head"
-      className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
+      className={cn(tableHeadVariants({ variant: headVariant }), className)}
       {...props}
-    />
+    >
+      {sortable ? (
+        <div className="flex items-center gap-2">
+          {children}
+          <div className="flex flex-col">
+            <div className={cn(
+              "w-0 h-0 border-l-[3px] border-r-[3px] border-b-[4px] border-transparent",
+              sortDirection === 'asc' ? "border-b-hunks-green-600" : "border-b-hunks-green-300"
+            )} />
+            <div className={cn(
+              "w-0 h-0 border-l-[3px] border-r-[3px] border-t-[4px] border-transparent mt-[1px]",
+              sortDirection === 'desc' ? "border-t-hunks-green-600" : "border-t-hunks-green-300"
+            )} />
+          </div>
+        </div>
+      ) : (
+        children
+      )}
+    </th>
   )
 }
 

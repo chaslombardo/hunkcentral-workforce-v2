@@ -55,6 +55,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField, useResponsiveTable } from '@/components/ui/responsive-table';
+import { SortableHeader, getSortDirection } from '@/components/ui/sortable-header';
+import { PayrollTableSkeleton } from '@/components/ui/skeleton-components';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 
@@ -177,15 +180,23 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
   {
     accessorKey: 'employee.fullName',
-    header: 'Employee',
+    header: ({ column }) => (
+      <SortableHeader
+        sortDirection={getSortDirection(column.getIsSorted())}
+        onSort={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        branded
+      >
+        Employee
+      </SortableHeader>
+    ),
     cell: ({ row }) => {
       const primaryDept = Object.entries(row.original.hoursByDepartment)
         .find(([, hours]) => hours > 0)?.[0] || 'admin';
       
       return (
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-            <UserIcon className="h-4 w-4 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-hunks-green-100">
+            <UserIcon className="h-4 w-4 text-hunks-green-600" />
           </div>
           <div>
             <div className="font-medium">{row.original.employee.fullName}</div>
@@ -200,7 +211,17 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
   {
     accessorKey: 'totalHours',
-    header: () => <div className="text-right">Hours</div>,
+    header: ({ column }) => (
+      <div className="text-right">
+        <SortableHeader
+          sortDirection={getSortDirection(column.getIsSorted())}
+          onSort={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          branded
+        >
+          Hours
+        </SortableHeader>
+      </div>
+    ),
     cell: ({ row }) => (
       <div className="text-right font-mono">
         {row.original.totalHours.toFixed(1)}h
@@ -209,7 +230,17 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
   {
     accessorKey: 'grossWages',
-    header: () => <div className="text-right">Gross Wages</div>,
+    header: ({ column }) => (
+      <div className="text-right">
+        <SortableHeader
+          sortDirection={getSortDirection(column.getIsSorted())}
+          onSort={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          branded
+        >
+          Gross Wages
+        </SortableHeader>
+      </div>
+    ),
     cell: ({ row }) => (
       <div className="text-right font-mono">
         {new Intl.NumberFormat('en-US', {
@@ -257,9 +288,19 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
   {
     accessorKey: 'totalPay',
-    header: () => <div className="text-right">Total Pay</div>,
+    header: ({ column }) => (
+      <div className="text-right">
+        <SortableHeader
+          sortDirection={getSortDirection(column.getIsSorted())}
+          onSort={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          branded
+        >
+          Total Pay
+        </SortableHeader>
+      </div>
+    ),
     cell: ({ row }) => (
-      <div className="text-right font-mono font-semibold">
+      <div className="text-right font-mono font-semibold text-hunks-green-700">
         {new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
@@ -269,7 +310,15 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
   {
     id: 'laborPercentage',
-    header: 'Labor %',
+    header: ({ column }) => (
+      <SortableHeader
+        sortDirection={getSortDirection(column.getIsSorted())}
+        onSort={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        branded
+      >
+        Labor %
+      </SortableHeader>
+    ),
     cell: ({ row }) => {
       // Calculate approximate labor percentage based on primary department
       const primaryDept = Object.entries(row.original.hoursByDepartment)
@@ -280,7 +329,10 @@ const columns: ColumnDef<PayrollCalculation>[] = [
       const isGood = mockPercentage <= 0.18;
       
       return (
-        <Badge variant={isGood ? 'default' : 'destructive'}>
+        <Badge 
+          variant={isGood ? 'default' : 'destructive'}
+          className={isGood ? 'bg-hunks-green hover:bg-hunks-green/90' : ''}
+        >
           {(mockPercentage * 100).toFixed(1)}%
         </Badge>
       );
@@ -320,6 +372,8 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
     pageIndex: 0,
     pageSize: 10,
   });
+  const [loading, setLoading] = React.useState(false);
+  const { isMobile } = useResponsiveTable();
 
   // Use mock data for development
   const data = payrollData.length > 0 ? payrollData : mockPayrollData;
@@ -348,18 +402,22 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  if (loading) {
+    return <PayrollTableSkeleton />;
+  }
+
   return (
     <div className="flex flex-col gap-4 px-4 lg:px-6">
       {/* Header and Controls - Following dashboard-01 DataTable pattern */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Employee Payroll</h2>
+          <h2 className="text-lg font-semibold text-hunks-green-800">Employee Payroll</h2>
           <p className="text-sm text-muted-foreground">
             {selectedPeriod ? selectedPeriod.name : 'Current pay period'}
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
           {/* Search */}
           <Input
             placeholder="Search employees..."
@@ -426,78 +484,153 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
           </DropdownMenu>
 
           {/* Export */}
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="border-hunks-green-200 hover:bg-hunks-green-50">
             <Plus className="mr-2 h-4 w-4" />
             <span className="hidden lg:inline">Add Employee</span>
           </Button>
           
-          <Button size="sm">
+          <Button size="sm" className="bg-hunks-green hover:bg-hunks-green/90">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>
       </div>
 
-      {/* Table - Following dashboard-01 DataTable pattern */}
-      <div className="overflow-hidden rounded-lg border">
-        <Table>
-          <TableHeader className="bg-muted sticky top-0 z-10">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="**:data-[slot=table-cell]:first:w-8">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+      {/* Desktop Table */}
+      <div className="hidden md:block">
+        <ResponsiveTable branded minWidth="1000px">
+          <Table variant="branded">
+            <TableHeader variant="branded" className="sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} variant="branded">
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} colSpan={header.colSpan} variant="branded">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No payroll data found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    variant="branded"
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow variant="branded">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No payroll data found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ResponsiveTable>
       </div>
 
+      {/* Mobile Cards */}
+      <MobileTableCard>
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <MobileTableItem key={row.id} branded>
+              <MobileTableField 
+                label="Employee" 
+                value={
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-hunks-green-100">
+                      <UserIcon className="h-3 w-3 text-hunks-green-600" />
+                    </div>
+                    <span className="font-medium">{row.original.employee.fullName}</span>
+                  </div>
+                } 
+              />
+              <MobileTableField 
+                label="Hours" 
+                value={`${row.original.totalHours.toFixed(1)}h`} 
+              />
+              <MobileTableField 
+                label="Gross Wages" 
+                value={new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                }).format(row.original.grossWages)} 
+              />
+              <MobileTableField 
+                label="Total Pay" 
+                value={
+                  <span className="font-semibold text-hunks-green-700">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                    }).format(row.original.totalPay)}
+                  </span>
+                } 
+              />
+              <div className="flex justify-between items-center pt-2 border-t border-hunks-green-200">
+                <Checkbox
+                  checked={row.getIsSelected()}
+                  onCheckedChange={(value) => row.toggleSelected(!!value)}
+                  aria-label="Select row"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      size="icon"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                    <DropdownMenuItem>Edit Hours</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Export Individual</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </MobileTableItem>
+          ))
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            No payroll data found.
+          </div>
+        )}
+      </MobileTableCard>
+
       {/* Pagination */}
-      <div className="flex items-center justify-between px-4">
-        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
+        <div className="text-muted-foreground text-sm">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} employee(s) selected.
         </div>
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
+          <div className="flex items-center gap-2">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">
               Rows per page
             </Label>
@@ -521,14 +654,14 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-fit items-center justify-center text-sm font-medium">
+          <div className="flex items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
+              className="hidden h-8 w-8 p-0 sm:flex border-hunks-green-200 hover:bg-hunks-green-50"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -537,8 +670,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
             </Button>
             <Button
               variant="outline"
-              className="size-8"
-              size="icon"
+              className="h-8 w-8 p-0 border-hunks-green-200 hover:bg-hunks-green-50"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -547,8 +679,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
             </Button>
             <Button
               variant="outline"
-              className="size-8"
-              size="icon"
+              className="h-8 w-8 p-0 border-hunks-green-200 hover:bg-hunks-green-50"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
@@ -557,8 +688,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
             </Button>
             <Button
               variant="outline"
-              className="hidden size-8 lg:flex"
-              size="icon"
+              className="hidden h-8 w-8 p-0 sm:flex border-hunks-green-200 hover:bg-hunks-green-50"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
