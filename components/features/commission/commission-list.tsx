@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { NoCommissionsEmptyState, NoCommissionMatchesEmptyState } from '@/components/features/empty-states';
 
 interface CommissionEntry {
   id: string;
@@ -121,6 +122,11 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
 
   if (loading) {
     return <CommissionTableSkeleton />;
+  }
+
+  // Show empty state if no entries at all
+  if (entries.length === 0) {
+    return <NoCommissionsEmptyState />;
   }
 
   return (
@@ -210,8 +216,10 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
             <TableBody>
               {filteredEntries.length === 0 ? (
                 <TableRow variant="branded">
-                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                    No commission entries found
+                  <TableCell colSpan={11} className="p-0">
+                    <div className="py-8">
+                      <NoCommissionMatchesEmptyState />
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -305,8 +313,8 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
       {/* Mobile Cards */}
       <MobileTableCard>
         {filteredEntries.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No commission entries found
+          <div className="py-8">
+            <NoCommissionMatchesEmptyState />
           </div>
         ) : (
           filteredEntries.map((entry) => {
