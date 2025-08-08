@@ -118,7 +118,7 @@ export function MetricCard({
   change,
   icon: Icon,
   color = 'neutral',
-  trend, // Reserved for future mini-chart implementation
+  trend: _trend, // Reserved for future mini-chart implementation
   loading = false,
   footer,
   className,
@@ -138,6 +138,16 @@ export function MetricCard({
     return `${sign}${changeValue}%`
   }
 
+  // Handle empty/zero values
+  const displayValue = typeof value === 'number' 
+    ? value === 0 
+      ? '0' 
+      : value.toLocaleString()
+    : value || '—'
+
+  // Determine if this is an empty state
+  const isEmpty = (typeof value === 'number' && value === 0) || !value
+
   return (
     <Card 
       className={cn(
@@ -156,8 +166,11 @@ export function MetricCard({
             <CardDescription className="text-sm font-medium">
               {title}
             </CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-              {typeof value === 'number' ? value.toLocaleString() : value}
+            <CardTitle className={cn(
+              "text-2xl font-semibold tabular-nums @[250px]/card:text-3xl",
+              isEmpty && "text-muted-foreground"
+            )}>
+              {displayValue}
             </CardTitle>
           </div>
           {Icon && (

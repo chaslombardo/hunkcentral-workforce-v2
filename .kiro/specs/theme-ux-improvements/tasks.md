@@ -116,7 +116,7 @@
   - Commit changes with descriptive message
   - _Requirements: 5.3, 5.4_
 
-- [-] 13. Add form validation testing
+- [x] 13. Add form validation testing
   - Write comprehensive tests for form validation logic
   - Test accessibility features with screen readers
   - Implement visual regression tests for form states
@@ -126,7 +126,7 @@
 
 ## Phase 4: Dashboard & Data Display (Week 3-4)
 
-- [ ] 14. Integrate real data into dashboard metrics
+- [-] 14. Integrate real data into dashboard metrics
   - Connect MetricCard components to actual data sources
   - Implement proper loading states while data is fetching
   - Add error handling for failed data requests
