@@ -70,6 +70,7 @@ export class OfflinePayrollManager {
       // Cached data successfully
     } catch (error) {
       // Failed to cache payroll data
+      console.error('Failed to cache payroll data:', error);
       // If localStorage is full, try to clear old cache
       this.clearExpiredCache();
     }
@@ -111,6 +112,7 @@ export class OfflinePayrollManager {
       return parsedCache;
     } catch (error) {
       // Failed to retrieve cached data
+      console.error('Failed to retrieve cached data:', error);
       // If parsing fails, remove corrupted cache
       const cacheKey = this.getCacheKey(type, userId, payPeriodId, tabName);
       localStorage.removeItem(cacheKey);
@@ -161,6 +163,7 @@ export class OfflinePayrollManager {
       // Cleared cache for pay period
     } catch (error) {
       // Failed to clear pay period cache
+      console.error('Failed to clear pay period cache:', error);
     }
   }
 
@@ -178,6 +181,7 @@ export class OfflinePayrollManager {
       // Cleared all payroll cache
     } catch (error) {
       // Failed to clear all cache
+      console.error('Failed to clear all cache:', error);
     }
   }
 
@@ -214,6 +218,7 @@ export class OfflinePayrollManager {
       }
     } catch (error) {
       // Failed to clear expired cache
+      console.error('Failed to clear expired cache:', error);
     }
   }
 

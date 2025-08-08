@@ -39,6 +39,7 @@ export function ServiceWorkerRegistration() {
         }
       } catch (error) {
         // Service Worker registration failed
+        console.error('Service Worker registration failed:', error);
       }
     }
 

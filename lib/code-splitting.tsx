@@ -67,7 +67,7 @@ export function createLazyComponent<T extends React.ComponentType<unknown>>(
     const startTime = performance.now();
     
     try {
-      const module = await importFn();
+      const moduleResult = await importFn();
       const loadTime = performance.now() - startTime;
       
       // Log load time in development
@@ -75,7 +75,7 @@ export function createLazyComponent<T extends React.ComponentType<unknown>>(
         console.warn(`📦 ${componentName || 'Component'} loaded in ${loadTime.toFixed(2)}ms`);
       }
       
-      return module;
+      return moduleResult;
     } catch (error) {
       console.error(`Failed to load ${componentName || 'component'}:`, error);
       throw error;
@@ -180,7 +180,7 @@ export const bundleOptimization = {
    * Dynamically import only the icons that are needed
    */
   createIconLoader: () => {
-    const iconCache = new Map<string, React.ComponentType<any>>();
+    const iconCache = new Map<string, React.ComponentType<unknown>>();
 
     const loader = {
       loadIcon: async (iconName: string) => {
@@ -191,7 +191,7 @@ export const bundleOptimization = {
         try {
           // Dynamic import from lucide-react
           const iconModule = await import('lucide-react');
-          const IconComponent = (iconModule as Record<string, React.ComponentType<unknown>>)[iconName];
+          const IconComponent = (iconModule as Record<string, React.ComponentType<unknown>>)[iconName] as React.ComponentType<unknown> | undefined;
           
           if (IconComponent) {
             iconCache.set(iconName, IconComponent);
@@ -200,8 +200,8 @@ export const bundleOptimization = {
             console.warn(`Icon "${iconName}" not found in lucide-react`);
             return null;
           }
-        } catch (error) {
-          console.error(`Failed to load icon "${iconName}":`, error);
+        } catch {
+          console.error(`Failed to load icon "${iconName}"`);
           return null;
         }
       },

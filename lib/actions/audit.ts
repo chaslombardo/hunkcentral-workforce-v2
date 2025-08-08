@@ -107,7 +107,7 @@ export async function getAuditLogs(
   } catch (error) {
     // Only log detailed errors in development
     if (process.env.NODE_ENV === 'development') {
-      // Failed to fetch audit logs
+      console.error('Failed to fetch audit logs:', error);
     }
     return {
       success: false,
@@ -174,7 +174,7 @@ export async function getEntityAuditHistory(
   } catch (error) {
     // Only log detailed errors in development
     if (process.env.NODE_ENV === 'development') {
-      // Failed to fetch entity audit history
+      console.error('Failed to fetch entity audit history:', error);
     }
     return {
       success: false,
@@ -294,6 +294,7 @@ export async function getUserActivitySummary(
     };
   } catch (error) {
     // Failed to fetch user activity summary
+    console.error('Failed to fetch user activity summary:', error);
     return {
       success: false,
       data: { totalActions: 0, actionBreakdown: {}, entityBreakdown: {}, recentActivity: [] },

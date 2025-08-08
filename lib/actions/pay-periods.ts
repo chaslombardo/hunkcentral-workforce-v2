@@ -238,6 +238,7 @@ export async function canModifyDataForDate(date: Date) {
     return !payPeriod // Can modify if no locked/closed period found
   } catch (error) {
     // Error checking data modification permissions
+    console.error('Error checking data modification permissions:', error);
     return false // Default to not allowing modifications on error
   }
 }

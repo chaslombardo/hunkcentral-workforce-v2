@@ -51,8 +51,8 @@ export class PerformanceMonitor {
       performance.clearMarks(startMark);
       performance.clearMarks(endMarkName);
       performance.clearMeasures(measureName);
-    } catch (error) {
-      console.warn('Performance measurement failed:', error);
+    } catch {
+      console.warn('Performance measurement failed');
     }
   }
 
@@ -138,7 +138,7 @@ export class PerformanceMonitor {
         return acc;
       }, {} as Record<string, Record<string, unknown>>)
     );
-    console.groupEnd();
+    console.warn('End performance stats');
   }
 
   /**
@@ -210,7 +210,7 @@ export const bundleAnalysis = {
     try {
       const size = JSON.stringify(moduleExports).length;
       console.warn(`📦 ${moduleName}: ~${(size / 1024).toFixed(2)}KB`);
-    } catch (error) {
+    } catch {
       console.warn(`📦 ${moduleName}: Unable to calculate size`);
     }
   },

@@ -116,6 +116,7 @@ export async function getCommissionEntries(userId?: string) {
     return { success: true, data: commissionEntries };
   } catch (error) {
     // Error fetching commission entries
+    console.error('Error fetching commission entries:', error);
     return { success: false, error: 'Failed to fetch commission entries' };
   }
 }
@@ -285,6 +286,7 @@ export async function getSalesUsers() {
     return { success: true, data: salesUsers };
   } catch (error) {
     // Error fetching sales users
+    console.error('Error fetching sales users:', error);
     return { success: false, error: 'Failed to fetch sales users' };
   }
 }

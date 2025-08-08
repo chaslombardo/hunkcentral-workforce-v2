@@ -126,13 +126,14 @@ export function generateColorVariants(baseColor: string): {
 /**
  * Check if a color meets WCAG contrast requirements
  */
-export function checkContrast(_foreground: string, _background: string): {
+export function checkContrast(foreground: string, background: string): {
   aa: boolean;
   aaa: boolean;
   ratio: number;
 } {
   // This is a placeholder implementation
   // In a real application, you would implement proper contrast calculation
+  console.warn('Checking contrast for:', foreground, 'on', background);
   // or use a library like 'color-contrast-checker'
   return {
     aa: true,

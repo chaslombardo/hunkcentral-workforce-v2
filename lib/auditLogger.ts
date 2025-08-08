@@ -24,7 +24,7 @@ export async function createAuditLog(data: AuditLogData) {
   } catch (error) {
     // Only log in development to reduce console noise in production
     if (process.env.NODE_ENV === 'development') {
-      // Audit log creation failed (non-critical)
+      console.error('Audit log creation failed (non-critical):', error);
     }
     // Don't throw error to avoid breaking main functionality
   }
