@@ -133,10 +133,11 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
       monitor.endRender(startMarkRef.current);
     });
 
-    // Warn about large props in development
+    // Warn about large props in development and track bundle usage
     React.useEffect(() => {
       bundleAnalysis.warnLargeProps('BrandLoading', props, 200);
-    }, [props]);
+      bundleAnalysis.trackRender('BrandLoading', variant || undefined, props);
+    }, [props, variant]);
 
     // Check for reduced motion preference - memoized
     const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)

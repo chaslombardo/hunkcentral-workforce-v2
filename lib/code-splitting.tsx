@@ -1,67 +1,26 @@
 /**
- * Code splitting utilities for lazy loading components and optimizing bundle size
+ * Code splitting utilities for enhanced components
+ * Implements lazy loading and dynamic imports for better performance
  */
 
 import * as React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { bundleAnalyzer } from './bundle-analyzer';
 
-// Loading fallback component
-const LoadingFallback = ({ componentName }: { componentName?: string }) => (
-  <div className="flex items-center justify-center p-4">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-hunks-green"></div>
-    {componentName && (
-      <span className="ml-2 text-sm text-muted-foreground">
-        Loading {componentName}...
-      </span>
-    )}
+// Generic loading fallback component
+const LoadingFallback = ({ className }: { className?: string }) => (
+  <div className={className}>
+    <Skeleton className="h-full w-full" />
   </div>
 );
 
-// Error boundary for lazy loaded components
-class LazyErrorBoundary extends React.Component<
-  { children: React.ReactNode; componentName?: string },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode; componentName?: string }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(`Error loading component ${this.props.componentName}:`, error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex flex-col items-center justify-center p-4 text-center">
-          <div className="text-destructive mb-2">
-            Failed to load {this.props.componentName || 'component'}
-          </div>
-          <button
-            onClick={() => this.setState({ hasError: false })}
-            className="text-sm text-hunks-green hover:underline"
-          >
-            Try again
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
 /**
- * Enhanced lazy loading with performance monitoring and error handling
+ * Create a lazy-loaded component with performance tracking
  */
-export function createLazyComponent<T extends React.ComponentType<unknown>>(
-  importFn: () => Promise<{ default: T }>,
-  componentName?: string,
-  fallback?: React.ComponentType
+export function createLazyComponent(
+  importFn: () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>,
+  componentName: string,
+  fallback?: React.ComponentType<Record<string, unknown>>
 ) {
   const LazyComponent = React.lazy(async () => {
     const startTime = performance.now();
@@ -70,226 +29,139 @@ export function createLazyComponent<T extends React.ComponentType<unknown>>(
       const moduleResult = await importFn();
       const loadTime = performance.now() - startTime;
       
-      // Log load time in development
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`📦 ${componentName || 'Component'} loaded in ${loadTime.toFixed(2)}ms`);
+        console.warn(`📦 Loaded ${componentName} in ${loadTime.toFixed(2)}ms`);
       }
       
+      bundleAnalyzer.trackComponentUsage(componentName, 'lazy-loaded');
       return moduleResult;
     } catch (error) {
-      console.error(`Failed to load ${componentName || 'component'}:`, error);
+      console.error(`Failed to load ${componentName}:`, error);
       throw error;
     }
   });
-
-  const WrappedComponent = React.forwardRef<unknown, React.ComponentProps<T>>((props, ref) => {
-    const FallbackComponent = fallback || (() => <LoadingFallback componentName={componentName} />);
-    
-    return (
-      <LazyErrorBoundary componentName={componentName}>
-        <React.Suspense fallback={<FallbackComponent />}>
-          <LazyComponent {...(props as React.ComponentProps<T>)} ref={ref} />
-        </React.Suspense>
-      </LazyErrorBoundary>
-    );
-  });
-
-  WrappedComponent.displayName = `Lazy(${componentName || 'Component'})`;
-  return WrappedComponent;
+  
+  return {
+    Component: LazyComponent,
+    Fallback: fallback || LoadingFallback
+  };
 }
 
 /**
- * Preload a lazy component
+ * Preload component on user interaction
  */
-export function preloadComponent(importFn: () => Promise<unknown>) {
-  // Start loading the component but don't wait for it
-  importFn().catch(error => {
-    console.warn('Failed to preload component:', error);
-  });
-}
-
-/**
- * Hook for preloading components on hover or focus
- */
-export function usePreloadOnHover(importFn: () => Promise<unknown>) {
+export function usePreloadOnInteraction<T>(
+  importFn: () => Promise<T>,
+  trigger: 'hover' | 'focus' | 'click' = 'hover'
+) {
   const [isPreloaded, setIsPreloaded] = React.useState(false);
-
-  const preload = React.useCallback(() => {
-    if (!isPreloaded) {
+  
+  const preload = React.useCallback(async () => {
+    if (isPreloaded) return;
+    
+    try {
+      await importFn();
       setIsPreloaded(true);
-      preloadComponent(importFn);
+    } catch (error) {
+      console.warn('Preload failed:', error);
     }
   }, [importFn, isPreloaded]);
 
-  return {
-    onMouseEnter: preload,
-    onFocus: preload,
-  };
-}
-
-/**
- * Tree-shakable component variants
- * Only import the variants that are actually used
- */
-export const createVariantLoader = <T extends Record<string, React.ComponentType<unknown>>>(
-  variants: T
-) => {
-  const loadedVariants = new Map<keyof T, React.ComponentType<unknown>>();
-
-  return {
-    /**
-     * Get a variant component, loading it lazily if needed
-     */
-    getVariant: (variantName: keyof T): React.ComponentType<unknown> => {
-      if (loadedVariants.has(variantName)) {
-        return loadedVariants.get(variantName)!;
-      }
-
-      const VariantComponent = variants[variantName];
-      if (!VariantComponent) {
-        throw new Error(`Variant "${String(variantName)}" not found`);
-      }
-
-      loadedVariants.set(variantName, VariantComponent);
-      return VariantComponent;
-    },
-
-    /**
-     * Preload specific variants
-     */
-    preloadVariants: (variantNames: (keyof T)[]) => {
-      variantNames.forEach(name => {
-        if (!loadedVariants.has(name) && variants[name]) {
-          loadedVariants.set(name, variants[name]);
-        }
-      });
-    },
-
-    /**
-     * Get all loaded variants (for debugging)
-     */
-    getLoadedVariants: () => Array.from(loadedVariants.keys()),
-  };
-};
-
-/**
- * Bundle size optimization utilities
- */
-export const bundleOptimization = {
-  /**
-   * Dynamically import only the icons that are needed
-   */
-  createIconLoader: () => {
-    const iconCache = new Map<string, React.ComponentType<unknown>>();
-
-    const loader = {
-      loadIcon: async (iconName: string) => {
-        if (iconCache.has(iconName)) {
-          return iconCache.get(iconName)!;
-        }
-
-        try {
-          // Dynamic import from lucide-react
-          const iconModule = await import('lucide-react');
-          const IconComponent = (iconModule as Record<string, React.ComponentType<unknown>>)[iconName] as React.ComponentType<unknown> | undefined;
-          
-          if (IconComponent) {
-            iconCache.set(iconName, IconComponent);
-            return IconComponent;
-          } else {
-            console.warn(`Icon "${iconName}" not found in lucide-react`);
-            return null;
-          }
-        } catch {
-          console.error(`Failed to load icon "${iconName}"`);
-          return null;
-        }
-      },
-
-      preloadIcons: async (names: string[]) => {
-        const promises = names.map(name => loader.loadIcon(name));
-        await Promise.allSettled(promises);
-      },
-
-      getLoadedIcons: () => Array.from(iconCache.keys()),
-    };
-
-    return loader;
-  },
-
-  /**
-   * Remove unused CSS classes at build time (development helper)
-   */
-  analyzeUnusedClasses: (usedClasses: Set<string>) => {
-    if (process.env.NODE_ENV !== 'development') return;
-
-    // This would be used with a build-time plugin to identify unused classes
-    console.warn('Used CSS classes:', Array.from(usedClasses).sort());
-  },
-};
-
-/**
- * Performance-aware component loader
- */
-export function createPerformantLoader<T extends React.ComponentType<unknown>>(
-  importFn: () => Promise<{ default: T }>,
-  options: {
-    componentName?: string;
-    preloadCondition?: () => boolean;
-    fallback?: React.ComponentType;
-    errorBoundary?: boolean;
-  } = {}
-) {
-  const {
-    componentName = 'Component',
-    preloadCondition,
-    fallback,
-    errorBoundary = true,
-  } = options;
-
-  const LazyComponent = createLazyComponent(importFn, componentName, fallback);
-
-  const PerformantComponent = React.forwardRef<unknown, React.ComponentProps<T>>((props, ref) => {
-    // Preload if condition is met
-    React.useEffect(() => {
-      if (preloadCondition?.()) {
-        preloadComponent(importFn);
-      }
-    }, []);
-
-    if (!errorBoundary) {
-      return <LazyComponent {...(props as React.ComponentProps<T>)} ref={ref} />;
+  const handlers = React.useMemo(() => {
+    switch (trigger) {
+      case 'hover':
+        return {
+          onMouseEnter: preload,
+          onFocus: preload
+        };
+      case 'focus':
+        return {
+          onFocus: preload
+        };
+      case 'click':
+        return {
+          onClick: preload
+        };
+      default:
+        return {};
     }
+  }, [trigger, preload]);
 
-    return (
-      <LazyErrorBoundary componentName={componentName}>
-        <LazyComponent {...(props as React.ComponentProps<T>)} ref={ref} />
-      </LazyErrorBoundary>
-    );
-  });
-
-  PerformantComponent.displayName = `PerformantLoader(${componentName})`;
-  return PerformantComponent;
+  return { handlers, isPreloaded };
 }
 
-// Export commonly used lazy components for the theme system
-// Note: These would be implemented when the actual components exist
-export const LazyComponents = {
-  // Example lazy components - implement when needed
-  // PayrollChart: createLazyComponent(
-  //   () => import('@/components/features/reports/payroll-chart'),
-  //   'PayrollChart'
-  // ),
+/**
+ * Route-based preloading
+ */
+export function useRoutePreload(
+  routes: Record<string, () => Promise<unknown>>,
+  currentRoute: string
+) {
+  React.useEffect(() => {
+    const preloadRoute = routes[currentRoute];
+    if (preloadRoute) {
+      // Preload after a short delay to not block initial render
+      const timer = setTimeout(() => {
+        preloadRoute().catch(() => {
+          // Ignore preload failures
+        });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [routes, currentRoute]);
+}
+
+/**
+ * Intersection observer based preloading
+ */
+export function useIntersectionPreload<T>(
+  importFn: () => Promise<T>,
+  options: IntersectionObserverInit = { rootMargin: '50px' }
+) {
+  const [ref, setRef] = React.useState<Element | null>(null);
+  const [isPreloaded, setIsPreloaded] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!ref || isPreloaded) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            importFn()
+              .then(() => setIsPreloaded(true))
+              .catch(() => {
+                // Ignore preload failures
+              });
+            observer.disconnect();
+          }
+        });
+      },
+      options
+    );
+
+    observer.observe(ref);
+    return () => observer.disconnect();
+  }, [ref, importFn, isPreloaded, options]);
+
+  return setRef;
+}
+
+// Example lazy loading configurations (to be implemented as needed)
+export const lazyLoadingExamples = {
+  // These would be implemented when specific components need lazy loading
+  // MetricCard: () => import('@/components/brand/metric-card'),
+  // BrandButton: () => import('@/components/brand/brand-button'),
+  // etc.
 };
 
 const codeSplittingUtils = {
   createLazyComponent,
-  preloadComponent,
-  usePreloadOnHover,
-  createVariantLoader,
-  bundleOptimization,
-  createPerformantLoader,
-  LazyComponents,
+  usePreloadOnInteraction,
+  useRoutePreload,
+  useIntersectionPreload,
+  lazyLoadingExamples
 };
 
 export default codeSplittingUtils;

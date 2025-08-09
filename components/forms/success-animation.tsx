@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Sparkles } from 'lucide-react';
+import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
 
 interface SuccessAnimationProps {
   size?: 'sm' | 'md' | 'lg';
@@ -12,27 +13,57 @@ interface SuccessAnimationProps {
   className?: string;
 }
 
-export function SuccessAnimation({
+export const SuccessAnimation = React.memo(function SuccessAnimation({
   size = 'md',
   showSparkles = true,
   duration = 1000,
   onComplete,
   className
 }: SuccessAnimationProps) {
+  const monitor = usePerformanceMonitor('SuccessAnimation');
+  const startMarkRef = React.useRef<string>('');
+
+  // Performance monitoring
+  React.useLayoutEffect(() => {
+    startMarkRef.current = monitor.startRender();
+  });
+
+  React.useLayoutEffect(() => {
+    monitor.endRender(startMarkRef.current);
+  });
+
+  // Warn about large props in development
+  React.useEffect(() => {
+    bundleAnalysis.warnLargeProps('SuccessAnimation', { size, showSparkles, duration, className }, 200);
+  }, [size, showSparkles, duration, className]);
   const [isVisible, setIsVisible] = React.useState(false);
   const [showCheck, setShowCheck] = React.useState(false);
 
-  const sizeClasses = {
+  // Memoize size classes to prevent unnecessary re-renders
+  const sizeClasses = React.useMemo(() => ({
     sm: 'h-8 w-8',
     md: 'h-12 w-12',
     lg: 'h-16 w-16'
-  };
+  }), []);
 
-  const sparkleSize = {
+  const sparkleSize = React.useMemo(() => ({
     sm: 'h-3 w-3',
     md: 'h-4 w-4',
     lg: 'h-5 w-5'
-  };
+  }), []);
+
+  // Memoize check icon size
+  const checkIconSize = React.useMemo(() => 
+    size === 'sm' ? 'h-5 w-5' : size === 'md' ? 'h-7 w-7' : 'h-9 w-9',
+    [size]
+  );
+
+  // Memoize sparkle positions
+  const sparklePositions = React.useMemo(() => ({
+    top: size === 'sm' ? '-top-2 -right-1' : size === 'md' ? '-top-3 -right-2' : '-top-4 -right-3',
+    bottom: size === 'sm' ? '-bottom-2 -left-1' : size === 'md' ? '-bottom-3 -left-2' : '-bottom-4 -left-3',
+    side: size === 'sm' ? 'top-0 -left-3' : size === 'md' ? 'top-1 -left-4' : 'top-2 -left-5'
+  }), [size]);
 
   React.useEffect(() => {
     // Start animation immediately
@@ -70,7 +101,7 @@ export function SuccessAnimation({
         <CheckCircle2
           className={cn(
             'text-white transition-all duration-300 ease-out',
-            size === 'sm' ? 'h-5 w-5' : size === 'md' ? 'h-7 w-7' : 'h-9 w-9',
+            checkIconSize,
             showCheck 
               ? 'scale-100 opacity-100' 
               : 'scale-0 opacity-0'
@@ -98,7 +129,7 @@ export function SuccessAnimation({
             className={cn(
               'absolute text-hunks-green animate-bounce',
               sparkleSize[size],
-              size === 'sm' ? '-top-2 -right-1' : size === 'md' ? '-top-3 -right-2' : '-top-4 -right-3'
+              sparklePositions.top
             )}
             style={{
               animationDelay: '0.3s',
@@ -112,7 +143,7 @@ export function SuccessAnimation({
             className={cn(
               'absolute text-hunks-orange animate-bounce',
               sparkleSize[size],
-              size === 'sm' ? '-bottom-2 -left-1' : size === 'md' ? '-bottom-3 -left-2' : '-bottom-4 -left-3'
+              sparklePositions.bottom
             )}
             style={{
               animationDelay: '0.5s',
@@ -126,7 +157,7 @@ export function SuccessAnimation({
             className={cn(
               'absolute text-hunks-green animate-bounce',
               sparkleSize[size],
-              size === 'sm' ? 'top-0 -left-3' : size === 'md' ? 'top-1 -left-4' : 'top-2 -left-5'
+              sparklePositions.side
             )}
             style={{
               animationDelay: '0.7s',
@@ -138,10 +169,10 @@ export function SuccessAnimation({
       )}
     </div>
   );
-}
+});
 
 // Confetti-style success animation for major achievements
-export function ConfettiSuccess({
+export const ConfettiSuccess = React.memo(function ConfettiSuccess({
   onComplete,
   className
 }: {
@@ -198,10 +229,10 @@ export function ConfettiSuccess({
       ))}
     </div>
   );
-}
+});
 
 // Subtle success checkmark for inline feedback
-export function InlineSuccessCheck({
+export const InlineSuccessCheck = React.memo(function InlineSuccessCheck({
   className
 }: {
   className?: string;
@@ -226,10 +257,10 @@ export function InlineSuccessCheck({
       )}
     />
   );
-}
+});
 
 // Loading to success transition
-export function LoadingToSuccess({
+export const LoadingToSuccess = React.memo(function LoadingToSuccess({
   isLoading,
   onComplete,
   className
@@ -269,4 +300,4 @@ export function LoadingToSuccess({
   }
 
   return null;
-}
+});

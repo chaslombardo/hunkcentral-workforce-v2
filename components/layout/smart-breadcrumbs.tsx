@@ -3,6 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization"
 import {
   Home,
   ClipboardList,
@@ -142,12 +143,19 @@ const getDynamicIcon = (segment: string, pathSegments: string[], index: number):
   return undefined
 }
 
-export function SmartBreadcrumbs({ 
+export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({ 
   className, 
   maxItems = 4, 
   showIcons = true 
 }: SmartBreadcrumbsProps) {
   const pathname = usePathname()
+  
+  // Performance monitoring
+  usePerformanceOptimization({
+    componentName: 'SmartBreadcrumbs',
+    props: { pathname, maxItems, showIcons },
+    trackRenderTime: true
+  });
   
   const breadcrumbs = React.useMemo(() => {
     // Remove leading slash and split path
@@ -258,4 +266,4 @@ export function SmartBreadcrumbs({
       </BreadcrumbList>
     </Breadcrumb>
   )
-}
+});

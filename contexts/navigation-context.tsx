@@ -1,8 +1,9 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useSession } from '@/hooks/useSession'
+import { usePerformanceOptimization } from '@/hooks/usePerformanceOptimization'
 
 interface NavigationBadge {
   id: string
@@ -40,9 +41,16 @@ interface NavigationProviderProps {
   children: React.ReactNode
 }
 
-export function NavigationProvider({ children }: NavigationProviderProps) {
+export const NavigationProvider = React.memo(function NavigationProvider({ children }: NavigationProviderProps) {
   const pathname = usePathname()
   const { user, hasAnyRole } = useSession()
+  
+  // Performance monitoring
+  usePerformanceOptimization({
+    componentName: 'NavigationProvider',
+    props: { pathname, user: user?.id },
+    trackRenderTime: true
+  });
   
   const [state, setState] = useState<NavigationState>({
     currentPath: pathname,
@@ -78,7 +86,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
     return () => clearInterval(interval)
   }, [user])
 
-  const updateBadge = (id: string, badge: NavigationBadge | null) => {
+  const updateBadge = useCallback((id: string, badge: NavigationBadge | null) => {
     setState(prev => {
       const newBadges = { ...prev.badges }
       if (badge === null) {
@@ -91,9 +99,9 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
         badges: newBadges,
       }
     })
-  }
+  }, []);
 
-  const refreshBadges = async () => {
+  const refreshBadges = useCallback(async () => {
     if (!user) return
 
     setState(prev => ({ ...prev, isLoading: true }))
@@ -170,33 +178,33 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
       console.error('Failed to refresh navigation badges:', error)
       setState(prev => ({ ...prev, isLoading: false }))
     }
-  }
+  }, [user, hasAnyRole]);
 
-  const isActiveRoute = (route: string) => {
+  const isActiveRoute = useCallback((route: string) => {
     if (route === '/dashboard') {
       return pathname === '/dashboard'
     }
     return pathname === route || pathname.startsWith(route + '/')
-  }
+  }, [pathname]);
 
-  const isActiveSection = (section: string) => {
+  const isActiveSection = useCallback((section: string) => {
     return state.currentSection === section
-  }
+  }, [state.currentSection]);
 
-  const contextValue: NavigationContextType = {
+  const contextValue: NavigationContextType = useMemo(() => ({
     state,
     updateBadge,
     refreshBadges,
     isActiveRoute,
     isActiveSection,
-  }
+  }), [state, updateBadge, refreshBadges, isActiveRoute, isActiveSection]);
 
   return (
     <NavigationContext.Provider value={contextValue}>
       {children}
     </NavigationContext.Provider>
   )
-}
+});
 
 // Helper function to determine current section from pathname
 function getCurrentSection(pathname: string): string {

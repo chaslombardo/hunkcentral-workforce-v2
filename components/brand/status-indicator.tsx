@@ -171,10 +171,11 @@ export const StatusIndicator = React.memo(function StatusIndicator({
     monitor.endRender(startMarkRef.current);
   });
 
-  // Warn about large props in development
+  // Warn about large props in development and track bundle usage
   React.useEffect(() => {
     bundleAnalysis.warnLargeProps('StatusIndicator', props, 200);
-  }, [props]);
+    bundleAnalysis.trackRender('StatusIndicator', status, props);
+  }, [props, status]);
 
   // Memoize icon component selection
   const IconComponent = React.useMemo(() => CustomIcon || statusIcons[status], [CustomIcon, status]);

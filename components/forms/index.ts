@@ -1,10 +1,12 @@
+/**
+ * Form components barrel export
+ * Optimized for tree-shaking and performance
+ */
+
+// Direct exports for components
+export { FormFeedback, formFeedbackPresets, useFormFeedback } from './form-feedback';
 export { SmartInput, commonValidationRules } from './smart-input';
-export { FormFeedback, useFormFeedback, formFeedbackPresets } from './form-feedback';
-export { useFormToast, useFormSubmission, formToastPresets } from './form-toast';
-export { FormFeedbackDemo } from './form-feedback-demo';
-export { SuccessAnimation, ConfettiSuccess, InlineSuccessCheck, LoadingToSuccess } from './success-animation';
-export { MobileForm, useMobileForm } from './mobile-form';
-export { MobileFormValidation, useMobileFormValidation, mobileValidationRules } from './mobile-form-validation';
-export { MobileFormDemo } from './mobile-form-demo';
+export { InlineSuccessCheck } from './success-animation';
+
+// Re-export types and utilities
 export type { SmartInputProps, ValidationRule } from './smart-input';
-export { SmartInputDemo } from './smart-input-demo';

@@ -1,8 +1,10 @@
-export { BrandButton, brandButtonVariants, type BrandButtonProps } from "./brand-button"
-export { BrandButtonDemo } from "./brand-button-demo"
-export { BrandLoading, brandLoadingVariants, type BrandLoadingProps } from "./brand-loading"
-export { BrandLoadingDemo } from "./brand-loading-demo"
-export { MetricCard, MetricCardSkeleton, METRIC_PRESETS, type MetricCardProps } from "./metric-card"
-export { MetricCardDemo } from "./metric-card-demo"
-export { StatusIndicator, StatusIndicators, getStatusType, type StatusIndicatorProps, type StatusType } from "./status-indicator"
-export { default as StatusIndicatorDemo } from "./status-indicator-demo"
+/**
+ * Brand components barrel export
+ * Optimized for tree-shaking and performance
+ */
+
+// Direct exports for components that are already optimized
+export { MetricCard, MetricCardSkeleton, METRIC_PRESETS } from './metric-card';
+export { BrandButton, brandButtonVariants } from './brand-button';
+export { BrandLoading, brandLoadingVariants, type BrandLoadingProps } from './brand-loading';
+export { StatusIndicator, StatusIndicators, getStatusType } from './status-indicator';

@@ -80,10 +80,11 @@ const BrandButton = React.memo(React.forwardRef<HTMLButtonElement, BrandButtonPr
       monitor.endRender(startMarkRef.current);
     });
 
-    // Warn about large props in development
+    // Warn about large props in development and track bundle usage
     React.useEffect(() => {
       bundleAnalysis.warnLargeProps('BrandButton', props, 200);
-    }, [props]);
+      bundleAnalysis.trackRender('BrandButton', variant || undefined, props);
+    }, [props, variant]);
 
     // Memoize component selection
     const Comp = React.useMemo(() => asChild ? Slot : "button", [asChild]);

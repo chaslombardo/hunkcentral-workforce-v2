@@ -137,10 +137,11 @@ const MetricCard = React.memo(function MetricCard({
     monitor.endRender(startMarkRef.current);
   });
 
-  // Warn about large props in development
+  // Warn about large props in development and track bundle usage
   React.useEffect(() => {
     bundleAnalysis.warnLargeProps('MetricCard', props, 500);
-  }, [props]);
+    bundleAnalysis.trackRender('MetricCard', color, props);
+  }, [props, color]);
 
   // Memoized calculations to prevent unnecessary re-computations
   const colorClasses = React.useMemo(() => colorVariants[color], [color]);

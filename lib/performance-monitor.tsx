@@ -232,6 +232,20 @@ export const bundleAnalysis = {
     } catch {
       // Ignore circular reference errors
     }
+  },
+
+  /**
+   * Track component render for bundle optimization
+   */
+  trackRender: (componentName: string, variant?: string, props?: Record<string, unknown>) => {
+    if (process.env.NODE_ENV !== 'development') return;
+    
+    // Import bundle analyzer dynamically to avoid circular dependencies
+    import('./bundle-analyzer').then(({ bundleAnalyzer }) => {
+      bundleAnalyzer.trackComponentUsage(componentName, variant, props);
+    }).catch(() => {
+      // Ignore import failures
+    });
   }
 };
 
@@ -246,5 +260,5 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   }, 30000);
 
   // Add to window for manual inspection
-  (window as Record<string, unknown>).__performanceMonitor = performanceMonitor;
+  (window as unknown as Record<string, unknown>).__performanceMonitor = performanceMonitor;
 }
