@@ -113,7 +113,7 @@ describe('BrandButton', () => {
       const button = screen.getByRole('button')
       const spinner = button.querySelector('svg')
       expect(spinner).toBeInTheDocument()
-      expect(spinner).toHaveClass('animate-spin')
+      expect(spinner).toHaveClass('animate-pulse')
       expect(screen.getByText('Loading Button')).toBeInTheDocument()
     })
 
