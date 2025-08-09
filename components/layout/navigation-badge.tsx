@@ -24,12 +24,12 @@ export function NavigationBadge({
       case 'pending':
         return {
           variant: 'default' as const,
-          className: 'bg-[#026937] text-white hover:bg-[#026937]/90'
+          className: 'bg-hunks-green text-white hover:bg-hunks-green/90'
         }
       case 'warning':
         return {
           variant: 'secondary' as const,
-          className: 'bg-[#ea7200] text-white hover:bg-[#ea7200]/90'
+          className: 'bg-hunks-orange text-white hover:bg-hunks-orange/90'
         }
       case 'info':
         return {

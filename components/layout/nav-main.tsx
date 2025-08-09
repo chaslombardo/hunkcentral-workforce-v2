@@ -69,7 +69,7 @@ export function NavMain({
   return (
     <>
       <SidebarGroup>
-        <SidebarGroupLabel className="text-[#026937] font-medium">
+        <SidebarGroupLabel className="text-hunks-green font-medium">
           {title}
         </SidebarGroupLabel>
         <SidebarMenu>
@@ -91,7 +91,7 @@ export function NavMain({
                       tooltip={item.title}
                       isActive={isActive}
                       asChild={!hasSubItems}
-                      className="hover:bg-[#026937]/10 data-[active=true]:bg-[#026937]/15 data-[active=true]:text-[#026937] data-[active=true]:font-medium"
+                      className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
                     >
                       {hasSubItems ? (
                         <NavigationItemWithBadge 
@@ -100,9 +100,9 @@ export function NavMain({
                           className="w-full"
                         >
                           <div className="flex items-center w-full">
-                            {item.icon && <item.icon className="text-[#026937]" />}
+                            {item.icon && <item.icon className="text-hunks-green" />}
                             <span>{item.title}</span>
-                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-[#026937]" />
+                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-hunks-green" />
                           </div>
                         </NavigationItemWithBadge>
                       ) : (
@@ -113,7 +113,7 @@ export function NavMain({
                             className="w-full"
                           >
                             <div className="flex items-center w-full">
-                              {item.icon && <item.icon className="text-[#026937]" />}
+                              {item.icon && <item.icon className="text-hunks-green" />}
                               <span>{item.title}</span>
                             </div>
                           </NavigationItemWithBadge>
@@ -133,7 +133,7 @@ export function NavMain({
                               <SidebarMenuSubButton 
                                 asChild 
                                 isActive={isSubActive}
-                                className="hover:bg-[#026937]/10 data-[active=true]:bg-[#026937]/15 data-[active=true]:text-[#026937] data-[active=true]:font-medium"
+                                className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
                               >
                                 <Link href={subItem.url} className="w-full">
                                   <NavigationItemWithBadge 
@@ -157,7 +157,7 @@ export function NavMain({
           })}
         </SidebarMenu>
       </SidebarGroup>
-      <Separator className="bg-[#026937]/20" />
+      <Separator className="bg-hunks-green/20" />
     </>
   )
 }

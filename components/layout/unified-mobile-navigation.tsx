@@ -234,11 +234,11 @@ export function UnifiedMobileHeader() {
     <div className="md:hidden">
       <div className="flex h-16 items-center justify-between border-b bg-background px-4">
         <div className="flex items-center gap-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#026937] text-white">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-hunks-green text-white">
             <Building2 className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium text-[#026937]">College Hunks</span>
+            <span className="truncate font-medium text-hunks-green">College Hunks</span>
             <span className="truncate text-xs text-muted-foreground">Workforce Management</span>
           </div>
         </div>

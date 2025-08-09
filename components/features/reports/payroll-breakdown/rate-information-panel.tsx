@@ -58,13 +58,13 @@ const DEPARTMENT_INFO: Record<Department, {
     label: 'Junk Removal', 
     description: 'Junk hauling and removal services',
     hasRoles: true,
-    icon: <div className="w-2 h-2 rounded-full bg-[#026937]" />
+    icon: <div className="w-2 h-2 rounded-full bg-hunks-green" />
   },
   move: { 
     label: 'Moving Services', 
     description: 'Residential and commercial moving',
     hasRoles: true,
-    icon: <div className="w-2 h-2 rounded-full bg-[#ea7200]" />
+    icon: <div className="w-2 h-2 rounded-full bg-hunks-orange" />
   },
   zigma: { 
     label: 'Zigma Operations', 
@@ -181,7 +181,7 @@ function MobileRateCard({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
   const hasWorkedHours = rateInfo.hoursWorked > 0;
 
   return (
-    <Card className={`@container/card min-h-[120px] touch-manipulation ${hasWorkedHours ? 'bg-muted/30 border-[#026937]/20' : ''}`}>
+    <Card className={`@container/card min-h-[120px] touch-manipulation ${hasWorkedHours ? 'bg-muted/30 border-hunks-green/20' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -210,7 +210,7 @@ function MobileRateCard({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                     {rateInfo.captainRate ? formatCurrency(rateInfo.captainRate) : 'N/A'}
                   </span>
                   {rateInfo.currentlyUsed === 'captain' && hasWorkedHours && (
-                    <Star className="h-4 w-4 text-[#026937]" />
+                    <Star className="h-4 w-4 text-hunks-green" />
                   )}
                 </div>
               </div>
@@ -221,7 +221,7 @@ function MobileRateCard({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                     {rateInfo.wingmanRate ? formatCurrency(rateInfo.wingmanRate) : 'N/A'}
                   </span>
                   {rateInfo.currentlyUsed === 'wingman' && hasWorkedHours && (
-                    <Star className="h-4 w-4 text-[#026937]" />
+                    <Star className="h-4 w-4 text-hunks-green" />
                   )}
                 </div>
               </div>
@@ -234,7 +234,7 @@ function MobileRateCard({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                   {rateInfo.singleRate ? formatCurrency(rateInfo.singleRate) : 'N/A'}
                 </span>
                 {hasWorkedHours && (
-                  <Star className="h-4 w-4 text-[#026937]" />
+                  <Star className="h-4 w-4 text-hunks-green" />
                 )}
               </div>
             </div>
@@ -276,7 +276,7 @@ function RateRow({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                 {rateInfo.captainRate ? formatCurrency(rateInfo.captainRate) : 'N/A'}
               </span>
               {rateInfo.currentlyUsed === 'captain' && hasWorkedHours && (
-                <Star className="h-3 w-3 text-[#026937]" />
+                <Star className="h-3 w-3 text-hunks-green" />
               )}
             </div>
           </TableCell>
@@ -286,7 +286,7 @@ function RateRow({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                 {rateInfo.wingmanRate ? formatCurrency(rateInfo.wingmanRate) : 'N/A'}
               </span>
               {rateInfo.currentlyUsed === 'wingman' && hasWorkedHours && (
-                <Star className="h-3 w-3 text-[#026937]" />
+                <Star className="h-3 w-3 text-hunks-green" />
               )}
             </div>
           </TableCell>
@@ -300,7 +300,7 @@ function RateRow({ rateInfo }: { rateInfo: DepartmentRateInfo }) {
                 {rateInfo.singleRate ? formatCurrency(rateInfo.singleRate) : 'N/A'}
               </span>
               {hasWorkedHours && (
-                <Star className="h-3 w-3 text-[#026937]" />
+                <Star className="h-3 w-3 text-hunks-green" />
               )}
             </div>
           </TableCell>
@@ -360,7 +360,7 @@ export function RateInformationPanel({ user, departmentHours }: RateInformationP
                   <TooltipContent>
                     <div className="max-w-xs">
                       <p className="text-sm">
-                        Rates marked with <Star className="h-3 w-3 inline text-[#026937]" /> were used 
+                        Rates marked with <Star className="h-3 w-3 inline text-hunks-green" /> were used 
                         for departments where you worked hours this period.
                       </p>
                     </div>
@@ -400,7 +400,7 @@ export function RateInformationPanel({ user, departmentHours }: RateInformationP
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Department Rates</h4>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Star className="h-3 w-3 text-[#026937]" />
+                <Star className="h-3 w-3 text-hunks-green" />
                 <span>Currently used rate</span>
               </div>
             </div>
@@ -489,7 +489,7 @@ export function RateInformationPanel({ user, departmentHours }: RateInformationP
           {/* Role Information */}
           <div className="rounded-lg bg-muted/30 p-3">
             <div className="flex items-start gap-2">
-              <Shield className="h-4 w-4 mt-0.5 text-[#026937]" />
+              <Shield className="h-4 w-4 mt-0.5 text-hunks-green" />
               <div className="text-sm">
                 <div className="font-medium mb-1">Your Roles: {user.roles.join(', ')}</div>
                 <p className="text-muted-foreground text-xs">

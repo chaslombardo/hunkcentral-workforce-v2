@@ -57,8 +57,8 @@ const DEPARTMENT_LABELS: Record<Department, string> = {
 };
 
 const DEPARTMENT_COLORS: Record<Department, string> = {
-  junk: 'bg-[#026937]',
-  move: 'bg-[#ea7200]',
+  junk: 'bg-hunks-green',
+  move: 'bg-hunks-orange',
   zigma: 'bg-blue-500',
   training: 'bg-purple-500',
   estimating: 'bg-green-500',
@@ -105,7 +105,7 @@ function DepartmentCard({
   const rateInfo = getRateInfo();
 
   return (
-    <Card className={`@container/card ${department.isPrimary ? 'border-[#026937] border-2' : ''}`}>
+    <Card className={`@container/card ${department.isPrimary ? 'border-hunks-green border-2' : ''}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${colorClass} flex-shrink-0`} />

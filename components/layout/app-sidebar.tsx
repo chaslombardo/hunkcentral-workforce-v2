@@ -145,11 +145,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#026937] text-white">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-hunks-green text-white">
             <Building2 className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium text-[#026937]">College Hunks</span>
+            <span className="truncate font-medium text-hunks-green">College Hunks</span>
             <span className="truncate text-xs text-muted-foreground">Workforce Management</span>
           </div>
         </div>

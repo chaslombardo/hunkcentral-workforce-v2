@@ -14,7 +14,7 @@ export function showCommissionMatchingNotifications(notifications: MatchingNotif
           title: notification.title,
           description: notification.message,
           variant: 'default',
-          className: 'border-[#026937] bg-[#026937]/10',
+          className: 'border-hunks-green bg-hunks-green/10',
         });
         break;
         
@@ -23,7 +23,7 @@ export function showCommissionMatchingNotifications(notifications: MatchingNotif
           title: notification.title,
           description: notification.message,
           variant: 'destructive',
-          className: 'border-[#ea7200] bg-[#ea7200]/10',
+          className: 'border-hunks-orange bg-hunks-orange/10',
         });
         break;
         
@@ -51,7 +51,7 @@ export function showCommissionMatchNotification(
     title: 'Commission Matched',
     description: `Job ${jobId} matched to ${salesPerson} - $${commissionAmount.toFixed(2)} commission (${accuracy.toFixed(1)}% accuracy)`,
     variant: 'default',
-    className: 'border-[#026937] bg-[#026937]/10',
+    className: 'border-hunks-green bg-hunks-green/10',
   });
 }
 
@@ -66,7 +66,7 @@ export function showCommissionConflictNotification(
     title: 'Commission Conflict',
     description: `Job ${jobId} has ${conflictCount} competing commission entries. Manual resolution required.`,
     variant: 'destructive',
-    className: 'border-[#ea7200] bg-[#ea7200]/10',
+    className: 'border-hunks-orange bg-hunks-orange/10',
   });
 }
 
@@ -83,7 +83,7 @@ export function showCommissionMatchingSummary(
       title: 'Commission Matching Complete',
       description: `${matchCount} commission(s) matched for $${totalCommission.toFixed(2)} total${conflictCount > 0 ? `. ${conflictCount} conflict(s) need resolution.` : '.'}`,
       variant: 'default',
-      className: 'border-[#026937] bg-[#026937]/10',
+      className: 'border-hunks-green bg-hunks-green/10',
     });
   }
   
@@ -92,7 +92,7 @@ export function showCommissionMatchingSummary(
       title: 'Commission Conflicts Detected',
       description: `${conflictCount} commission conflict(s) require manual resolution.`,
       variant: 'destructive',
-      className: 'border-[#ea7200] bg-[#ea7200]/10',
+      className: 'border-hunks-orange bg-hunks-orange/10',
     });
   }
 }
@@ -110,6 +110,6 @@ export function showConflictResolutionNotification(
     title: 'Conflict Resolved',
     description: `Job ${jobId} assigned to ${selectedSalesPerson} - $${commissionAmount.toFixed(2)} commission. ${removedCount} duplicate entries removed.`,
     variant: 'default',
-    className: 'border-[#026937] bg-[#026937]/10',
+    className: 'border-hunks-green bg-hunks-green/10',
   });
 }

@@ -357,7 +357,7 @@ export function PayrollPrintLayout({
       <div className="no-print mt-6 text-center">
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#026937] text-white rounded-md hover:bg-[#025530] transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-hunks-green text-white rounded-md hover:bg-hunks-green-700 transition-colors"
         >
           <Printer className="h-4 w-4" />
           Print Paystub

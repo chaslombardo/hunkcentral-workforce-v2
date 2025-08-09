@@ -39,7 +39,7 @@ export default function DashboardPage() {
         description: "Record today's jobs and team hours",
         href: "/logs/create",
         icon: ClipboardList,
-        color: "bg-[#026937] hover:bg-[#026937]/90",
+        color: "bg-hunks-green hover:bg-hunks-green/90",
       })
     }
 
@@ -49,7 +49,7 @@ export default function DashboardPage() {
         description: "Track new job bookings",
         href: "/commission/create",
         icon: DollarSign,
-        color: "bg-[#ea7200] hover:bg-[#ea7200]/90",
+        color: "bg-hunks-orange hover:bg-hunks-orange/90",
       })
     }
 
@@ -110,7 +110,7 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#026937]">
+          <h1 className="text-3xl font-bold tracking-tight text-hunks-green">
             Welcome back, {user?.fullName || 'User'}!
           </h1>
           <p className="text-muted-foreground">
@@ -304,7 +304,7 @@ export default function DashboardPage() {
                   <BrandButton 
                     key={action.title} 
                     asChild 
-                    variant={action.color.includes('#026937') ? 'primary' : action.color.includes('#ea7200') ? 'secondary' : 'outline'}
+                    variant={action.color.includes('hunks-green') ? 'primary' : action.color.includes('hunks-orange') ? 'secondary' : 'outline'}
                     className="w-full justify-start"
                   >
                     <Link href={action.href} className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   {metrics.recentActivity.slice(0, 5).map((activity) => (
                     <div key={activity.id} className="flex items-start gap-3 text-sm">
-                      <div className="flex-shrink-0 w-2 h-2 bg-[#026937] rounded-full mt-2" />
+                      <div className="flex-shrink-0 w-2 h-2 bg-hunks-green rounded-full mt-2" />
                       <div className="flex-1 min-w-0">
                         <p className="text-foreground">{activity.description}</p>
                         <p className="text-muted-foreground text-xs">
