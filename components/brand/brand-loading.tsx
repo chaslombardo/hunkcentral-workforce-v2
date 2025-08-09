@@ -4,7 +4,8 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
-import { ariaLabels, motionUtils } from "@/lib/accessibility-utils"
+import { ariaLabels } from "@/lib/accessibility-utils"
+import { useMotionPreference, getMicroInteractionClasses } from "@/lib/motion-preferences"
 
 const brandLoadingVariants = cva(
   "inline-flex items-center justify-center",
@@ -150,24 +151,8 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
       bundleAnalysis.trackRender('BrandLoading', variant || undefined, props);
     }, [props, variant]);
 
-    // Check for reduced motion preference - memoized
-    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(() => 
-      respectReducedMotion ? motionUtils.prefersReducedMotion() : false
-    )
-    
-    React.useEffect(() => {
-      if (respectReducedMotion && typeof window !== 'undefined') {
-        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-        setPrefersReducedMotion(mediaQuery.matches)
-        
-        const handleChange = (e: MediaQueryListEvent) => {
-          setPrefersReducedMotion(e.matches)
-        }
-        
-        mediaQuery.addEventListener('change', handleChange)
-        return () => mediaQuery.removeEventListener('change', handleChange)
-      }
-    }, [respectReducedMotion])
+    // Use motion preference hook
+    const { prefersReducedMotion } = useMotionPreference()
 
     // Announce loading state changes to screen readers
     React.useEffect(() => {
@@ -218,16 +203,25 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
           return (
             <div className={cn(brandLoadingVariants({ variant, size, color, className }))}>
               <div 
-                className={cn(dotVariants({ size, color }), "animation-delay-0")}
-                style={{ animationDelay: '0ms' }}
+                className={cn(
+                  dotVariants({ size, color }),
+                  getMicroInteractionClasses('loadingPulse')
+                )}
+                style={{ animationDelay: prefersReducedMotion && respectReducedMotion ? '0ms' : '0ms' }}
               />
               <div 
-                className={cn(dotVariants({ size, color }), "animation-delay-150")}
-                style={{ animationDelay: '150ms' }}
+                className={cn(
+                  dotVariants({ size, color }),
+                  getMicroInteractionClasses('loadingPulse')
+                )}
+                style={{ animationDelay: prefersReducedMotion && respectReducedMotion ? '0ms' : '150ms' }}
               />
               <div 
-                className={cn(dotVariants({ size, color }), "animation-delay-300")}
-                style={{ animationDelay: '300ms' }}
+                className={cn(
+                  dotVariants({ size, color }),
+                  getMicroInteractionClasses('loadingPulse')
+                )}
+                style={{ animationDelay: prefersReducedMotion && respectReducedMotion ? '0ms' : '300ms' }}
               />
             </div>
           )

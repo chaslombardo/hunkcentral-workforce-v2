@@ -164,7 +164,7 @@
   - Commit changes with descriptive message
   - _Requirements: 7.1_
 
-- [-] 18. Enhance accessibility features
+- [x] 18. Enhance accessibility features
   - Add proper ARIA labels and descriptions to all new components
   - Implement keyboard navigation for all interactive elements
   - Ensure sufficient color contrast for all brand color combinations
@@ -173,7 +173,7 @@
   - Commit changes with descriptive message
   - _Requirements: 7.2, 7.3, 7.4_
 
-- [ ] 19. Add animation and motion preferences
+- [-] 19. Add animation and motion preferences
   - Implement respect for prefers-reduced-motion user setting
   - Create alternative static states for users who prefer reduced motion
   - Ensure all animations are smooth and performant

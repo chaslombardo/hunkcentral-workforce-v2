@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils"
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
 import { 
   ariaLabels, 
-  keyboardUtils, 
-  motionUtils,
+  keyboardUtils,
   generateAccessibilityId 
 } from "@/lib/accessibility-utils"
+import { useMotionPreference, getMicroInteractionClasses } from "@/lib/motion-preferences"
 
 const brandButtonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -218,14 +218,14 @@ const BrandButton = React.memo(React.forwardRef<HTMLButtonElement, BrandButtonPr
       }
     }, [onKeyDown, shortcut, isDisabled]);
 
+    // Use motion preference hook
+    const { prefersReducedMotion } = useMotionPreference();
+    
     // Memoize animation classes based on reduced motion preference
     const animationClasses = React.useMemo(() => {
-      if (!respectReducedMotion) return '';
+      if (!respectReducedMotion) return 'transition-all duration-200';
       
-      return motionUtils.getAnimationClasses(
-        'transition-all duration-200', // Animated
-        'transition-none' // Static for reduced motion
-      );
+      return getMicroInteractionClasses('buttonHover');
     }, [respectReducedMotion]);
     
     // Memoize class names
@@ -264,8 +264,8 @@ const BrandButton = React.memo(React.forwardRef<HTMLButtonElement, BrandButtonPr
           {loading ? (
             <>
               <Loader2 className={cn(
-                "animate-spin",
-                respectReducedMotion && motionUtils.prefersReducedMotion() && "animate-none"
+                getMicroInteractionClasses('loadingPulse'),
+                respectReducedMotion && prefersReducedMotion && "animate-none"
               )} />
               {children}
             </>

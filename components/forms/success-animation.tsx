@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
+import { useMotionPreference } from '@/lib/motion-preferences';
 
 interface SuccessAnimationProps {
   size?: 'sm' | 'md' | 'lg';
@@ -22,6 +23,7 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
 }: SuccessAnimationProps) {
   const monitor = usePerformanceMonitor('SuccessAnimation');
   const startMarkRef = React.useRef<string>('');
+  const { prefersReducedMotion } = useMotionPreference();
 
   // Performance monitoring
   React.useLayoutEffect(() => {
@@ -36,8 +38,13 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
   React.useEffect(() => {
     bundleAnalysis.warnLargeProps('SuccessAnimation', { size, showSparkles, duration, className }, 200);
   }, [size, showSparkles, duration, className]);
+  
   const [isVisible, setIsVisible] = React.useState(false);
   const [showCheck, setShowCheck] = React.useState(false);
+
+  // Adjust timing for reduced motion
+  const effectiveDuration = prefersReducedMotion ? 300 : duration;
+  const checkDelay = prefersReducedMotion ? 50 : 200;
 
   // Memoize size classes to prevent unnecessary re-renders
   const sizeClasses = React.useMemo(() => ({
@@ -72,57 +79,65 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
     // Show check mark after initial scale
     const checkTimer = setTimeout(() => {
       setShowCheck(true);
-    }, 200);
+    }, checkDelay);
 
     // Complete animation
     const completeTimer = setTimeout(() => {
       onComplete?.();
-    }, duration);
+    }, effectiveDuration);
 
     return () => {
       clearTimeout(checkTimer);
       clearTimeout(completeTimer);
     };
-  }, [duration, onComplete]);
+  }, [checkDelay, effectiveDuration, onComplete]);
 
   return (
     <div className={cn('relative flex items-center justify-center', className)}>
       {/* Main success circle */}
       <div
         className={cn(
-          'relative rounded-full bg-hunks-green flex items-center justify-center transition-all duration-500 ease-out',
+          'relative rounded-full bg-hunks-green flex items-center justify-center',
           sizeClasses[size],
+          prefersReducedMotion 
+            ? 'transition-opacity duration-200 ease-out' 
+            : 'transition-all duration-500 ease-out',
           isVisible 
             ? 'scale-100 opacity-100' 
-            : 'scale-0 opacity-0'
+            : prefersReducedMotion ? 'opacity-0' : 'scale-0 opacity-0'
         )}
       >
         {/* Check mark */}
         <CheckCircle2
           className={cn(
-            'text-white transition-all duration-300 ease-out',
+            'text-white',
             checkIconSize,
+            prefersReducedMotion 
+              ? 'transition-opacity duration-150 ease-out' 
+              : 'transition-all duration-300 ease-out',
             showCheck 
               ? 'scale-100 opacity-100' 
-              : 'scale-0 opacity-0'
+              : prefersReducedMotion ? 'opacity-0' : 'scale-0 opacity-0'
           )}
         />
         
-        {/* Pulse ring */}
-        <div
-          className={cn(
-            'absolute inset-0 rounded-full bg-hunks-green animate-ping opacity-20',
-            isVisible ? 'animate-ping' : ''
-          )}
-          style={{
-            animationDuration: '1s',
-            animationIterationCount: '2'
-          }}
-        />
+        {/* Pulse ring - only show if motion is allowed */}
+        {!prefersReducedMotion && (
+          <div
+            className={cn(
+              'absolute inset-0 rounded-full bg-hunks-green opacity-20',
+              isVisible ? 'animate-ping' : ''
+            )}
+            style={{
+              animationDuration: '1s',
+              animationIterationCount: '2'
+            }}
+          />
+        )}
       </div>
 
-      {/* Sparkles */}
-      {showSparkles && isVisible && (
+      {/* Sparkles - only show if motion is allowed and sparkles are enabled */}
+      {showSparkles && isVisible && !prefersReducedMotion && (
         <>
           {/* Top sparkle */}
           <Sparkles
@@ -164,6 +179,33 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
               animationDuration: '0.8s',
               animationIterationCount: '2'
             }}
+          />
+        </>
+      )}
+      
+      {/* Static sparkles for reduced motion */}
+      {showSparkles && isVisible && prefersReducedMotion && (
+        <>
+          <Sparkles
+            className={cn(
+              'absolute text-hunks-green opacity-60',
+              sparkleSize[size],
+              sparklePositions.top
+            )}
+          />
+          <Sparkles
+            className={cn(
+              'absolute text-hunks-orange opacity-60',
+              sparkleSize[size],
+              sparklePositions.bottom
+            )}
+          />
+          <Sparkles
+            className={cn(
+              'absolute text-hunks-green opacity-60',
+              sparkleSize[size],
+              sparklePositions.side
+            )}
           />
         </>
       )}

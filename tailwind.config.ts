@@ -132,11 +132,72 @@ export default {
   				to: {
   					height: '0'
   				}
+  			},
+  			'gentle-bounce': {
+  				'0%, 20%, 53%, 80%, 100%': {
+  					'animation-timing-function': 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+  					transform: 'translate3d(0, 0, 0)'
+  				},
+  				'40%, 43%': {
+  					'animation-timing-function': 'cubic-bezier(0.755, 0.05, 0.855, 0.06)',
+  					transform: 'translate3d(0, -8px, 0)'
+  				},
+  				'70%': {
+  					'animation-timing-function': 'cubic-bezier(0.755, 0.05, 0.855, 0.06)',
+  					transform: 'translate3d(0, -4px, 0)'
+  				},
+  				'90%': {
+  					transform: 'translate3d(0, -2px, 0)'
+  				}
+  			},
+  			'subtle-pulse': {
+  				'0%, 100%': {
+  					opacity: '1',
+  					transform: 'scale(1)'
+  				},
+  				'50%': {
+  					opacity: '0.8',
+  					transform: 'scale(1.02)'
+  				}
+  			},
+  			'smooth-fade-in': {
+  				from: {
+  					opacity: '0',
+  					transform: 'translateY(8px)'
+  				},
+  				to: {
+  					opacity: '1',
+  					transform: 'translateY(0)'
+  				}
+  			},
+  			'success-celebration': {
+  				'0%': { transform: 'scale(1)' },
+  				'15%': { transform: 'scale(1.1)' },
+  				'30%': { transform: 'scale(0.95)' },
+  				'45%': { transform: 'scale(1.05)' },
+  				'60%': { transform: 'scale(0.98)' },
+  				'75%': { transform: 'scale(1.02)' },
+  				'100%': { transform: 'scale(1)' }
+  			},
+  			'loading-dots': {
+  				'0%, 80%, 100%': {
+  					transform: 'scale(0.8)',
+  					opacity: '0.5'
+  				},
+  				'40%': {
+  					transform: 'scale(1)',
+  					opacity: '1'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'gentle-bounce': 'gentle-bounce 0.6s ease-out',
+  			'subtle-pulse': 'subtle-pulse 2s ease-in-out infinite',
+  			'smooth-fade-in': 'smooth-fade-in 0.3s ease-out',
+  			'success-celebration': 'success-celebration 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  			'loading-dots': 'loading-dots 1.4s ease-in-out infinite'
   		}
   	}
   },

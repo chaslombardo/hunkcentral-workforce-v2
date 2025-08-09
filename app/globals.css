@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import motion preferences CSS */
+@import './motion-preferences.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;
