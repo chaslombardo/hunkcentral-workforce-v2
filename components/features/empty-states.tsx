@@ -50,7 +50,12 @@ const WelcomeIllustration = React.lazy(() =>
 
 // Fallback component for lazy-loaded illustrations
 const IllustrationFallback = () => (
-  <div className="w-48 h-48 bg-muted/20 rounded-lg animate-pulse" />
+  <div 
+    className="w-48 h-48 bg-muted/20 rounded-lg animate-pulse" 
+    aria-hidden="true"
+    role="img"
+    aria-label="Loading illustration"
+  />
 );
 
 // Logs Empty States

@@ -30,6 +30,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
+import { ariaLabels } from "@/lib/accessibility-utils"
 
 interface BreadcrumbSegment {
   label: string
@@ -226,7 +227,10 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
   }
   
   return (
-    <Breadcrumb className={cn("hidden sm:flex", className)}>
+    <Breadcrumb 
+      className={cn("hidden sm:flex", className)}
+      aria-label={ariaLabels.navigation.breadcrumb}
+    >
       <BreadcrumbList>
         {breadcrumbs.map((breadcrumb, index) => (
           <React.Fragment key={`${breadcrumb.href || breadcrumb.label}-${index}`}>
@@ -236,9 +240,16 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
             )}>
               {breadcrumb.href ? (
                 <BreadcrumbLink asChild>
-                  <Link href={breadcrumb.href} className="flex items-center gap-1.5">
+                  <Link 
+                    href={breadcrumb.href} 
+                    className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                    aria-label={`Navigate to ${breadcrumb.label}`}
+                  >
                     {breadcrumb.icon && (
-                      <breadcrumb.icon className="h-3.5 w-3.5" />
+                      <breadcrumb.icon 
+                        className="h-3.5 w-3.5" 
+                        aria-hidden="true"
+                      />
                     )}
                     <span className="truncate max-w-[120px] sm:max-w-[160px]">
                       {breadcrumb.label}
@@ -246,9 +257,16 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
                   </Link>
                 </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage className="flex items-center gap-1.5">
+                <BreadcrumbPage 
+                  className="flex items-center gap-1.5"
+                  aria-current="page"
+                  aria-label={`Current page: ${breadcrumb.label}`}
+                >
                   {breadcrumb.icon && (
-                    <breadcrumb.icon className="h-3.5 w-3.5" />
+                    <breadcrumb.icon 
+                      className="h-3.5 w-3.5" 
+                      aria-hidden="true"
+                    />
                   )}
                   <span className="truncate max-w-[120px] sm:max-w-[160px]">
                     {breadcrumb.label}
@@ -257,9 +275,12 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
               )}
             </BreadcrumbItem>
             {index < breadcrumbs.length - 1 && (
-              <BreadcrumbSeparator className={cn(
-                index === 0 && "hidden md:block" // Hide separator after first item on smaller screens
-              )} />
+              <BreadcrumbSeparator 
+                className={cn(
+                  index === 0 && "hidden md:block" // Hide separator after first item on smaller screens
+                )}
+                aria-hidden="true"
+              />
             )}
           </React.Fragment>
         ))}

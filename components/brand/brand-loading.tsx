@@ -4,6 +4,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
+import { ariaLabels, motionUtils } from "@/lib/accessibility-utils"
 
 const brandLoadingVariants = cva(
   "inline-flex items-center justify-center",
@@ -92,6 +93,14 @@ interface BrandLoadingProps
    * @default true
    */
   respectReducedMotion?: boolean
+  /**
+   * Custom aria-label for the loading indicator
+   */
+  'aria-label'?: string
+  /**
+   * Whether to announce loading state changes to screen readers
+   */
+  announceChanges?: boolean
 }
 
 const SpinnerIcon = ({ className }: { className?: string }) => (
@@ -119,6 +128,8 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
     color, 
     text, 
     respectReducedMotion = true,
+    'aria-label': ariaLabel,
+    announceChanges = false,
     ...props 
   }, ref) => {
     const monitor = usePerformanceMonitor('BrandLoading');
@@ -140,7 +151,9 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
     }, [props, variant]);
 
     // Check for reduced motion preference - memoized
-    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
+    const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(() => 
+      respectReducedMotion ? motionUtils.prefersReducedMotion() : false
+    )
     
     React.useEffect(() => {
       if (respectReducedMotion && typeof window !== 'undefined') {
@@ -155,6 +168,32 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
         return () => mediaQuery.removeEventListener('change', handleChange)
       }
     }, [respectReducedMotion])
+
+    // Announce loading state changes to screen readers
+    React.useEffect(() => {
+      if (announceChanges && text) {
+        const message = `${ariaLabels.status.loading}: ${text}`;
+        // Use a timeout to ensure the announcement happens after render
+        const timer = setTimeout(() => {
+          const announcer = document.createElement('div');
+          announcer.setAttribute('aria-live', 'polite');
+          announcer.setAttribute('aria-atomic', 'true');
+          announcer.className = 'sr-only';
+          announcer.textContent = message;
+          
+          document.body.appendChild(announcer);
+          
+          // Remove after announcement
+          setTimeout(() => {
+            if (document.body.contains(announcer)) {
+              document.body.removeChild(announcer);
+            }
+          }, 1000);
+        }, 100);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [announceChanges, text])
 
     // Memoize the loading indicator to prevent unnecessary re-renders
     const renderLoadingIndicator = React.useMemo(() => {
@@ -215,20 +254,31 @@ const BrandLoading = React.memo(React.forwardRef<HTMLDivElement, BrandLoadingPro
       [color]
     );
 
+    // Memoize accessibility attributes
+    const accessibilityProps = React.useMemo(() => ({
+      role: "status",
+      "aria-label": ariaLabel || (text ? `${ariaLabels.status.loading}: ${text}` : ariaLabels.status.loading),
+      "aria-live": announceChanges ? "polite" as const : undefined,
+      "aria-atomic": announceChanges ? true : undefined,
+    }), [ariaLabel, text, announceChanges]);
+
     return (
       <div
         ref={ref}
         className={cn("inline-flex items-center gap-2", className)}
-        role="status"
-        aria-label={text ? `Loading: ${text}` : "Loading"}
+        {...accessibilityProps}
         {...props}
       >
         {renderLoadingIndicator}
         {text && (
-          <span className={textColorClass}>
+          <span className={textColorClass} aria-hidden="true">
             {text}
           </span>
         )}
+        {/* Screen reader only text for better context */}
+        <span className="sr-only">
+          {text ? `Loading ${text}` : "Loading, please wait"}
+        </span>
       </div>
     )
   }

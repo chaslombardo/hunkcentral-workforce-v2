@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
+import { ariaLabels, generateAccessibilityId, useAccessibilityTesting } from "@/lib/accessibility-utils"
 
 // Types extending shadcn/ui component props
 export interface MetricCardProps extends React.ComponentProps<typeof Card> {
@@ -40,6 +41,22 @@ export interface MetricCardProps extends React.ComponentProps<typeof Card> {
     primary: string
     secondary?: string
   }
+  /**
+   * Custom aria-label for the metric card
+   */
+  'aria-label'?: string
+  /**
+   * Whether the card is interactive (clickable)
+   */
+  interactive?: boolean
+  /**
+   * Click handler for interactive cards
+   */
+  onCardClick?: () => void
+  /**
+   * Keyboard shortcut for interactive cards
+   */
+  shortcut?: string
 }
 
 // Color variant mappings using brand colors
@@ -123,10 +140,15 @@ const MetricCard = React.memo(function MetricCard({
   loading = false,
   footer,
   className,
+  interactive = false,
+  onCardClick,
+  shortcut,
+  'aria-label': ariaLabel,
   ...props
 }: MetricCardProps) {
   const monitor = usePerformanceMonitor('MetricCard');
   const startMarkRef = React.useRef<string>('');
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   // Performance monitoring
   React.useLayoutEffect(() => {
@@ -136,6 +158,9 @@ const MetricCard = React.memo(function MetricCard({
   React.useLayoutEffect(() => {
     monitor.endRender(startMarkRef.current);
   });
+
+  // Accessibility testing in development
+  useAccessibilityTesting(cardRef as React.RefObject<HTMLElement>);
 
   // Warn about large props in development and track bundle usage
   React.useEffect(() => {
@@ -167,20 +192,69 @@ const MetricCard = React.memo(function MetricCard({
     return (typeof value === 'number' && value === 0) || !value
   }, [value]);
 
+  // Memoize accessibility attributes
+  const accessibilityProps = React.useMemo(() => {
+    const props: Record<string, string | number | boolean | undefined> = {};
+    
+    // ARIA label for the metric
+    if (ariaLabel) {
+      props['aria-label'] = ariaLabel;
+    } else {
+      props['aria-label'] = ariaLabels.metric.value(title, displayValue, change);
+    }
+    
+    // Role for interactive cards
+    if (interactive && onCardClick) {
+      props.role = 'button';
+      props.tabIndex = 0;
+      props['aria-pressed'] = false;
+    }
+    
+    // Keyboard shortcut description
+    if (shortcut) {
+      const descriptionId = generateAccessibilityId('metric-desc');
+      props['aria-describedby'] = descriptionId;
+    }
+    
+    return props;
+  }, [ariaLabel, title, displayValue, change, interactive, onCardClick, shortcut]);
+
+  // Handle keyboard interactions for interactive cards
+  const handleKeyDown = React.useCallback((event: React.KeyboardEvent) => {
+    if (!interactive || !onCardClick) return;
+    
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onCardClick();
+    }
+    
+    // Handle keyboard shortcut
+    if (shortcut && event.key === shortcut.toLowerCase() && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      onCardClick();
+    }
+  }, [interactive, onCardClick, shortcut]);
+
   // Show loading skeleton
   if (loading) {
     return <MetricCardSkeleton className={cn(colorClasses.border, className)} />
   }
 
   return (
-    <Card 
-      className={cn(
-        "@container/card border-l-4 from-primary/5 to-card bg-gradient-to-t shadow-xs",
-        colorClasses.border,
-        className
-      )} 
-      {...props}
-    >
+    <>
+      <Card 
+        ref={cardRef}
+        className={cn(
+          "@container/card border-l-4 from-primary/5 to-card bg-gradient-to-t shadow-xs",
+          colorClasses.border,
+          interactive && "cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          className
+        )}
+        onClick={interactive ? onCardClick : undefined}
+        onKeyDown={interactive ? handleKeyDown : undefined}
+        {...accessibilityProps}
+        {...props}
+      >
       <CardHeader>
         {description && (
           <CardDescription>{description}</CardDescription>
@@ -198,7 +272,10 @@ const MetricCard = React.memo(function MetricCard({
             </CardTitle>
           </div>
           {Icon && (
-            <Icon className={cn("h-5 w-5 shrink-0", colorClasses.icon)} />
+            <Icon 
+              className={cn("h-5 w-5 shrink-0", colorClasses.icon)} 
+              aria-hidden="true"
+            />
           )}
         </div>
         {change && (
@@ -210,7 +287,12 @@ const MetricCard = React.memo(function MetricCard({
                 colorClasses.badge
               )}
             >
-              {TrendIcon && <TrendIcon className="h-3 w-3" />}
+              {TrendIcon && (
+              <TrendIcon 
+                className="h-3 w-3" 
+                aria-hidden="true"
+              />
+            )}
               {formatChange(change.value)}
             </Badge>
           </CardAction>
@@ -221,7 +303,12 @@ const MetricCard = React.memo(function MetricCard({
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
             {footer.primary}
-            {TrendIcon && <TrendIcon className="h-4 w-4" />}
+            {TrendIcon && (
+              <TrendIcon 
+                className="h-4 w-4" 
+                aria-hidden="true"
+              />
+            )}
           </div>
           {footer.secondary && (
             <div className="text-muted-foreground">
@@ -235,7 +322,15 @@ const MetricCard = React.memo(function MetricCard({
           )}
         </CardFooter>
       )}
-    </Card>
+      </Card>
+      
+      {/* Hidden description for keyboard shortcut */}
+      {shortcut && (
+        <span id={generateAccessibilityId('metric-desc')} className="sr-only">
+          Keyboard shortcut: {shortcut}
+        </span>
+      )}
+    </>
   )
 });
 

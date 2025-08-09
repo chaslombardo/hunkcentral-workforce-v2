@@ -7,6 +7,12 @@ import { Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor"
+import { 
+  ariaLabels, 
+  keyboardUtils, 
+  motionUtils,
+  generateAccessibilityId 
+} from "@/lib/accessibility-utils"
 
 const brandButtonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -64,12 +70,62 @@ export interface BrandButtonProps
   asChild?: boolean
   loading?: boolean
   icon?: React.ComponentType<{ className?: string }>
+  /**
+   * Loading text announced to screen readers
+   */
+  loadingText?: string
+  /**
+   * Success state for form submissions
+   */
+  success?: boolean
+  /**
+   * Success text announced to screen readers
+   */
+  successText?: string
+  /**
+   * Error state for form submissions
+   */
+  error?: boolean
+  /**
+   * Error text announced to screen readers
+   */
+  errorText?: string
+  /**
+   * Keyboard shortcut hint
+   */
+  shortcut?: string
+  /**
+   * Whether to respect user's reduced motion preference
+   */
+  respectReducedMotion?: boolean
 }
 
 const BrandButton = React.memo(React.forwardRef<HTMLButtonElement, BrandButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, icon: Icon, children, disabled, ...props }, ref) => {
+  ({ 
+    className, 
+    variant, 
+    size, 
+    asChild = false, 
+    loading = false, 
+    success = false,
+    error = false,
+    icon: Icon, 
+    children, 
+    disabled, 
+    loadingText,
+    successText,
+    errorText,
+    shortcut,
+    respectReducedMotion = true,
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    onKeyDown,
+    ...props 
+  }, ref) => {
     const monitor = usePerformanceMonitor('BrandButton');
     const startMarkRef = React.useRef<string>('');
+    const buttonRef = React.useRef<HTMLButtonElement>(null);
+    const descriptionId = React.useRef(generateAccessibilityId('button-desc'));
 
     // Performance monitoring
     React.useLayoutEffect(() => {
@@ -89,34 +145,145 @@ const BrandButton = React.memo(React.forwardRef<HTMLButtonElement, BrandButtonPr
     // Memoize component selection
     const Comp = React.useMemo(() => asChild ? Slot : "button", [asChild]);
     
-    // Memoize class names
-    const buttonClassName = React.useMemo(() => 
-      cn(brandButtonVariants({ variant, size, className })), 
-      [variant, size, className]
-    );
-
     // Memoize disabled state
     const isDisabled = React.useMemo(() => disabled || loading, [disabled, loading]);
     
+    // Memoize button state for accessibility
+    const buttonState = React.useMemo(() => {
+      if (loading) return 'loading';
+      if (success) return 'success';
+      if (error) return 'error';
+      return 'idle';
+    }, [loading, success, error]);
+
+    // Memoize accessibility attributes
+    const accessibilityProps = React.useMemo(() => {
+      const props: Record<string, string | boolean | undefined> = {};
+      
+      // ARIA label based on state
+      if (ariaLabel) {
+        props['aria-label'] = ariaLabel;
+      } else if (buttonState !== 'idle') {
+        const baseLabel = typeof children === 'string' ? children : 'Button';
+        switch (buttonState) {
+          case 'loading':
+            props['aria-label'] = loadingText || ariaLabels.button.loading(baseLabel);
+            break;
+          case 'success':
+            props['aria-label'] = successText || ariaLabels.button.success(baseLabel);
+            break;
+          case 'error':
+            props['aria-label'] = errorText || ariaLabels.button.error(baseLabel);
+            break;
+        }
+      }
+
+      // ARIA described by
+      const describedByIds = [ariaDescribedBy];
+      if (shortcut) {
+        describedByIds.push(descriptionId.current);
+      }
+      const validIds = describedByIds.filter(Boolean);
+      if (validIds.length > 0) {
+        props['aria-describedby'] = validIds.join(' ');
+      }
+
+      // ARIA pressed for toggle buttons
+      if (props.role === 'switch' || props['aria-pressed'] !== undefined) {
+        // Keep existing aria-pressed if provided
+      }
+
+      // ARIA busy for loading state
+      if (loading) {
+        props['aria-busy'] = 'true';
+      }
+
+      return props;
+    }, [ariaLabel, ariaDescribedBy, buttonState, children, loading, loadingText, successText, errorText, shortcut]);
+
+    // Handle keyboard interactions
+    const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+      // Call original handler first
+      onKeyDown?.(event);
+
+      // Handle keyboard shortcuts
+      if (shortcut && event.key === shortcut.toLowerCase() && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        buttonRef.current?.click();
+      }
+
+      // Ensure Enter and Space work properly
+      if (keyboardUtils.isActivationKey(event) && !isDisabled) {
+        // Let the default behavior handle the click
+      }
+    }, [onKeyDown, shortcut, isDisabled]);
+
+    // Memoize animation classes based on reduced motion preference
+    const animationClasses = React.useMemo(() => {
+      if (!respectReducedMotion) return '';
+      
+      return motionUtils.getAnimationClasses(
+        'transition-all duration-200', // Animated
+        'transition-none' // Static for reduced motion
+      );
+    }, [respectReducedMotion]);
+    
+    // Memoize class names
+    const buttonClassName = React.useMemo(() => 
+      cn(
+        brandButtonVariants({ variant, size }),
+        animationClasses,
+        // State-specific classes
+        success && 'ring-2 ring-hunks-green/20',
+        error && 'ring-2 ring-destructive/20',
+        className
+      ), 
+      [variant, size, className, animationClasses, success, error]
+    );
+
+    // Combine refs
+    const combinedRef = React.useCallback((node: HTMLButtonElement | null) => {
+      buttonRef.current = node;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    }, [ref]);
+    
     return (
-      <Comp
-        className={buttonClassName}
-        ref={ref}
-        disabled={isDisabled}
-        {...props}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="animate-spin" />
-            {children}
-          </>
-        ) : (
-          <>
-            {Icon && <Icon />}
-            {children}
-          </>
+      <>
+        <Comp
+          ref={combinedRef}
+          className={buttonClassName}
+          disabled={isDisabled}
+          onKeyDown={handleKeyDown}
+          {...accessibilityProps}
+          {...props}
+        >
+          {loading ? (
+            <>
+              <Loader2 className={cn(
+                "animate-spin",
+                respectReducedMotion && motionUtils.prefersReducedMotion() && "animate-none"
+              )} />
+              {children}
+            </>
+          ) : (
+            <>
+              {Icon && <Icon />}
+              {children}
+            </>
+          )}
+        </Comp>
+        
+        {/* Hidden description for keyboard shortcut */}
+        {shortcut && (
+          <span id={descriptionId.current} className="sr-only">
+            Keyboard shortcut: {shortcut}
+          </span>
         )}
-      </Comp>
+      </>
     )
   }
 ));

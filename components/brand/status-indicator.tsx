@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { usePerformanceMonitor, bundleAnalysis } from "@/lib/performance-monitor";
+import { useAccessibilityTesting } from "@/lib/accessibility-utils";
 
 // Status type definitions based on common application statuses
 export type StatusType = 
@@ -161,6 +162,7 @@ export const StatusIndicator = React.memo(function StatusIndicator({
 }: StatusIndicatorProps) {
   const monitor = usePerformanceMonitor('StatusIndicator');
   const startMarkRef = React.useRef<string>('');
+  const statusRef = React.useRef<HTMLSpanElement>(null);
 
   // Performance monitoring
   React.useLayoutEffect(() => {
@@ -170,6 +172,9 @@ export const StatusIndicator = React.memo(function StatusIndicator({
   React.useLayoutEffect(() => {
     monitor.endRender(startMarkRef.current);
   });
+
+  // Accessibility testing in development
+  useAccessibilityTesting(statusRef as React.RefObject<HTMLElement>);
 
   // Warn about large props in development and track bundle usage
   React.useEffect(() => {
@@ -206,14 +211,26 @@ export const StatusIndicator = React.memo(function StatusIndicator({
     className
   ), [status, size, shouldAnimate, className]);
   
+  // Memoize accessibility attributes
+  const accessibilityProps = React.useMemo(() => ({
+    'aria-label': `Status: ${displayText}`,
+    role: 'status',
+    'aria-live': shouldAnimate ? 'polite' as const : undefined,
+  }), [displayText, shouldAnimate]);
+
   return (
     <Badge
+      ref={statusRef}
       className={badgeClassName}
       data-testid="status-indicator"
+      {...accessibilityProps}
       {...props}
     >
       {showIcon && IconComponent && (
-        <IconComponent className={iconSizeClass} />
+        <IconComponent 
+          className={iconSizeClass} 
+          aria-hidden="true"
+        />
       )}
       <span className="truncate">{displayText}</span>
     </Badge>
