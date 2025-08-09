@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/validations';
 import { createCommissionEntry } from '@/lib/actions/commission';
 import { useToast } from '@/hooks/use-toast';
 
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
 import {
   Form,
   FormControl,
@@ -200,7 +200,7 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button
+                        <BrandButton
                           variant="outline"
                           className={cn(
                             'w-full pl-3 text-left font-normal',
@@ -213,7 +213,7 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
                             <span>Pick a date</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        </BrandButton>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -267,22 +267,21 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
             />
 
         <div className="flex gap-4 pt-4">
-          <Button
+          <BrandButton
             type="button"
             variant="outline"
             onClick={() => router.back()}
             disabled={isSubmitting}
           >
             Cancel
-          </Button>
-          <Button 
+          </BrandButton>
+          <BrandButton 
             type="submit" 
-            disabled={isSubmitting}
-            className="bg-[#026937] hover:bg-[#026937]/90"
+            variant="primary"
+            loading={isSubmitting}
           >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Entry
-          </Button>
+          </BrandButton>
         </div>
       </form>
     </Form>

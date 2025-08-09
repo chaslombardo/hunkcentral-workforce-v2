@@ -1,7 +1,7 @@
 'use client'
 
 import { Building2, WifiOff, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { BrandButton } from '@/components/brand/brand-button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function OfflinePage() {
@@ -35,22 +35,23 @@ export default function OfflinePage() {
             </p>
           </div>
           
-          <Button 
+          <BrandButton 
             onClick={() => window.location.reload()} 
-            className="w-full bg-[#026937] hover:bg-[#026937]/90"
+            variant="primary"
+            className="w-full"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
-          </Button>
+          </BrandButton>
           
           <div className="text-center">
-            <Button 
+            <BrandButton 
               variant="ghost" 
               onClick={() => window.history.back()}
               className="text-sm"
             >
               Go Back
-            </Button>
+            </BrandButton>
           </div>
         </CardContent>
       </Card>

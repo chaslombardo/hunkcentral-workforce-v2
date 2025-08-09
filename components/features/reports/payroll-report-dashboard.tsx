@@ -5,7 +5,9 @@ import { PayrollSummaryCards } from './payroll-summary-cards';
 import { PayrollChart } from './payroll-chart';
 import { PayrollDataTable } from './payroll-data-table';
 import { PayrollExportDialog } from './payroll-export-dialog';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
+import { BrandLoading } from '@/components/brand/brand-loading';
+import { StatusIndicator } from '@/components/brand/status-indicator';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
@@ -75,9 +77,12 @@ export function PayrollReportDashboard() {
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="px-4 lg:px-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                <BrandLoading variant="spinner" size="lg" />
+                <div className="text-center">
+                  <div className="text-lg font-medium">Loading Payroll Data</div>
+                  <div className="text-sm text-muted-foreground">Please wait while we fetch your reports</div>
+                </div>
               </div>
             </div>
           </div>
@@ -111,12 +116,10 @@ export function PayrollReportDashboard() {
                       <SelectItem key={period.id} value={period.id}>
                         <div className="flex items-center gap-2">
                           <span>{period.name}</span>
-                          <Badge 
-                            variant={period.status === 'closed' ? 'secondary' : 'default'}
-                            className="text-xs"
-                          >
-                            {period.status}
-                          </Badge>
+                          <StatusIndicator 
+                            status={period.status as 'open' | 'locked' | 'closed'}
+                            size="sm"
+                          />
                         </div>
                       </SelectItem>
                     ))}
@@ -126,7 +129,7 @@ export function PayrollReportDashboard() {
                 {/* Date Range Picker */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full sm:w-[200px] justify-start text-left font-normal">
+                    <BrandButton variant="outline" className="w-full sm:w-[200px] justify-start text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateRange?.from ? (
                         dateRange.to ? (
@@ -140,7 +143,7 @@ export function PayrollReportDashboard() {
                       ) : (
                         <span>Pick a date range</span>
                       )}
-                    </Button>
+                    </BrandButton>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
@@ -156,14 +159,14 @@ export function PayrollReportDashboard() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <BrandButton variant="outline" size="sm">
                     <Filter className="mr-2 h-4 w-4" />
                     Filter
-                  </Button>
-                  <Button onClick={handleExport} size="sm">
+                  </BrandButton>
+                  <BrandButton onClick={handleExport} size="sm" variant="primary">
                     <Download className="mr-2 h-4 w-4" />
                     Export
-                  </Button>
+                  </BrandButton>
                 </div>
               </div>
             </div>

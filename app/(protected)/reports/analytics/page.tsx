@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   BarChart3, 
@@ -81,10 +81,10 @@ export default async function AnalyticsPage() {
             Comprehensive insights into operations, performance, and trends.
           </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <BrandButton variant="outline" className="gap-2">
           <Download className="h-4 w-4" />
           Export Report
-        </Button>
+        </BrandButton>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">

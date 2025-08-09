@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
+import { StatusIndicator } from '@/components/brand/status-indicator';
 import {
   Table,
   TableBody,
@@ -87,17 +87,8 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Pending</Badge>;
-      case 'matched':
-        return <Badge className="bg-hunks-green hover:bg-hunks-green/90">Matched</Badge>;
-      case 'approved':
-        return <Badge className="bg-hunks-orange hover:bg-hunks-orange/90">Approved</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const getStatusIndicator = (status: string) => {
+    return <StatusIndicator status={status as 'pending' | 'matched' | 'approved' | 'rejected'} />;
   };
 
   const getBookingAccuracy = (estimated: number, actual: number | null) => {
@@ -268,13 +259,13 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      <TableCell>{getStatusBadge(entry.status)}</TableCell>
+                      <TableCell>{getStatusIndicator(entry.status)}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <BrandButton variant="ghost" className="h-8 w-8 p-0">
                               <MoreHorizontal className="h-4 w-4" />
-                            </Button>
+                            </BrandButton>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {onView && (
@@ -344,13 +335,13 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
                     } 
                   />
                 )}
-                <MobileTableField label="Status" value={getStatusBadge(entry.status)} />
+                <MobileTableField label="Status" value={getStatusIndicator(entry.status)} />
                 <div className="flex justify-end pt-2 border-t border-hunks-green-200">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <BrandButton variant="ghost" className="h-8 w-8 p-0">
                         <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                      </BrandButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {onView && (

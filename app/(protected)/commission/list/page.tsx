@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { getCommissionEntries } from '@/lib/actions/commission';
 import { CommissionList } from '@/components/features/commission/commission-list';
 import { CommissionConflicts } from '@/components/features/commission/commission-conflicts';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
@@ -40,10 +40,10 @@ export default async function CommissionListPage() {
           </p>
         </div>
         <Link href="/commission/create">
-          <Button className="bg-[#026937] hover:bg-[#026937]/90">
+          <BrandButton variant="primary">
             <Plus className="mr-2 h-4 w-4" />
             Create Entry
-          </Button>
+          </BrandButton>
         </Link>
       </div>
 

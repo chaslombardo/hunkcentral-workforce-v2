@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { BrandButton } from '@/components/brand/brand-button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   ClipboardList, 
@@ -124,16 +124,16 @@ export default function DashboardPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span>{error}</span>
-              <Button
+              <BrandButton
                 variant="outline"
                 size="sm"
                 onClick={refetch}
-                disabled={loading}
+                loading={loading}
                 className="ml-4"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
-              </Button>
+              </BrandButton>
             </AlertDescription>
           </Alert>
         )}
@@ -301,16 +301,17 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {quickActions.map((action) => (
-                  <Button 
+                  <BrandButton 
                     key={action.title} 
                     asChild 
-                    className={`w-full justify-start ${action.color} text-white`}
+                    variant={action.color.includes('#026937') ? 'primary' : action.color.includes('#ea7200') ? 'secondary' : 'outline'}
+                    className="w-full justify-start"
                   >
                     <Link href={action.href} className="flex items-center gap-2">
                       <action.icon className="h-4 w-4" />
                       {action.title}
                     </Link>
-                  </Button>
+                  </BrandButton>
                 ))}
               </CardContent>
             </Card>
