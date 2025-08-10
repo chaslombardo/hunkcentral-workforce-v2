@@ -51,7 +51,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <Toaster />
         <ServiceWorkerRegistration />
-        <PerformanceMonitor />
+        <PerformanceMonitor pageName="root-layout" />
       </body>
     </html>
   );

@@ -6,14 +6,27 @@ import {
 } from "@/components/layout/unified-mobile-navigation"
 import { MobileNetworkIndicator } from "@/components/ui/offline-indicator"
 import { NavigationProvider } from "@/contexts/navigation-context"
+import { PerformanceMonitor } from "@/components/performance-monitor"
+import { FeedbackDialog } from "@/components/features/feedback/feedback-dialog"
+import { auth } from "@/lib/auth"
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth();
+  
   return (
     <NavigationProvider>
+      {/* Performance monitoring for all protected pages */}
+      <PerformanceMonitor 
+        pageName="protected-layout" 
+        userId={session?.user?.id}
+        trackInteractions={true}
+        trackFormSubmissions={true}
+      />
+      
       {/* Mobile network indicator */}
       <MobileNetworkIndicator />
       
@@ -37,6 +50,9 @@ export default function ProtectedLayout({
       {/* Unified mobile navigation */}
       <UnifiedBottomNavigation />
       <UnifiedQuickActionsFAB />
+      
+      {/* Global feedback dialog */}
+      <FeedbackDialog />
     </NavigationProvider>
   )
 }

@@ -1,208 +1,318 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { performanceMonitor } from '@/lib/performance-monitor';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Activity, BarChart3, Clock, Zap } from 'lucide-react';
+import { useEffect, useRef } from "react";
+import { analytics } from "@/lib/analytics";
 
 interface PerformanceMonitorProps {
-  showInProduction?: boolean;
-  className?: string;
+  pageName: string;
+  userId?: string;
+  trackInteractions?: boolean;
+  trackFormSubmissions?: boolean;
 }
 
-export function PerformanceMonitor({ 
-  showInProduction = false 
+export function PerformanceMonitor({
+  pageName,
+  userId,
+  trackInteractions = true,
+  trackFormSubmissions = true,
 }: PerformanceMonitorProps) {
-  const [stats, setStats] = React.useState<Record<string, ReturnType<typeof performanceMonitor.getStats>>>({});
-  const [isVisible, setIsVisible] = React.useState(false);
+  const startTimeRef = useRef<number>(Date.now());
+  const interactionCountRef = useRef<number>(0);
 
-  // Only show in development unless explicitly enabled for production
-  const shouldShow = process.env.NODE_ENV === 'development' || showInProduction;
+  useEffect(() => {
+    // Track page load performance
+    const trackPageLoad = () => {
+      if (typeof window !== 'undefined' && window.performance) {
+        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        
+        if (navigation) {
+          // Track various performance metrics
+          analytics.trackPerformance({
+            metricType: 'page_load',
+            value: navigation.loadEventEnd - navigation.fetchStart,
+            page: pageName,
+            userId,
+            metadata: {
+              domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+              firstPaint: navigation.responseEnd - navigation.fetchStart,
+              domInteractive: navigation.domInteractive - navigation.fetchStart,
+            },
+          });
 
-  React.useEffect(() => {
-    if (!shouldShow) return;
+          // Track First Contentful Paint if available
+          const paintEntries = performance.getEntriesByType('paint');
+          const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+          if (fcp) {
+            analytics.trackPerformance({
+              metricType: 'render_time',
+              value: fcp.startTime,
+              page: pageName,
+              userId,
+              metadata: { metric: 'first-contentful-paint' },
+            });
+          }
+        }
+      }
 
-    const updateStats = () => {
-      setStats(performanceMonitor.getAllStats());
+      // Track page view
+      analytics.trackPageView(pageName, userId);
     };
 
-    // Update stats every 5 seconds
-    const interval = setInterval(updateStats, 5000);
-    updateStats(); // Initial update
+    // Track when page is fully loaded
+    if (document.readyState === 'complete') {
+      trackPageLoad();
+    } else {
+      window.addEventListener('load', trackPageLoad);
+    }
 
-    return () => clearInterval(interval);
-  }, [shouldShow]);
+    // Track interactions if enabled
+    const handleClick = (event: MouseEvent) => {
+      if (!trackInteractions) return;
 
-  if (!shouldShow) return null;
+      const target = event.target as HTMLElement;
+      const elementInfo = getElementInfo(target);
+      
+      interactionCountRef.current++;
+      
+      analytics.trackInteraction({
+        eventType: 'click',
+        element: elementInfo,
+        page: pageName,
+        userId,
+        metadata: {
+          timestamp: Date.now(),
+          interactionCount: interactionCountRef.current,
+          sessionTime: Date.now() - startTimeRef.current,
+        },
+      });
+    };
 
-  const sortedStats = Object.entries(stats)
-    .filter(([, stat]) => stat !== null)
-    .sort(([, a], [, b]) => (b?.average || 0) - (a?.average || 0));
+    // Track form submissions if enabled
+    const handleFormSubmit = (event: SubmitEvent) => {
+      if (!trackFormSubmissions) return;
 
-  const totalComponents = sortedStats.length;
-  const averageRenderTime = sortedStats.length > 0 
-    ? sortedStats.reduce((acc, [, stat]) => acc + (stat?.average || 0), 0) / sortedStats.length
-    : 0;
+      const form = event.target as HTMLFormElement;
+      const formName = form.name || form.id || 'unnamed-form';
+      
+      analytics.trackFormInteraction(formName, 'submit', pageName, userId);
+    };
 
-  const slowComponents = sortedStats.filter(([, stat]) => (stat?.average || 0) > 10);
+    // Track errors
+    const handleError = (event: ErrorEvent) => {
+      analytics.trackError(
+        new Error(event.message),
+        pageName,
+        userId,
+        {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+        }
+      );
+    };
 
-  return (
-    <>
-      {/* Toggle Button */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsVisible(!isVisible)}
-        className="fixed bottom-4 right-4 z-50 shadow-lg"
-      >
-        <Activity className="h-4 w-4 mr-2" />
-        Performance
-        {slowComponents.length > 0 && (
-          <Badge variant="destructive" className="ml-2">
-            {slowComponents.length}
-          </Badge>
-        )}
-      </Button>
+    // Track unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      analytics.trackError(
+        new Error(`Unhandled Promise Rejection: ${event.reason}`),
+        pageName,
+        userId,
+        { type: 'unhandled-promise-rejection' }
+      );
+    };
 
-      {/* Performance Panel */}
-      {isVisible && (
-        <Card className="fixed bottom-16 right-4 z-50 w-96 max-h-96 overflow-auto shadow-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Performance Monitor
-            </CardTitle>
-            <CardDescription>
-              Component render performance statistics
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-2 text-sm">
-              <div className="text-center">
-                <div className="font-semibold">{totalComponents}</div>
-                <div className="text-muted-foreground">Components</div>
-              </div>
-              <div className="text-center">
-                <div className="font-semibold">{averageRenderTime.toFixed(1)}ms</div>
-                <div className="text-muted-foreground">Avg Render</div>
-              </div>
-              <div className="text-center">
-                <div className="font-semibold text-destructive">{slowComponents.length}</div>
-                <div className="text-muted-foreground">Slow (&gt;10ms)</div>
-              </div>
-            </div>
+    // Add event listeners
+    if (trackInteractions) {
+      document.addEventListener('click', handleClick, { passive: true });
+    }
+    if (trackFormSubmissions) {
+      document.addEventListener('submit', handleFormSubmit);
+    }
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
-            <Separator />
+    // Track visibility changes (user switching tabs)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        analytics.trackInteraction({
+          eventType: 'page_view',
+          page: pageName,
+          userId,
+          metadata: {
+            action: 'hidden',
+            sessionTime: Date.now() - startTimeRef.current,
+            interactionCount: interactionCountRef.current,
+          },
+        });
+      } else {
+        analytics.trackInteraction({
+          eventType: 'page_view',
+          page: pageName,
+          userId,
+          metadata: {
+            action: 'visible',
+            sessionTime: Date.now() - startTimeRef.current,
+          },
+        });
+      }
+    };
 
-            {/* Component List */}
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {sortedStats.length === 0 ? (
-                <div className="text-center text-muted-foreground py-4">
-                  No performance data available
-                </div>
-              ) : (
-                sortedStats.map(([componentName, stat]) => (
-                  <div key={componentName} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <Clock className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate font-medium">{componentName}</span>
-                      {(stat?.average || 0) > 10 && (
-                        <Zap className="h-3 w-3 text-destructive flex-shrink-0" />
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{stat?.count} renders</span>
-                      <Badge 
-                        variant={(stat?.average || 0) > 10 ? "destructive" : "secondary"}
-                        className="text-xs"
-                      >
-                        {stat?.average.toFixed(1)}ms
-                      </Badge>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-            <Separator />
+    // Cleanup
+    return () => {
+      if (trackInteractions) {
+        document.removeEventListener('click', handleClick);
+      }
+      if (trackFormSubmissions) {
+        document.removeEventListener('submit', handleFormSubmit);
+      }
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('load', trackPageLoad);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => performanceMonitor.logStats()}
-                className="flex-1"
-              >
-                Log to Console
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  performanceMonitor.clear();
-                  setStats({});
-                }}
-                className="flex-1"
-              >
-                Clear Data
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </>
-  );
+      // Track session end
+      analytics.trackInteraction({
+        eventType: 'page_view',
+        page: pageName,
+        userId,
+        metadata: {
+          action: 'unload',
+          sessionTime: Date.now() - startTimeRef.current,
+          interactionCount: interactionCountRef.current,
+        },
+      });
+    };
+  }, [pageName, userId, trackInteractions, trackFormSubmissions]);
+
+  // Track Core Web Vitals
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+      // Track Largest Contentful Paint (LCP)
+      const lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        
+        analytics.trackPerformance({
+          metricType: 'render_time',
+          value: lastEntry.startTime,
+          page: pageName,
+          userId,
+          metadata: { metric: 'largest-contentful-paint' },
+        });
+      });
+
+      // Track First Input Delay (FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry: any) => {
+          analytics.trackPerformance({
+            metricType: 'interaction_delay',
+            value: entry.processingStart - entry.startTime,
+            page: pageName,
+            userId,
+            metadata: { metric: 'first-input-delay' },
+          });
+        });
+      });
+
+      // Track Cumulative Layout Shift (CLS)
+      const clsObserver = new PerformanceObserver((list) => {
+        let clsValue = 0;
+        const entries = list.getEntries();
+        
+        entries.forEach((entry: any) => {
+          if (!entry.hadRecentInput) {
+            clsValue += entry.value;
+          }
+        });
+
+        analytics.trackPerformance({
+          metricType: 'render_time',
+          value: clsValue,
+          page: pageName,
+          userId,
+          metadata: { metric: 'cumulative-layout-shift' },
+        });
+      });
+
+      try {
+        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+        fidObserver.observe({ entryTypes: ['first-input'] });
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+      } catch (error) {
+        console.warn('Performance Observer not fully supported:', error);
+      }
+
+      return () => {
+        lcpObserver.disconnect();
+        fidObserver.disconnect();
+        clsObserver.disconnect();
+      };
+    }
+  }, [pageName, userId]);
+
+  return null; // This component doesn't render anything
 }
 
-/**
- * Hook for monitoring a specific component's performance
- */
-export function useComponentPerformance(componentName: string) {
-  const [renderCount, setRenderCount] = React.useState(0);
-  const [lastRenderTime, setLastRenderTime] = React.useState<number | null>(null);
+// Helper function to get meaningful element information
+function getElementInfo(element: HTMLElement): string {
+  const tagName = element.tagName.toLowerCase();
+  const id = element.id ? `#${element.id}` : '';
+  const className = element.className ? `.${element.className.split(' ').join('.')}` : '';
+  const text = element.textContent?.trim().substring(0, 50) || '';
+  const role = element.getAttribute('role') || '';
+  const ariaLabel = element.getAttribute('aria-label') || '';
+  
+  // Prioritize meaningful identifiers
+  if (ariaLabel) return `${tagName}[aria-label="${ariaLabel}"]`;
+  if (id) return `${tagName}${id}`;
+  if (role) return `${tagName}[role="${role}"]`;
+  if (className && !className.includes('undefined')) return `${tagName}${className}`;
+  if (text) return `${tagName}:"${text}"`;
+  
+  return tagName;
+}
 
-  React.useEffect(() => {
-    setRenderCount(prev => prev + 1);
-    
-    const stats = performanceMonitor.getStats(componentName);
-    if (stats) {
-      setLastRenderTime(stats.recent);
+// Hook for manual performance tracking
+export function usePerformanceTracking(pageName: string, userId?: string) {
+  const trackInteraction = (element: string, metadata?: Record<string, any>) => {
+    analytics.trackInteraction({
+      eventType: 'click',
+      element,
+      page: pageName,
+      userId,
+      metadata,
+    });
+  };
+
+  const trackFormSubmission = (formName: string, metadata?: Record<string, any>) => {
+    analytics.trackFormInteraction(formName, 'submit', pageName, userId);
+    if (metadata) {
+      analytics.trackInteraction({
+        eventType: 'form_submit',
+        element: formName,
+        page: pageName,
+        userId,
+        metadata,
+      });
     }
-  }, [componentName]);
+  };
+
+  const trackCustomMetric = (metricType: string, value: number, metadata?: Record<string, any>) => {
+    analytics.trackPerformance({
+      metricType: metricType as any,
+      value,
+      page: pageName,
+      userId,
+      metadata,
+    });
+  };
 
   return {
-    renderCount,
-    lastRenderTime,
-    stats: performanceMonitor.getStats(componentName),
+    trackInteraction,
+    trackFormSubmission,
+    trackCustomMetric,
   };
 }
-
-/**
- * Development-only performance warning component
- */
-export function PerformanceWarning({ 
-  componentName, 
-  threshold = 10 
-}: { 
-  componentName: string; 
-  threshold?: number; 
-}) {
-  const stats = performanceMonitor.getStats(componentName);
-  
-  if (process.env.NODE_ENV !== 'development') return null;
-  if (!stats || stats.average <= threshold) return null;
-
-  return (
-    <div className="fixed top-4 right-4 z-50 bg-destructive text-destructive-foreground p-2 rounded text-sm shadow-lg">
-      ⚠️ {componentName} is slow ({stats.average.toFixed(1)}ms avg)
-    </div>
-  );
-}
-
-export default PerformanceMonitor;

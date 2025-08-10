@@ -202,3 +202,97 @@ model AuditLog {
 
   createdAt   DateTime @default(now())
 }
+
+// Analytics Events
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  eventType   String   // 'click', 'form_submit', 'page_view', 'navigation', 'error', 'feedback_submitted'
+  userId      String?
+  metadata    Json     @default("{}")
+  timestamp   DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+}
+
+// Performance Metrics
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  metricType  String   // 'page_load', 'interaction_delay', 'bundle_size', 'render_time'
+  value       Float
+  page        String
+  userId      String?
+  metadata    Json     @default("{}")
+  timestamp   DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+}
+
+// User Feedback
+model UserFeedback {
+  id               String   @id @default(uuid())
+  type             String   // 'bug', 'feature', 'improvement', 'performance', 'general'
+  title            String
+  description      String
+  page             String
+  priority         String   // 'low', 'medium', 'high', 'critical'
+  email            String?
+  userId           String?
+  userAgent        String?
+  screenResolution String?
+  status           String   @default("open") // 'open', 'in_progress', 'resolved', 'closed'
+  resolution       String?
+  resolvedAt       DateTime?
+  timestamp        DateTime @default(now())
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// A/B Test Experiments
+model ABTestExperiment {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  status      String   @default("draft") // 'draft', 'active', 'paused', 'completed'
+  startDate   DateTime?
+  endDate     DateTime?
+  variants    Json     // Array of variant configurations
+  targetMetric String  // The metric being optimized
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignments ABTestAssignment[]
+  events      ABTestEvent[]
+}
+
+// A/B Test User Assignments
+model ABTestAssignment {
+  id           String           @id @default(uuid())
+  experimentId String
+  experiment   ABTestExperiment @relation(fields: [experimentId], references: [id])
+  userId       String?
+  sessionId    String?
+  variant      String
+  assignedAt   DateTime         @default(now())
+
+  @@unique([experimentId, userId])
+  @@unique([experimentId, sessionId])
+}
+
+// A/B Test Events
+model ABTestEvent {
+  id           String           @id @default(uuid())
+  experimentId String
+  experiment   ABTestExperiment @relation(fields: [experimentId], references: [id])
+  userId       String?
+  sessionId    String?
+  variant      String
+  eventType    String           // 'conversion', 'interaction', 'page_view'
+  value        Float?           // Numeric value for the event
+  metadata     Json             @default("{}")
+  timestamp    DateTime         @default(now())
+
+  createdAt    DateTime         @default(now())
+}
