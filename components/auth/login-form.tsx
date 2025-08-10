@@ -7,11 +7,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -111,10 +111,9 @@ export function LoginForm({
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <BrandButton type="submit" variant="primary" className="w-full" loading={isLoading}>
           {isLoading ? 'Signing in...' : 'Sign In'}
-        </Button>
+        </BrandButton>
       </div>
 
       <div className="text-center text-sm text-muted-foreground">

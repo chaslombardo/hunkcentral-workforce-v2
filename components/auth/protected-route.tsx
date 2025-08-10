@@ -5,7 +5,8 @@ import { useSession } from '@/hooks/useSession';
 import { hasRouteAccess } from '@/lib/routes';
 import type { UserRole } from '@/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { BrandButton } from '@/components/brand/brand-button';
+import { BrandLoading } from '@/components/brand/brand-loading';
 import Link from 'next/link';
 
 interface ProtectedRouteProps {
@@ -24,9 +25,9 @@ export function ProtectedRoute({
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        <div className="text-center space-y-4">
+          <BrandLoading variant="spinner" size="lg" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -40,9 +41,9 @@ export function ProtectedRoute({
           <p className="text-muted-foreground">
             Please sign in to access this page.
           </p>
-          <Button asChild>
+          <BrandButton asChild variant="primary">
             <Link href="/auth/login">Sign In</Link>
-          </Button>
+          </BrandButton>
         </div>
       </div>
     );
@@ -62,9 +63,9 @@ export function ProtectedRoute({
           </AlertDescription>
         </Alert>
         <div className="mt-4">
-          <Button asChild variant="outline">
+          <BrandButton asChild variant="outline">
             <Link href="/dashboard">Return to Dashboard</Link>
-          </Button>
+          </BrandButton>
         </div>
       </div>
     );
@@ -80,9 +81,9 @@ export function ProtectedRoute({
           </AlertDescription>
         </Alert>
         <div className="mt-4">
-          <Button asChild variant="outline">
+          <BrandButton asChild variant="outline">
             <Link href="/dashboard">Return to Dashboard</Link>
-          </Button>
+          </BrandButton>
         </div>
       </div>
     );

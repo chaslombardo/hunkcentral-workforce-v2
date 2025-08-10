@@ -12,6 +12,11 @@ export interface SessionUser {
   roles: UserRole[];
 }
 
+// Server-side session helper (alias for compatibility)
+export async function auth() {
+  return await getServerSession(authOptions);
+}
+
 // Server-side session helper
 export async function getSession() {
   return await getServerSession(authOptions);

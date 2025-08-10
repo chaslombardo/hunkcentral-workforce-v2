@@ -1,0 +1,1383 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Form Validation Visual Regression Tests > Form State Combinations > renders complex form with multiple validation states > complex-form-validation-states 1`] = `
+<div
+  class="space-y-4"
+>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hunks-green"
+      for="«r8»"
+    >
+      Email Address
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-describedby="«r8»-success"
+        aria-invalid="false"
+        class="flex w-full rounded-md border bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10 border-hunks-green focus-visible:ring-hunks-green/20"
+        id="«r8»"
+        inputmode="email"
+        type="email"
+        value="user@example.com"
+      />
+      <div
+        class="absolute right-3 top-1/2 -translate-y-1/2"
+      >
+        <div
+          class="h-4 w-4 text-hunks-green"
+          data-testid="check-icon"
+        >
+          ✓
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-hunks-green/20 bg-hunks-green/5"
+      id="«r8»-success"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-hunks-green"
+        data-testid="check-icon"
+      >
+        ✓
+      </div>
+      <div
+        class="text-sm [&_p]:leading-relaxed text-hunks-green"
+      >
+        Valid email address
+      </div>
+    </div>
+  </div>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-destructive"
+      for="«r9»"
+    >
+      Password
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-describedby="«r9»-error"
+        aria-invalid="true"
+        class="flex w-full rounded-md border bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 border-destructive focus-visible:ring-destructive/20 pr-20"
+        id="«r9»"
+        type="password"
+        value=""
+      />
+      <div
+        class="absolute right-3 top-1/2 -translate-y-1/2"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+      </div>
+      <button
+        aria-label="Show password"
+        class="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        type="button"
+      >
+        <div
+          class="h-4 w-4"
+          data-testid="eye-icon"
+        >
+          👁
+        </div>
+      </button>
+    </div>
+    <div
+      class="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+      id="«r9»-error"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4"
+        data-testid="alert-icon"
+      >
+        !
+      </div>
+      <div
+        class="text-sm [&_p]:leading-relaxed"
+      >
+        Password must be at least 8 characters
+      </div>
+    </div>
+  </div>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      for="«ra»"
+    >
+      Confirm Password
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-invalid="false"
+        class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+        id="«ra»"
+        type="password"
+        value="checking..."
+      />
+      <div
+        class="absolute right-3 top-1/2 -translate-y-1/2"
+      >
+        <div
+          class="h-4 w-4 animate-spin text-muted-foreground"
+          data-testid="loader-icon"
+        >
+          ⟳
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-destructive/20 bg-destructive/5 animate-in slide-in-from-top-2 duration-300 relative"
+    role="alert"
+  >
+    <div
+      class="h-4 w-4 text-destructive"
+      data-testid="alert-icon"
+    >
+      !
+    </div>
+    <div
+      class="flex-1"
+    >
+      <h5
+        class="font-medium leading-none tracking-tight mb-2 text-destructive"
+      >
+        Form Validation Error
+      </h5>
+      <div
+        class="text-sm [&_p]:leading-relaxed text-destructive/90"
+      >
+        <div
+          class="space-y-3"
+        >
+          <p>
+            Please fix the errors above before submitting.
+          </p>
+          <div
+            class="space-y-2"
+          >
+            <div
+              class="flex items-center gap-2 text-sm font-medium"
+            >
+              <div
+                class="h-3 w-3"
+                data-testid="lightbulb-icon"
+              >
+                💡
+              </div>
+              Suggestions:
+            </div>
+            <ul
+              class="text-sm space-y-1 ml-5"
+            >
+              <li
+                class="list-disc"
+              >
+                Check password requirements
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > Form State Combinations > renders mobile form validation with mixed error types > mobile-form-mixed-validation-states 1`] = `
+<div
+  class="space-y-4"
+>
+  <div
+    class="space-y-3"
+  >
+    <div
+      class="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+    >
+      <div
+        class="flex items-center gap-3"
+      >
+        <div
+          class="flex items-center gap-2"
+        >
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-xs"
+            data-slot="badge"
+          >
+            3
+             error
+            s
+          </span>
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-hunks-orange/10 text-hunks-orange"
+            data-slot="badge"
+          >
+            1
+             warning
+          </span>
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-blue-100 text-blue-700"
+            data-slot="badge"
+          >
+            1
+             info
+          </span>
+        </div>
+        <span
+          class="text-sm text-muted-foreground"
+        >
+          Please review and fix the issues below
+        </span>
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md text-xs h-8 px-2"
+      >
+        <div
+          class="h-4 w-4 mr-1"
+          data-testid="chevron-down-icon"
+        >
+          ▼
+        </div>
+        Show All (
+        5
+        )
+      </button>
+    </div>
+    <div
+      class="space-y-2"
+    >
+      <div
+        class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+        role="alert"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+        <div
+          class="flex-1 pr-8"
+        >
+          <div
+            class="[&_p]:leading-relaxed text-sm"
+          >
+            <div
+              class="flex flex-col gap-1"
+            >
+              <span
+                class="font-medium capitalize"
+              >
+                First Name
+              </span>
+              <span>
+                First name is required
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+        >
+          <div
+            class="h-3 w-3"
+            data-testid="x-icon"
+          >
+            ×
+          </div>
+          <span
+            class="sr-only"
+          >
+            Dismiss
+          </span>
+        </button>
+      </div>
+      <div
+        class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+        role="alert"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+        <div
+          class="flex-1 pr-8"
+        >
+          <div
+            class="[&_p]:leading-relaxed text-sm"
+          >
+            <div
+              class="flex flex-col gap-1"
+            >
+              <span
+                class="font-medium capitalize"
+              >
+                Last Name
+              </span>
+              <span>
+                Last name is required
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+        >
+          <div
+            class="h-3 w-3"
+            data-testid="x-icon"
+          >
+            ×
+          </div>
+          <span
+            class="sr-only"
+          >
+            Dismiss
+          </span>
+        </button>
+      </div>
+      <div
+        class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+        role="alert"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+        <div
+          class="flex-1 pr-8"
+        >
+          <div
+            class="[&_p]:leading-relaxed text-sm"
+          >
+            <div
+              class="flex flex-col gap-1"
+            >
+              <span
+                class="font-medium capitalize"
+              >
+                Email
+              </span>
+              <span>
+                Email format is invalid
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+        >
+          <div
+            class="h-3 w-3"
+            data-testid="x-icon"
+          >
+            ×
+          </div>
+          <span
+            class="sr-only"
+          >
+            Dismiss
+          </span>
+        </button>
+      </div>
+    </div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs w-full h-12 touch-manipulation"
+    >
+      <div
+        class="h-4 w-4 mr-2"
+        data-testid="chevron-down-icon"
+      >
+        ▼
+      </div>
+      Show 
+      2
+       more issue
+      s
+    </button>
+  </div>
+  <div
+    class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-destructive/20 bg-destructive/5 animate-in slide-in-from-top-2 duration-300 relative"
+    role="alert"
+  >
+    <div
+      class="h-4 w-4 text-destructive"
+      data-testid="alert-icon"
+    >
+      !
+    </div>
+    <div
+      class="flex-1"
+    >
+      <h5
+        class="font-medium leading-none tracking-tight mb-2 text-destructive"
+      >
+        Multiple Validation Errors
+      </h5>
+      <div
+        class="text-sm [&_p]:leading-relaxed text-destructive/90"
+      >
+        <div
+          class="space-y-3"
+        >
+          <p>
+            Please review and fix the issues above.
+          </p>
+          <div
+            class="flex flex-wrap items-center gap-2 pt-2"
+          >
+            <button
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-8"
+            >
+              <div
+                class="h-3 w-3 mr-1"
+                data-testid="refresh-icon"
+              >
+                ↻
+              </div>
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > FormFeedback Visual States > renders error feedback with actions consistently > form-feedback-error-with-actions 1`] = `
+<div
+  class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-destructive/20 bg-destructive/5 animate-in slide-in-from-top-2 duration-300 relative"
+  role="alert"
+>
+  <div
+    class="h-4 w-4 text-destructive"
+    data-testid="alert-icon"
+  >
+    !
+  </div>
+  <div
+    class="flex-1"
+  >
+    <h5
+      class="font-medium leading-none tracking-tight mb-2 text-destructive"
+    >
+      Validation Error
+    </h5>
+    <div
+      class="text-sm [&_p]:leading-relaxed text-destructive/90"
+    >
+      <div
+        class="space-y-3"
+      >
+        <p>
+          Please fix the errors below and try again.
+        </p>
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex items-center gap-2 text-sm font-medium"
+          >
+            <div
+              class="h-3 w-3"
+              data-testid="lightbulb-icon"
+            >
+              💡
+            </div>
+            Suggestions:
+          </div>
+          <ul
+            class="text-sm space-y-1 ml-5"
+          >
+            <li
+              class="list-disc"
+            >
+              Check required fields
+            </li>
+            <li
+              class="list-disc"
+            >
+              Verify email format
+            </li>
+          </ul>
+        </div>
+        <div
+          class="flex flex-wrap items-center gap-2 pt-2"
+        >
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-8"
+          >
+            <div
+              class="h-3 w-3 mr-1"
+              data-testid="refresh-icon"
+            >
+              ↻
+            </div>
+            Try Again
+          </button>
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-8"
+          >
+            Fix Errors
+          </button>
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-8 text-xs"
+          >
+            <div
+              class="h-3 w-3 mr-1"
+              data-testid="external-link-icon"
+            >
+              ↗
+            </div>
+            Get Help
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > FormFeedback Visual States > renders info feedback consistently > form-feedback-info 1`] = `
+<div
+  class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-blue-200 bg-blue-50 animate-in slide-in-from-top-2 duration-400 relative"
+  role="alert"
+>
+  <div
+    class="h-4 w-4 text-blue-600"
+    data-testid="info-icon"
+  >
+    ℹ
+  </div>
+  <div
+    class="flex-1"
+  >
+    <h5
+      class="font-medium leading-none tracking-tight mb-2 text-blue-800"
+    >
+      Information
+    </h5>
+    <div
+      class="text-sm [&_p]:leading-relaxed text-blue-700"
+    >
+      <div
+        class="space-y-3"
+      >
+        <p>
+          Here are some tips to help you complete this form.
+        </p>
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex items-center gap-2 text-sm font-medium"
+          >
+            <div
+              class="h-3 w-3"
+              data-testid="lightbulb-icon"
+            >
+              💡
+            </div>
+            Suggestions:
+          </div>
+          <ul
+            class="text-sm space-y-1 ml-5"
+          >
+            <li
+              class="list-disc"
+            >
+              Fill all required fields
+            </li>
+            <li
+              class="list-disc"
+            >
+              Use valid email format
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > FormFeedback Visual States > renders success feedback consistently > form-feedback-success 1`] = `
+<div
+  class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-hunks-green/20 bg-hunks-green/5 animate-in slide-in-from-top-2 duration-500 relative"
+  role="alert"
+>
+  <div
+    class="h-4 w-4 text-hunks-green"
+    data-testid="success-animation"
+  >
+    ✨
+  </div>
+  <div
+    class="flex-1"
+  >
+    <h5
+      class="font-medium leading-none tracking-tight mb-2 text-hunks-green"
+    >
+      Success!
+    </h5>
+    <div
+      class="text-sm [&_p]:leading-relaxed text-hunks-green/90"
+    >
+      <div
+        class="space-y-3"
+      >
+        <p>
+          Your form has been submitted successfully.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > FormFeedback Visual States > renders warning feedback consistently > form-feedback-warning 1`] = `
+<div
+  class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground border-hunks-orange/20 bg-hunks-orange/5 animate-in slide-in-from-top-2 duration-400 relative"
+  role="alert"
+>
+  <div
+    class="h-4 w-4 text-hunks-orange"
+    data-testid="warning-icon"
+  >
+    ⚠
+  </div>
+  <div
+    class="flex-1"
+  >
+    <h5
+      class="font-medium leading-none tracking-tight mb-2 text-hunks-orange"
+    >
+      Warning
+    </h5>
+    <div
+      class="text-sm [&_p]:leading-relaxed text-hunks-orange/90"
+    >
+      <div
+        class="space-y-3"
+      >
+        <p>
+          This action cannot be undone.
+        </p>
+        <p
+          class="text-sm opacity-80"
+        >
+          Please review your changes before proceeding.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > MobileFormValidation Visual States > renders empty state consistently > mobile-form-validation-empty 1`] = `<div />`;
+
+exports[`Form Validation Visual Regression Tests > MobileFormValidation Visual States > renders error summary consistently > mobile-form-validation-summary 1`] = `
+<div
+  class="space-y-3"
+>
+  <div
+    class="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+  >
+    <div
+      class="flex items-center gap-3"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-xs"
+          data-slot="badge"
+        >
+          1
+           error
+        </span>
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-hunks-orange/10 text-hunks-orange"
+          data-slot="badge"
+        >
+          1
+           warning
+        </span>
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-blue-100 text-blue-700"
+          data-slot="badge"
+        >
+          1
+           info
+        </span>
+      </div>
+      <span
+        class="text-sm text-muted-foreground"
+      >
+        Please review and fix the issues below
+      </span>
+    </div>
+  </div>
+  <div
+    class="space-y-2"
+  >
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-destructive"
+        data-testid="alert-icon"
+      >
+        !
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Email
+            </span>
+            <span>
+              Invalid email format
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground relative border-hunks-orange/20 bg-hunks-orange/5 min-h-[48px] touch-manipulation"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-hunks-orange"
+        data-testid="warning-icon"
+      >
+        ⚠
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Password
+            </span>
+            <span>
+              Password too weak
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground relative border-blue-200 bg-blue-50 min-h-[48px] touch-manipulation"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-blue-600"
+        data-testid="info-icon"
+      >
+        ℹ
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Username
+            </span>
+            <span>
+              Username available
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > MobileFormValidation Visual States > renders individual error items consistently > mobile-form-validation-items 1`] = `
+<div
+  class="space-y-3"
+>
+  <div
+    class="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+  >
+    <div
+      class="flex items-center gap-3"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-xs"
+          data-slot="badge"
+        >
+          1
+           error
+        </span>
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-hunks-orange/10 text-hunks-orange"
+          data-slot="badge"
+        >
+          1
+           warning
+        </span>
+        <span
+          class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 text-xs bg-blue-100 text-blue-700"
+          data-slot="badge"
+        >
+          1
+           info
+        </span>
+      </div>
+      <span
+        class="text-sm text-muted-foreground"
+      >
+        Please review and fix the issues below
+      </span>
+    </div>
+  </div>
+  <div
+    class="space-y-2"
+  >
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-destructive"
+        data-testid="alert-icon"
+      >
+        !
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Email
+            </span>
+            <span>
+              Invalid email format
+            </span>
+          </div>
+        </div>
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+      >
+        <div
+          class="h-3 w-3"
+          data-testid="x-icon"
+        >
+          ×
+        </div>
+        <span
+          class="sr-only"
+        >
+          Dismiss
+        </span>
+      </button>
+    </div>
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground relative border-hunks-orange/20 bg-hunks-orange/5 min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-hunks-orange"
+        data-testid="warning-icon"
+      >
+        ⚠
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Password
+            </span>
+            <span>
+              Password too weak
+            </span>
+          </div>
+        </div>
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+      >
+        <div
+          class="h-3 w-3"
+          data-testid="x-icon"
+        >
+          ×
+        </div>
+        <span
+          class="sr-only"
+        >
+          Dismiss
+        </span>
+      </button>
+    </div>
+    <div
+      class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7 text-foreground relative border-blue-200 bg-blue-50 min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4 text-blue-600"
+        data-testid="info-icon"
+      >
+        ℹ
+      </div>
+      <div
+        class="flex-1 pr-8"
+      >
+        <div
+          class="[&_p]:leading-relaxed text-sm"
+        >
+          <div
+            class="flex flex-col gap-1"
+          >
+            <span
+              class="font-medium capitalize"
+            >
+              Username
+            </span>
+            <span>
+              Username available
+            </span>
+          </div>
+        </div>
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground rounded-md text-xs absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
+      >
+        <div
+          class="h-3 w-3"
+          data-testid="x-icon"
+        >
+          ×
+        </div>
+        <span
+          class="sr-only"
+        >
+          Dismiss
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > Responsive Design States > renders desktop-optimized components consistently > desktop-responsive-design 1`] = `
+<div
+  class="grid grid-cols-2 gap-4"
+>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      for="«re»"
+    >
+      Desktop Input 1
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-describedby="«re»-hint"
+        aria-invalid="false"
+        class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+        id="«re»"
+        type="text"
+        value=""
+      />
+    </div>
+    <p
+      class="text-sm text-muted-foreground"
+      id="«re»-hint"
+    >
+      This is a desktop hint
+    </p>
+  </div>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-destructive"
+      for="«rf»"
+    >
+      Desktop Input 2
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-describedby="«rf»-error"
+        aria-invalid="true"
+        class="flex w-full rounded-md border bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10 border-destructive focus-visible:ring-destructive/20"
+        id="«rf»"
+        type="text"
+        value=""
+      />
+      <div
+        class="absolute right-3 top-1/2 -translate-y-1/2"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+      </div>
+    </div>
+    <div
+      class="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+      id="«rf»-error"
+      role="alert"
+    >
+      <div
+        class="h-4 w-4"
+        data-testid="alert-icon"
+      >
+        !
+      </div>
+      <div
+        class="text-sm [&_p]:leading-relaxed"
+      >
+        Desktop error message
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > Responsive Design States > renders mobile-optimized components consistently > mobile-responsive-design 1`] = `
+<div
+  class="space-y-4"
+>
+  <div
+    class="grid gap-2"
+  >
+    <label
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      for="«rd»"
+    >
+      Mobile Input
+    </label>
+    <div
+      class="relative"
+    >
+      <input
+        aria-invalid="false"
+        class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+        id="«rd»"
+        inputmode="tel"
+        placeholder="Enter phone number"
+        type="tel"
+        value=""
+      />
+    </div>
+  </div>
+  <div
+    class="space-y-3"
+  >
+    <div
+      class="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
+    >
+      <div
+        class="flex items-center gap-3"
+      >
+        <div
+          class="flex items-center gap-2"
+        >
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-xs"
+            data-slot="badge"
+          >
+            1
+             error
+          </span>
+        </div>
+        <span
+          class="text-sm text-muted-foreground"
+        >
+          Please review and fix the issues below
+        </span>
+      </div>
+    </div>
+    <div
+      class="space-y-2"
+    >
+      <div
+        class="w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive relative min-h-[48px] touch-manipulation cursor-pointer hover:bg-accent/50"
+        role="alert"
+      >
+        <div
+          class="h-4 w-4 text-destructive"
+          data-testid="alert-icon"
+        >
+          !
+        </div>
+        <div
+          class="flex-1 pr-8"
+        >
+          <div
+            class="[&_p]:leading-relaxed text-sm"
+          >
+            <div
+              class="flex flex-col gap-1"
+            >
+              <span
+                class="font-medium capitalize"
+              >
+                Phone
+              </span>
+              <span>
+                Invalid phone format
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders default state consistently > smart-input-default-state 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r0»"
+  >
+    Default Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-describedby="«r0»-hint"
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+      id="«r0»"
+      placeholder="Enter text here"
+      type="text"
+      value=""
+    />
+  </div>
+  <p
+    class="text-sm text-muted-foreground"
+    id="«r0»-hint"
+  >
+    This is a helpful hint
+  </p>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders loading state with consistent styling > smart-input-loading-state 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r3»"
+  >
+    Loading Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+      id="«r3»"
+      type="text"
+      value="checking..."
+    />
+    <div
+      class="absolute right-3 top-1/2 -translate-y-1/2"
+    >
+      <div
+        class="h-4 w-4 animate-spin text-muted-foreground"
+        data-testid="loader-icon"
+      >
+        ⟳
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders mobile-optimized input consistently > smart-input-mobile-state 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r6»"
+  >
+    Mobile Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+      id="«r6»"
+      inputmode="email"
+      type="email"
+      value="user@example.com"
+    />
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders password input with toggle consistently > smart-input-password-state 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r5»"
+  >
+    Password Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-20"
+      id="«r5»"
+      type="password"
+      value="secretpassword"
+    />
+    <button
+      aria-label="Show password"
+      class="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+      type="button"
+    >
+      <div
+        class="h-4 w-4"
+        data-testid="eye-icon"
+      >
+        👁
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders progressive validation states consistently > smart-input-progressive-initial 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r7»"
+  >
+    Progressive Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+      id="«r7»"
+      type="text"
+      value=""
+    />
+  </div>
+</div>
+`;
+
+exports[`Form Validation Visual Regression Tests > SmartInput Visual States > renders progressive validation states consistently > smart-input-progressive-typing 1`] = `
+<div
+  class="grid gap-2"
+>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="«r7»"
+  >
+    Progressive Input
+  </label>
+  <div
+    class="relative"
+  >
+    <input
+      aria-invalid="false"
+      class="flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px] h-12 text-base touch-manipulation focus-visible:ring-2 focus-visible:ring-offset-1 pr-10"
+      id="«r7»"
+      type="text"
+      value="a"
+    />
+  </div>
+</div>
+`;
