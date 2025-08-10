@@ -31,7 +31,11 @@
     "analyze": "ANALYZE=true npm run build",
     "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
     "perf:audit": "npm run build && npm run lighthouse",
-    "bundle:analyze": "npx @next/bundle-analyzer"
+    "bundle:analyze": "npx @next/bundle-analyzer",
+    "deploy:preview": "vercel --prod=false",
+    "deploy:production": "vercel --prod",
+    "vercel:build": "npm run db:generate && npm run build",
+    "vercel:dev": "npm run db:generate && npm run dev"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Vercel-specific optimizations
+  output: 'standalone',
+  poweredByHeader: false,
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['@/components/ui', 'lucide-react', '@/components/brand', '@/components/forms'],

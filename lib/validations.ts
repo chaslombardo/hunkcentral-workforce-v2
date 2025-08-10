@@ -113,7 +113,11 @@ export const CreateUserSchema = BaseUserSchema.extend({
 
 export const UpdateUserSchema = BaseUserSchema.extend({
   id: z.string(),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
+  password: z.union([
+    z.string().min(8, 'Password must be at least 8 characters'),
+    z.literal(''),
+    z.undefined()
+  ]).optional().transform((val) => val === '' ? undefined : val),
 });
 
 export const UserSearchSchema = z.object({

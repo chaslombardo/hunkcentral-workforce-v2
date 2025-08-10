@@ -110,6 +110,7 @@ export function UserFormDialog({
 
   const form = useForm({
     resolver: zodResolver(mode === 'create' ? CreateUserSchema : UpdateUserSchema),
+    mode: 'onChange',
     defaultValues: mode === 'edit' && user ? {
       id: user.id,
       email: user.email,
@@ -281,7 +282,9 @@ export function UserFormDialog({
                       <Input
                         id="password"
                         type="password"
-                        {...form.register('password')}
+                        {...form.register('password', {
+                          setValueAs: (value) => value === '' ? undefined : value
+                        })}
                         placeholder="Leave blank to keep current password"
                       />
                       {form.formState.errors.password && (
@@ -342,7 +345,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateJunkCaptain', { valueAsNumber: true })}
+                        {...form.register('rateJunkCaptain', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -353,7 +358,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateJunkWingman', { valueAsNumber: true })}
+                        {...form.register('rateJunkWingman', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -364,7 +371,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateMoveCaptain', { valueAsNumber: true })}
+                        {...form.register('rateMoveCaptain', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -375,7 +384,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateMoveWingman', { valueAsNumber: true })}
+                        {...form.register('rateMoveWingman', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -386,7 +397,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateZigma', { valueAsNumber: true })}
+                        {...form.register('rateZigma', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -397,7 +410,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateTraining', { valueAsNumber: true })}
+                        {...form.register('rateTraining', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -408,7 +423,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateEstimating', { valueAsNumber: true })}
+                        {...form.register('rateEstimating', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -419,7 +436,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateWarehouse', { valueAsNumber: true })}
+                        {...form.register('rateWarehouse', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -430,7 +449,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateAdmin', { valueAsNumber: true })}
+                        {...form.register('rateAdmin', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -456,7 +477,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('salaryAmount', { valueAsNumber: true })}
+                        {...form.register('salaryAmount', { 
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
                         placeholder="0.00"
                       />
                     </div>
@@ -522,7 +545,9 @@ export function UserFormDialog({
                       step="0.01"
                       min="0"
                       max="100"
-                      {...form.register('commissionRate', { valueAsNumber: true })}
+                      {...form.register('commissionRate', { 
+                        setValueAs: (value) => value === '' ? undefined : Number(value)
+                      })}
                       placeholder="0.00"
                     />
                   </div>
@@ -548,7 +573,9 @@ export function UserFormDialog({
                         step="0.01"
                         min="0"
                         max="1"
-                        {...form.register('junkBonusGoal', { valueAsNumber: true })}
+                        {...form.register('junkBonusGoal', { 
+                          setValueAs: (value) => value === '' ? 0.14 : Number(value)
+                        })}
                         placeholder="0.14"
                       />
                       <p className="text-xs text-muted-foreground">
@@ -563,7 +590,9 @@ export function UserFormDialog({
                         step="0.01"
                         min="0"
                         max="1"
-                        {...form.register('moveBonusGoal', { valueAsNumber: true })}
+                        {...form.register('moveBonusGoal', { 
+                          setValueAs: (value) => value === '' ? 0.24 : Number(value)
+                        })}
                         placeholder="0.24"
                       />
                       <p className="text-xs text-muted-foreground">
