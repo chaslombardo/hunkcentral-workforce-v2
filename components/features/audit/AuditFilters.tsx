@@ -26,8 +26,8 @@ export function AuditFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [entityType, setEntityType] = useState(searchParams.get('entityType') || '');
-  const [action, setAction] = useState(searchParams.get('action') || '');
+  const [entityType, setEntityType] = useState(searchParams.get('entityType') || 'all');
+  const [action, setAction] = useState(searchParams.get('action') || 'all');
   const [userId, setUserId] = useState(searchParams.get('userId') || '');
   const [entityId, setEntityId] = useState(searchParams.get('entityId') || '');
   const [startDate, setStartDate] = useState<Date | undefined>(
@@ -40,8 +40,8 @@ export function AuditFilters() {
   const applyFilters = () => {
     const params = new URLSearchParams();
     
-    if (entityType) params.set('entityType', entityType);
-    if (action) params.set('action', action);
+    if (entityType && entityType !== 'all') params.set('entityType', entityType);
+    if (action && action !== 'all') params.set('action', action);
     if (userId) params.set('userId', userId);
     if (entityId) params.set('entityId', entityId);
     if (startDate) params.set('startDate', startDate.toISOString());
@@ -51,8 +51,8 @@ export function AuditFilters() {
   };
 
   const clearFilters = () => {
-    setEntityType('');
-    setAction('');
+    setEntityType('all');
+    setAction('all');
     setUserId('');
     setEntityId('');
     setStartDate(undefined);
@@ -69,7 +69,7 @@ export function AuditFilters() {
             <SelectValue placeholder="All types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All types</SelectItem>
+            <SelectItem value="all">All types</SelectItem>
             <SelectItem value="daily_log">Daily Log</SelectItem>
             <SelectItem value="commission_entry">Commission Entry</SelectItem>
             <SelectItem value="user">User</SelectItem>
@@ -85,7 +85,7 @@ export function AuditFilters() {
             <SelectValue placeholder="All actions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All actions</SelectItem>
+            <SelectItem value="all">All actions</SelectItem>
             <SelectItem value="create">Create</SelectItem>
             <SelectItem value="update">Update</SelectItem>
             <SelectItem value="delete">Delete</SelectItem>

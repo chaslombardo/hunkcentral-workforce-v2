@@ -60,10 +60,10 @@ export function AuditTrailViewer({
           setAuditLogs(result.data.logs);
           setTotalPages(Math.ceil(result.data.total / limit));
         }
-      } catch (error) {
+      } catch (err) {
         // Only log in development, show user-friendly message in production
         if (process.env.NODE_ENV === 'development') {
-          // Failed to fetch audit logs
+          console.error('Failed to fetch audit logs:', err);
         }
         // Set error state for user feedback instead of just logging
         setError('Unable to load audit logs. Please try again later.');
@@ -183,16 +183,16 @@ export function AuditTrailViewer({
               auditLogs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-mono text-sm">
-                    {format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss')}
+                    {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-xs">
-                          {log.user.fullName.split(' ').map(n => n[0]).join('')}
+                          {log.user?.fullName ? log.user.fullName.split(' ').map(n => n[0]).join('') : 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{log.user.fullName}</span>
+                      <span className="text-sm">{log.user?.fullName || 'Unknown User'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -204,7 +204,7 @@ export function AuditTrailViewer({
                         {formatEntityType(log.entityType)}
                       </Badge>
                       <div className="text-xs text-muted-foreground font-mono">
-                        {log.entityId.slice(0, 8)}...
+                        {log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'}
                       </div>
                     </div>
                   </TableCell>

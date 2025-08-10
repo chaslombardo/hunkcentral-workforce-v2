@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuditTrailViewer } from '@/components/features/audit/AuditTrailViewer';
 import { AuditFilters } from '@/components/features/audit/AuditFilters';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export default function AuditTrailPage() {
   return (
@@ -22,12 +23,16 @@ export default function AuditTrailPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Suspense fallback={<div>Loading filters...</div>}>
-              <AuditFilters />
-            </Suspense>
-            <Suspense fallback={<div>Loading audit trail...</div>}>
-              <AuditTrailViewer />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<div>Loading filters...</div>}>
+                <AuditFilters />
+              </Suspense>
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <Suspense fallback={<div>Loading audit trail...</div>}>
+                <AuditTrailViewer />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </CardContent>
       </Card>

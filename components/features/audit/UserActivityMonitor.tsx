@@ -47,10 +47,10 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
       if (result.success) {
         setActivityData(result.data);
       }
-    } catch (error) {
+    } catch (err) {
       // Only log in development, show user-friendly message in production
       if (process.env.NODE_ENV === 'development') {
-        // Failed to fetch user activity
+        console.error('Failed to fetch user activity:', err);
       }
       // Set error state for user feedback instead of just logging
       setError('Unable to load user activity. Please try again later.');
@@ -294,11 +294,11 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
                         {formatEntityType(log.entityType)}
                       </Badge>
                       <span className="text-xs text-muted-foreground font-mono">
-                        {log.entityId.slice(0, 8)}...
+                        {log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'}
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss')}
+                      {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
                     </div>
                   </div>
                 </div>

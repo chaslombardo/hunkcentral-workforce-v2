@@ -35,10 +35,10 @@ export function EntityAuditHistory({
         if (result.success) {
           setAuditLogs(result.data);
         }
-      } catch (error) {
+      } catch (err) {
         // Only log in development, show user-friendly message in production
         if (process.env.NODE_ENV === 'development') {
-          // Failed to fetch audit history
+          console.error('Failed to fetch audit history:', err);
         }
         // Set error state for user feedback instead of just logging
         setError('Unable to load audit history. Please try again later.');
@@ -173,18 +173,18 @@ export function EntityAuditHistory({
                 <div className="flex items-start gap-3">
                   <Avatar className="h-8 w-8 mt-1">
                     <AvatarFallback className="text-xs">
-                      {log.user.fullName.split(' ').map(n => n[0]).join('')}
+                      {log.user?.fullName ? log.user.fullName.split(' ').map(n => n[0]).join('') : 'U'}
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{log.user.fullName}</span>
+                      <span className="font-medium text-sm">{log.user?.fullName || 'Unknown User'}</span>
                       <Badge variant={getActionBadgeVariant(log.action)} className="text-xs">
                         {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss')}
+                        {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
                       </span>
                     </div>
                     

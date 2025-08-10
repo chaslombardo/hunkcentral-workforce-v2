@@ -1,9 +1,9 @@
+/* Import motion preferences CSS */
+@import './motion-preferences.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import motion preferences CSS */
-@import './motion-preferences.css';
 
 @layer base {
   :root {
