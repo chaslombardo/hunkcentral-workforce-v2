@@ -35,7 +35,7 @@
   - Commit changes with descriptive message
   - _Requirements: 9.4, 9.5_
 
-- [-] 4. Fix broken navigation links and add filters to review logs
+- [x] 4. Fix broken navigation links and add filters to review logs
   - Fix 404 error on "Learn More" button clicks
   - Implement proper routing or disable non-functional links
   - Add captain filter dropdown to filter logs by specific captain
@@ -48,7 +48,7 @@
 
 ## Phase 2: Data Integration Fixes (Priority 1)
 
-- [ ] 5. Replace mock data in reports and analytics
+- [-] 5. Replace mock data in reports and analytics
   - Remove hardcoded mock data from My Payroll page
   - Remove hardcoded mock data from Analytics page
   - Connect to real database queries for all report data
