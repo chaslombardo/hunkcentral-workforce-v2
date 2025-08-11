@@ -48,7 +48,7 @@
 
 ## Phase 2: Data Integration Fixes (Priority 1)
 
-- [-] 5. Replace mock data in reports and analytics
+- [x] 5. Replace mock data in reports and analytics
   - Remove hardcoded mock data from My Payroll page
   - Remove hardcoded mock data from Analytics page
   - Connect to real database queries for all report data
@@ -57,7 +57,7 @@
   - Commit changes with descriptive message
   - _Requirements: 4.1, 4.2, 4.3, 6.1_
 
-- [ ] 6. Fix user data in log creation form
+- [-] 6. Fix user data in log creation form
   - Replace mock users in captain dropdown with real database users
   - Default captain selection to current logged-in user
   - Populate team hours section with real employee data
