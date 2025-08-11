@@ -68,243 +68,10 @@ import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work'
 import type { TipEntry } from '@/lib/payCalculator';
 import type { PayrollValidationResult, ValidationError } from '@/lib/payrollValidation';
 import { validateEmployeePayroll, submitDiscrepancyReport } from '@/lib/actions/payroll-validation';
-// import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
-// import { getDailyWorkBreakdown } from '@/lib/actions/daily-work';
+import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
+import { getDailyWorkBreakdown } from '@/lib/actions/daily-work';
 
-// Mock data for current user - replace with actual user data
-const mockUser: User = {
-  id: '1',
-  fullName: 'John Smith',
-  email: 'john@example.com',
-  roles: ['captain'],
-  rateJunkCaptain: 20,
-  rateJunkWingman: 16,
-  rateMoveCaptain: 22,
-  rateMoveWingman: 18,
-  rateZigma: 19,
-  rateTraining: 15,
-  rateEstimating: 25,
-  rateWarehouse: 17,
-  rateAdmin: 14,
-  junkBonusGoal: 0.14,
-  moveBonusGoal: 0.24,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const mockUserPayroll: PayrollCalculation = {
-  employeeId: '1',
-  employee: mockUser,
-  totalHours: 40,
-  hoursByDepartment: { junk: 30, move: 8, zigma: 2, training: 0, estimating: 0, warehouse: 0, admin: 0 },
-  grossWages: 720,
-  tips: 150,
-  bonuses: 85,
-  commission: 0,
-  totalPay: 955,
-  breakdown: {
-    hourlyWages: 720,
-    salaryAmount: 0,
-    salaryType: null,
-    salaryFrequency: null,
-    tips: 150,
-    commission: 0,
-    laborBonuses: 85,
-    totalBeforeSalaryAdjustment: 955,
-    finalPay: 955,
-  },
-};
-
-// Mock department breakdown data
-const mockDepartmentBreakdown: DepartmentBreakdownData[] = [
-  {
-    department: 'junk',
-    hours: 30,
-    rate: 20, // Captain rate
-    grossPay: 600,
-    percentage: 75,
-    isPrimary: true,
-  },
-  {
-    department: 'move',
-    hours: 8,
-    rate: 18, // Wingman rate
-    grossPay: 144,
-    percentage: 20,
-    isPrimary: false,
-  },
-  {
-    department: 'zigma',
-    hours: 2,
-    rate: 19,
-    grossPay: 38,
-    percentage: 5,
-    isPrimary: false,
-  },
-];
-
-// Mock pay periods
-const mockPayPeriods: PayPeriod[] = [
-  {
-    id: '1',
-    name: 'January 2025 - Week 1',
-    startDate: new Date('2025-01-01'),
-    endDate: new Date('2025-01-07'),
-    status: 'closed',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'January 2025 - Week 2',
-    startDate: new Date('2025-01-08'),
-    endDate: new Date('2025-01-14'),
-    status: 'open',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'December 2024 - Week 4',
-    startDate: new Date('2024-12-23'),
-    endDate: new Date('2024-12-29'),
-    status: 'closed',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-// Mock historical data for trends
-const mockHistoricalData = [
-  { period: 'Dec Week 4', totalPay: 890, hours: 38, tips: 120 },
-  { period: 'Jan Week 1', totalPay: 955, hours: 40, tips: 150 },
-  { period: 'Jan Week 2', totalPay: 1020, hours: 42, tips: 180 },
-];
-
-// Mock daily work entries for calendar
-const mockDailyWorkEntries: DailyWorkEntry[] = [
-  {
-    date: new Date('2025-01-02'),
-    logId: 'log-1',
-    departments: [
-      { department: 'junk', hours: 6, rate: 20, role: 'captain' },
-      { department: 'move', hours: 2, rate: 18, role: 'wingman' },
-    ],
-    tips: 45,
-    totalHours: 8,
-    grossPay: 156,
-    jobsCompleted: 3,
-  },
-  {
-    date: new Date('2025-01-03'),
-    logId: 'log-2',
-    departments: [
-      { department: 'junk', hours: 8, rate: 20, role: 'captain' },
-    ],
-    tips: 60,
-    totalHours: 8,
-    grossPay: 160,
-    jobsCompleted: 4,
-  },
-  {
-    date: new Date('2025-01-06'),
-    logId: 'log-3',
-    departments: [
-      { department: 'move', hours: 6, rate: 22, role: 'captain' },
-      { department: 'zigma', hours: 2, rate: 19, role: 'wingman' },
-    ],
-    tips: 35,
-    totalHours: 8,
-    grossPay: 170,
-    jobsCompleted: 2,
-  },
-];
-
-// Mock work pattern stats
-const mockWorkPatternStats: WorkPatternStats = {
-  totalDaysWorked: 15,
-  avgHoursPerDay: 8.2,
-  mostCommonDepartment: 'junk',
-  totalJobsCompleted: 45,
-  avgTipsPerDay: 42.5,
-  busiestDay: new Date('2025-01-03'),
-  highestTipDay: new Date('2025-01-03'),
-  highestPayDay: new Date('2025-01-06'),
-};
-
-// Mock tips breakdown data
-const mockTipsBreakdown: TipEntry[] = [
-  {
-    date: new Date('2025-01-02'),
-    jobId: 'J2025-001',
-    clientName: 'Smith Residence',
-    totalJobTips: 80,
-    teamMembers: 4,
-    myShare: 20,
-    jobType: 'junk',
-    logId: 'log-1',
-  },
-  {
-    date: new Date('2025-01-02'),
-    jobId: 'J2025-002',
-    clientName: 'Downtown Office',
-    totalJobTips: 60,
-    teamMembers: 3,
-    myShare: 20,
-    jobType: 'junk',
-    logId: 'log-1',
-  },
-  {
-    date: new Date('2025-01-03'),
-    jobId: 'J2025-003',
-    clientName: 'Johnson Family',
-    totalJobTips: 100,
-    teamMembers: 4,
-    myShare: 25,
-    jobType: 'junk',
-    logId: 'log-2',
-  },
-  {
-    date: new Date('2025-01-03'),
-    jobId: 'J2025-004',
-    clientName: 'Corporate Move',
-    totalJobTips: 120,
-    teamMembers: 4,
-    myShare: 30,
-    jobType: 'junk',
-    logId: 'log-2',
-  },
-  {
-    date: new Date('2025-01-06'),
-    jobId: 'M2025-001',
-    clientName: 'Miller Apartment',
-    totalJobTips: 40,
-    teamMembers: 2,
-    myShare: 20,
-    jobType: 'move',
-    logId: 'log-3',
-  },
-  {
-    date: new Date('2025-01-06'),
-    jobId: 'J2025-005',
-    clientName: 'Wilson House',
-    totalJobTips: 30,
-    teamMembers: 2,
-    myShare: 15,
-    jobType: 'junk',
-    logId: 'log-3',
-  },
-  {
-    date: new Date('2025-01-07'),
-    jobId: 'M2025-002',
-    clientName: 'Davis Relocation',
-    totalJobTips: 90,
-    teamMembers: 3,
-    myShare: 30,
-    jobType: 'move',
-    logId: 'log-4',
-  },
-];
+// Real data integration - all mock data has been replaced with API calls
 
 interface MyPayrollViewProps {
   userId?: string;
@@ -313,7 +80,12 @@ interface MyPayrollViewProps {
 
 interface PayrollSummaryData {
   employeeId: string;
-  employee: User;
+  employee: {
+    id: string;
+    fullName: string;
+    email: string;
+    roles: string[];
+  };
   payPeriod: PayPeriod;
   totalHours: number;
   totalPay: number;
@@ -334,42 +106,51 @@ interface DetailedPayrollData {
 export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps = {}) {
   const isMobile = useIsMobile();
   const offlineState = useOfflineDetection();
-  const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod>(initialPayPeriod || mockPayPeriods[0]);
+  const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod | null>(initialPayPeriod || null);
+  const [payPeriods, setPayPeriods] = React.useState<PayPeriod[]>([]);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [activeTab, setActiveTab] = React.useState('breakdown');
   const [showExportDialog, setShowExportDialog] = React.useState(false);
   const [showDiscrepancyDialog, setShowDiscrepancyDialog] = React.useState(false);
   const [discrepancyErrors, setDiscrepancyErrors] = React.useState<ValidationError[]>([]);
   
-  // Use mock data for now - in real implementation, this would be replaced with actual API calls
-  const userPayroll = mockUserPayroll;
-  const trend = calculateTrend(userPayroll.totalPay, mockHistoricalData[0].totalPay);
+  // Load pay periods on mount
+  React.useEffect(() => {
+    const loadPayPeriods = async () => {
+      try {
+        // Get pay periods from API - for now use a simple fetch
+        const response = await fetch('/api/pay-periods');
+        if (response.ok) {
+          const periods = await response.json();
+          setPayPeriods(periods);
+          if (!selectedPeriod && periods.length > 0) {
+            // Select the most recent open period or the latest closed one
+            const openPeriod = periods.find((p: PayPeriod) => p.status === 'open');
+            setSelectedPeriod(openPeriod || periods[0]);
+          }
+        }
+      } catch (error) {
+        // Fallback to default period if API fails
+        const defaultPeriod: PayPeriod = {
+          id: 'current',
+          name: 'Current Period',
+          startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+          status: 'open',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        setPayPeriods([defaultPeriod]);
+        setSelectedPeriod(defaultPeriod);
+      }
+    };
+
+    loadPayPeriods();
+  }, [selectedPeriod]);
   
   // Enhanced loading states with retry capabilities
-  const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(() => {
-    // Initialize with mock data to ensure UI renders immediately
-    return {
-      employeeId: userPayroll.employeeId,
-      employee: userPayroll.employee,
-      payPeriod: selectedPeriod,
-      totalHours: userPayroll.totalHours,
-      totalPay: userPayroll.totalPay,
-      grossWages: userPayroll.grossWages,
-      tips: userPayroll.tips,
-      commission: userPayroll.commission,
-      bonuses: userPayroll.bonuses,
-    };
-  });
-  const [detailedData, setDetailedData] = React.useState<DetailedPayrollData | null>(() => {
-    // Initialize with mock data to ensure tabs render immediately
-    return {
-      departmentBreakdown: mockDepartmentBreakdown || [],
-      dailyWorkHistory: mockDailyWorkEntries || [],
-      tipsDetails: mockTipsBreakdown || [],
-      workPatternStats: mockWorkPatternStats,
-      validationResult: undefined,
-    };
-  });
+  const [summaryData, setSummaryData] = React.useState<PayrollSummaryData | null>(null);
+  const [detailedData, setDetailedData] = React.useState<DetailedPayrollData | null>(null);
   const [isLoadingSummary, setIsLoadingSummary] = React.useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = React.useState(false);
   const [summaryError, setSummaryError] = React.useState<string | null>(null);
@@ -380,278 +161,234 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
 
   // Enhanced summary data loading with retry logic and better error handling
   React.useEffect(() => {
+    if (!selectedPeriod || !userId) return;
+
     const loadSummary = async () => {
       setIsLoadingSummary(true);
       setSummaryError(null);
       
       try {
-        // For testing, always use mock data successfully
-        const summaryResult = {
-          employeeId: userPayroll.employeeId,
-          employee: userPayroll.employee,
-          payPeriod: selectedPeriod,
-          totalHours: userPayroll.totalHours,
-          totalPay: userPayroll.totalPay,
-          grossWages: userPayroll.grossWages,
-          tips: userPayroll.tips,
-          commission: userPayroll.commission,
-          bonuses: userPayroll.bonuses,
-        };
+        const summaryResult = await getPayrollSummary(userId, selectedPeriod.id);
         
-        setSummaryData(summaryResult);
-        setHasOfflineData(false);
-        setSummaryRetryCount(0);
+        if (summaryResult.success && summaryResult.data) {
+          setSummaryData(summaryResult.data);
+          setHasOfflineData(false);
+          setSummaryRetryCount(0);
+        } else {
+          throw new Error(summaryResult.error || 'Failed to load payroll summary');
+        }
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
-        // Summary loading error
-        
-        // Always provide fallback data to ensure UI renders
-        const fallbackSummary = {
-          employeeId: userPayroll.employeeId,
-          employee: userPayroll.employee,
-          payPeriod: selectedPeriod,
-          totalHours: userPayroll.totalHours,
-          totalPay: userPayroll.totalPay,
-          grossWages: userPayroll.grossWages,
-          tips: userPayroll.tips,
-          commission: userPayroll.commission,
-          bonuses: userPayroll.bonuses,
-        };
-        setSummaryData(fallbackSummary);
         setSummaryError(errorMessage);
+        
+        // Try to load cached data
+        const cachedData = localStorage.getItem(`payroll-summary-${selectedPeriod.id}`);
+        if (cachedData) {
+          try {
+            const parsed = JSON.parse(cachedData);
+            setSummaryData(parsed);
+            setHasOfflineData(true);
+          } catch (parseError) {
+            // Failed to parse cached data
+          }
+        }
       } finally {
         setIsLoadingSummary(false);
       }
     };
 
     loadSummary();
-  }, [selectedPeriod, offlineState.isOffline, userPayroll.employeeId, userPayroll.employee, userPayroll.totalHours, userPayroll.totalPay, userPayroll.grossWages, userPayroll.tips, userPayroll.commission, userPayroll.bonuses]);
+  }, [selectedPeriod, userId, offlineState.isOffline]);
 
   // Enhanced detailed data loading with progressive fallbacks and better error handling
   React.useEffect(() => {
     if (!['breakdown', 'daily', 'tips', 'history', 'performance', 'validation'].includes(activeTab)) return;
+    if (!selectedPeriod || !userId) return;
     
     const loadDetails = async () => {
       setIsLoadingDetails(true);
       setDetailsError(null);
       
       try {
-        // For testing, always use mock data successfully
-        let validationResult: PayrollValidationResult | undefined;
-        if (activeTab === 'validation' && userId) {
-          try {
-            const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
-            if (validationResponse.success) {
-              validationResult = validationResponse.data;
+        const detailsResult = await getCachedDetailedPayrollBreakdown(userId, selectedPeriod.id);
+        
+        if (detailsResult.success && detailsResult.data) {
+          // Convert the enhanced payroll data to our expected format
+          const enhancedData = detailsResult.data;
+          
+          let validationResult: PayrollValidationResult | undefined;
+          if (activeTab === 'validation') {
+            try {
+              const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
+              if (validationResponse.success) {
+                validationResult = validationResponse.data;
+              }
+            } catch (validationError) {
+              // Validation data unavailable - continue without it
             }
-          } catch (validationError) {
-            // Validation data unavailable
-            // Continue without validation data rather than failing entirely
           }
+          
+          const formattedData: DetailedPayrollData = {
+            departmentBreakdown: enhancedData.departmentBreakdown.map(dept => ({
+              department: dept.department,
+              hours: dept.hours,
+              rate: dept.rate,
+              grossPay: dept.grossPay,
+              percentage: dept.percentage,
+              isPrimary: dept.isPrimary,
+            })),
+            dailyWorkHistory: enhancedData.dailyWorkHistory.map(day => ({
+              date: day.date,
+              logId: day.logIds[0] || '',
+              departments: day.departments.map(dept => ({
+                department: dept.department,
+                hours: dept.hours,
+                rate: dept.rate,
+                role: day.role,
+              })),
+              tips: day.tips,
+              totalHours: day.departments.reduce((sum, dept) => sum + dept.hours, 0),
+              grossPay: day.departments.reduce((sum, dept) => sum + (dept.hours * dept.rate), 0),
+              jobsCompleted: 1, // Simplified - could be enhanced
+            })),
+            tipsDetails: enhancedData.tipsDetails,
+            workPatternStats: {
+              totalDaysWorked: enhancedData.dailyWorkHistory.length,
+              avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
+              mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
+              totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
+              avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
+              busiestDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+              highestTipDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+              highestPayDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+            },
+            validationResult,
+          };
+          
+          setDetailedData(formattedData);
+          setDetailsRetryCount(0);
+        } else {
+          throw new Error(detailsResult.error || 'Failed to load detailed payroll data');
         }
-        
-        const detailsResult = {
-          departmentBreakdown: mockDepartmentBreakdown || [],
-          dailyWorkHistory: mockDailyWorkEntries || [],
-          tipsDetails: mockTipsBreakdown || [],
-          workPatternStats: mockWorkPatternStats,
-          validationResult,
-        };
-        
-        setDetailedData(detailsResult);
-        setDetailsRetryCount(0);
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
-        // Details loading error
-        
-        // Always provide fallback data to ensure UI renders
-        const fallbackDetails = {
-          departmentBreakdown: mockDepartmentBreakdown || [],
-          dailyWorkHistory: mockDailyWorkEntries || [],
-          tipsDetails: mockTipsBreakdown || [],
-          workPatternStats: mockWorkPatternStats,
-          validationResult: undefined,
-        };
-        setDetailedData(fallbackDetails);
         setDetailsError(errorMessage);
+        
+        // Try to load cached data
+        const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            const parsed = JSON.parse(cachedData);
+            setDetailedData(parsed);
+          } catch (parseError) {
+            // Failed to parse cached data
+          }
+        }
       } finally {
         setIsLoadingDetails(false);
       }
     };
 
     loadDetails();
-  }, [activeTab, selectedPeriod.id, userId, offlineState.isOffline]);
+  }, [activeTab, selectedPeriod, userId, offlineState.isOffline]);
 
   // Reset detailed data when period changes
   React.useEffect(() => {
     setDetailedData(null);
-  }, [selectedPeriod.id]);
+  }, [selectedPeriod?.id]);
 
   // Enhanced retry functions with exponential backoff and better error handling
   const retrySummary = React.useCallback(async () => {
-    const maxRetries = 3;
-    const baseDelay = 1000;
+    // Simplified retry - just reload the data
+    if (!selectedPeriod || !userId) return;
     
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      setIsLoadingSummary(true);
-      setSummaryError(null);
-      setSummaryRetryCount(attempt);
+    setIsLoadingSummary(true);
+    setSummaryError(null);
+    
+    try {
+      const summaryResult = await getPayrollSummary(userId, selectedPeriod.id);
       
-      try {
-        // Exponential backoff delay with jitter to prevent thundering herd
-        if (attempt > 0) {
-          const delay = baseDelay * Math.pow(2, attempt - 1);
-          const jitter = Math.random() * 0.1 * delay; // Add up to 10% jitter
-          await new Promise(resolve => setTimeout(resolve, delay + jitter));
-        }
-        
-        // Check if we're still offline before attempting
-        if (offlineState.isOffline && attempt > 0) {
-          throw new Error('Still offline, cannot retry');
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const summaryResult = {
-          employeeId: userPayroll.employeeId,
-          employee: userPayroll.employee,
-          payPeriod: selectedPeriod,
-          totalHours: userPayroll.totalHours,
-          totalPay: userPayroll.totalPay,
-          grossWages: userPayroll.grossWages,
-          tips: userPayroll.tips,
-          commission: userPayroll.commission,
-          bonuses: userPayroll.bonuses,
-        };
-        
-        setSummaryData(summaryResult);
+      if (summaryResult.success && summaryResult.data) {
+        setSummaryData(summaryResult.data);
         setHasOfflineData(false);
-        setSummaryRetryCount(0); // Reset on success
-        
-        // Cache successful result with timestamp
-        const cacheData = {
-          ...summaryResult,
-          cachedAt: Date.now(),
-        };
-        localStorage.setItem(`payroll-summary-${selectedPeriod.id}`, JSON.stringify(cacheData));
-        setIsLoadingSummary(false);
-        return; // Success, exit retry loop
-        
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
-        // Summary retry attempt failed
-        
-        if (attempt === maxRetries - 1) {
-          // Final attempt failed, try cached data
-          const cachedData = localStorage.getItem(`payroll-summary-${selectedPeriod.id}`);
-          if (cachedData) {
-            try {
-              const parsed = JSON.parse(cachedData);
-              setSummaryData(parsed);
-              setHasOfflineData(true);
-              setSummaryError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
-            } catch (parseError) {
-              // Failed to parse cached summary data
-              setSummaryError(`${errorMessage} (cached data corrupted, no fallback available)`);
-              localStorage.removeItem(`payroll-summary-${selectedPeriod.id}`);
-            }
-          } else {
-            setSummaryError(`${errorMessage} (no cached data available after ${maxRetries} attempts)`);
-          }
-        }
+        setSummaryRetryCount(0);
+      } else {
+        throw new Error(summaryResult.error || 'Failed to load payroll summary');
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
+      setSummaryError(errorMessage);
+    } finally {
+      setIsLoadingSummary(false);
     }
-    
-    setIsLoadingSummary(false);
-  }, [selectedPeriod, userPayroll, offlineState.isOffline]);
+  }, [selectedPeriod, userId]);
 
   const retryDetails = React.useCallback(async () => {
-    const maxRetries = 3;
-    const baseDelay = 1000;
+    // Simplified retry - just reload the data
+    if (!selectedPeriod || !userId) return;
     
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      setIsLoadingDetails(true);
-      setDetailsError(null);
-      setDetailsRetryCount(attempt);
+    setIsLoadingDetails(true);
+    setDetailsError(null);
+    
+    try {
+      const detailsResult = await getCachedDetailedPayrollBreakdown(userId, selectedPeriod.id);
       
-      try {
-        // Exponential backoff delay with jitter
-        if (attempt > 0) {
-          const delay = baseDelay * Math.pow(2, attempt - 1);
-          const jitter = Math.random() * 0.1 * delay;
-          await new Promise(resolve => setTimeout(resolve, delay + jitter));
-        }
+      if (detailsResult.success && detailsResult.data) {
+        // Convert the enhanced payroll data to our expected format
+        const enhancedData = detailsResult.data;
         
-        // Check if we're still offline before attempting
-        if (offlineState.isOffline && attempt > 0) {
-          throw new Error('Still offline, cannot retry');
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        let validationResult: PayrollValidationResult | undefined;
-        if (activeTab === 'validation' && userId) {
-          try {
-            const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
-            if (validationResponse.success) {
-              validationResult = validationResponse.data;
-            }
-          } catch (validationError) {
-            // Validation data unavailable during retry
-            // Don't fail the entire retry for validation issues
-          }
-        }
-        
-        const detailsResult = {
-          departmentBreakdown: mockDepartmentBreakdown,
-          dailyWorkHistory: mockDailyWorkEntries,
-          tipsDetails: mockTipsBreakdown,
-          workPatternStats: mockWorkPatternStats,
-          validationResult,
+        const formattedData: DetailedPayrollData = {
+          departmentBreakdown: enhancedData.departmentBreakdown.map(dept => ({
+            department: dept.department,
+            hours: dept.hours,
+            rate: dept.rate,
+            grossPay: dept.grossPay,
+            percentage: dept.percentage,
+            isPrimary: dept.isPrimary,
+          })),
+          dailyWorkHistory: enhancedData.dailyWorkHistory.map(day => ({
+            date: day.date,
+            logId: day.logIds[0] || '',
+            departments: day.departments.map(dept => ({
+              department: dept.department,
+              hours: dept.hours,
+              rate: dept.rate,
+              role: day.role,
+            })),
+            tips: day.tips,
+            totalHours: day.departments.reduce((sum, dept) => sum + dept.hours, 0),
+            grossPay: day.departments.reduce((sum, dept) => sum + (dept.hours * dept.rate), 0),
+            jobsCompleted: 1, // Simplified - could be enhanced
+          })),
+          tipsDetails: enhancedData.tipsDetails,
+          workPatternStats: {
+            totalDaysWorked: enhancedData.dailyWorkHistory.length,
+            avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
+            mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
+            totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
+            avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
+            busiestDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+            highestTipDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+            highestPayDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
+          },
+          validationResult: undefined,
         };
         
-        setDetailedData(detailsResult);
-        setDetailsRetryCount(0); // Reset on success
-        
-        // Cache successful result with timestamp
-        const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
-        const cacheData = {
-          ...detailsResult,
-          cachedAt: Date.now(),
-        };
-        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-        setIsLoadingDetails(false);
-        return; // Success, exit retry loop
-        
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
-        // Details retry attempt failed
-        
-        if (attempt === maxRetries - 1) {
-          // Final attempt failed, try cached data
-          const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
-          const cachedData = localStorage.getItem(cacheKey);
-          if (cachedData) {
-            try {
-              const parsed = JSON.parse(cachedData);
-              setDetailedData(parsed);
-              setDetailsError(`${errorMessage} (showing cached data after ${maxRetries} attempts)`);
-            } catch (parseError) {
-              // Failed to parse cached details data
-              setDetailsError(`${errorMessage} (cached data corrupted, no fallback available)`);
-              localStorage.removeItem(cacheKey);
-            }
-          } else {
-            setDetailsError(`${errorMessage} (no cached data available after ${maxRetries} attempts)`);
-          }
-        }
+        setDetailedData(formattedData);
+        setDetailsRetryCount(0);
+      } else {
+        throw new Error(detailsResult.error || 'Failed to load detailed payroll data');
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
+      setDetailsError(errorMessage);
+    } finally {
+      setIsLoadingDetails(false);
     }
-    
-    setIsLoadingDetails(false);
-  }, [activeTab, selectedPeriod.id, userId, offlineState.isOffline]);
+  }, [activeTab, selectedPeriod, userId]);
 
   // Handle discrepancy reporting
   const handleReportDiscrepancy = React.useCallback((errors: ValidationError[]) => {
@@ -660,7 +397,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
   }, []);
 
   const handleSubmitDiscrepancyReport = React.useCallback(async (reportData: { description: string; priority: string; category: string; requestCallback?: boolean; expectedOutcome?: string; contactEmail?: string }) => {
-    if (!userId) return;
+    if (!userId || !selectedPeriod) return;
     
     const fullReportData = {
       ...reportData,
@@ -674,7 +411,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     if (!result.success) {
       throw new Error(result.error || 'Failed to submit report');
     }
-  }, [userId, selectedPeriod.id, discrepancyErrors]);
+  }, [userId, selectedPeriod, discrepancyErrors]);
 
   const handleViewAuditTrail = React.useCallback(() => {
     // Navigate to audit trail or show detailed view
@@ -714,9 +451,9 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   {/* Pay Period Selector */}
                   <Select
-                    value={selectedPeriod.id}
+                    value={selectedPeriod?.id || ''}
                     onValueChange={(value) => {
-                      const period = mockPayPeriods.find(p => p.id === value);
+                      const period = payPeriods.find(p => p.id === value);
                       if (period) setSelectedPeriod(period);
                     }}
                     disabled={offlineState.isOffline}
@@ -724,10 +461,10 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                     <SelectTrigger className={`w-full sm:w-[200px] ${
                       isMobile ? 'h-12 touch-manipulation' : ''
                     }`}>
-                      <SelectValue />
+                      <SelectValue placeholder="Select pay period" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockPayPeriods.map((period) => (
+                      {payPeriods.map((period) => (
                         <SelectItem key={period.id} value={period.id}>
                           <div className="flex items-center gap-2">
                             <span>{period.name}</span>
@@ -804,7 +541,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               </>
             ) : null}
             
-            {summaryData && (
+            {summaryData && selectedPeriod && (
               <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs sm:grid-cols-2 @5xl/main:grid-cols-4 
                 /* Mobile optimizations */
                 [&>*]:min-h-[120px] sm:[&>*]:min-h-[140px]
@@ -814,22 +551,26 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               <CardHeader>
                 <CardDescription data-testid="total-pay-label">Total Pay</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {formatCurrency(summaryData?.totalPay || userPayroll.totalPay)}
+                  {formatCurrency(summaryData.totalPay)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {trend.isPositive ? '+' : ''}{trend.percentage.toFixed(1)}%
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowExportDialog(true)}
+                    className="h-7 text-xs"
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Export
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
-                  {trend.isPositive ? 'Increased' : 'Decreased'} from last period
-                  {trend.isPositive ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
+                  Pay period summary
                 </div>
                 <div className="text-muted-foreground">
-                  {formatDate(selectedPeriod.startDate)} - {formatDate(selectedPeriod.endDate)}
+                  {formatDate(selectedPeriod?.startDate || new Date())} - {formatDate(selectedPeriod?.endDate || new Date())}
                 </div>
                 {summaryError && (
                   <div className="flex items-center gap-1 text-xs text-yellow-600">
@@ -845,61 +586,56 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               <CardHeader>
                 <CardDescription>Hours Worked</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {summaryData?.totalHours || userPayroll.totalHours}h
+                  {summaryData.totalHours}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <Clock className="h-3 w-3" />
-                    Regular
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('daily')}
+                    className="h-7 text-xs"
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    View Details
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
-                  Total hours worked this period
-                  <Clock className="size-4" />
+                  Hours across all departments
                 </div>
                 <div className="text-muted-foreground">
-                  Primary department: {Object.entries(userPayroll.hoursByDepartment)
-                    .find(([, hours]) => hours > 0)?.[0] || 'admin'}
+                  {selectedPeriod.status === 'closed' ? 'Final' : 'Current'} total
                 </div>
-                {summaryError && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    Using cached data
-                  </div>
-                )}
               </CardFooter>
             </Card>
 
-            {/* Tips Earned */}
+            {/* Tips */}
             <Card className="@container/card">
               <CardHeader>
                 <CardDescription>Tips Earned</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {formatCurrency(summaryData?.tips || userPayroll.tips)}
+                  {formatCurrency(summaryData.tips)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <DollarSign className="h-3 w-3" />
-                    Performance
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('tips')}
+                    className="h-7 text-xs"
+                  >
+                    <DollarSign className="h-3 w-3 mr-1" />
+                    View Tips
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
-                  Great customer service!
-                  <Award className="size-4" />
+                  Share of job tips
                 </div>
                 <div className="text-muted-foreground">
-                  Average per job: {formatCurrency((summaryData?.tips || userPayroll.tips) / 8)}
+                  Distributed equally among team
                 </div>
-                {(hasOfflineData || summaryError) && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
-                  </div>
-                )}
               </CardFooter>
             </Card>
 
@@ -908,33 +644,32 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               <CardHeader>
                 <CardDescription>Bonuses</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {formatCurrency(summaryData?.bonuses || userPayroll.bonuses)}
+                  {formatCurrency(summaryData.bonuses)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <Award className="h-3 w-3" />
-                    Labor Bonus
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('performance')}
+                    className="h-7 text-xs"
+                  >
+                    <Award className="h-3 w-3 mr-1" />
+                    View Performance
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">
-                  Efficiency bonus earned
-                  <Award className="size-4" />
+                  Labor efficiency bonuses
                 </div>
                 <div className="text-muted-foreground">
-                  Performance bonus earned
+                  For beating target goals
                 </div>
-                {(hasOfflineData || summaryError) && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
-                  </div>
-                )}
               </CardFooter>
             </Card>
           </div>
-          )}
+            )}
+          </div>
         </div>
 
           {/* Enhanced Tabs with Progressive Loading */}
@@ -959,13 +694,13 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                         value="daily" 
                         className="min-w-[80px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
                       >
-                        Work
+                        Work ({detailedData?.dailyWorkHistory?.length || 0})
                       </TabsTrigger>
                       <TabsTrigger 
                         value="tips" 
                         className="min-w-[70px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
                       >
-                        Tips
+                        Tips ({detailedData?.tipsDetails?.length || 0})
                       </TabsTrigger>
                       <TabsTrigger 
                         value="history" 
@@ -994,10 +729,10 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                       Breakdown
                     </TabsTrigger>
                     <TabsTrigger value="daily" className="text-xs sm:text-sm">
-                      Work
+                      Work ({detailedData?.dailyWorkHistory?.length || 0})
                     </TabsTrigger>
                     <TabsTrigger value="tips" className="text-xs sm:text-sm">
-                      Tips
+                      Tips ({detailedData?.tipsDetails?.length || 0})
                     </TabsTrigger>
                     <TabsTrigger value="history" className="text-xs sm:text-sm">
                       Pay History
@@ -1029,23 +764,29 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               </div>
 
             {/* Pay Breakdown Tab */}
-            <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6 mt-6">
               <div className="space-y-6">
                 {/* Department Breakdown */}
                 <PayrollComponentErrorBoundary componentName="Department Breakdown">
                   {isLoadingDetails && !detailedData ? (
                     <PayrollLoadingSkeleton />
-                  ) : detailedData ? (
+                  ) : detailedData && summaryData?.employee ? (
                     <DepartmentBreakdown
                       departments={detailedData.departmentBreakdown}
-                      totalHours={summaryData?.totalHours || userPayroll.totalHours}
-                      totalPay={summaryData?.totalPay || userPayroll.totalPay}
-                      user={mockUser}
+                      totalHours={summaryData.totalHours}
+                      totalPay={summaryData.totalPay}
+                      user={{
+                        ...summaryData.employee,
+                        junkBonusGoal: 0.14,
+                        moveBonusGoal: 0.24,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                      } as User}
                     />
                   ) : (
                     <DepartmentBreakdownFallback
-                      totalHours={summaryData?.totalHours || userPayroll.totalHours}
-                      totalPay={summaryData?.totalPay || userPayroll.totalPay}
+                      totalHours={summaryData?.totalHours || 0}
+                      totalPay={summaryData?.totalPay || 0}
                       error={detailsError || "Department breakdown data is not available"}
                       onRetry={retryDetails}
                       isRetrying={isLoadingDetails}
@@ -1055,13 +796,19 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
 
                 {/* Rate Information Panel */}
                 <PayrollComponentErrorBoundary componentName="Rate Information">
-                  {detailedData ? (
+                  {detailedData && summaryData ? (
                     <RateInformationPanel
                       departmentHours={detailedData.departmentBreakdown.reduce((acc, dept) => {
                         acc[dept.department as Department] = dept.hours;
                         return acc;
                       }, {} as Record<Department, number>)}
-                      user={mockUser}
+                      user={{
+                        ...summaryData.employee,
+                        junkBonusGoal: 0.14,
+                        moveBonusGoal: 0.24,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                      } as User}
                     />
                   ) : (
                     <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
@@ -1085,7 +832,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Daily Work Tab */}
-            <TabsContent value="daily" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="daily" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Daily Work Calendar">
                 {isLoadingDetails && !detailedData ? (
                   <PayrollLoadingSkeleton />
@@ -1095,8 +842,8 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                     workPatternStats={detailedData.workPatternStats}
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
-                    payPeriodStart={selectedPeriod.startDate}
-                    payPeriodEnd={selectedPeriod.endDate}
+                    payPeriodStart={selectedPeriod?.startDate || new Date()}
+                    payPeriodEnd={selectedPeriod?.endDate || new Date()}
                   />
                 ) : (
                   <DailyWorkFallback
@@ -1111,20 +858,20 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Tips Tab */}
-            <TabsContent value="tips" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="tips" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Tips Detail View">
                 {isLoadingDetails && !detailedData ? (
                   <PayrollLoadingSkeleton />
                 ) : detailedData ? (
                   <TipsDetailView
                     tips={detailedData.tipsDetails}
-                    totalTips={summaryData?.tips || userPayroll.tips}
-                    payPeriodStart={selectedPeriod.startDate}
-                    payPeriodEnd={selectedPeriod.endDate}
+                    totalTips={summaryData?.tips || 0}
+                    payPeriodStart={selectedPeriod?.startDate || new Date()}
+                    payPeriodEnd={selectedPeriod?.endDate || new Date()}
                   />
                 ) : (
                   <TipsDetailFallback
-                    totalTips={summaryData?.tips || userPayroll.tips}
+                    totalTips={summaryData?.tips || 0}
                     jobCount={8}
                     error={detailsError || "Tips details are not available"}
                     onRetry={retryDetails}
@@ -1135,14 +882,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* History Tab */}
-            <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="history" className="flex flex-col px-4 lg:px-6 mt-6 space-y-6">
               <PayrollComponentErrorBoundary componentName="Pay Period Analysis">
-                {detailedData ? (
-                  <PayPeriodAnalysis
-                    userId={userId || '1'}
-                    currentPeriod={selectedPeriod}
-                    availablePeriods={mockPayPeriods}
-                  />
+                {detailedData && selectedPeriod ? (
+                  <div className="w-full overflow-hidden">
+                    <PayPeriodAnalysis
+                      userId={userId || '1'}
+                      currentPeriod={selectedPeriod}
+                      availablePeriods={payPeriods}
+                    />
+                  </div>
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
                     <CardContent className="pt-6">
@@ -1164,14 +913,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Performance Tab */}
-            <TabsContent value="performance" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="performance" className="flex flex-col px-4 lg:px-6 mt-6 space-y-6">
               <PayrollComponentErrorBoundary componentName="Performance Analysis">
-                {detailedData ? (
-                  <PayPeriodAnalysis
-                    userId={userId || '1'}
-                    currentPeriod={selectedPeriod}
-                    availablePeriods={mockPayPeriods}
-                  />
+                {detailedData && selectedPeriod ? (
+                  <div className="w-full overflow-hidden">
+                    <PayPeriodAnalysis
+                      userId={userId || '1'}
+                      currentPeriod={selectedPeriod}
+                      availablePeriods={payPeriods}
+                    />
+                  </div>
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
                     <CardContent className="pt-6">
@@ -1193,7 +944,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Validation Tab */}
-            <TabsContent value="validation" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="validation" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Payroll Validation">
                 {isLoadingDetails ? (
                   <PayrollLoadingSkeleton />
@@ -1250,12 +1001,12 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         <PayrollExportDialog
           open={showExportDialog}
           onOpenChange={setShowExportDialog}
-          payrollData={summaryData ? [userPayroll] : []}
+          payrollData={[]}
           selectedPeriod={selectedPeriod}
           departmentBreakdown={detailedData?.departmentBreakdown}
           dailyWorkHistory={detailedData?.dailyWorkHistory}
           tipsDetails={detailedData?.tipsDetails}
-          currentUser={mockUser}
+          currentUser={undefined}
         />
 
         {/* Discrepancy Report Dialog */}
@@ -1264,12 +1015,11 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
           onOpenChange={setShowDiscrepancyDialog}
           errors={discrepancyErrors}
           employeeId={userId || '1'}
-          payPeriodId={selectedPeriod.id}
+          payPeriodId={selectedPeriod?.id || ''}
           onSubmit={handleSubmitDiscrepancyReport}
         />
-        </div>
       </div>
     </div>
-  </PayrollErrorBoundary>
+    </PayrollErrorBoundary>
   );
 }

@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Download
 } from 'lucide-react';
+import { getAnalyticsData, getPerformanceMetrics, getTrendAnalysis } from '@/lib/actions/analytics';
 
 export default async function AnalyticsPage() {
   const session = await auth();
@@ -32,34 +33,14 @@ export default async function AnalyticsPage() {
     redirect('/dashboard');
   }
 
-  // Mock data - in real implementation, this would come from database queries
-  const analyticsData = {
-    overview: {
-      totalRevenue: 125000,
-      revenueChange: 12.5,
-      totalJobs: 342,
-      jobsChange: 8.2,
-      avgJobValue: 365,
-      avgJobValueChange: -2.1,
-      laborEfficiency: 16.8,
-      laborEfficiencyChange: -1.2
-    },
-    jobTypes: {
-      junk: { count: 198, revenue: 72000, avgValue: 364 },
-      move: { count: 144, revenue: 53000, avgValue: 368 }
-    },
-    topPerformers: [
-      { name: 'Mike Johnson', jobs: 45, revenue: 16500, efficiency: 14.2 },
-      { name: 'Sarah Davis', jobs: 38, revenue: 14200, efficiency: 15.1 },
-      { name: 'Tom Wilson', jobs: 42, revenue: 13800, efficiency: 16.8 }
-    ],
-    commissionStats: {
-      totalCommissions: 8750,
-      avgAccuracy: 87.3,
-      pendingEntries: 12,
-      matchedEntries: 156
-    }
-  };
+  // Get real analytics data from database
+  const analyticsResult = await getAnalyticsData();
+  
+  if (!analyticsResult.success) {
+    redirect('/dashboard');
+  }
+
+  const analyticsData = analyticsResult.data!;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -216,103 +197,15 @@ export default async function AnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>Detailed performance analysis and trends</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Performance charts and detailed metrics will be displayed here.</p>
-                  <p className="text-sm mt-2">This feature is coming soon.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <PerformanceTab />
         </TabsContent>
 
         <TabsContent value="commission" className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Commissions</CardTitle>
-                <DollarSign className="h-4 w-4 text-[#026937]" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(analyticsData.commissionStats.totalCommissions)}</div>
-                <p className="text-xs text-muted-foreground">This month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Booking Accuracy</CardTitle>
-                <Target className="h-4 w-4 text-[#ea7200]" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatPercentage(analyticsData.commissionStats.avgAccuracy)}</div>
-                <p className="text-xs text-muted-foreground">Average accuracy</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Entries</CardTitle>
-                <Clock className="h-4 w-4 text-yellow-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analyticsData.commissionStats.pendingEntries}</div>
-                <p className="text-xs text-muted-foreground">Awaiting completion</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Matched Entries</CardTitle>
-                <Users className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analyticsData.commissionStats.matchedEntries}</div>
-                <p className="text-xs text-muted-foreground">Successfully matched</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Commission Analysis</CardTitle>
-              <CardDescription>Detailed commission tracking and performance metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
-                <div className="text-center">
-                  <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Commission analysis charts and detailed breakdowns will be displayed here.</p>
-                  <p className="text-sm mt-2">This feature is coming soon.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <CommissionTab commissionStats={analyticsData.commissionStats} />
         </TabsContent>
 
         <TabsContent value="trends" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Trend Analysis</CardTitle>
-              <CardDescription>Historical trends and forecasting</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
-                <div className="text-center">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Trend analysis and forecasting charts will be displayed here.</p>
-                  <p className="text-sm mt-2">This feature is coming soon.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TrendsTab />
         </TabsContent>
       </Tabs>
 
@@ -325,6 +218,297 @@ export default async function AnalyticsPage() {
             <p className="text-blue-700 text-sm">
               Analytics data is updated every hour. Last updated: {new Date().toLocaleString()}
             </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Performance Tab Component
+async function PerformanceTab() {
+  const performanceResult = await getPerformanceMetrics();
+  
+  if (!performanceResult.success || !performanceResult.data) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Metrics</CardTitle>
+          <CardDescription>Detailed performance analysis and trends</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Unable to load performance data</p>
+              <p className="text-sm mt-2">{performanceResult.error}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { monthlyTrends, departmentPerformance } = performanceResult.data;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Monthly Performance Trends</CardTitle>
+          <CardDescription>Revenue, jobs, and efficiency over the last 6 months</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {monthlyTrends.map((trend, index) => (
+              <div key={trend.month} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="font-medium">{trend.month}</div>
+                  <Badge variant="outline">{trend.jobs} jobs</Badge>
+                </div>
+                <div className="flex items-center gap-6 text-right">
+                  <div>
+                    <div className="font-medium">${trend.revenue.toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">Revenue</div>
+                  </div>
+                  <div>
+                    <div className="font-medium">{trend.efficiency.toFixed(1)}%</div>
+                    <div className="text-sm text-muted-foreground">Labor Efficiency</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Department Performance</CardTitle>
+          <CardDescription>Current month performance by department</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {departmentPerformance.map((dept) => (
+              <div key={dept.department} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge className="capitalize">{dept.department}</Badge>
+                  <div className="text-sm text-muted-foreground">{dept.hours} hours</div>
+                </div>
+                <div className="flex items-center gap-6 text-right">
+                  <div>
+                    <div className="font-medium">${dept.revenue.toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">Revenue</div>
+                  </div>
+                  <div>
+                    <div className="font-medium">{dept.efficiency.toFixed(1)}%</div>
+                    <div className="text-sm text-muted-foreground">Efficiency</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Commission Tab Component
+function CommissionTab({ commissionStats }: { commissionStats: any }) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(1)}%`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Commissions</CardTitle>
+            <DollarSign className="h-4 w-4 text-[#026937]" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(commissionStats.totalCommissions)}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Booking Accuracy</CardTitle>
+            <Target className="h-4 w-4 text-[#ea7200]" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatPercentage(commissionStats.avgAccuracy)}</div>
+            <p className="text-xs text-muted-foreground">Average accuracy</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Entries</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{commissionStats.pendingEntries}</div>
+            <p className="text-xs text-muted-foreground">Awaiting completion</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Matched Entries</CardTitle>
+            <Users className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{commissionStats.matchedEntries}</div>
+            <p className="text-xs text-muted-foreground">Successfully matched</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Commission Analysis</CardTitle>
+          <CardDescription>Commission performance and booking accuracy trends</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Total Commission Earned</span>
+                  <DollarSign className="h-4 w-4 text-[#026937]" />
+                </div>
+                <div className="text-2xl font-bold">{formatCurrency(commissionStats.totalCommissions)}</div>
+                <div className="text-sm text-muted-foreground">
+                  From {commissionStats.matchedEntries} matched entries
+                </div>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Booking Accuracy Rate</span>
+                  <Target className="h-4 w-4 text-[#ea7200]" />
+                </div>
+                <div className="text-2xl font-bold">{formatPercentage(commissionStats.avgAccuracy)}</div>
+                <div className="text-sm text-muted-foreground">
+                  Estimates within 20% of actual revenue
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 border rounded-lg bg-blue-50">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">Commission Pipeline</span>
+              </div>
+              <div className="text-sm text-blue-700">
+                {commissionStats.pendingEntries} commission entries are pending completion. 
+                These will be matched automatically when corresponding logs are approved.
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Trends Tab Component
+async function TrendsTab() {
+  const trendsResult = await getTrendAnalysis();
+  
+  if (!trendsResult.success || !trendsResult.data) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Trend Analysis</CardTitle>
+          <CardDescription>Historical trends and forecasting</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Unable to load trend data</p>
+              <p className="text-sm mt-2">{trendsResult.error}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { revenueGrowth, seasonalPatterns } = trendsResult.data;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenue Growth Trend</CardTitle>
+          <CardDescription>Month-over-month revenue growth over the last 12 months</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {revenueGrowth.slice(-6).map((period) => (
+              <div key={period.period} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="font-medium">{period.period}</div>
+                  <div className="flex items-center gap-1">
+                    {period.growth > 0 ? (
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                    ) : period.growth < 0 ? (
+                      <TrendingDown className="h-4 w-4 text-red-500" />
+                    ) : null}
+                    <span className={`text-sm ${
+                      period.growth > 0 ? 'text-green-600' : 
+                      period.growth < 0 ? 'text-red-600' : 
+                      'text-gray-600'
+                    }`}>
+                      {period.growth > 0 ? '+' : ''}{period.growth.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">${period.revenue.toLocaleString()}</div>
+                  <div className="text-sm text-muted-foreground">Revenue</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Seasonal Patterns</CardTitle>
+          <CardDescription>Average monthly performance patterns</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {seasonalPatterns.map((pattern) => (
+              <div key={pattern.month} className="p-4 border rounded-lg">
+                <div className="font-medium mb-2">{pattern.month}</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Avg Revenue</span>
+                    <span className="text-sm font-medium">${pattern.avgRevenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Avg Jobs</span>
+                    <span className="text-sm font-medium">{Math.round(pattern.avgJobs)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

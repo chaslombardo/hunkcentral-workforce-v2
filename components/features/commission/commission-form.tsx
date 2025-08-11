@@ -59,7 +59,7 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
       clientName: '',
       jobType: 'junk',
       targetDate: new Date(),
-      estimatedRevenue: 0,
+      estimatedRevenue: 0.01,
     },
   });
 
@@ -111,7 +111,7 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
                     <SelectContent>
                       {salesUsers.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
-                          <div className="flex flex-col">
+                          <div className="flex flex-col items-start text-left w-full">
                             <span className="font-medium">{user.fullName}</span>
                             <span className="text-xs text-muted-foreground">{user.email}</span>
                             {user.commissionRate && (
@@ -221,9 +221,6 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0, 0, 0, 0))
-                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -250,11 +247,23 @@ export function CommissionForm({ salesUsers, currentUserId }: CommissionFormProp
                       <Input
                         type="number"
                         step="0.01"
-                        min="0"
+                        min="0.01"
                         placeholder="0.00"
                         className="pl-8"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === '') {
+                            field.onChange(0.01);
+                          } else {
+                            const numValue = parseFloat(value);
+                            field.onChange(isNaN(numValue) ? 0.01 : Math.max(0.01, numValue));
+                          }
+                        }}
+                        onFocus={(e) => {
+                          e.target.select();
+                        }}
                       />
                     </div>
                   </FormControl>

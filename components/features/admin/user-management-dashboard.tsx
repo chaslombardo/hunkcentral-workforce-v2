@@ -15,6 +15,9 @@ import {
   IconEdit,
   IconTrash,
   IconCopy,
+  IconChevronDown,
+  IconChevronUp,
+  IconSearch,
 } from '@tabler/icons-react';
 import {
   ColumnDef,
@@ -43,6 +46,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -50,6 +54,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -278,7 +289,22 @@ export function UserManagementDashboard() {
     },
     {
       accessorKey: 'fullName',
-      header: 'Name',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold hover:bg-transparent"
+        >
+          Name
+          {column.getIsSorted() === "asc" ? (
+            <IconChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconChevronDown className="ml-2 h-4 w-4" />
+          ) : (
+            <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          )}
+        </Button>
+      ),
       cell: ({ row }) => (
         <Link 
           href={`/admin/users/${row.original.id}`}
@@ -290,7 +316,22 @@ export function UserManagementDashboard() {
     },
     {
       accessorKey: 'email',
-      header: 'Email',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold hover:bg-transparent"
+        >
+          Email
+          {column.getIsSorted() === "asc" ? (
+            <IconChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconChevronDown className="ml-2 h-4 w-4" />
+          ) : (
+            <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          )}
+        </Button>
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <IconMail className="h-4 w-4 text-muted-foreground" />
@@ -334,7 +375,22 @@ export function UserManagementDashboard() {
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="h-auto p-0 font-semibold hover:bg-transparent"
+        >
+          Created
+          {column.getIsSorted() === "asc" ? (
+            <IconChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconChevronDown className="ml-2 h-4 w-4" />
+          ) : (
+            <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
+          )}
+        </Button>
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <IconCalendar className="h-4 w-4" />
@@ -463,7 +519,40 @@ export function UserManagementDashboard() {
             Manage employee accounts, roles, and compensation settings
           </p>
         </div>
-        <UserFormDialog mode="create" onSuccess={() => loadUsers(searchForm.getValues())} />
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Columns
+                <IconChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {table
+                .getAllColumns()
+                .filter(
+                  (column) =>
+                    typeof column.accessorFn !== "undefined" &&
+                    column.getCanHide()
+                )
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <UserFormDialog mode="create" onSuccess={() => loadUsers(searchForm.getValues())} />
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -480,10 +569,20 @@ export function UserManagementDashboard() {
         <CardContent>
           <form onSubmit={searchForm.handleSubmit(onSearch)} className="space-y-4">
             <div className="flex gap-4">
-              <div className="flex-1">
+              <div className="flex-1 relative">
+                <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder="Search by name, email, or role..."
+                  className="pl-10"
                   {...searchForm.register('search')}
+                  onChange={(e) => {
+                    searchForm.setValue('search', e.target.value);
+                    // Auto-search on input change with debounce
+                    const timeoutId = setTimeout(() => {
+                      searchForm.handleSubmit(onSearch)();
+                    }, 300);
+                    return () => clearTimeout(timeoutId);
+                  }}
                 />
               </div>
               <Button type="submit" disabled={loading}>
@@ -598,13 +697,37 @@ export function UserManagementDashboard() {
         <CardContent className="p-0">
           {data?.users.length === 0 ? (
             <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[400px]">
-              <div className="flex flex-col items-center gap-1 text-center">
+              <div className="flex flex-col items-center gap-4 text-center">
                 <IconUsers className="h-12 w-12 text-muted-foreground" />
-                <h3 className="text-2xl font-bold tracking-tight">No users found</h3>
-                <p className="text-muted-foreground">
-                  Get started by creating your first user
-                </p>
-                <UserFormDialog mode="create" onSuccess={() => loadUsers()} />
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold tracking-tight">No users found</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    {searchForm.watch('search') || (searchForm.watch('roles')?.length || 0) > 0
+                      ? "No users match your current filters. Try adjusting your search criteria."
+                      : "Get started by creating your first user account."}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(searchForm.watch('search') || (searchForm.watch('roles')?.length || 0) > 0) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        searchForm.reset({
+                          search: '',
+                          roles: [],
+                          sortBy: 'fullName',
+                          sortOrder: 'asc',
+                          page: 1,
+                          limit: 10,
+                        });
+                        loadUsers();
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                  <UserFormDialog mode="create" onSuccess={() => loadUsers()} />
+                </div>
               </div>
             </div>
           ) : (
@@ -642,52 +765,113 @@ export function UserManagementDashboard() {
               </div>
 
               {/* Pagination */}
-              {data && data.pagination.pages > 1 && (
-                <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between p-4 border-t">
+                <div className="flex items-center gap-6">
                   <div className="text-sm text-muted-foreground">
-                    Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}
-                    {Math.min(data.pagination.page * data.pagination.limit, data.pagination.total)} of{' '}
-                    {data.pagination.total} users
+                    {data ? (
+                      <>
+                        Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}
+                        {Math.min(data.pagination.page * data.pagination.limit, data.pagination.total)} of{' '}
+                        {data.pagination.total} users
+                      </>
+                    ) : (
+                      'Loading...'
+                    )}
                   </div>
+                  
+                  {/* Rows per page selector */}
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.setPageIndex(0)}
-                      disabled={!table.getCanPreviousPage()}
+                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                      Rows per page
+                    </Label>
+                    <Select
+                      value={`${table.getState().pagination.pageSize}`}
+                      onValueChange={(value) => {
+                        const newPageSize = Number(value);
+                        table.setPageSize(newPageSize);
+                        searchForm.setValue('limit', newPageSize);
+                        searchForm.handleSubmit(onSearch)();
+                      }}
                     >
-                      <IconChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.previousPage()}
-                      disabled={!table.getCanPreviousPage()}
-                    >
-                      <IconChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm">
-                      Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.nextPage()}
-                      disabled={!table.getCanNextPage()}
-                    >
-                      <IconChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                      disabled={!table.getCanNextPage()}
-                    >
-                      <IconChevronsRight className="h-4 w-4" />
-                    </Button>
+                      <SelectTrigger className="w-20 h-8" id="rows-per-page">
+                        <SelectValue placeholder={table.getState().pagination.pageSize} />
+                      </SelectTrigger>
+                      <SelectContent side="top">
+                        {[10, 25, 50, 100].map((pageSize) => (
+                          <SelectItem key={pageSize} value={`${pageSize}`}>
+                            {pageSize}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              )}
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      table.setPageIndex(0);
+                      searchForm.setValue('page', 1);
+                      searchForm.handleSubmit(onSearch)();
+                    }}
+                    disabled={!table.getCanPreviousPage()}
+                  >
+                    <IconChevronsLeft className="h-4 w-4" />
+                    <span className="sr-only">Go to first page</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      table.previousPage();
+                      const currentPage = table.getState().pagination.pageIndex;
+                      searchForm.setValue('page', currentPage);
+                      searchForm.handleSubmit(onSearch)();
+                    }}
+                    disabled={!table.getCanPreviousPage()}
+                  >
+                    <IconChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Go to previous page</span>
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">
+                      Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                    </span>
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      table.nextPage();
+                      const currentPage = table.getState().pagination.pageIndex + 2;
+                      searchForm.setValue('page', currentPage);
+                      searchForm.handleSubmit(onSearch)();
+                    }}
+                    disabled={!table.getCanNextPage()}
+                  >
+                    <IconChevronRight className="h-4 w-4" />
+                    <span className="sr-only">Go to next page</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const lastPageIndex = table.getPageCount() - 1;
+                      table.setPageIndex(lastPageIndex);
+                      searchForm.setValue('page', lastPageIndex + 1);
+                      searchForm.handleSubmit(onSearch)();
+                    }}
+                    disabled={!table.getCanNextPage()}
+                  >
+                    <IconChevronsRight className="h-4 w-4" />
+                    <span className="sr-only">Go to last page</span>
+                  </Button>
+                </div>
+              </div>
             </>
           )}
         </CardContent>

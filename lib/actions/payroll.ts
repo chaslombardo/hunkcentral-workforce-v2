@@ -1025,7 +1025,7 @@ export async function validateEnhancedPayrollBreakdown(data: EnhancedPayrollData
 /**
  * Validate enhanced payroll breakdown data (synchronous version)
  */
-export function validateEnhancedPayrollBreakdownSync(data: unknown): { isValid: boolean; errors: string[] } {
+export async function validateEnhancedPayrollBreakdownSync(data: unknown): Promise<{ isValid: boolean; errors: string[] }> {
   const errors: string[] = [];
 
   if (!data) {

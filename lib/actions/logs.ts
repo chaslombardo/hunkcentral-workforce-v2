@@ -24,6 +24,13 @@ function handleDatabaseError(error: unknown, operation: string): string {
       case 'P2002':
         return 'A record with this information already exists';
       case 'P2003':
+        // Foreign key constraint violation - provide specific error messages
+        if (error.message.includes('employeeId_fkey')) {
+          return 'One or more selected employees are invalid. Please refresh the page and select valid employees.';
+        }
+        if (error.message.includes('captainId') || error.message.includes('captain')) {
+          return 'Selected captain is invalid. Please refresh the page and select a valid captain.';
+        }
         return 'Referenced record does not exist. Please refresh and try again';
       case 'P2025':
         return 'Record not found';
@@ -88,6 +95,49 @@ async function validateUserExists(userId: string): Promise<boolean> {
   }
 }
 
+// Validate multiple employee IDs exist
+async function validateEmployeeIds(employeeIds: string[]): Promise<{ valid: boolean; invalidIds: string[] }> {
+  try {
+    if (employeeIds.length === 0) {
+      return { valid: true, invalidIds: [] };
+    }
+
+    const users = await prisma.user.findMany({
+      where: { 
+        id: { in: employeeIds }
+      },
+      select: { id: true }
+    });
+
+    const foundIds = users.map(user => user.id);
+    const invalidIds = employeeIds.filter(id => !foundIds.includes(id));
+
+    return {
+      valid: invalidIds.length === 0,
+      invalidIds
+    };
+  } catch (error) {
+    console.error('Employee IDs validation failed:', error);
+    return { valid: false, invalidIds: employeeIds };
+  }
+}
+
+// Validate captain ID exists
+async function validateCaptainId(captainId: string): Promise<boolean> {
+  try {
+    const captain = await prisma.user.findUnique({
+      where: { id: captainId },
+      select: { id: true, roles: true }
+    });
+    
+    // Check if user exists and has captain role
+    return !!captain && captain.roles.includes('captain');
+  } catch (error) {
+    console.error('Captain validation failed:', error);
+    return false;
+  }
+}
+
 /**
  * Save or update a daily log as draft
  */
@@ -111,6 +161,34 @@ export async function saveDraftLog(
         success: false, 
         error: 'Cannot modify data for this date - pay period is locked or closed' 
       };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+    }
+
+    // Validate captain ID exists
+    const captainValid = await validateCaptainId(validatedData.captainId);
+    if (!captainValid) {
+      return { 
+        success: false, 
+        error: 'Selected captain is not valid. Please refresh the page and select a valid captain.' 
+      };
+    }
+
+    // Validate employee IDs exist (if there are hours to save)
+    if (validatedData.hours.length > 0) {
+      const employeeIds = validatedData.hours.map(hour => hour.employeeId);
+      const employeeValidation = await validateEmployeeIds(employeeIds);
+      
+      if (!employeeValidation.valid) {
+        return { 
+          success: false, 
+          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.` 
+        };
+      }
     }
 
     const logData = {
@@ -235,6 +313,34 @@ export async function submitLog(
         success: false, 
         error: 'Cannot submit empty log. Please add at least one job or hour entry.' 
       };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+    }
+
+    // Validate captain ID exists
+    const captainValid = await validateCaptainId(validatedData.captainId);
+    if (!captainValid) {
+      return { 
+        success: false, 
+        error: 'Selected captain is not valid. Please refresh the page and select a valid captain.' 
+      };
+    }
+
+    // Validate employee IDs exist (if there are hours to submit)
+    if (validatedData.hours.length > 0) {
+      const employeeIds = validatedData.hours.map(hour => hour.employeeId);
+      const employeeValidation = await validateEmployeeIds(employeeIds);
+      
+      if (!employeeValidation.valid) {
+        return { 
+          success: false, 
+          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.` 
+        };
+      }
     }
 
     // First save as draft to ensure data is persisted
