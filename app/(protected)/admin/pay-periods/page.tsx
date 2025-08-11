@@ -1,16 +1,15 @@
 import { Suspense } from "react"
 import { PayPeriodManager } from "@/components/features/admin/pay-period-manager"
+import { PayPeriodSummaryTiles } from "@/components/features/admin/pay-period-summary-tiles"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function PayPeriodsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-      </div>
+      <Suspense fallback={<PayPeriodSummaryTilesSkeleton />}>
+        <PayPeriodSummaryTiles />
+      </Suspense>
       <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
         <Card className="h-full">
           <CardHeader>
@@ -26,6 +25,25 @@ export default function PayPeriodsPage() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  )
+}
+
+function PayPeriodSummaryTilesSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i} className="animate-pulse">
+          <CardHeader>
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-6 w-16" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-32" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

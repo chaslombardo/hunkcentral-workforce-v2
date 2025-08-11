@@ -66,7 +66,7 @@
   - Commit changes with descriptive message
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [-] 7. Fix My Payroll page tab counts and layout issues
+- [x] 7. Fix My Payroll page tab counts and layout issues
   - Correct "Detail (0)" tab to show actual count of displayed employees
   - Fix non-functional quick action buttons
   - Fix Pay History tab where chart overlaps other report tiles
@@ -77,7 +77,7 @@
   - Commit changes with descriptive message
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 8. Add missing pay periods dashboard tiles
+- [-] 8. Add missing pay periods dashboard tiles
   - Create three summary tiles at top of pay periods page
   - Order pay period cards chronologically by date (most recent first)
   - Run `npm run lint` and `npm run tsc` to ensure code quality

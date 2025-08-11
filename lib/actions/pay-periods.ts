@@ -242,3 +242,84 @@ export async function canModifyDataForDate(date: Date) {
     return false // Default to not allowing modifications on error
   }
 }
+
+// Get pay period statistics for dashboard tiles
+export async function getPayPeriodStats() {
+  try {
+    const session = await auth()
+    if (!session?.user || !session.user.roles?.some(role => ["admin", "manager"].includes(role))) {
+      throw new Error("Unauthorized: Admin or Manager access required")
+    }
+
+    const now = new Date()
+
+    // Get current pay period
+    const currentPayPeriod = await prisma.payPeriod.findFirst({
+      where: {
+        AND: [
+          { startDate: { lte: now } },
+          { endDate: { gte: now } }
+        ]
+      },
+      orderBy: { startDate: 'desc' }
+    })
+
+    // Get total pay periods count
+    const totalPayPeriods = await prisma.payPeriod.count()
+
+    // Get pay periods by status
+    const openPeriods = await prisma.payPeriod.count({
+      where: { status: 'open' }
+    })
+
+    const lockedPeriods = await prisma.payPeriod.count({
+      where: { status: 'locked' }
+    })
+
+    const closedPeriods = await prisma.payPeriod.count({
+      where: { status: 'closed' }
+    })
+
+    // Get pending logs count for current period (if exists)
+    let pendingLogsCount = 0
+    if (currentPayPeriod) {
+      pendingLogsCount = await prisma.dailyLog.count({
+        where: {
+          status: 'submitted',
+          logDate: {
+            gte: currentPayPeriod.startDate,
+            lte: currentPayPeriod.endDate
+          }
+        }
+      })
+    }
+
+    // Calculate days remaining in current period
+    const daysRemaining = currentPayPeriod 
+      ? Math.max(0, Math.ceil((currentPayPeriod.endDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)))
+      : 0
+
+    return {
+      success: true,
+      data: {
+        currentPeriod: {
+          name: currentPayPeriod?.name || 'No Active Period',
+          status: currentPayPeriod?.status || 'none',
+          daysRemaining,
+          pendingLogs: pendingLogsCount
+        },
+        totals: {
+          total: totalPayPeriods,
+          open: openPeriods,
+          locked: lockedPeriods,
+          closed: closedPeriods
+        }
+      }
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to fetch pay period statistics" 
+    }
+  }
+}

@@ -64,7 +64,11 @@ export function PayPeriodManager() {
     try {
       const result = await getPayPeriods()
       if (result.success && result.data) {
-        setPayPeriods(result.data)
+        // Sort pay periods chronologically by start date (most recent first)
+        const sortedPeriods = result.data.sort((a, b) => 
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        )
+        setPayPeriods(sortedPeriods)
       } else {
         toast.error(result.error || "Failed to load pay periods")
       }
