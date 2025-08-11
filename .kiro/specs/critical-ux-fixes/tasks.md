@@ -57,7 +57,7 @@
   - Commit changes with descriptive message
   - _Requirements: 4.1, 4.2, 4.3, 6.1_
 
-- [-] 6. Fix user data in log creation form
+- [x] 6. Fix user data in log creation form
   - Replace mock users in captain dropdown with real database users
   - Default captain selection to current logged-in user
   - Populate team hours section with real employee data
@@ -66,7 +66,7 @@
   - Commit changes with descriptive message
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 7. Fix My Payroll page tab counts and layout issues
+- [-] 7. Fix My Payroll page tab counts and layout issues
   - Correct "Detail (0)" tab to show actual count of displayed employees
   - Fix non-functional quick action buttons
   - Fix Pay History tab where chart overlaps other report tiles

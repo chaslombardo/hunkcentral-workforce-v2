@@ -554,10 +554,15 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   {formatCurrency(summaryData.totalPay)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <TrendingUp className="h-3 w-3" />
-                    Current Period
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowExportDialog(true)}
+                    className="h-7 text-xs"
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Export
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
@@ -584,10 +589,15 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   {summaryData.totalHours}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <Clock className="h-3 w-3" />
-                    Total
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('daily')}
+                    className="h-7 text-xs"
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    View Details
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
@@ -608,10 +618,15 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   {formatCurrency(summaryData.tips)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <DollarSign className="h-3 w-3" />
-                    Tips
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('tips')}
+                    className="h-7 text-xs"
+                  >
+                    <DollarSign className="h-3 w-3 mr-1" />
+                    View Tips
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
@@ -632,10 +647,15 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                   {formatCurrency(summaryData.bonuses)}
                 </CardTitle>
                 <CardAction>
-                  <Badge variant="outline">
-                    <Award className="h-3 w-3" />
-                    Performance
-                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('performance')}
+                    className="h-7 text-xs"
+                  >
+                    <Award className="h-3 w-3 mr-1" />
+                    View Performance
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardFooter className="flex-col items-start gap-1.5 text-sm">
@@ -649,97 +669,6 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </Card>
           </div>
             )}
-            <Card className="@container/card">
-              <CardHeader>
-                <CardDescription>Hours Worked</CardDescription>
-                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {summaryData?.totalHours || 0}h
-                </CardTitle>
-                <CardAction>
-                  <Badge variant="outline">
-                    <Clock className="h-3 w-3" />
-                    Regular
-                  </Badge>
-                </CardAction>
-              </CardHeader>
-              <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                <div className="line-clamp-1 flex gap-2 font-medium">
-                  Total hours worked this period
-                  <Clock className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Total hours worked this period
-                </div>
-                {summaryError && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    Using cached data
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
-
-            {/* Tips Earned */}
-            <Card className="@container/card">
-              <CardHeader>
-                <CardDescription>Tips Earned</CardDescription>
-                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {formatCurrency(summaryData?.tips || 0)}
-                </CardTitle>
-                <CardAction>
-                  <Badge variant="outline">
-                    <DollarSign className="h-3 w-3" />
-                    Performance
-                  </Badge>
-                </CardAction>
-              </CardHeader>
-              <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                <div className="line-clamp-1 flex gap-2 font-medium">
-                  Great customer service!
-                  <Award className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Share of job tips earned
-                </div>
-                {(hasOfflineData || summaryError) && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
-
-            {/* Bonuses */}
-            <Card className="@container/card">
-              <CardHeader>
-                <CardDescription>Bonuses</CardDescription>
-                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                  {formatCurrency(summaryData?.bonuses || 0)}
-                </CardTitle>
-                <CardAction>
-                  <Badge variant="outline">
-                    <Award className="h-3 w-3" />
-                    Labor Bonus
-                  </Badge>
-                </CardAction>
-              </CardHeader>
-              <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                <div className="line-clamp-1 flex gap-2 font-medium">
-                  Efficiency bonus earned
-                  <Award className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Performance bonus earned
-                </div>
-                {(hasOfflineData || summaryError) && (
-                  <div className="flex items-center gap-1 text-xs text-yellow-600">
-                    <AlertCircle className="h-3 w-3" />
-                    {hasOfflineData ? 'Using cached data' : 'Limited data'}
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
           </div>
         </div>
 
@@ -765,13 +694,13 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                         value="daily" 
                         className="min-w-[80px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
                       >
-                        Work
+                        Work ({detailedData?.dailyWorkHistory?.length || 0})
                       </TabsTrigger>
                       <TabsTrigger 
                         value="tips" 
                         className="min-w-[70px] h-10 text-sm font-medium touch-manipulation data-[state=active]:bg-background data-[state=active]:shadow-sm"
                       >
-                        Tips
+                        Tips ({detailedData?.tipsDetails?.length || 0})
                       </TabsTrigger>
                       <TabsTrigger 
                         value="history" 
@@ -800,10 +729,10 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                       Breakdown
                     </TabsTrigger>
                     <TabsTrigger value="daily" className="text-xs sm:text-sm">
-                      Work
+                      Work ({detailedData?.dailyWorkHistory?.length || 0})
                     </TabsTrigger>
                     <TabsTrigger value="tips" className="text-xs sm:text-sm">
-                      Tips
+                      Tips ({detailedData?.tipsDetails?.length || 0})
                     </TabsTrigger>
                     <TabsTrigger value="history" className="text-xs sm:text-sm">
                       Pay History
@@ -835,7 +764,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               </div>
 
             {/* Pay Breakdown Tab */}
-            <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="breakdown" className="flex flex-col px-4 lg:px-6 mt-6">
               <div className="space-y-6">
                 {/* Department Breakdown */}
                 <PayrollComponentErrorBoundary componentName="Department Breakdown">
@@ -903,7 +832,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Daily Work Tab */}
-            <TabsContent value="daily" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="daily" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Daily Work Calendar">
                 {isLoadingDetails && !detailedData ? (
                   <PayrollLoadingSkeleton />
@@ -929,7 +858,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Tips Tab */}
-            <TabsContent value="tips" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="tips" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Tips Detail View">
                 {isLoadingDetails && !detailedData ? (
                   <PayrollLoadingSkeleton />
@@ -953,14 +882,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* History Tab */}
-            <TabsContent value="history" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="history" className="flex flex-col px-4 lg:px-6 mt-6 space-y-6">
               <PayrollComponentErrorBoundary componentName="Pay Period Analysis">
                 {detailedData && selectedPeriod ? (
-                  <PayPeriodAnalysis
-                    userId={userId || '1'}
-                    currentPeriod={selectedPeriod}
-                    availablePeriods={payPeriods}
-                  />
+                  <div className="w-full overflow-hidden">
+                    <PayPeriodAnalysis
+                      userId={userId || '1'}
+                      currentPeriod={selectedPeriod}
+                      availablePeriods={payPeriods}
+                    />
+                  </div>
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
                     <CardContent className="pt-6">
@@ -982,14 +913,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Performance Tab */}
-            <TabsContent value="performance" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="performance" className="flex flex-col px-4 lg:px-6 mt-6 space-y-6">
               <PayrollComponentErrorBoundary componentName="Performance Analysis">
                 {detailedData && selectedPeriod ? (
-                  <PayPeriodAnalysis
-                    userId={userId || '1'}
-                    currentPeriod={selectedPeriod}
-                    availablePeriods={payPeriods}
-                  />
+                  <div className="w-full overflow-hidden">
+                    <PayPeriodAnalysis
+                      userId={userId || '1'}
+                      currentPeriod={selectedPeriod}
+                      availablePeriods={payPeriods}
+                    />
+                  </div>
                 ) : (
                   <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
                     <CardContent className="pt-6">
@@ -1011,7 +944,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             </TabsContent>
 
             {/* Validation Tab */}
-            <TabsContent value="validation" className="flex flex-col px-4 lg:px-6">
+            <TabsContent value="validation" className="flex flex-col px-4 lg:px-6 mt-6">
               <PayrollComponentErrorBoundary componentName="Payroll Validation">
                 {isLoadingDetails ? (
                   <PayrollLoadingSkeleton />

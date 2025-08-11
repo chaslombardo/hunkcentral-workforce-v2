@@ -376,8 +376,8 @@ export function PayPeriodAnalysis({
       )}
 
       {/* Charts Section */}
-      <Card>
-        <CardHeader>
+      <Card className="mt-6">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             {chartView === 'trends' && <LineChartIcon className="h-5 w-5" />}
             {chartView === 'departments' && <PieChartIcon className="h-5 w-5" />}
@@ -392,72 +392,78 @@ export function PayPeriodAnalysis({
             {chartView === 'performance' && 'Monitor key performance indicators and targets'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {isLoading ? (
-            <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-[350px] w-full" />
           ) : (
-            <div id="chart-content" className="h-[300px]">
+            <div id="chart-content" className="w-full">
               {chartView === 'trends' && (
-                <ChartContainer config={chartConfig}>
-                  <LineChart data={mockHistoricalData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" />
-                    <YAxis yAxisId="pay" orientation="left" />
-                    <YAxis yAxisId="hours" orientation="right" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Line
-                      yAxisId="pay"
-                      type="monotone"
-                      dataKey="totalPay"
-                      stroke="var(--color-totalPay)"
-                      strokeWidth={2}
-                      dot={{ fill: 'var(--color-totalPay)' }}
-                    />
-                    <Line
-                      yAxisId="hours"
-                      type="monotone"
-                      dataKey="hours"
-                      stroke="var(--color-hours)"
-                      strokeWidth={2}
-                      dot={{ fill: 'var(--color-hours)' }}
-                    />
-                    <Line
-                      yAxisId="pay"
-                      type="monotone"
-                      dataKey="tips"
-                      stroke="var(--color-tips)"
-                      strokeWidth={2}
-                      dot={{ fill: 'var(--color-tips)' }}
-                    />
-                  </LineChart>
-                </ChartContainer>
+                <div className="h-[350px] w-full">
+                  <ChartContainer config={chartConfig} className="h-full w-full">
+                    <LineChart data={mockHistoricalData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="period" />
+                      <YAxis yAxisId="pay" orientation="left" />
+                      <YAxis yAxisId="hours" orientation="right" />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Line
+                        yAxisId="pay"
+                        type="monotone"
+                        dataKey="totalPay"
+                        stroke="var(--color-totalPay)"
+                        strokeWidth={2}
+                        dot={{ fill: 'var(--color-totalPay)' }}
+                      />
+                      <Line
+                        yAxisId="hours"
+                        type="monotone"
+                        dataKey="hours"
+                        stroke="var(--color-hours)"
+                        strokeWidth={2}
+                        dot={{ fill: 'var(--color-hours)' }}
+                      />
+                      <Line
+                        yAxisId="pay"
+                        type="monotone"
+                        dataKey="tips"
+                        stroke="var(--color-tips)"
+                        strokeWidth={2}
+                        dot={{ fill: 'var(--color-tips)' }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </div>
               )}
 
               {chartView === 'departments' && (
-                <ChartContainer config={chartConfig}>
-                  <BarChart data={mockDepartmentTrends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="department" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="current" fill="#026937" name="Current Period" />
-                    <Bar dataKey="previous" fill="#ea7200" name="Previous Period" />
-                  </BarChart>
-                </ChartContainer>
+                <div className="h-[350px] w-full">
+                  <ChartContainer config={chartConfig} className="h-full w-full">
+                    <BarChart data={mockDepartmentTrends} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="department" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="current" fill="#026937" name="Current Period" />
+                      <Bar dataKey="previous" fill="#ea7200" name="Previous Period" />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
               )}
 
               {chartView === 'performance' && (
-                <ChartContainer config={chartConfig}>
-                  <BarChart data={mockPerformanceMetrics} layout="horizontal">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="metric" type="category" width={100} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="current" fill="#026937" name="Current" />
-                    <Bar dataKey="target" fill="#ea7200" name="Target" />
-                  </BarChart>
-                </ChartContainer>
+                <div className="h-[350px] w-full">
+                  <ChartContainer config={chartConfig} className="h-full w-full">
+                    <BarChart data={mockPerformanceMetrics} layout="horizontal" margin={{ top: 20, right: 30, left: 120, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="metric" type="category" width={100} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="current" fill="#026937" name="Current" />
+                      <Bar dataKey="target" fill="#ea7200" name="Target" />
+                    </BarChart>
+                  </ChartContainer>
+                </div>
               )}
             </div>
           )}
@@ -465,8 +471,8 @@ export function PayPeriodAnalysis({
       </Card>
 
       {/* Insights and Recommendations */}
-      <Card>
-        <CardHeader>
+      <Card className="mt-6">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5" />
             Performance Insights
@@ -529,8 +535,8 @@ export function PayPeriodAnalysis({
       </Card>
 
       {/* Detailed Comparison Table */}
-      <Card>
-        <CardHeader>
+      <Card className="mt-6">
+        <CardHeader className="pb-4">
           <CardTitle>Period Comparison Details</CardTitle>
           <CardDescription>
             Side-by-side comparison of key metrics
