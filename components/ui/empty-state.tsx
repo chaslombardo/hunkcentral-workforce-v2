@@ -15,19 +15,23 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
     label: string
     onClick: () => void
     variant?: "default" | "outline" | "secondary"
+    disabled?: boolean
   } | {
     label: string
     href: string
     variant?: "default" | "outline" | "secondary"
+    disabled?: boolean
   }
   secondaryAction?: {
     label: string
     onClick: () => void
     variant?: "default" | "outline" | "secondary"
+    disabled?: boolean
   } | {
     label: string
     href: string
     variant?: "default" | "outline" | "secondary"
+    disabled?: boolean
   }
   illustration?: React.ReactNode
   size?: "sm" | "md" | "lg"
@@ -118,6 +122,7 @@ export function EmptyState({
                 <Button 
                   onClick={action.onClick} 
                   variant={action.variant}
+                  disabled={action.disabled}
                   className={cn(
                     action.variant === "default" && "bg-[#026937] hover:bg-[#026937]/90",
                     size === "sm" && "h-8 px-3 text-xs"
@@ -129,6 +134,7 @@ export function EmptyState({
                 <Button 
                   asChild 
                   variant={action.variant}
+                  disabled={action.disabled}
                   className={cn(
                     action.variant === "default" && "bg-[#026937] hover:bg-[#026937]/90",
                     size === "sm" && "h-8 px-3 text-xs"
@@ -146,6 +152,7 @@ export function EmptyState({
                 <Button 
                   onClick={secondaryAction.onClick} 
                   variant={secondaryAction.variant || "outline"}
+                  disabled={secondaryAction.disabled}
                   className={cn(
                     secondaryAction.variant === "default" && "bg-[#ea7200] hover:bg-[#ea7200]/90",
                     size === "sm" && "h-8 px-3 text-xs"
@@ -157,6 +164,7 @@ export function EmptyState({
                 <Button 
                   asChild 
                   variant={secondaryAction.variant || "outline"}
+                  disabled={secondaryAction.disabled}
                   className={cn(
                     secondaryAction.variant === "default" && "bg-[#ea7200] hover:bg-[#ea7200]/90",
                     size === "sm" && "h-8 px-3 text-xs"

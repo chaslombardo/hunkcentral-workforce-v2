@@ -27,7 +27,7 @@
   - Commit changes with descriptive message
   - _Requirements: 10.1, 10.2, 10.4_
 
-- [ ] 3. Resolve database constraint violations in log creation
+- [x] 3. Resolve database constraint violations in log creation
   - Fix foreign key constraint errors in LogHour creation (employeeId_fkey)
   - Add proper validation for employee IDs before database operations
   - Test log submission works without Prisma errors
@@ -35,13 +35,14 @@
   - Commit changes with descriptive message
   - _Requirements: 9.4, 9.5_
 
-- [ ] 4. Fix broken navigation links and add filters to review logs
+- [-] 4. Fix broken navigation links and add filters to review logs
   - Fix 404 error on "Learn More" button clicks
   - Implement proper routing or disable non-functional links
   - Add captain filter dropdown to filter logs by specific captain
   - Add date selection filter with options for pay periods or custom date range
   - Test all navigation links and filters work correctly
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 11.1, 11.2, 11.3_
 
@@ -52,6 +53,7 @@
   - Remove hardcoded mock data from Analytics page
   - Connect to real database queries for all report data
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 4.1, 4.2, 4.3, 6.1_
 
@@ -60,6 +62,7 @@
   - Default captain selection to current logged-in user
   - Populate team hours section with real employee data
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 9.1, 9.2, 9.3_
 
@@ -70,6 +73,7 @@
   - Fix Performance tab where chart overlaps other report tiles
   - Ensure proper layout and spacing for all charts and report components
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 5.1, 5.2, 5.3_
 
@@ -77,6 +81,7 @@
   - Create three summary tiles at top of pay periods page
   - Order pay period cards chronologically by date (most recent first)
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 2.1, 2.2, 2.3_
 
@@ -88,6 +93,7 @@
   - Add search functionality across employee fields
   - Add column sorting and filtering capabilities
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8_
 
@@ -98,6 +104,7 @@
   - Enable future date selection in target date calendar
   - Fix estimated revenue field to allow clearing default zero value
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
@@ -105,6 +112,7 @@
   - Add functional options to quick action dropdown menu
   - Implement Edit, Delete, Approve, Reject actions
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
@@ -114,6 +122,7 @@
   - Replace "This feature is coming soon" in Commission tab with real commission analytics and charts
   - Connect all tabs to real database data and meaningful business insights
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
@@ -122,5 +131,6 @@
   - Keep reliable manual save draft feature
   - Clear "Synchronizing Data" messages and pending sync items
   - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_

@@ -88,9 +88,10 @@ export const NoLogsEmptyState = React.memo(function NoLogsEmptyState({ onCreateL
         href: "/logs/create"
       }}
       secondaryAction={{
-        label: "Learn More",
-        href: "/help/logs",
-        variant: "outline"
+        label: "Coming Soon",
+        onClick: () => {},
+        variant: "outline",
+        disabled: true
       }}
       size="lg"
       variant="card"
@@ -137,9 +138,10 @@ export const NoCommissionsEmptyState = React.memo(function NoCommissionsEmptySta
         href: "/commission/create"
       }}
       secondaryAction={{
-        label: "View Guidelines",
-        href: "/help/commissions",
-        variant: "outline"
+        label: "Coming Soon",
+        onClick: () => {},
+        variant: "outline",
+        disabled: true
       }}
       size="lg"
       variant="card"
@@ -235,9 +237,10 @@ export function NoDashboardDataEmptyState() {
         href: "/logs/create"
       }}
       secondaryAction={{
-        label: "Take a Tour",
-        href: "/help/getting-started",
-        variant: "outline"
+        label: "Coming Soon",
+        onClick: () => {},
+        variant: "outline",
+        disabled: true
       }}
       size="lg"
       variant="card"
