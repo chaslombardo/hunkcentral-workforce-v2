@@ -49,6 +49,8 @@ model User {
   editedLogs        DailyLog[] @relation("LastEditedBy")
   logHours          LogHour[]
   commissionEntries CommissionEntry[]
+  approvedCommissions CommissionEntry[] @relation("CommissionApprovedBy")
+  rejectedCommissions CommissionEntry[] @relation("CommissionRejectedBy")
   auditLogs         AuditLog[]
   discrepancyReportsEmployee DiscrepancyReport[] @relation("DiscrepancyReportEmployee")
   discrepancyReportsReporter DiscrepancyReport[] @relation("DiscrepancyReportReporter")
@@ -133,10 +135,21 @@ model CommissionEntry {
   estimatedRevenue Decimal   @db.Decimal(10, 2)
   actualRevenue    Decimal?  @db.Decimal(10, 2)
   commissionAmount Decimal?  @db.Decimal(10, 2)
-  status           String    // 'pending', 'matched', 'approved'
+  status           String    // 'pending', 'matched', 'approved', 'rejected'
 
   matchedLogId     String?
   matchedLog       DailyLog? @relation(fields: [matchedLogId], references: [id])
+
+  // Approval fields
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?     @relation("CommissionApprovedBy", fields: [approvedById], references: [id])
+
+  // Rejection fields
+  rejectedAt       DateTime?
+  rejectedById     String?
+  rejectedBy       User?     @relation("CommissionRejectedBy", fields: [rejectedById], references: [id])
+  rejectionReason  String?
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

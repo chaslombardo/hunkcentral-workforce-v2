@@ -10,7 +10,21 @@ export async function GET() {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
+    // Check authorization
+    if (!session.user.roles?.includes('admin') && !session.user.roles?.includes('manager')) {
+      return NextResponse.json({ error: 'Unauthorized: Admin or Manager access required' }, { status: 403 });
+    }
+
+    // Build where clause for manager filtering
+    let where = {};
+    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      where = {
+        roles: { hasSome: ['captain', 'wingman'] },
+      };
+    }
+
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true,
         email: true,

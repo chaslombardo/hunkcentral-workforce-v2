@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getCommissionEntries } from '@/lib/actions/commission';
-import { CommissionList } from '@/components/features/commission/commission-list';
+import { CommissionListWithActions } from '@/components/features/commission/commission-list-with-actions';
 import { CommissionConflicts } from '@/components/features/commission/commission-conflicts';
 import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -54,7 +54,7 @@ export default async function CommissionListPage() {
         </TabsList>
         
         <TabsContent value="entries" className="space-y-6">
-          <CommissionList 
+          <CommissionListWithActions 
             entries={entries}
           />
         </TabsContent>

@@ -1,21 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { WifiOff, CloudOff, Cloud, AlertCircle, CheckCircle2 } from "lucide-react"
+import { WifiOff, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useOffline, useOfflineSync } from "@/hooks/useOffline"
-import { useToast } from "@/hooks/use-toast"
+import { useOffline } from "@/hooks/useOffline"
 import { cn } from "@/lib/utils"
 
-// Simple offline indicator for header/navigation
+// Simple offline indicator for header/navigation - simplified to remove sync confusion
 export function OfflineIndicator() {
   const { isOnline, isOffline, hasBeenOffline } = useOffline()
-  const { hasPendingSync, pendingSync } = useOfflineSync()
 
-  if (isOnline && !hasBeenOffline && !hasPendingSync) {
+  if (isOnline && !hasBeenOffline) {
     return null
   }
 
@@ -28,14 +25,7 @@ export function OfflineIndicator() {
         </Badge>
       )}
       
-      {isOnline && hasPendingSync && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <CloudOff className="h-3 w-3" />
-          Syncing ({pendingSync.length})
-        </Badge>
-      )}
-      
-      {isOnline && hasBeenOffline && !hasPendingSync && (
+      {isOnline && hasBeenOffline && (
         <Badge variant="default" className="flex items-center gap-1 bg-green-600">
           <CheckCircle2 className="h-3 w-3" />
           Back Online
@@ -45,31 +35,12 @@ export function OfflineIndicator() {
   )
 }
 
-// Detailed offline status card
+// Detailed offline status card - simplified to remove sync confusion
 export function OfflineStatusCard() {
   const { isOnline, isOffline, hasBeenOffline } = useOffline()
-  const { hasPendingSync, pendingSync, syncData } = useOfflineSync()
-  const { toast } = useToast()
 
-  const handleSyncAll = async () => {
-    try {
-      for (const key of pendingSync) {
-        await syncData(key)
-      }
-      toast({
-        title: "Sync Complete",
-        description: "All offline data has been synchronized.",
-      })
-    } catch {
-      toast({
-        title: "Sync Failed",
-        description: "Some data could not be synchronized. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  if (isOnline && !hasBeenOffline && !hasPendingSync) {
+  // Only show status when offline or recently back online
+  if (isOnline && !hasBeenOffline) {
     return null
   }
 
@@ -77,8 +48,7 @@ export function OfflineStatusCard() {
     <Card className={cn(
       "mb-4",
       isOffline && "border-destructive",
-      isOnline && hasPendingSync && "border-yellow-500",
-      isOnline && !hasPendingSync && "border-green-500"
+      isOnline && hasBeenOffline && "border-green-500"
     )}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
@@ -88,13 +58,7 @@ export function OfflineStatusCard() {
               You&apos;re Offline
             </>
           )}
-          {isOnline && hasPendingSync && (
-            <>
-              <CloudOff className="h-4 w-4 text-yellow-600" />
-              Synchronizing Data
-            </>
-          )}
-          {isOnline && !hasPendingSync && hasBeenOffline && (
+          {isOnline && hasBeenOffline && (
             <>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               Back Online
@@ -106,38 +70,21 @@ export function OfflineStatusCard() {
         {isOffline && (
           <div className="space-y-3">
             <CardDescription>
-              You can continue working offline. Your changes will be saved locally and synchronized when you&apos;re back online.
+              You can continue working offline. Use the &quot;Save Draft&quot; button to save your work locally.
             </CardDescription>
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Some features may be limited while offline. Forms will auto-save locally.
+                Some features may be limited while offline. Your drafts will be available when you&apos;re back online.
               </AlertDescription>
             </Alert>
           </div>
         )}
         
-        {isOnline && hasPendingSync && (
-          <div className="space-y-3">
-            <CardDescription>
-              Synchronizing {pendingSync.length} item(s) with the server...
-            </CardDescription>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Items pending sync: {pendingSync.join(', ')}
-              </div>
-              <Button size="sm" onClick={handleSyncAll}>
-                <Cloud className="h-4 w-4 mr-2" />
-                Sync Now
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {isOnline && !hasPendingSync && hasBeenOffline && (
+        {isOnline && hasBeenOffline && (
           <div className="space-y-3">
             <CardDescription className="text-green-700">
-              All your offline changes have been synchronized successfully.
+              You&apos;re back online. Your saved drafts are available.
             </CardDescription>
           </div>
         )}
@@ -146,10 +93,9 @@ export function OfflineStatusCard() {
   )
 }
 
-// Network status indicator for mobile
+// Network status indicator for mobile - simplified to remove sync confusion
 export function MobileNetworkIndicator() {
-  const { isOnline, isOffline } = useOffline()
-  const { hasPendingSync } = useOfflineSync()
+  const { isOffline } = useOffline()
 
   return (
     <div className="fixed top-4 right-4 z-50 md:hidden">
@@ -157,13 +103,6 @@ export function MobileNetworkIndicator() {
         <Badge variant="destructive" className="flex items-center gap-1 shadow-lg">
           <WifiOff className="h-3 w-3" />
           Offline
-        </Badge>
-      )}
-      
-      {isOnline && hasPendingSync && (
-        <Badge variant="secondary" className="flex items-center gap-1 shadow-lg">
-          <CloudOff className="h-3 w-3" />
-          Syncing
         </Badge>
       )}
     </div>

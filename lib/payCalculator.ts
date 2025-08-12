@@ -1,5 +1,16 @@
 // Payroll and bonus calculation logic
-import type { User, Department, DailyLog, CommissionEntry, SalaryType, SalaryFrequency } from '@/types';
+import type { 
+  User, 
+  Department, 
+  DailyLog, 
+  CommissionEntry, 
+  SalaryType, 
+  SalaryFrequency,
+  CaptainPerformanceData,
+  JunkPerformanceMetrics,
+  MovePerformanceMetrics,
+  PerformanceFilters
+} from '@/types';
 import { LABOR_GOALS } from './constants';
 
 export interface PayrollCalculation {
@@ -845,4 +856,280 @@ function calculateUserDailyTips(userId: string, log: DailyLog): number {
   }
 
   return totalTips;
+}
+
+/**
+ * Calculate performance metrics for a captain across all their logs
+ */
+export function calculateCaptainPerformanceMetrics(
+  captain: User,
+  approvedLogs: DailyLog[],
+  filters?: PerformanceFilters
+): CaptainPerformanceData {
+  // Filter logs for this captain and date range
+  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
+  
+  if (filters?.startDate) {
+    captainLogs = captainLogs.filter(log => log.logDate >= filters.startDate!);
+  }
+  
+  if (filters?.endDate) {
+    captainLogs = captainLogs.filter(log => log.logDate <= filters.endDate!);
+  }
+
+  // Calculate junk metrics
+  const junkMetrics = calculateJunkPerformanceMetrics(captain, captainLogs);
+  
+  // Calculate move metrics
+  const moveMetrics = calculateMovePerformanceMetrics(captain, captainLogs);
+
+  return {
+    captainId: captain.id,
+    captainName: captain.fullName,
+    junkMetrics,
+    moveMetrics,
+  };
+}
+
+/**
+ * Calculate junk-specific performance metrics for a captain
+ */
+export function calculateJunkPerformanceMetrics(
+  captain: User,
+  captainLogs: DailyLog[]
+): JunkPerformanceMetrics {
+  let totalRevenue = 0;
+  let totalDisposalCost = 0;
+  let totalLaborCost = 0;
+  let jobCount = 0;
+
+  for (const log of captainLogs) {
+    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
+    const junkHours = log.hours.filter(hour => hour.department === 'junk');
+
+    // Sum up job metrics
+    for (const job of junkJobs) {
+      totalRevenue += Number(job.revenue);
+      totalDisposalCost += Number(job.disposalCost || 0);
+      jobCount++;
+    }
+
+    // Calculate labor cost for junk section
+    for (const hour of junkHours) {
+      const rate = calculateHourlyWage(hour.employee, 'junk', hour.isCoCaptain);
+      totalLaborCost += Number(hour.hours) * rate;
+    }
+  }
+
+  const averageJobSize = jobCount > 0 ? totalRevenue / jobCount : 0;
+  const laborPercentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
+  const disposalPercentage = totalRevenue > 0 ? totalDisposalCost / totalRevenue : 0;
+
+  return {
+    jobCount,
+    totalRevenue,
+    averageJobSize,
+    laborPercentage,
+    disposalPercentage,
+  };
+}
+
+/**
+ * Calculate move-specific performance metrics for a captain
+ */
+export function calculateMovePerformanceMetrics(
+  captain: User,
+  captainLogs: DailyLog[]
+): MovePerformanceMetrics {
+  let totalRevenue = 0;
+  let totalLaborCost = 0;
+  let totalUpsellRevenue = 0;
+  let totalValuationRevenue = 0;
+  let totalJunkOnMoveRevenue = 0;
+  let totalMaterialsRevenue = 0;
+  let jobCount = 0;
+
+  for (const log of captainLogs) {
+    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const moveHours = log.hours.filter(hour => hour.department === 'move');
+
+    // Sum up job metrics
+    for (const job of moveJobs) {
+      const jobRevenue = Number(job.revenue);
+      const valuationRevenue = Number(job.valuation || 0);
+      const junkOnMoveRevenue = Number(job.junkOnMove || 0);
+      const materialsRevenue = Number(job.materials || 0);
+      
+      // Upsell revenue is calculated as total revenue minus base components
+      const baseRevenue = valuationRevenue + junkOnMoveRevenue + materialsRevenue;
+      const upsellRevenue = Math.max(0, jobRevenue - baseRevenue);
+
+      totalRevenue += jobRevenue;
+      totalUpsellRevenue += upsellRevenue;
+      totalValuationRevenue += valuationRevenue;
+      totalJunkOnMoveRevenue += junkOnMoveRevenue;
+      totalMaterialsRevenue += materialsRevenue;
+      jobCount++;
+    }
+
+    // Calculate labor cost for move section
+    for (const hour of moveHours) {
+      const rate = calculateHourlyWage(hour.employee, 'move', hour.isCoCaptain);
+      totalLaborCost += Number(hour.hours) * rate;
+    }
+  }
+
+  const averageJobSize = jobCount > 0 ? totalRevenue / jobCount : 0;
+  const laborPercentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
+  const upsellPercentage = totalRevenue > 0 ? totalUpsellRevenue / totalRevenue : 0;
+  const valuationPercentage = totalRevenue > 0 ? totalValuationRevenue / totalRevenue : 0;
+  const junkOnMovePercentage = totalRevenue > 0 ? totalJunkOnMoveRevenue / totalRevenue : 0;
+  const materialsPercentage = totalRevenue > 0 ? totalMaterialsRevenue / totalRevenue : 0;
+
+  return {
+    jobCount,
+    totalRevenue,
+    averageJobSize,
+    laborPercentage,
+    upsellRevenue: totalUpsellRevenue,
+    upsellPercentage,
+    valuationRevenue: totalValuationRevenue,
+    valuationPercentage,
+    junkOnMoveRevenue: totalJunkOnMoveRevenue,
+    junkOnMovePercentage,
+    materialsRevenue: totalMaterialsRevenue,
+    materialsPercentage,
+  };
+}
+
+/**
+ * Calculate performance metrics for all captains
+ */
+export function calculateAllCaptainsPerformance(
+  users: User[],
+  approvedLogs: DailyLog[],
+  filters?: PerformanceFilters
+): CaptainPerformanceData[] {
+  // Filter to only captains
+  const captains = users.filter(user => user.roles.includes('captain'));
+  
+  // Filter by captain IDs if specified
+  const filteredCaptains = filters?.captainIds 
+    ? captains.filter(captain => filters.captainIds!.includes(captain.id))
+    : captains;
+
+  return filteredCaptains.map(captain => 
+    calculateCaptainPerformanceMetrics(captain, approvedLogs, filters)
+  );
+}
+
+/**
+ * Calculate disposal percentage for a specific captain and date range
+ */
+export function calculateDisposalPercentage(
+  captain: User,
+  approvedLogs: DailyLog[],
+  startDate?: Date,
+  endDate?: Date
+): number {
+  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
+  
+  if (startDate) {
+    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+  }
+  
+  if (endDate) {
+    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+  }
+
+  let totalRevenue = 0;
+  let totalDisposalCost = 0;
+
+  for (const log of captainLogs) {
+    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
+    
+    for (const job of junkJobs) {
+      totalRevenue += Number(job.revenue);
+      totalDisposalCost += Number(job.disposalCost || 0);
+    }
+  }
+
+  return totalRevenue > 0 ? totalDisposalCost / totalRevenue : 0;
+}
+
+/**
+ * Calculate average job size for a captain by job type
+ */
+export function calculateAverageJobSize(
+  captain: User,
+  approvedLogs: DailyLog[],
+  jobType: 'junk' | 'move',
+  startDate?: Date,
+  endDate?: Date
+): number {
+  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
+  
+  if (startDate) {
+    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+  }
+  
+  if (endDate) {
+    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+  }
+
+  let totalRevenue = 0;
+  let jobCount = 0;
+
+  for (const log of captainLogs) {
+    const jobs = log.jobs.filter(job => job.jobType === jobType);
+    
+    for (const job of jobs) {
+      totalRevenue += Number(job.revenue);
+      jobCount++;
+    }
+  }
+
+  return jobCount > 0 ? totalRevenue / jobCount : 0;
+}
+
+/**
+ * Calculate captain labor percentage for a specific job type and date range
+ */
+export function calculateCaptainLaborPercentage(
+  captain: User,
+  approvedLogs: DailyLog[],
+  jobType: 'junk' | 'move',
+  startDate?: Date,
+  endDate?: Date
+): number {
+  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
+  
+  if (startDate) {
+    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+  }
+  
+  if (endDate) {
+    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+  }
+
+  let totalRevenue = 0;
+  let totalLaborCost = 0;
+
+  for (const log of captainLogs) {
+    const jobs = log.jobs.filter(job => job.jobType === jobType);
+    const hours = log.hours.filter(hour => hour.department === jobType);
+
+    // Sum revenue for this job type
+    for (const job of jobs) {
+      totalRevenue += Number(job.revenue);
+    }
+
+    // Sum labor cost for this job type
+    for (const hour of hours) {
+      const rate = calculateHourlyWage(hour.employee, jobType, hour.isCoCaptain);
+      totalLaborCost += Number(hour.hours) * rate;
+    }
+  }
+
+  return totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
 }

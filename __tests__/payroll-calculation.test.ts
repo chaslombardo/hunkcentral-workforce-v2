@@ -6,6 +6,13 @@ import {
   applySalaryRules,
   convertSalaryToWeekly,
   calculateHourlyWage,
+  calculateCaptainPerformanceMetrics,
+  calculateJunkPerformanceMetrics,
+  calculateMovePerformanceMetrics,
+  calculateAllCaptainsPerformance,
+  calculateDisposalPercentage,
+  calculateAverageJobSize,
+  calculateCaptainLaborPercentage,
 } from '@/lib/payCalculator';
 import type { User, DailyLog, LogJob, LogHour, CommissionEntry, Department } from '@/types';
 
@@ -611,6 +618,572 @@ describe('Payroll Calculation Engine', () => {
       expect(salaryPayroll.breakdown.salaryAmount).toBe(1000);
       expect(salaryPayroll.breakdown.salaryType).toBe('base');
       expect(salaryPayroll.totalPay).toBe(1000); // Just salary, no tips/commission
+    });
+  });
+
+  describe('Performance Metrics Calculations', () => {
+    describe('calculateJunkPerformanceMetrics', () => {
+      it('should calculate junk performance metrics correctly', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+          fullName: 'Captain Test',
+        });
+
+        const employee = createMockUser({ id: 'emp-1', rateJunkWingman: 15 });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'junk', revenue: 1000, disposalCost: 100 }),
+              createMockJob({ jobType: 'junk', revenue: 1500, disposalCost: 200 }),
+            ],
+            hours: [
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'junk',
+                hours: 8, // 8 * 15 = 120
+              }),
+              createMockHour({
+                employeeId: 'captain-1',
+                employee: captain,
+                department: 'junk',
+                hours: 8, // 8 * 20 = 160
+              }),
+            ],
+          }),
+        ];
+
+        const metrics = calculateJunkPerformanceMetrics(captain, logs);
+
+        expect(metrics.jobCount).toBe(2);
+        expect(metrics.totalRevenue).toBe(2500); // 1000 + 1500
+        expect(metrics.averageJobSize).toBe(1250); // 2500 / 2
+        expect(metrics.laborPercentage).toBeCloseTo(0.112, 3); // 280 / 2500
+        expect(metrics.disposalPercentage).toBeCloseTo(0.12, 3); // 300 / 2500
+      });
+
+      it('should handle zero revenue gracefully', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [],
+            hours: [],
+          }),
+        ];
+
+        const metrics = calculateJunkPerformanceMetrics(captain, logs);
+
+        expect(metrics.jobCount).toBe(0);
+        expect(metrics.totalRevenue).toBe(0);
+        expect(metrics.averageJobSize).toBe(0);
+        expect(metrics.laborPercentage).toBe(0);
+        expect(metrics.disposalPercentage).toBe(0);
+      });
+    });
+
+    describe('calculateMovePerformanceMetrics', () => {
+      it('should calculate move performance metrics correctly', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+          fullName: 'Captain Test',
+        });
+
+        const employee = createMockUser({ id: 'emp-1', rateMoveWingman: 17 });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({
+                jobType: 'move',
+                revenue: 2000,
+                valuation: 500,
+                junkOnMove: 300,
+                materials: 200,
+              }),
+              createMockJob({
+                jobType: 'move',
+                revenue: 1500,
+                valuation: 400,
+                junkOnMove: 200,
+                materials: 100,
+              }),
+            ],
+            hours: [
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'move',
+                hours: 10, // 10 * 17 = 170
+              }),
+              createMockHour({
+                employeeId: 'captain-1',
+                employee: captain,
+                department: 'move',
+                hours: 10, // 10 * 22 = 220
+              }),
+            ],
+          }),
+        ];
+
+        const metrics = calculateMovePerformanceMetrics(captain, logs);
+
+        expect(metrics.jobCount).toBe(2);
+        expect(metrics.totalRevenue).toBe(3500); // 2000 + 1500
+        expect(metrics.averageJobSize).toBe(1750); // 3500 / 2
+        expect(metrics.laborPercentage).toBeCloseTo(0.111, 3); // 390 / 3500
+
+        // Job 1: upsell = 2000 - (500 + 300 + 200) = 1000
+        // Job 2: upsell = 1500 - (400 + 200 + 100) = 800
+        // Total upsell = 1800
+        expect(metrics.upsellRevenue).toBe(1800);
+        expect(metrics.upsellPercentage).toBeCloseTo(0.514, 3); // 1800 / 3500
+
+        expect(metrics.valuationRevenue).toBe(900); // 500 + 400
+        expect(metrics.valuationPercentage).toBeCloseTo(0.257, 3); // 900 / 3500
+
+        expect(metrics.junkOnMoveRevenue).toBe(500); // 300 + 200
+        expect(metrics.junkOnMovePercentage).toBeCloseTo(0.143, 3); // 500 / 3500
+
+        expect(metrics.materialsRevenue).toBe(300); // 200 + 100
+        expect(metrics.materialsPercentage).toBeCloseTo(0.086, 3); // 300 / 3500
+      });
+
+      it('should handle jobs with no breakdown components', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({
+                jobType: 'move',
+                revenue: 1000,
+                // No valuation, junkOnMove, or materials
+              }),
+            ],
+            hours: [],
+          }),
+        ];
+
+        const metrics = calculateMovePerformanceMetrics(captain, logs);
+
+        expect(metrics.jobCount).toBe(1);
+        expect(metrics.totalRevenue).toBe(1000);
+        expect(metrics.upsellRevenue).toBe(1000); // All revenue is upsell
+        expect(metrics.upsellPercentage).toBe(1.0);
+        expect(metrics.valuationRevenue).toBe(0);
+        expect(metrics.junkOnMoveRevenue).toBe(0);
+        expect(metrics.materialsRevenue).toBe(0);
+      });
+    });
+
+    describe('calculateCaptainPerformanceMetrics', () => {
+      it('should calculate comprehensive captain performance metrics', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+          fullName: 'Captain Test',
+        });
+
+        const employee = createMockUser({ id: 'emp-1' });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-01-15'),
+            jobs: [
+              createMockJob({ jobType: 'junk', revenue: 1000, disposalCost: 100 }),
+              createMockJob({
+                jobType: 'move',
+                revenue: 2000,
+                valuation: 500,
+                junkOnMove: 300,
+                materials: 200,
+              }),
+            ],
+            hours: [
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'junk',
+                hours: 8,
+              }),
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'move',
+                hours: 10,
+              }),
+            ],
+          }),
+        ];
+
+        const performance = calculateCaptainPerformanceMetrics(captain, logs);
+
+        expect(performance.captainId).toBe('captain-1');
+        expect(performance.captainName).toBe('Captain Test');
+
+        // Junk metrics
+        expect(performance.junkMetrics.jobCount).toBe(1);
+        expect(performance.junkMetrics.totalRevenue).toBe(1000);
+        expect(performance.junkMetrics.disposalPercentage).toBe(0.1);
+
+        // Move metrics
+        expect(performance.moveMetrics.jobCount).toBe(1);
+        expect(performance.moveMetrics.totalRevenue).toBe(2000);
+        expect(performance.moveMetrics.upsellRevenue).toBe(1000); // 2000 - 1000
+      });
+
+      it('should filter by date range when provided', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-01-10'), // Before filter
+            jobs: [createMockJob({ jobType: 'junk', revenue: 1000 })],
+            hours: [],
+          }),
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-01-20'), // Within filter
+            jobs: [createMockJob({ jobType: 'junk', revenue: 2000 })],
+            hours: [],
+          }),
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-02-10'), // After filter
+            jobs: [createMockJob({ jobType: 'junk', revenue: 3000 })],
+            hours: [],
+          }),
+        ];
+
+        const filters = {
+          startDate: new Date('2024-01-15'),
+          endDate: new Date('2024-01-31'),
+        };
+
+        const performance = calculateCaptainPerformanceMetrics(captain, logs, filters);
+
+        expect(performance.junkMetrics.jobCount).toBe(1);
+        expect(performance.junkMetrics.totalRevenue).toBe(2000); // Only the middle log
+      });
+    });
+
+    describe('calculateAllCaptainsPerformance', () => {
+      it('should calculate performance for all captains', () => {
+        const captain1 = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+          fullName: 'Captain One',
+        });
+
+        const captain2 = createMockUser({
+          id: 'captain-2',
+          roles: ['captain'],
+          fullName: 'Captain Two',
+        });
+
+        const wingman = createMockUser({
+          id: 'wingman-1',
+          roles: ['wingman'],
+          fullName: 'Wingman One',
+        });
+
+        const users = [captain1, captain2, wingman];
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain: captain1,
+            jobs: [createMockJob({ jobType: 'junk', revenue: 1000 })],
+            hours: [],
+          }),
+          createMockLog({
+            captainId: 'captain-2',
+            captain: captain2,
+            jobs: [createMockJob({ jobType: 'move', revenue: 2000 })],
+            hours: [],
+          }),
+        ];
+
+        const performance = calculateAllCaptainsPerformance(users, logs);
+
+        expect(performance).toHaveLength(2); // Only captains
+        expect(performance[0].captainName).toBe('Captain One');
+        expect(performance[1].captainName).toBe('Captain Two');
+        expect(performance[0].junkMetrics.totalRevenue).toBe(1000);
+        expect(performance[1].moveMetrics.totalRevenue).toBe(2000);
+      });
+
+      it('should filter by captain IDs when provided', () => {
+        const captain1 = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const captain2 = createMockUser({
+          id: 'captain-2',
+          roles: ['captain'],
+        });
+
+        const users = [captain1, captain2];
+        const logs: any[] = [];
+
+        const filters = {
+          captainIds: ['captain-1'],
+        };
+
+        const performance = calculateAllCaptainsPerformance(users, logs, filters);
+
+        expect(performance).toHaveLength(1);
+        expect(performance[0].captainId).toBe('captain-1');
+      });
+    });
+
+    describe('calculateDisposalPercentage', () => {
+      it('should calculate disposal percentage correctly', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'junk', revenue: 1000, disposalCost: 150 }),
+              createMockJob({ jobType: 'junk', revenue: 2000, disposalCost: 250 }),
+            ],
+            hours: [],
+          }),
+        ];
+
+        const percentage = calculateDisposalPercentage(captain, logs);
+
+        expect(percentage).toBeCloseTo(0.133, 3); // 400 / 3000
+      });
+
+      it('should filter by date range', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-01-10'),
+            jobs: [createMockJob({ jobType: 'junk', revenue: 1000, disposalCost: 100 })],
+            hours: [],
+          }),
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            logDate: new Date('2024-01-20'),
+            jobs: [createMockJob({ jobType: 'junk', revenue: 2000, disposalCost: 200 })],
+            hours: [],
+          }),
+        ];
+
+        const startDate = new Date('2024-01-15');
+        const percentage = calculateDisposalPercentage(captain, logs, startDate);
+
+        expect(percentage).toBe(0.1); // Only second log: 200 / 2000
+      });
+    });
+
+    describe('calculateAverageJobSize', () => {
+      it('should calculate average job size for junk jobs', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'junk', revenue: 1000 }),
+              createMockJob({ jobType: 'junk', revenue: 1500 }),
+              createMockJob({ jobType: 'move', revenue: 3000 }), // Should be ignored
+            ],
+            hours: [],
+          }),
+        ];
+
+        const averageSize = calculateAverageJobSize(captain, logs, 'junk');
+
+        expect(averageSize).toBe(1250); // (1000 + 1500) / 2
+      });
+
+      it('should calculate average job size for move jobs', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'move', revenue: 2000 }),
+              createMockJob({ jobType: 'move', revenue: 4000 }),
+              createMockJob({ jobType: 'junk', revenue: 1000 }), // Should be ignored
+            ],
+            hours: [],
+          }),
+        ];
+
+        const averageSize = calculateAverageJobSize(captain, logs, 'move');
+
+        expect(averageSize).toBe(3000); // (2000 + 4000) / 2
+      });
+
+      it('should return 0 for no jobs', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [],
+            hours: [],
+          }),
+        ];
+
+        const averageSize = calculateAverageJobSize(captain, logs, 'junk');
+
+        expect(averageSize).toBe(0);
+      });
+    });
+
+    describe('calculateCaptainLaborPercentage', () => {
+      it('should calculate labor percentage for junk jobs', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const employee = createMockUser({ id: 'emp-1', rateJunkWingman: 15 });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'junk', revenue: 1000 }),
+              createMockJob({ jobType: 'move', revenue: 2000 }), // Should be ignored
+            ],
+            hours: [
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'junk',
+                hours: 8, // 8 * 15 = 120
+              }),
+              createMockHour({
+                employeeId: 'captain-1',
+                employee: captain,
+                department: 'move', // Should be ignored
+                hours: 10,
+              }),
+            ],
+          }),
+        ];
+
+        const laborPercentage = calculateCaptainLaborPercentage(captain, logs, 'junk');
+
+        expect(laborPercentage).toBe(0.12); // 120 / 1000
+      });
+
+      it('should calculate labor percentage for move jobs', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const employee = createMockUser({ id: 'emp-1', rateMoveWingman: 17 });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [
+              createMockJob({ jobType: 'move', revenue: 2000 }),
+            ],
+            hours: [
+              createMockHour({
+                employeeId: 'emp-1',
+                employee,
+                department: 'move',
+                hours: 10, // 10 * 17 = 170
+              }),
+              createMockHour({
+                employeeId: 'captain-1',
+                employee: captain,
+                department: 'move',
+                hours: 8, // 8 * 22 = 176
+              }),
+            ],
+          }),
+        ];
+
+        const laborPercentage = calculateCaptainLaborPercentage(captain, logs, 'move');
+
+        expect(laborPercentage).toBeCloseTo(0.173, 3); // 346 / 2000
+      });
+
+      it('should return 0 for no revenue', () => {
+        const captain = createMockUser({
+          id: 'captain-1',
+          roles: ['captain'],
+        });
+
+        const logs = [
+          createMockLog({
+            captainId: 'captain-1',
+            captain,
+            jobs: [],
+            hours: [],
+          }),
+        ];
+
+        const laborPercentage = calculateCaptainLaborPercentage(captain, logs, 'junk');
+
+        expect(laborPercentage).toBe(0);
+      });
     });
   });
 });

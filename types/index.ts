@@ -180,3 +180,50 @@ export interface AuditLog {
   dailyLog?: DailyLog;
   createdAt: Date;
 }
+
+// Performance Rankings Types
+export interface PerformanceMetrics {
+  jobCount: number;
+  totalRevenue: number;
+  averageJobSize: number;
+  laborPercentage: number;
+}
+
+export interface JunkPerformanceMetrics extends PerformanceMetrics {
+  disposalPercentage: number;
+}
+
+export interface MovePerformanceMetrics extends PerformanceMetrics {
+  upsellRevenue: number;
+  upsellPercentage: number;
+  valuationRevenue: number;
+  valuationPercentage: number;
+  junkOnMoveRevenue: number;
+  junkOnMovePercentage: number;
+  materialsRevenue: number;
+  materialsPercentage: number;
+}
+
+export interface CaptainPerformanceData {
+  captainId: string;
+  captainName: string;
+  junkMetrics: JunkPerformanceMetrics;
+  moveMetrics: MovePerformanceMetrics;
+}
+
+export interface PerformanceRankingsResponse {
+  captains: CaptainPerformanceData[];
+  dateRange: {
+    startDate: Date;
+    endDate: Date;
+  };
+  totalCaptains: number;
+}
+
+export interface PerformanceFilters {
+  startDate?: Date;
+  endDate?: Date;
+  captainIds?: string[];
+  includeJunk?: boolean;
+  includeMove?: boolean;
+}
