@@ -108,7 +108,7 @@
   - Commit changes with descriptive message
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [-] 11. Implement commission tracking quick actions
+- [x] 11. Implement commission tracking quick actions
   - Add functional options to quick action dropdown menu
   - Implement Edit, Delete, Approve, Reject actions
   - Run `npm run lint` and `npm run tsc` to ensure code quality
@@ -116,7 +116,7 @@
   - Commit changes with descriptive message
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 12. Implement analytics page tabs with real functionality
+- [-] 12. Implement analytics page tabs with real functionality
   - Replace "This feature is coming soon" in Performance tab with real performance metrics and charts
   - Replace "This feature is coming soon" in Trends tab with real trend analysis and charts
   - Replace "This feature is coming soon" in Commission tab with real commission analytics and charts
