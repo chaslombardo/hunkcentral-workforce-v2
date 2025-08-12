@@ -7,7 +7,7 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 1.1, 1.2, 2.5, 4.1, 4.4_
 
-- [-] 2. Extend existing payroll calculation engine for performance metrics
+- [x] 2. Extend existing payroll calculation engine for performance metrics
   - Enhance lib/payCalculator.ts with performance calculation functions
   - Leverage existing labor percentage calculations for rankings display
   - Add disposal percentage and Move-specific metrics calculations
@@ -15,7 +15,7 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 1.2, 1.3, 1.4, 4.4, 5.5_
 
-- [ ] 3. Create performance analytics API using existing patterns
+- [x] 3. Create performance analytics API using existing patterns
   - Add /app/api/analytics/performance/route.ts following existing API structure
   - Use existing role-based middleware and authentication patterns
   - Follow existing error handling patterns from payroll APIs
@@ -23,7 +23,7 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 1.5, 4.2, 4.4, 5.2_
 
-- [ ] 4. Build rankings report page using existing components and patterns
+- [x] 4. Build rankings report page using existing components and patterns
   - Create /app/(protected)/reports/rankings/page.tsx following existing report page structure
   - Use existing Card, Table, Badge, and Chart components from components/ui/
   - If new components needed, use shadcn/ui MCP server (list_blocks, get_component_demo)
@@ -32,7 +32,7 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.6, 6.1, 6.2_
 
-- [ ] 5. Verify and enhance existing role-based access control for managers
+- [x] 5. Verify and enhance existing role-based access control for managers
   - Test existing RoleGuard component works for manager subordinate access
   - Verify existing role permission logic in lib/auth.ts supports manager team access
   - Enhance existing audit logging if needed for manager data access
@@ -40,7 +40,7 @@
   - Run lint, tsc check, remove console.logs, and commit any changes
   - _Requirements: 2.1, 2.2, 2.3, 2.5, 4.5_
 
-- [ ] 6. Verify existing admin dashboard supports manager capabilities
+- [-] 6. Verify existing admin dashboard supports manager capabilities
   - Test existing components/features/admin/user-management-dashboard.tsx for managers
   - Verify managers can see captain/wingman data but not other roles
   - Confirm existing Tabs and filtering work for manager use cases

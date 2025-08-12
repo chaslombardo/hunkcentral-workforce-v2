@@ -276,6 +276,13 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
       });
     }
 
+    // Manager role filtering - managers can only see captains and wingmen
+    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      conditions.push({
+        roles: { hasSome: ['captain', 'wingman'] },
+      });
+    }
+
     const where = conditions.length > 0 
       ? conditions.length === 1 
         ? conditions[0] 
@@ -374,6 +381,32 @@ export async function getUserById(userId: string) {
 
     if (!user) {
       throw new Error('User not found');
+    }
+
+    // Check manager access permissions
+    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      const hasAccessibleRole = user.roles.some(role => ['captain', 'wingman'].includes(role));
+      if (!hasAccessibleRole) {
+        throw new Error('Access denied: Managers can only view captain and wingman users');
+      }
+      
+      // Log manager access for audit trail
+      await prisma.auditLog.create({
+        data: {
+          entityType: 'user_access',
+          entityId: userId,
+          action: 'manager_view_user',
+          changes: {
+            action: 'manager_access',
+            targetUserId: userId,
+            targetUserRoles: user.roles,
+            accessType: 'view_user_profile',
+          },
+          userId: session.user.id,
+        },
+      }).catch(() => {
+        // Don't fail the main operation if audit logging fails
+      });
     }
 
     return { success: true, user };

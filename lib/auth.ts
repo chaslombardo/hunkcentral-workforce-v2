@@ -56,3 +56,51 @@ export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[
     throw new Error(`One of roles [${roles.join(', ')}] required`);
   }
 }
+
+// Manager access control utilities
+export function getManagerAccessibleRoles(): UserRole[] {
+  return ['captain', 'wingman'];
+}
+
+export function canManagerAccessUser(managerUser: SessionUser | User, targetUser: SessionUser | User): boolean {
+  // Users can access themselves
+  if (managerUser.id === targetUser.id) {
+    return true;
+  }
+  
+  // Admins can access anyone
+  if (hasRole(managerUser, 'admin')) {
+    return true;
+  }
+  
+  // Managers can only access captains and wingmen
+  if (hasRole(managerUser, 'manager')) {
+    const accessibleRoles = getManagerAccessibleRoles();
+    return targetUser.roles.some(role => accessibleRoles.includes(role));
+  }
+  
+  return false;
+}
+
+export function canUserAccessUserData(currentUser: SessionUser | User, targetUserId: string): boolean {
+  // Admins can access anyone
+  if (hasRole(currentUser, 'admin')) {
+    return true;
+  }
+  
+  // Users can access themselves
+  if (currentUser.id === targetUserId) {
+    return true;
+  }
+  
+  // Managers can access captains and wingmen (will be verified at data level)
+  if (hasRole(currentUser, 'manager')) {
+    return true; // Actual filtering happens in data queries
+  }
+  
+  return false;
+}
+
+export function shouldFilterUsersForManager(user: SessionUser | User): boolean {
+  return hasRole(user, 'manager') && !hasRole(user, 'admin');
+}

@@ -209,3 +209,25 @@ export async function logPayPeriodChange(
     changes: Object.keys(changes).length > 0 ? changes : undefined,
   });
 }
+
+export async function logManagerAccess(
+  action: string,
+  targetUserId: string,
+  managerId: string,
+  additionalData?: Record<string, unknown>
+) {
+  const changes: Record<string, unknown> = {
+    action: 'manager_access',
+    targetUserId,
+    accessType: action,
+    ...additionalData,
+  };
+
+  await createAuditLog({
+    entityType: 'user_access',
+    entityId: targetUserId,
+    action: `manager_${action}`,
+    userId: managerId,
+    changes,
+  });
+}
