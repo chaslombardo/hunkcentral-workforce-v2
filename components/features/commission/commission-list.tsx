@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit, Trash2, Check, X } from 'lucide-react';
 import { BrandButton } from '@/components/brand/brand-button';
 import { StatusIndicator } from '@/components/brand/status-indicator';
 import {
@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField, useResponsiveTable } from '@/components/ui/responsive-table';
+import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } from '@/components/ui/responsive-table';
 import { CommissionTableSkeleton } from '@/components/ui/skeleton-components';
 import {
   DropdownMenu,
@@ -61,20 +61,35 @@ interface CommissionEntry {
       fullName: string;
     };
   } | null;
+  approvedBy?: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
+  rejectedBy?: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
+  approvedAt?: Date | null;
+  rejectedAt?: Date | null;
+  rejectionReason?: string | null;
 }
 
 interface CommissionListProps {
   entries: CommissionEntry[];
   onEdit?: (entry: CommissionEntry) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (entry: CommissionEntry) => void;
   onView?: (entry: CommissionEntry) => void;
+  onApprove?: (entry: CommissionEntry) => void;
+  onReject?: (entry: CommissionEntry) => void;
+  isLoading?: boolean;
 }
 
-export function CommissionList({ entries, onEdit, onDelete, onView }: CommissionListProps) {
+export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, onReject, isLoading }: CommissionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [loading, setLoading] = useState(false);
-  const { isMobile } = useResponsiveTable();
+  const componentLoading = isLoading;
 
   const filteredEntries = entries.filter((entry) => {
     const matchesSearch = 
@@ -111,7 +126,7 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
   const matchedEntries = entries.filter(e => e.status === 'matched').length;
   const totalCommission = entries.reduce((sum, entry) => sum + (entry.commissionAmount || 0), 0);
 
-  if (loading) {
+  if (componentLoading) {
     return <CommissionTableSkeleton />;
   }
 
@@ -180,6 +195,7 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="matched">Matched</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -280,9 +296,27 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
                                 Edit
                               </DropdownMenuItem>
                             )}
+                            {onApprove && entry.status === 'matched' && (
+                              <DropdownMenuItem 
+                                onClick={() => onApprove(entry)}
+                                className="text-hunks-green"
+                              >
+                                <Check className="mr-2 h-4 w-4" />
+                                Approve
+                              </DropdownMenuItem>
+                            )}
+                            {onReject && ['matched', 'pending'].includes(entry.status) && (
+                              <DropdownMenuItem 
+                                onClick={() => onReject(entry)}
+                                className="text-destructive"
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                Reject
+                              </DropdownMenuItem>
+                            )}
                             {onDelete && entry.status === 'pending' && (
                               <DropdownMenuItem 
-                                onClick={() => onDelete(entry.id)}
+                                onClick={() => onDelete(entry)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
@@ -356,9 +390,27 @@ export function CommissionList({ entries, onEdit, onDelete, onView }: Commission
                           Edit
                         </DropdownMenuItem>
                       )}
+                      {onApprove && entry.status === 'matched' && (
+                        <DropdownMenuItem 
+                          onClick={() => onApprove(entry)}
+                          className="text-hunks-green"
+                        >
+                          <Check className="mr-2 h-4 w-4" />
+                          Approve
+                        </DropdownMenuItem>
+                      )}
+                      {onReject && ['matched', 'pending'].includes(entry.status) && (
+                        <DropdownMenuItem 
+                          onClick={() => onReject(entry)}
+                          className="text-destructive"
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Reject
+                        </DropdownMenuItem>
+                      )}
                       {onDelete && entry.status === 'pending' && (
                         <DropdownMenuItem 
-                          onClick={() => onDelete(entry.id)}
+                          onClick={() => onDelete(entry)}
                           className="text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />

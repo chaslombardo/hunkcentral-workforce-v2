@@ -77,7 +77,7 @@
   - Commit changes with descriptive message
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [-] 8. Add missing pay periods dashboard tiles
+- [x] 8. Add missing pay periods dashboard tiles
   - Create three summary tiles at top of pay periods page
   - Order pay period cards chronologically by date (most recent first)
   - Run `npm run lint` and `npm run tsc` to ensure code quality
@@ -87,7 +87,7 @@
 
 ## Phase 3: Enhanced Data Tables (Priority 2)
 
-- [ ] 9. Add pagination and controls to employee list
+- [x] 9. Add pagination and controls to employee list
   - Add pagination controls with next/previous buttons
   - Add dropdown for rows per page (10, 25, 50, 100)
   - Add search functionality across employee fields
@@ -99,7 +99,7 @@
 
 ## Phase 4: Form and UI Fixes (Priority 2)
 
-- [ ] 10. Fix commission creation form issues
+- [x] 10. Fix commission creation form issues
   - Fix sales consultant dropdown text alignment (currently squished left)
   - Enable future date selection in target date calendar
   - Fix estimated revenue field to allow clearing default zero value
@@ -108,7 +108,7 @@
   - Commit changes with descriptive message
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 11. Implement commission tracking quick actions
+- [-] 11. Implement commission tracking quick actions
   - Add functional options to quick action dropdown menu
   - Implement Edit, Delete, Approve, Reject actions
   - Run `npm run lint` and `npm run tsc` to ensure code quality

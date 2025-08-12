@@ -104,6 +104,20 @@ export async function getCommissionEntries(userId?: string) {
             },
           },
         },
+        approvedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        rejectedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -246,6 +260,171 @@ export async function deleteCommissionEntry(id: string) {
       return { success: false, error: error.message };
     }
     return { success: false, error: 'Failed to delete commission entry' };
+  }
+}
+
+export async function approveCommissionEntry(id: string, comments?: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      throw new Error('Unauthorized');
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      throw new Error('Manager access required to approve commission entries');
+    }
+
+    // Get the existing entry
+    const existingEntry = await prisma.commissionEntry.findUnique({
+      where: { id },
+      include: {
+        sales: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!existingEntry) {
+      throw new Error('Commission entry not found');
+    }
+
+    // Only allow approval of matched entries
+    if (existingEntry.status !== 'matched') {
+      throw new Error('Only matched commission entries can be approved');
+    }
+
+    // Update the entry status to approved
+    const approvedEntry = await prisma.commissionEntry.update({
+      where: { id },
+      data: {
+        status: 'approved',
+        approvedAt: new Date(),
+        approvedById: session.user.id,
+      },
+      include: {
+        sales: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Log the approval
+    await logCommissionChange(
+      'approve',
+      id,
+      session.user.id,
+      existingEntry,
+      approvedEntry,
+      { comments, approvedAt: approvedEntry.approvedAt }
+    );
+
+    revalidatePath('/commission');
+    return { success: true, data: approvedEntry };
+  } catch (error) {
+    // Error approving commission entry
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Failed to approve commission entry' };
+  }
+}
+
+export async function rejectCommissionEntry(id: string, reason?: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      throw new Error('Unauthorized');
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      throw new Error('Manager access required to reject commission entries');
+    }
+
+    // Get the existing entry
+    const existingEntry = await prisma.commissionEntry.findUnique({
+      where: { id },
+      include: {
+        sales: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!existingEntry) {
+      throw new Error('Commission entry not found');
+    }
+
+    // Only allow rejection of matched or pending entries
+    if (!['matched', 'pending'].includes(existingEntry.status)) {
+      throw new Error('Only matched or pending commission entries can be rejected');
+    }
+
+    // Update the entry status to rejected
+    const rejectedEntry = await prisma.commissionEntry.update({
+      where: { id },
+      data: {
+        status: 'rejected',
+        rejectedAt: new Date(),
+        rejectedById: session.user.id,
+        rejectionReason: reason,
+      },
+      include: {
+        sales: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        rejectedBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Log the rejection
+    await logCommissionChange(
+      'reject',
+      id,
+      session.user.id,
+      existingEntry,
+      rejectedEntry,
+      { reason, rejectedAt: rejectedEntry.rejectedAt }
+    );
+
+    revalidatePath('/commission');
+    return { success: true, data: rejectedEntry };
+  } catch (error) {
+    // Error rejecting commission entry
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Failed to reject commission entry' };
   }
 }
 
