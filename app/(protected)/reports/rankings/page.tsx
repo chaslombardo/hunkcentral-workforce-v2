@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { auth, hasRole } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { CaptainPerformanceData } from '@/types';
 import { 
   BarChart3, 
@@ -13,7 +15,11 @@ import {
   Download,
   Trophy,
   Truck,
-  Package
+  Package,
+  Eye,
+  Info,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 
 export default async function RankingsPage() {
@@ -24,6 +30,7 @@ export default async function RankingsPage() {
   }
 
   // All authenticated users can access rankings report (per requirements)
+  const isCurrentUserCaptain = hasRole(session.user, 'captain');
   
   // Fetch performance data using server-side approach
   let performanceData = null;
@@ -163,12 +170,18 @@ export default async function RankingsPage() {
                     const totalJobs = captain.junkMetrics.jobCount + captain.moveMetrics.jobCount;
                     const avgJobSize = totalJobs > 0 ? totalRevenue / totalJobs : 0;
                     const isCurrentUser = session.user.id === captain.captainId;
+                    const avgLaborPercentage = totalJobs > 0 ? 
+                      (captain.junkMetrics.laborPercentage + captain.moveMetrics.laborPercentage) / 2 : 0;
                     
                     return (
                       <div 
                         key={captain.captainId} 
-                        className={`flex items-center justify-between p-4 border rounded-lg ${
-                          isCurrentUser ? 'border-[#026937] bg-[#026937]/5' : ''
+                        className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
+                          isCurrentUser && isCurrentUserCaptain 
+                            ? 'border-[#026937] bg-gradient-to-r from-[#026937]/10 to-[#ea7200]/5 shadow-md' 
+                            : isCurrentUser 
+                            ? 'border-[#026937] bg-[#026937]/5' 
+                            : 'hover:shadow-sm'
                         }`}
                       >
                         <div className="flex items-center gap-4">
@@ -181,19 +194,75 @@ export default async function RankingsPage() {
                             <div className="font-medium flex items-center gap-2">
                               {captain.captainName}
                               {isCurrentUser && (
-                                <Badge variant="outline" className="text-[#026937] border-[#026937]">
-                                  You
+                                <Badge variant="outline" className={`${
+                                  isCurrentUserCaptain 
+                                    ? 'text-[#026937] border-[#026937] bg-[#026937]/10' 
+                                    : 'text-[#026937] border-[#026937]'
+                                }`}>
+                                  {isCurrentUserCaptain ? (
+                                    <div className="flex items-center gap-1">
+                                      <Award className="h-3 w-3" />
+                                      You
+                                    </div>
+                                  ) : 'You'}
+                                </Badge>
+                              )}
+                              {index === 0 && (
+                                <Badge className="bg-[#ea7200] text-white">
+                                  <Trophy className="h-3 w-3 mr-1" />
+                                  Top Performer
                                 </Badge>
                               )}
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              {totalJobs} total jobs • {formatCurrency(avgJobSize)} avg job size
+                            <div className="text-sm text-muted-foreground flex items-center gap-4">
+                              <span>{totalJobs} total jobs</span>
+                              <span>•</span>
+                              <span>{formatCurrency(avgJobSize)} avg job size</span>
+                              <span>•</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="flex items-center gap-1 cursor-help">
+                                    {formatPercentage(avgLaborPercentage)} avg labor
+                                    <Info className="h-3 w-3" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Average labor percentage across Junk (target: 14%) and Move (target: 24%) operations</p>
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-medium">{formatCurrency(totalRevenue)}</div>
-                          <div className="text-sm text-muted-foreground">Total Revenue</div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="font-medium">{formatCurrency(totalRevenue)}</div>
+                            <div className="text-sm text-muted-foreground">Total Revenue</div>
+                          </div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <BrandButton variant="outline" size="sm" className="gap-2">
+                                <Eye className="h-4 w-4" />
+                                Details
+                              </BrandButton>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <TrendingUp className="h-5 w-5 text-[#026937]" />
+                                  {captain.captainName} - Detailed Performance
+                                  {isCurrentUser && (
+                                    <Badge variant="outline" className="text-[#026937] border-[#026937]">
+                                      Your Performance
+                                    </Badge>
+                                  )}
+                                </DialogTitle>
+                                <DialogDescription>
+                                  Comprehensive performance breakdown across all operations
+                                </DialogDescription>
+                              </DialogHeader>
+                              <CaptainDetailView captain={captain} />
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     );
@@ -209,11 +278,262 @@ export default async function RankingsPage() {
         </TabsContent>
 
         <TabsContent value="junk" className="space-y-6">
-          <JunkOperationsTab captains={(performanceData?.captains as CaptainPerformanceData[]) || []} currentUserId={session.user.id} />
+          <JunkOperationsTab captains={(performanceData?.captains as CaptainPerformanceData[]) || []} currentUserId={session.user.id} isCurrentUserCaptain={isCurrentUserCaptain} />
         </TabsContent>
 
         <TabsContent value="move" className="space-y-6">
-          <MoveOperationsTab captains={(performanceData?.captains as CaptainPerformanceData[]) || []} currentUserId={session.user.id} />
+          <MoveOperationsTab captains={(performanceData?.captains as CaptainPerformanceData[]) || []} currentUserId={session.user.id} isCurrentUserCaptain={isCurrentUserCaptain} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// Captain Detail View Component
+function CaptainDetailView({ captain }: { captain: CaptainPerformanceData }) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(1)}%`;
+  };
+
+  const totalRevenue = captain.junkMetrics.totalRevenue + captain.moveMetrics.totalRevenue;
+  const totalJobs = captain.junkMetrics.jobCount + captain.moveMetrics.jobCount;
+  const avgJobSize = totalJobs > 0 ? totalRevenue / totalJobs : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-[#026937]">{formatCurrency(totalRevenue)}</div>
+            <p className="text-xs text-muted-foreground">All operations</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalJobs}</div>
+            <p className="text-xs text-muted-foreground">Completed</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Avg Job Size</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(avgJobSize)}</div>
+            <p className="text-xs text-muted-foreground">Per job</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Performance Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-[#ea7200]">
+              {totalJobs > 0 ? Math.round((totalRevenue / totalJobs) / 100) : 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Revenue efficiency</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed Breakdown */}
+      <Tabs defaultValue="junk" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="junk">Junk Operations</TabsTrigger>
+          <TabsTrigger value="move">Move Operations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="junk" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-[#026937]" />
+                Junk Operations Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">Jobs Completed</div>
+                  <div className="text-lg font-semibold">{captain.junkMetrics.jobCount}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Revenue</div>
+                  <div className="text-lg font-semibold">{formatCurrency(captain.junkMetrics.totalRevenue)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Average Job Size</div>
+                  <div className="text-lg font-semibold">{formatCurrency(captain.junkMetrics.averageJobSize)}</div>
+                </div>
+                <div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-help">
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          Labor Percentage <Info className="h-3 w-3" />
+                        </div>
+                        <div className={`text-lg font-semibold ${
+                          captain.junkMetrics.laborPercentage <= 14 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {formatPercentage(captain.junkMetrics.laborPercentage)}
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Labor cost as percentage of revenue. Target: 14% or below for junk operations.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+              <div className="pt-4 border-t">
+                <div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-help">
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          Disposal Percentage <Info className="h-3 w-3" />
+                        </div>
+                        <div className="text-lg font-semibold">{formatPercentage(captain.junkMetrics.disposalPercentage)}</div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Percentage of jobs that included disposal services</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="move" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-[#026937]" />
+                Move Operations Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">Jobs Completed</div>
+                  <div className="text-lg font-semibold">{captain.moveMetrics.jobCount}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Revenue</div>
+                  <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.totalRevenue)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Average Job Size</div>
+                  <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.averageJobSize)}</div>
+                </div>
+                <div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-help">
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          Labor Percentage <Info className="h-3 w-3" />
+                        </div>
+                        <div className={`text-lg font-semibold ${
+                          captain.moveMetrics.laborPercentage <= 24 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {formatPercentage(captain.moveMetrics.laborPercentage)}
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Labor cost as percentage of revenue. Target: 24% or below for move operations.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t">
+                <h4 className="font-medium mb-3">Revenue Breakdown</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            Upsell Revenue <Info className="h-3 w-3" />
+                          </div>
+                          <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.upsellRevenue)}</div>
+                          <div className="text-xs text-muted-foreground">({formatPercentage(captain.moveMetrics.upsellPercentage)})</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Additional services sold during the move</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            Valuation Revenue <Info className="h-3 w-3" />
+                          </div>
+                          <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.valuationRevenue)}</div>
+                          <div className="text-xs text-muted-foreground">({formatPercentage(captain.moveMetrics.valuationPercentage)})</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Revenue from valuation protection services</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            Junk on Move <Info className="h-3 w-3" />
+                          </div>
+                          <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.junkOnMoveRevenue)}</div>
+                          <div className="text-xs text-muted-foreground">({formatPercentage(captain.moveMetrics.junkOnMovePercentage)})</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Junk removal services performed during moves</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">
+                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            Materials Revenue <Info className="h-3 w-3" />
+                          </div>
+                          <div className="text-lg font-semibold">{formatCurrency(captain.moveMetrics.materialsRevenue)}</div>
+                          <div className="text-xs text-muted-foreground">({formatPercentage(captain.moveMetrics.materialsPercentage)})</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Revenue from packing materials and supplies</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
@@ -221,7 +541,7 @@ export default async function RankingsPage() {
 }
 
 // Junk Operations Tab Component
-function JunkOperationsTab({ captains, currentUserId }: { captains: CaptainPerformanceData[], currentUserId: string }) {
+function JunkOperationsTab({ captains, currentUserId, isCurrentUserCaptain }: { captains: CaptainPerformanceData[], currentUserId: string, isCurrentUserCaptain: boolean }) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -300,8 +620,12 @@ function JunkOperationsTab({ captains, currentUserId }: { captains: CaptainPerfo
               return (
                 <div 
                   key={captain.captainId} 
-                  className={`flex items-center justify-between p-4 border rounded-lg ${
-                    isCurrentUser ? 'border-[#026937] bg-[#026937]/5' : ''
+                  className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
+                    isCurrentUser && isCurrentUserCaptain 
+                      ? 'border-[#026937] bg-gradient-to-r from-[#026937]/10 to-[#ea7200]/5 shadow-md' 
+                      : isCurrentUser 
+                      ? 'border-[#026937] bg-[#026937]/5' 
+                      : 'hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-center gap-4">
@@ -314,19 +638,85 @@ function JunkOperationsTab({ captains, currentUserId }: { captains: CaptainPerfo
                       <div className="font-medium flex items-center gap-2">
                         {captain.captainName}
                         {isCurrentUser && (
-                          <Badge variant="outline" className="text-[#026937] border-[#026937]">
-                            You
+                          <Badge variant="outline" className={`${
+                            isCurrentUserCaptain 
+                              ? 'text-[#026937] border-[#026937] bg-[#026937]/10' 
+                              : 'text-[#026937] border-[#026937]'
+                          }`}>
+                            {isCurrentUserCaptain ? (
+                              <div className="flex items-center gap-1">
+                                <Award className="h-3 w-3" />
+                                You
+                              </div>
+                            ) : 'You'}
+                          </Badge>
+                        )}
+                        {index === 0 && (
+                          <Badge className="bg-[#ea7200] text-white">
+                            <Trophy className="h-3 w-3 mr-1" />
+                            Top Junk
                           </Badge>
                         )}
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {metrics.jobCount} jobs • {formatPercentage(metrics.laborPercentage)} labor • {formatPercentage(metrics.disposalPercentage)} disposal
+                      <div className="text-sm text-muted-foreground flex items-center gap-4">
+                        <span>{metrics.jobCount} jobs</span>
+                        <span>•</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1 cursor-help">
+                              {formatPercentage(metrics.laborPercentage)} labor
+                              <Info className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Labor cost percentage. Target: 14% or below for junk operations</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span>•</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1 cursor-help">
+                              {formatPercentage(metrics.disposalPercentage)} disposal
+                              <Info className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Percentage of jobs that included disposal services</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-medium">{formatCurrency(metrics.totalRevenue)}</div>
-                    <div className="text-sm text-muted-foreground">{formatCurrency(metrics.averageJobSize)} avg</div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="font-medium">{formatCurrency(metrics.totalRevenue)}</div>
+                      <div className="text-sm text-muted-foreground">{formatCurrency(metrics.averageJobSize)} avg</div>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <BrandButton variant="outline" size="sm" className="gap-2">
+                          <Eye className="h-4 w-4" />
+                          Details
+                        </BrandButton>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Package className="h-5 w-5 text-[#026937]" />
+                            {captain.captainName} - Junk Operations Detail
+                            {isCurrentUser && (
+                              <Badge variant="outline" className="text-[#026937] border-[#026937]">
+                                Your Performance
+                              </Badge>
+                            )}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Detailed junk operations performance metrics
+                          </DialogDescription>
+                        </DialogHeader>
+                        <CaptainDetailView captain={captain} />
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               );
@@ -339,7 +729,7 @@ function JunkOperationsTab({ captains, currentUserId }: { captains: CaptainPerfo
 }
 
 // Move Operations Tab Component
-function MoveOperationsTab({ captains, currentUserId }: { captains: CaptainPerformanceData[], currentUserId: string }) {
+function MoveOperationsTab({ captains, currentUserId, isCurrentUserCaptain }: { captains: CaptainPerformanceData[], currentUserId: string, isCurrentUserCaptain: boolean }) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -418,8 +808,12 @@ function MoveOperationsTab({ captains, currentUserId }: { captains: CaptainPerfo
               return (
                 <div 
                   key={captain.captainId} 
-                  className={`p-4 border rounded-lg ${
-                    isCurrentUser ? 'border-[#026937] bg-[#026937]/5' : ''
+                  className={`p-4 border rounded-lg transition-all ${
+                    isCurrentUser && isCurrentUserCaptain 
+                      ? 'border-[#026937] bg-gradient-to-r from-[#026937]/10 to-[#ea7200]/5 shadow-md' 
+                      : isCurrentUser 
+                      ? 'border-[#026937] bg-[#026937]/5' 
+                      : 'hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -433,47 +827,145 @@ function MoveOperationsTab({ captains, currentUserId }: { captains: CaptainPerfo
                         <div className="font-medium flex items-center gap-2">
                           {captain.captainName}
                           {isCurrentUser && (
-                            <Badge variant="outline" className="text-[#026937] border-[#026937]">
-                              You
+                            <Badge variant="outline" className={`${
+                              isCurrentUserCaptain 
+                                ? 'text-[#026937] border-[#026937] bg-[#026937]/10' 
+                                : 'text-[#026937] border-[#026937]'
+                            }`}>
+                              {isCurrentUserCaptain ? (
+                                <div className="flex items-center gap-1">
+                                  <Award className="h-3 w-3" />
+                                  You
+                                </div>
+                              ) : 'You'}
+                            </Badge>
+                          )}
+                          {index === 0 && (
+                            <Badge className="bg-[#ea7200] text-white">
+                              <Trophy className="h-3 w-3 mr-1" />
+                              Top Move
                             </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {metrics.jobCount} jobs • {formatPercentage(metrics.laborPercentage)} labor
+                        <div className="text-sm text-muted-foreground flex items-center gap-4">
+                          <span>{metrics.jobCount} jobs</span>
+                          <span>•</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex items-center gap-1 cursor-help">
+                                {formatPercentage(metrics.laborPercentage)} labor
+                                <Info className="h-3 w-3" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Labor cost percentage. Target: 24% or below for move operations</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">{formatCurrency(metrics.totalRevenue)}</div>
-                      <div className="text-sm text-muted-foreground">{formatCurrency(metrics.averageJobSize)} avg</div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="font-medium">{formatCurrency(metrics.totalRevenue)}</div>
+                        <div className="text-sm text-muted-foreground">{formatCurrency(metrics.averageJobSize)} avg</div>
+                      </div>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <BrandButton variant="outline" size="sm" className="gap-2">
+                            <Eye className="h-4 w-4" />
+                            Details
+                          </BrandButton>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Truck className="h-5 w-5 text-[#026937]" />
+                              {captain.captainName} - Move Operations Detail
+                              {isCurrentUser && (
+                                <Badge variant="outline" className="text-[#026937] border-[#026937]">
+                                  Your Performance
+                                </Badge>
+                              )}
+                            </DialogTitle>
+                            <DialogDescription>
+                              Detailed move operations performance metrics with revenue breakdown
+                            </DialogDescription>
+                          </DialogHeader>
+                          <CaptainDetailView captain={captain} />
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                   
                   {/* Move-specific metrics */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <div className="text-muted-foreground">Upsell</div>
-                      <div className="font-medium">
-                        {formatCurrency(metrics.upsellRevenue)} ({formatPercentage(metrics.upsellPercentage)})
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-help">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              Upsell <Info className="h-3 w-3" />
+                            </div>
+                            <div className="font-medium">
+                              {formatCurrency(metrics.upsellRevenue)} ({formatPercentage(metrics.upsellPercentage)})
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Additional services sold during the move</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div>
-                      <div className="text-muted-foreground">Valuation</div>
-                      <div className="font-medium">
-                        {formatCurrency(metrics.valuationRevenue)} ({formatPercentage(metrics.valuationPercentage)})
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-help">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              Valuation <Info className="h-3 w-3" />
+                            </div>
+                            <div className="font-medium">
+                              {formatCurrency(metrics.valuationRevenue)} ({formatPercentage(metrics.valuationPercentage)})
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Revenue from valuation protection services</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div>
-                      <div className="text-muted-foreground">Junk on Move</div>
-                      <div className="font-medium">
-                        {formatCurrency(metrics.junkOnMoveRevenue)} ({formatPercentage(metrics.junkOnMovePercentage)})
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-help">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              Junk on Move <Info className="h-3 w-3" />
+                            </div>
+                            <div className="font-medium">
+                              {formatCurrency(metrics.junkOnMoveRevenue)} ({formatPercentage(metrics.junkOnMovePercentage)})
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Junk removal services performed during moves</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div>
-                      <div className="text-muted-foreground">Materials</div>
-                      <div className="font-medium">
-                        {formatCurrency(metrics.materialsRevenue)} ({formatPercentage(metrics.materialsPercentage)})
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-help">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              Materials <Info className="h-3 w-3" />
+                            </div>
+                            <div className="font-medium">
+                              {formatCurrency(metrics.materialsRevenue)} ({formatPercentage(metrics.materialsPercentage)})
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Revenue from packing materials and supplies</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                 </div>

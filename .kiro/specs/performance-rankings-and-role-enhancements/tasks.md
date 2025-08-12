@@ -40,7 +40,7 @@
   - Run lint, tsc check, remove console.logs, and commit any changes
   - _Requirements: 2.1, 2.2, 2.3, 2.5, 4.5_
 
-- [-] 6. Verify existing admin dashboard supports manager capabilities
+- [x] 6. Verify existing admin dashboard supports manager capabilities
   - Test existing components/features/admin/user-management-dashboard.tsx for managers
   - Verify managers can see captain/wingman data but not other roles
   - Confirm existing Tabs and filtering work for manager use cases
@@ -48,7 +48,7 @@
   - Run lint, tsc check, remove console.logs, and commit any fixes
   - _Requirements: 2.1, 2.2, 2.4, 5.2_
 
-- [ ] 7. Verify existing wingman payroll access works correctly
+- [x] 7. Verify existing wingman payroll access works correctly
   - Test existing components/features/reports/my-payroll-view.tsx for wingmen
   - Verify wingmen can see tips analysis and time period filtering
   - Confirm existing rate display and average calculations work for wingmen
@@ -56,7 +56,7 @@
   - Run lint, tsc check, remove console.logs, and commit any fixes
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 8. Add captain performance highlighting using existing components
+- [-] 8. Add captain performance highlighting using existing components
   - Highlight current user's performance in rankings table when they are a captain
   - Add basic drill-down using existing modal/dialog patterns
   - Use existing Tooltip components for metric explanations
