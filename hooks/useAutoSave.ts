@@ -28,7 +28,7 @@ export function useAutoSave({
   watch,
   logId,
   interval = 30000, // 30 seconds
-  enabled = true,
+  enabled = false, // Disabled by default to prevent sync issues
 }: UseAutoSaveOptions): UseAutoSaveReturn {
   const [status, setStatus] = useState<AutoSaveStatus>('idle');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -175,10 +175,13 @@ export function useAutoSave({
     }
   }, [currentLogId, formData, toast, isOffline, storeData]);
 
-  // Auto-save effect
+  // Auto-save effect - disabled to prevent sync issues
   useEffect(() => {
+    // Auto-save is disabled by default to prevent problematic sync issues
+    // Manual save via saveNow() is still available
     if (!enabled) return;
 
+    // If auto-save is explicitly enabled, keep the original logic
     const currentData = JSON.stringify(formData);
     
     // Don't save if data hasn't changed
