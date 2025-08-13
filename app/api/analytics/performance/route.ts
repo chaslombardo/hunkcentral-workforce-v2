@@ -55,6 +55,7 @@ export async function GET(request: Request) {
     const actualEndDate = filters.endDate || defaultEndDate;
 
     // Get all users (we need all captains for performance calculations)
+    // Note: We need rates and bonus goals for calculations but they won't be exposed in the response
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -305,6 +306,8 @@ export async function GET(request: Request) {
     }));
 
     // Calculate performance metrics for all captains
+    // Note: This function only returns performance metrics (job counts, revenue, percentages)
+    // and does NOT include any sensitive payroll data (rates, salaries, bonuses)
     const captainPerformanceData = calculateAllCaptainsPerformance(
       usersForCalculation,
       logsForCalculation,

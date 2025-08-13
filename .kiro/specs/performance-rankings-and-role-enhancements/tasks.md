@@ -56,7 +56,7 @@
   - Run lint, tsc check, remove console.logs, and commit any fixes
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [-] 8. Add captain performance highlighting using existing components
+- [x] 8. Add captain performance highlighting using existing components
   - Highlight current user's performance in rankings table when they are a captain
   - Add basic drill-down using existing modal/dialog patterns
   - Use existing Tooltip components for metric explanations
