@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import './mobile-optimizations.css';
@@ -9,18 +9,19 @@ import { PerformanceMonitor } from '@/components/performance-monitor';
 
 const inter = Inter({ subsets: ['latin'] });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#026937',
+}
+
 export const metadata: Metadata = {
   title: 'HUNKCentral - Workforce Management',
   description:
     'Digital workforce management system for College Hunks Hauling Junk & Moving',
   manifest: '/manifest.json',
-  themeColor: '#026937',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

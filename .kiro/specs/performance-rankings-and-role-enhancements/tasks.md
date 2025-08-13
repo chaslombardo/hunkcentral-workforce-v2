@@ -77,7 +77,7 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 4.4, 4.2_
 
-- [-] 11. Implement dark/light theme switcher
+- [x] 11. Implement dark/light theme switcher
   - Add theme provider using Next.js themes or similar pattern
   - Create theme switcher component with toggle functionality
   - Implement theme persistence using localStorage or cookies
