@@ -10,6 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { OfflineIndicator, ConnectionQualityIndicator } from "@/components/ui/offline-indicator"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 
 interface MainLayoutProps {
@@ -31,6 +32,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             <SmartBreadcrumbs />
           </div>
           <div className="flex items-center gap-2 px-4">
+            <ThemeSwitcher />
             <OfflineIndicator />
           </div>
         </header>

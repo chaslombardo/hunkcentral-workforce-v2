@@ -36,6 +36,7 @@ import { useNavigation } from "@/contexts/navigation-context"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 // Navigation data structure for unified mobile navigation
 const getNavigationData = (userRoles: string[] = []) => {
@@ -241,6 +242,9 @@ export function UnifiedMobileHeader() {
             <span className="truncate font-medium text-hunks-green">College Hunks</span>
             <span className="truncate text-xs text-muted-foreground">Workforce Management</span>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
         </div>
       </div>
       
