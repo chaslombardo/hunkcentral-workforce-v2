@@ -77,9 +77,21 @@
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 4.4, 4.2_
 
-- [ ] 11. Test and validate the complete feature
+- [x] 11. Implement dark/light theme switcher
+  - Add theme provider using Next.js themes or similar pattern
+  - Create theme switcher component with toggle functionality
+  - Implement theme persistence using localStorage or cookies
+  - Update CSS variables and component styling for dark mode
+  - Ensure brand colors (#026937, #ea7200) work in both themes
+  - Add theme switcher to navigation/header area
+  - Test theme switching across all pages and components
+  - Run lint, tsc check, remove console.logs, and commit changes
+  - _Requirements: Enhanced user experience and accessibility_
+
+- [ ] 12. Test and validate the complete feature
   - Write unit tests extending existing test suite patterns
   - Test role-based access control for all user types
   - Verify all functionality works across different roles
+  - Test theme switcher functionality across all user roles
   - Run full test suite, lint, tsc check, and final commit
   - _Requirements: All requirements validation_
