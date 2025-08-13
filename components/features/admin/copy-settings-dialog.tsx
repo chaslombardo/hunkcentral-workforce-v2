@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IconCopy } from '@tabler/icons-react';
-// Remove Prisma import - use number type instead
+import { convertUserDecimalFields } from '@/lib/decimal-utils';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -80,8 +80,10 @@ export function CopySettingsDialog({
       const loadAvailableUsers = async () => {
         const result = await getUsers({ limit: 100 });
         if (result.success && result.data) {
-          // Filter out the source user
-          const filteredUsers = result.data.users.filter(u => u.id !== sourceUser.id);
+          // Filter out the source user and convert decimal fields
+          const filteredUsers = result.data.users
+            .filter(u => u.id !== sourceUser.id)
+            .map(convertUserDecimalFields);
           setAvailableUsers(filteredUsers);
         }
       };

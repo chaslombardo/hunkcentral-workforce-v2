@@ -85,6 +85,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
 import { getUsers, deleteUser } from '@/lib/actions/users';
+import { convertUserDecimalFields } from '@/lib/decimal-utils';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 
@@ -161,7 +162,12 @@ export function UserManagementDashboard() {
     try {
       const result = await getUsers(params);
       if (result.success && result.data) {
-        setData(result.data);
+        // Convert decimal fields to numbers for TypeScript compatibility
+        const convertedData = {
+          ...result.data,
+          users: result.data.users.map(convertUserDecimalFields)
+        };
+        setData(convertedData);
       } else {
         toast({
           title: 'Error',
