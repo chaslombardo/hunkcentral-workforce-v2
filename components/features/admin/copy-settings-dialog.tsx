@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IconCopy } from '@tabler/icons-react';
-import { Decimal } from '@prisma/client/runtime/library';
+// Remove Prisma import - use number type instead
 
 import { Button } from '@/components/ui/button';
 import {
@@ -38,21 +38,21 @@ interface User {
   email: string;
   fullName: string;
   roles: string[];
-  rateJunkCaptain?: Decimal | null;
-  rateJunkWingman?: Decimal | null;
-  rateMoveCaptain?: Decimal | null;
-  rateMoveWingman?: Decimal | null;
-  rateZigma?: Decimal | null;
-  rateTraining?: Decimal | null;
-  rateEstimating?: Decimal | null;
-  rateWarehouse?: Decimal | null;
-  rateAdmin?: Decimal | null;
-  salaryAmount?: Decimal | null;
+  rateJunkCaptain?: number | null;
+  rateJunkWingman?: number | null;
+  rateMoveCaptain?: number | null;
+  rateMoveWingman?: number | null;
+  rateZigma?: number | null;
+  rateTraining?: number | null;
+  rateEstimating?: number | null;
+  rateWarehouse?: number | null;
+  rateAdmin?: number | null;
+  salaryAmount?: number | null;
   salaryFrequency?: string | null;
   salaryType?: string | null;
-  commissionRate?: Decimal | null;
-  junkBonusGoal: Decimal;
-  moveBonusGoal: Decimal;
+  commissionRate?: number | null;
+  junkBonusGoal: number;
+  moveBonusGoal: number;
   createdAt: Date;
   updatedAt: Date;
 }

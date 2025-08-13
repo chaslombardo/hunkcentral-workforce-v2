@@ -88,28 +88,28 @@ import { getUsers, deleteUser } from '@/lib/actions/users';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 
-import { Decimal } from '@prisma/client/runtime/library';
+// Remove Prisma import - use number type instead
 
 interface User {
   id: string;
   email: string;
   fullName: string;
   roles: string[];
-  rateJunkCaptain?: Decimal | null;
-  rateJunkWingman?: Decimal | null;
-  rateMoveCaptain?: Decimal | null;
-  rateMoveWingman?: Decimal | null;
-  rateZigma?: Decimal | null;
-  rateTraining?: Decimal | null;
-  rateEstimating?: Decimal | null;
-  rateWarehouse?: Decimal | null;
-  rateAdmin?: Decimal | null;
-  salaryAmount?: Decimal | null;
+  rateJunkCaptain?: number | null;
+  rateJunkWingman?: number | null;
+  rateMoveCaptain?: number | null;
+  rateMoveWingman?: number | null;
+  rateZigma?: number | null;
+  rateTraining?: number | null;
+  rateEstimating?: number | null;
+  rateWarehouse?: number | null;
+  rateAdmin?: number | null;
+  salaryAmount?: number | null;
   salaryFrequency?: string | null;
   salaryType?: string | null;
-  commissionRate?: Decimal | null;
-  junkBonusGoal: Decimal;
-  moveBonusGoal: Decimal;
+  commissionRate?: number | null;
+  junkBonusGoal: number;
+  moveBonusGoal: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -259,7 +259,7 @@ export function UserManagementDashboard() {
     return USER_ROLES.find(r => r.value === role)?.color || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
 
-  const formatCurrency = (amount?: Decimal | null) => {
+  const formatCurrency = (amount?: number | null) => {
     if (!amount) return '-';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -394,7 +394,7 @@ export function UserManagementDashboard() {
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <IconCalendar className="h-4 w-4" />
-          {new Date(row.original.createdAt).toLocaleDateString()}
+          {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() : 'N/A'}
         </div>
       ),
     },

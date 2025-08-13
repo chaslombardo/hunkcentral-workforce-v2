@@ -260,7 +260,7 @@ export function PerformanceMonitor({
 function getElementInfo(element: HTMLElement): string {
   const tagName = element.tagName.toLowerCase();
   const id = element.id ? `#${element.id}` : '';
-  const className = element.className ? `.${element.className.split(' ').join('.')}` : '';
+  const className = element.className && typeof element.className === 'string' ? `.${element.className.split(' ').join('.')}` : '';
   const text = element.textContent?.trim().substring(0, 50) || '';
   const role = element.getAttribute('role') || '';
   const ariaLabel = element.getAttribute('aria-label') || '';

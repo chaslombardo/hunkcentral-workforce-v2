@@ -95,19 +95,11 @@ export async function updateUser(data: UpdateUserFormData) {
       throw new Error('Unauthorized: Admin access required');
     }
 
-    // Debug: Log the received data
-    console.log('Server received data:', data);
-    console.log('Password field in server:', data.password);
-    console.log('Password field type in server:', typeof data.password);
-
     let validatedData;
     try {
       validatedData = UpdateUserSchema.parse(data);
-      console.log('Validated data:', validatedData);
-      console.log('Validated password field:', validatedData.password);
     } catch (error) {
       if (error instanceof ZodError) {
-        console.log('Validation error:', error.issues);
         const issues = error.issues;
         if (issues && issues.length > 0) {
           const firstIssue = issues[0];
@@ -417,7 +409,25 @@ export async function getUserById(userId: string) {
       });
     }
 
-    return { success: true, user };
+    // Convert Decimal fields to numbers for client components
+    const userWithNumbers = {
+      ...user,
+      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : null,
+      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : null,
+      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : null,
+      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : null,
+      rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
+      rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
+      rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,
+      rateWarehouse: user.rateWarehouse ? Number(user.rateWarehouse) : null,
+      rateAdmin: user.rateAdmin ? Number(user.rateAdmin) : null,
+      salaryAmount: user.salaryAmount ? Number(user.salaryAmount) : null,
+      commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
+      junkBonusGoal: Number(user.junkBonusGoal),
+      moveBonusGoal: Number(user.moveBonusGoal),
+    };
+
+    return { success: true, user: userWithNumbers };
   } catch (error) {
     // Error fetching user
     return { 
