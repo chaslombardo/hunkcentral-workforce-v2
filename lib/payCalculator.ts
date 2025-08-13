@@ -1002,10 +1002,86 @@ export function calculateMovePerformanceMetrics(
   };
 }
 
+// Performance calculation cache
+const performanceCache = new Map<string, CaptainPerformanceData>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 /**
- * Calculate performance metrics for all captains
+ * Generate cache key for performance calculations
+ */
+function generatePerformanceCacheKey(
+  captainId: string,
+  logIds: string[],
+  filters?: PerformanceFilters
+): string {
+  return JSON.stringify({
+    captainId,
+    logIds: logIds.sort(),
+    filters: {
+      startDate: filters?.startDate?.toISOString(),
+      endDate: filters?.endDate?.toISOString(),
+      includeJunk: filters?.includeJunk,
+      includeMove: filters?.includeMove,
+    },
+  });
+}
+
+/**
+ * Calculate performance metrics for all captains with caching
  */
 export function calculateAllCaptainsPerformance(
+  users: User[],
+  approvedLogs: DailyLog[],
+  filters?: PerformanceFilters
+): CaptainPerformanceData[] {
+  // Filter to only captains
+  const captains = users.filter(user => user.roles.includes('captain'));
+  
+  const results: CaptainPerformanceData[] = [];
+  
+  for (const captain of captains) {
+    // Get logs for this captain
+    const captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
+    const logIds = captainLogs.map(log => log.id);
+    
+    // Generate cache key
+    const cacheKey = generatePerformanceCacheKey(captain.id, logIds, filters);
+    
+    // Check cache first
+    const cached = performanceCache.get(cacheKey);
+    if (cached) {
+      results.push(cached);
+      continue;
+    }
+    
+    // Calculate performance metrics
+    const performance = calculateCaptainPerformanceMetrics(captain, captainLogs, filters);
+    
+    // Cache the result
+    performanceCache.set(cacheKey, performance);
+    
+    results.push(performance);
+  }
+  
+  // Clean up old cache entries (keep only last 100 entries)
+  if (performanceCache.size > 100) {
+    const entries = Array.from(performanceCache.entries());
+    const toDelete = entries.slice(0, entries.length - 100);
+    toDelete.forEach(([key]) => performanceCache.delete(key));
+  }
+  
+  // Sort by total revenue (descending)
+  return results.sort((a, b) => {
+    const totalA = a.junkMetrics.totalRevenue + a.moveMetrics.totalRevenue;
+    const totalB = b.junkMetrics.totalRevenue + b.moveMetrics.totalRevenue;
+    return totalB - totalA;
+  });
+}
+
+/**
+ * Calculate performance metrics for all captains (legacy function name)
+ */
+export function calculateAllCaptainsPerformanceOld(
   users: User[],
   approvedLogs: DailyLog[],
   filters?: PerformanceFilters

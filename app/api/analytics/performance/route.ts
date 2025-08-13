@@ -12,6 +12,26 @@ import type {
   PerformanceRankingsResponse 
 } from '@/types';
 
+// Cache configuration
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const performanceCache = new Map<string, { data: PerformanceRankingsResponse; timestamp: number }>();
+
+// Helper function to generate cache key
+function generateCacheKey(filters: PerformanceFilters): string {
+  return JSON.stringify({
+    startDate: filters.startDate?.toISOString(),
+    endDate: filters.endDate?.toISOString(),
+    captainIds: filters.captainIds?.sort(),
+    includeJunk: filters.includeJunk,
+    includeMove: filters.includeMove,
+  });
+}
+
+// Helper function to check if cache is valid
+function isCacheValid(timestamp: number): boolean {
+  return Date.now() - timestamp < CACHE_DURATION;
+}
+
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -27,6 +47,7 @@ export async function GET(request: Request) {
     const captainIdsParam = searchParams.get('captainIds');
     const includeJunk = searchParams.get('includeJunk') !== 'false';
     const includeMove = searchParams.get('includeMove') !== 'false';
+    const skipCache = searchParams.get('skipCache') === 'true';
 
     // Build filters object
     const filters: PerformanceFilters = {
@@ -54,8 +75,46 @@ export async function GET(request: Request) {
     const actualStartDate = filters.startDate || defaultStartDate;
     const actualEndDate = filters.endDate || defaultEndDate;
 
-    // Get all users (we need all captains for performance calculations)
+    // Update filters with actual dates for cache key generation
+    filters.startDate = actualStartDate;
+    filters.endDate = actualEndDate;
+
+    // Check cache first (unless explicitly skipped)
+    if (!skipCache) {
+      const cacheKey = generateCacheKey(filters);
+      const cachedResult = performanceCache.get(cacheKey);
+      
+      if (cachedResult && isCacheValid(cachedResult.timestamp)) {
+        // Add cache headers
+        const response = NextResponse.json(cachedResult.data);
+        response.headers.set('X-Cache', 'HIT');
+        response.headers.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+        return response;
+      }
+    }
+
+    // Get only captains and users needed for calculations
+    // Optimize by filtering to only captains and users with relevant data
     const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { roles: { has: 'captain' } },
+          // Include users who have worked hours in the date range
+          {
+            logHours: {
+              some: {
+                log: {
+                  status: 'approved',
+                  approvedAt: {
+                    gte: actualStartDate,
+                    lte: actualEndDate,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
       select: {
         id: true,
         email: true,
@@ -84,7 +143,7 @@ export async function GET(request: Request) {
       },
     });
 
-    // Get approved logs within the date range
+    // Get approved logs within the date range with optimized includes
     const approvedLogs = await prisma.dailyLog.findMany({
       where: {
         status: 'approved',
@@ -92,6 +151,12 @@ export async function GET(request: Request) {
           gte: actualStartDate,
           lte: actualEndDate,
         },
+        // Only include logs from captains if we're filtering by captain IDs
+        ...(filters.captainIds && {
+          captainId: {
+            in: filters.captainIds,
+          },
+        }),
       },
       include: {
         captain: {
@@ -305,6 +370,8 @@ export async function GET(request: Request) {
     }));
 
     // Calculate performance metrics for all captains
+    // Note: This function only returns performance metrics (job counts, revenue, percentages)
+    // and does NOT include any sensitive payroll data (rates, salaries, bonuses)
     const captainPerformanceData = calculateAllCaptainsPerformance(
       usersForCalculation,
       logsForCalculation,
@@ -317,7 +384,7 @@ export async function GET(request: Request) {
       : captainPerformanceData;
 
     // Build response
-    const response: PerformanceRankingsResponse = {
+    const responseData: PerformanceRankingsResponse = {
       captains: filteredCaptains,
       dateRange: {
         startDate: actualStartDate,
@@ -326,7 +393,25 @@ export async function GET(request: Request) {
       totalCaptains: filteredCaptains.length,
     };
 
-    return NextResponse.json(response);
+    // Cache the result
+    const cacheKey = generateCacheKey(filters);
+    performanceCache.set(cacheKey, {
+      data: responseData,
+      timestamp: Date.now(),
+    });
+
+    // Clean up old cache entries (keep only last 50 entries)
+    if (performanceCache.size > 50) {
+      const entries = Array.from(performanceCache.entries());
+      entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+      const toDelete = entries.slice(0, entries.length - 50);
+      toDelete.forEach(([key]) => performanceCache.delete(key));
+    }
+
+    const response = NextResponse.json(responseData);
+    response.headers.set('X-Cache', 'MISS');
+    response.headers.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+    return response;
   } catch (error) {
     console.error('Error fetching performance analytics:', error);
     return NextResponse.json(

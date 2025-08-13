@@ -56,21 +56,21 @@
   - Run lint, tsc check, remove console.logs, and commit any fixes
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [-] 8. Add captain performance highlighting using existing components
+- [x] 8. Add captain performance highlighting using existing components
   - Highlight current user's performance in rankings table when they are a captain
   - Add basic drill-down using existing modal/dialog patterns
   - Use existing Tooltip components for metric explanations
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 5.1, 5.2, 5.5_
 
-- [ ] 9. Verify all roles can access rankings report appropriately
+- [x] 9. Verify all roles can access rankings report appropriately
   - Test sales consultants can access rankings without payroll data exposure
   - Use existing Table sorting and filtering components
   - Ensure no sensitive compensation data is displayed to any role
   - Run lint, tsc check, remove console.logs, and commit changes
   - _Requirements: 6.1, 6.4, 1.5_
 
-- [ ] 10. Add performance optimizations using existing patterns
+- [x] 10. Add performance optimizations using existing patterns
   - Implement caching for performance calculations using existing strategies
   - Use existing loading states and skeleton components
   - Optimize queries following existing database patterns
