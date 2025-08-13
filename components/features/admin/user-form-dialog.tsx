@@ -141,6 +141,11 @@ export function UserFormDialog({
   const onSubmit = async (data: CreateUserFormData | UpdateUserFormData) => {
     setIsSubmitting(true);
     try {
+      // Debug: Log the form data being submitted
+      console.log('Form data being submitted:', data);
+      console.log('Password field value:', data.password);
+      console.log('Password field type:', typeof data.password);
+      
       const result = mode === 'create' 
         ? await createUser(data as CreateUserFormData)
         : await updateUser(data as UpdateUserFormData);

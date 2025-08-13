@@ -95,11 +95,19 @@ export async function updateUser(data: UpdateUserFormData) {
       throw new Error('Unauthorized: Admin access required');
     }
 
+    // Debug: Log the received data
+    console.log('Server received data:', data);
+    console.log('Password field in server:', data.password);
+    console.log('Password field type in server:', typeof data.password);
+
     let validatedData;
     try {
       validatedData = UpdateUserSchema.parse(data);
+      console.log('Validated data:', validatedData);
+      console.log('Validated password field:', validatedData.password);
     } catch (error) {
       if (error instanceof ZodError) {
+        console.log('Validation error:', error.issues);
         const issues = error.issues;
         if (issues && issues.length > 0) {
           const firstIssue = issues[0];
