@@ -85,7 +85,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
 import { getUsers, deleteUser } from '@/lib/actions/users';
-import { convertUserDecimalFields } from '@/lib/decimal-utils';
+import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 

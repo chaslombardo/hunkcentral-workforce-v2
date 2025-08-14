@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IconCopy } from '@tabler/icons-react';
-import { convertUserDecimalFields } from '@/lib/decimal-utils';
+import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
 
 import { Button } from '@/components/ui/button';
 import {
