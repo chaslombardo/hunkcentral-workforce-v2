@@ -158,7 +158,7 @@
   - Commit changes with descriptive message
   - _Requirements: Complete API coverage and routing integrity_
 
-- [ ] 16. Fix date formatting errors and type safety
+- [x] 16. Fix date formatting errors and type safety
   - Fix "toLocaleDateString is not a function" errors by adding proper type checking
   - Create utility functions that validate Date objects before calling date methods
   - Add fallback handling for invalid date data from server
@@ -189,7 +189,7 @@
   - Commit changes with descriptive message
   - _Requirements: Development environment optimization_
 
-- [ ] 19. Investigate and fix theme switching functionality
+- [-] 19. Investigate and fix theme switching functionality
   - Debug why theme randomly switches back to light mode
   - Locate and verify theme switcher button/control is accessible to users
   - Test theme persistence across page reloads and navigation

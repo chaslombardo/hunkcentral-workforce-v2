@@ -15,7 +15,8 @@ export function Providers({ children }: ProvidersProps) {
         attribute="class"
         defaultTheme="system"
         enableSystem
-        disableTransitionOnChange
+        storageKey="hunkcentral-theme"
+        themes={['light', 'dark', 'system']}
       >
         {children}
       </ThemeProvider>

@@ -8,6 +8,7 @@ import { MobileNetworkIndicator } from "@/components/ui/offline-indicator"
 import { NavigationProvider } from "@/contexts/navigation-context"
 import { PerformanceMonitor } from "@/components/performance-monitor"
 import { FeedbackDialog } from "@/components/features/feedback/feedback-dialog"
+import { ThemeDebug } from "@/components/theme-debug"
 import { auth } from "@/lib/auth"
 
 export default async function ProtectedLayout({
@@ -53,6 +54,9 @@ export default async function ProtectedLayout({
       
       {/* Global feedback dialog */}
       <FeedbackDialog />
+      
+      {/* Theme debug component - only in development */}
+      <ThemeDebug enabled={process.env.NODE_ENV === 'development'} />
     </NavigationProvider>
   )
 }
