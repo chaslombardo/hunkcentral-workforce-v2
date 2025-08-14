@@ -35,19 +35,15 @@ import {
   Clock,
   DollarSign,
   Download,
-  TrendingUp,
-  TrendingDown,
   Award,
   AlertCircle,
   AlertTriangle,
-
   Shield,
   WifiOff,
   RefreshCw,
 } from 'lucide-react';
-import { formatCurrency, formatDate, calculateTrend } from '@/lib/formatters';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import type { PayPeriod, User, Department } from '@/types';
-import type { PayrollCalculation } from '@/lib/payCalculator';
 import { DepartmentBreakdown, type DepartmentBreakdownData } from './payroll-breakdown/department-breakdown';
 import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
 import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
@@ -64,12 +60,35 @@ import {
   TipsDetailFallback,
   PayrollLoadingSkeleton 
 } from './payroll-fallback-views';
-import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
 import type { TipEntry } from '@/lib/payCalculator';
 import type { PayrollValidationResult, ValidationError } from '@/lib/payrollValidation';
-import { validateEmployeePayroll, submitDiscrepancyReport } from '@/lib/actions/payroll-validation';
-import { getPayrollSummary, getCachedDetailedPayrollBreakdown } from '@/lib/actions/payroll';
-import { getDailyWorkBreakdown } from '@/lib/actions/daily-work';
+
+// Types for API responses
+interface DailyWorkEntry {
+  date: Date;
+  logId: string;
+  departments: Array<{
+    department: Department;
+    hours: number;
+    rate: number;
+    role: 'captain' | 'co-captain' | 'wingman';
+  }>;
+  tips: number;
+  totalHours: number;
+  grossPay: number;
+  jobsCompleted: number;
+}
+
+interface WorkPatternStats {
+  totalDaysWorked: number;
+  avgHoursPerDay: number;
+  mostCommonDepartment: Department;
+  totalJobsCompleted: number;
+  avgTipsPerDay: number;
+  busiestDay: Date;
+  highestTipDay: Date;
+  highestPayDay: Date;
+}
 
 // Real data integration - all mock data has been replaced with API calls
 
@@ -168,15 +187,20 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
       setSummaryError(null);
       
       try {
-        const summaryResult = await getPayrollSummary(userId, selectedPeriod.id);
+        const response = await fetch(`/api/payroll?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`);
         
-        if (summaryResult.success && summaryResult.data) {
-          setSummaryData(summaryResult.data);
-          setHasOfflineData(false);
-          setSummaryRetryCount(0);
-        } else {
-          throw new Error(summaryResult.error || 'Failed to load payroll summary');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load payroll summary');
         }
+        
+        const summaryData = await response.json();
+        setSummaryData(summaryData);
+        setHasOfflineData(false);
+        setSummaryRetryCount(0);
+        
+        // Cache the data
+        localStorage.setItem(`payroll-summary-${selectedPeriod.id}`, JSON.stringify(summaryData));
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
@@ -211,66 +235,73 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
       setDetailsError(null);
       
       try {
-        const detailsResult = await getCachedDetailedPayrollBreakdown(userId, selectedPeriod.id);
+        const response = await fetch(`/api/payroll/detailed?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`);
         
-        if (detailsResult.success && detailsResult.data) {
-          // Convert the enhanced payroll data to our expected format
-          const enhancedData = detailsResult.data;
-          
-          let validationResult: PayrollValidationResult | undefined;
-          if (activeTab === 'validation') {
-            try {
-              const validationResponse = await validateEmployeePayroll(userId, selectedPeriod.id);
-              if (validationResponse.success) {
-                validationResult = validationResponse.data;
-              }
-            } catch (validationError) {
-              // Validation data unavailable - continue without it
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load detailed payroll data');
+        }
+        
+        const enhancedData = await response.json();
+        
+        let validationResult: PayrollValidationResult | undefined;
+        if (activeTab === 'validation') {
+          try {
+            const validationResponse = await fetch(`/api/payroll/validation?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`);
+            if (validationResponse.ok) {
+              validationResult = await validationResponse.json();
             }
+          } catch (validationError) {
+            // Validation data unavailable - continue without it
           }
-          
-          const formattedData: DetailedPayrollData = {
-            departmentBreakdown: enhancedData.departmentBreakdown.map(dept => ({
+        }
+        
+        const formattedData: DetailedPayrollData = {
+          departmentBreakdown: enhancedData.departmentBreakdown.map((dept: any) => ({
+            department: dept.department,
+            hours: dept.hours,
+            rate: dept.rate,
+            grossPay: dept.grossPay,
+            percentage: dept.percentage,
+            isPrimary: dept.isPrimary,
+          })),
+          dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: any) => ({
+            date: new Date(day.date),
+            logId: day.logIds[0] || '',
+            departments: day.departments.map((dept: any) => ({
               department: dept.department,
               hours: dept.hours,
               rate: dept.rate,
-              grossPay: dept.grossPay,
-              percentage: dept.percentage,
-              isPrimary: dept.isPrimary,
+              role: day.role,
             })),
-            dailyWorkHistory: enhancedData.dailyWorkHistory.map(day => ({
-              date: day.date,
-              logId: day.logIds[0] || '',
-              departments: day.departments.map(dept => ({
-                department: dept.department,
-                hours: dept.hours,
-                rate: dept.rate,
-                role: day.role,
-              })),
-              tips: day.tips,
-              totalHours: day.departments.reduce((sum, dept) => sum + dept.hours, 0),
-              grossPay: day.departments.reduce((sum, dept) => sum + (dept.hours * dept.rate), 0),
-              jobsCompleted: 1, // Simplified - could be enhanced
-            })),
-            tipsDetails: enhancedData.tipsDetails,
-            workPatternStats: {
-              totalDaysWorked: enhancedData.dailyWorkHistory.length,
-              avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
-              mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
-              totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
-              avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
-              busiestDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-              highestTipDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-              highestPayDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-            },
-            validationResult,
-          };
-          
-          setDetailedData(formattedData);
-          setDetailsRetryCount(0);
-        } else {
-          throw new Error(detailsResult.error || 'Failed to load detailed payroll data');
-        }
+            tips: day.tips,
+            totalHours: day.departments.reduce((sum: number, dept: any) => sum + dept.hours, 0),
+            grossPay: day.departments.reduce((sum: number, dept: any) => sum + (dept.hours * dept.rate), 0),
+            jobsCompleted: 1, // Simplified - could be enhanced
+          })),
+          tipsDetails: enhancedData.tipsDetails.map((tip: any) => ({
+            ...tip,
+            date: new Date(tip.date),
+          })),
+          workPatternStats: {
+            totalDaysWorked: enhancedData.dailyWorkHistory.length,
+            avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
+            mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
+            totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
+            avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
+            busiestDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+            highestTipDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+            highestPayDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+          },
+          validationResult,
+        };
+        
+        setDetailedData(formattedData);
+        setDetailsRetryCount(0);
+        
+        // Cache the data
+        const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
+        localStorage.setItem(cacheKey, JSON.stringify(formattedData));
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
@@ -282,6 +313,27 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
         if (cachedData) {
           try {
             const parsed = JSON.parse(cachedData);
+            // Convert date strings back to Date objects
+            if (parsed.dailyWorkHistory) {
+              parsed.dailyWorkHistory = parsed.dailyWorkHistory.map((day: any) => ({
+                ...day,
+                date: new Date(day.date),
+              }));
+            }
+            if (parsed.tipsDetails) {
+              parsed.tipsDetails = parsed.tipsDetails.map((tip: any) => ({
+                ...tip,
+                date: new Date(tip.date),
+              }));
+            }
+            if (parsed.workPatternStats) {
+              parsed.workPatternStats = {
+                ...parsed.workPatternStats,
+                busiestDay: new Date(parsed.workPatternStats.busiestDay),
+                highestTipDay: new Date(parsed.workPatternStats.highestTipDay),
+                highestPayDay: new Date(parsed.workPatternStats.highestPayDay),
+              };
+            }
             setDetailedData(parsed);
           } catch (parseError) {
             // Failed to parse cached data
@@ -309,15 +361,20 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     setSummaryError(null);
     
     try {
-      const summaryResult = await getPayrollSummary(userId, selectedPeriod.id);
+      const response = await fetch(`/api/payroll?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`);
       
-      if (summaryResult.success && summaryResult.data) {
-        setSummaryData(summaryResult.data);
-        setHasOfflineData(false);
-        setSummaryRetryCount(0);
-      } else {
-        throw new Error(summaryResult.error || 'Failed to load payroll summary');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load payroll summary');
       }
+      
+      const summaryData = await response.json();
+      setSummaryData(summaryData);
+      setHasOfflineData(false);
+      setSummaryRetryCount(0);
+      
+      // Cache the data
+      localStorage.setItem(`payroll-summary-${selectedPeriod.id}`, JSON.stringify(summaryData));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load summary';
       setSummaryError(errorMessage);
@@ -334,54 +391,61 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
     setDetailsError(null);
     
     try {
-      const detailsResult = await getCachedDetailedPayrollBreakdown(userId, selectedPeriod.id);
+      const response = await fetch(`/api/payroll/detailed?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`);
       
-      if (detailsResult.success && detailsResult.data) {
-        // Convert the enhanced payroll data to our expected format
-        const enhancedData = detailsResult.data;
-        
-        const formattedData: DetailedPayrollData = {
-          departmentBreakdown: enhancedData.departmentBreakdown.map(dept => ({
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load detailed payroll data');
+      }
+      
+      const enhancedData = await response.json();
+      
+      const formattedData: DetailedPayrollData = {
+        departmentBreakdown: enhancedData.departmentBreakdown.map((dept: any) => ({
+          department: dept.department,
+          hours: dept.hours,
+          rate: dept.rate,
+          grossPay: dept.grossPay,
+          percentage: dept.percentage,
+          isPrimary: dept.isPrimary,
+        })),
+        dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: any) => ({
+          date: new Date(day.date),
+          logId: day.logIds[0] || '',
+          departments: day.departments.map((dept: any) => ({
             department: dept.department,
             hours: dept.hours,
             rate: dept.rate,
-            grossPay: dept.grossPay,
-            percentage: dept.percentage,
-            isPrimary: dept.isPrimary,
+            role: day.role,
           })),
-          dailyWorkHistory: enhancedData.dailyWorkHistory.map(day => ({
-            date: day.date,
-            logId: day.logIds[0] || '',
-            departments: day.departments.map(dept => ({
-              department: dept.department,
-              hours: dept.hours,
-              rate: dept.rate,
-              role: day.role,
-            })),
-            tips: day.tips,
-            totalHours: day.departments.reduce((sum, dept) => sum + dept.hours, 0),
-            grossPay: day.departments.reduce((sum, dept) => sum + (dept.hours * dept.rate), 0),
-            jobsCompleted: 1, // Simplified - could be enhanced
-          })),
-          tipsDetails: enhancedData.tipsDetails,
-          workPatternStats: {
-            totalDaysWorked: enhancedData.dailyWorkHistory.length,
-            avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
-            mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
-            totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
-            avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
-            busiestDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-            highestTipDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-            highestPayDay: enhancedData.dailyWorkHistory[0]?.date || new Date(),
-          },
-          validationResult: undefined,
-        };
-        
-        setDetailedData(formattedData);
-        setDetailsRetryCount(0);
-      } else {
-        throw new Error(detailsResult.error || 'Failed to load detailed payroll data');
-      }
+          tips: day.tips,
+          totalHours: day.departments.reduce((sum: number, dept: any) => sum + dept.hours, 0),
+          grossPay: day.departments.reduce((sum: number, dept: any) => sum + (dept.hours * dept.rate), 0),
+          jobsCompleted: 1, // Simplified - could be enhanced
+        })),
+        tipsDetails: enhancedData.tipsDetails.map((tip: any) => ({
+          ...tip,
+          date: new Date(tip.date),
+        })),
+        workPatternStats: {
+          totalDaysWorked: enhancedData.dailyWorkHistory.length,
+          avgHoursPerDay: enhancedData.totalHours / Math.max(enhancedData.dailyWorkHistory.length, 1),
+          mostCommonDepartment: enhancedData.departmentBreakdown[0]?.department || 'admin',
+          totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
+          avgTipsPerDay: enhancedData.tips / Math.max(enhancedData.dailyWorkHistory.length, 1),
+          busiestDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+          highestTipDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+          highestPayDay: new Date(enhancedData.dailyWorkHistory[0]?.date || new Date()),
+        },
+        validationResult: undefined,
+      };
+      
+      setDetailedData(formattedData);
+      setDetailsRetryCount(0);
+      
+      // Cache the data
+      const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
+      localStorage.setItem(cacheKey, JSON.stringify(formattedData));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load detailed data';
       setDetailsError(errorMessage);
@@ -407,9 +471,21 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
       errors: discrepancyErrors,
     };
     
-    const result = await submitDiscrepancyReport(userId, selectedPeriod.id, fullReportData);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to submit report');
+    const response = await fetch('/api/payroll/discrepancy-report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        employeeId: userId,
+        payPeriodId: selectedPeriod.id,
+        reportData: fullReportData,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to submit report');
     }
   }, [userId, selectedPeriod, discrepancyErrors]);
 
