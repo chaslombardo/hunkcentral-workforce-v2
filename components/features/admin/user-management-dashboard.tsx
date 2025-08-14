@@ -86,6 +86,7 @@ import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
 import { getUsers, deleteUser } from '@/lib/actions/users';
 import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
+import { formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 
@@ -400,7 +401,7 @@ export function UserManagementDashboard() {
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <IconCalendar className="h-4 w-4" />
-          {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() : 'N/A'}
+          {formatDateDisplay(row.original.createdAt)}
         </div>
       ),
     },

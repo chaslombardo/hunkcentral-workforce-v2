@@ -49,6 +49,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 
 import { deleteUser } from '@/lib/actions/users';
+import { formatDate, formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 
@@ -311,13 +312,10 @@ export function UserDetailView({ user }: UserDetailViewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-                month: 'short', 
-                year: 'numeric' 
-              }) : 'N/A'}
+              {formatDate(user.createdAt)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+              {formatDateDisplay(user.createdAt)}
             </p>
           </CardContent>
         </Card>
