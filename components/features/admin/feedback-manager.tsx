@@ -23,6 +23,7 @@ import {
   Filter,
   Search
 } from "lucide-react";
+import { formatDateDisplay } from "@/lib/formatters";
 
 interface FeedbackItem {
   id: string;
@@ -358,7 +359,7 @@ export function FeedbackManager() {
                     </code>
                   </TableCell>
                   <TableCell>
-                    {new Date(item.timestamp).toLocaleDateString()}
+                    {formatDateDisplay(item.timestamp)}
                   </TableCell>
                   <TableCell>
                     <Button

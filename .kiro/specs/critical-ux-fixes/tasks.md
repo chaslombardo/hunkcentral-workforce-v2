@@ -134,3 +134,104 @@
   - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
+
+## Phase 5: Critical Console Error Resolution (Priority 1)
+
+- [x] 14. Fix PrismaClient browser environment errors
+  - Identify and remove any PrismaClient imports in client-side components
+  - Move database operations to server actions or API routes
+  - Fix analytics system to use server-side processing instead of direct database access
+  - Add proper error boundaries to prevent analytics failures from breaking UI
+  - Test that no "PrismaClient is unable to run in this browser environment" errors occur
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Client-server separation and error handling_
+
+- [x] 15. Fix missing API endpoints and routing errors
+  - Create missing `/api/health` endpoint for application health checks
+  - Fix 404 errors on `/reports` route navigation
+  - Ensure all route prefetching works without generating 404 errors
+  - Test that all application routes load successfully
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Complete API coverage and routing integrity_
+
+- [x] 16. Fix date formatting errors and type safety
+  - Fix "toLocaleDateString is not a function" errors by adding proper type checking
+  - Create utility functions that validate Date objects before calling date methods
+  - Add fallback handling for invalid date data from server
+  - Test that all date displays work without JavaScript errors
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Robust data type handling_
+
+- [ ] 17. Fix PWA manifest access and authentication issues
+  - Fix 401 Unauthorized error when accessing `/manifest.json`
+  - Ensure PWA manifest is accessible without authentication requirements
+  - Verify service worker registration works without errors
+  - Test PWA functionality and offline capabilities
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: PWA configuration and security_
+
+- [x] 18. Fix Webpack/Turbopack configuration warning
+  - Resolve "Webpack is configured while Turbopack is not" warning
+  - Review next.config.js for Webpack configurations that conflict with Turbopack
+  - Either configure Turbopack properly or remove conflicting Webpack settings
+  - Follow Next.js documentation for Turbopack configuration: https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
+  - Test that development server starts without configuration warnings
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Development environment optimization_
+
+- [x] 19. Investigate and fix theme switching functionality
+  - Debug why theme randomly switches back to light mode
+  - Locate and verify theme switcher button/control is accessible to users
+  - Test theme persistence across page reloads and navigation
+  - Ensure theme preference is properly saved in localStorage/cookies
+  - Add clear UI indication of current theme and switching option
+  - Test theme switching works consistently across all pages
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: User experience and theme consistency_
+
+- [ ] 20. Fix captain defaulting in Team Hours sections
+  - Verify create log form defaults selected captain in Team Hours sections
+  - Ensure captain selection at top of form auto-populates in Junk team hours
+  - Ensure captain selection at top of form auto-populates in Move team hours
+  - Test that changing captain at top updates team hours sections accordingly
+  - Verify co-captain checkbox functionality works with captain defaults
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Form usability and data consistency_
+
+- [x] 21. Fix React.Fragment className errors in create log form
+  - Debug and fix "Invalid prop className supplied to React.Fragment" console errors
+  - Identify components incorrectly passing className to React.Fragment
+  - Replace React.Fragment with proper div or remove className props
+  - Fix form submission routing to redirect to view logs page after successful submission
+  - Test create log form submission flow works without console errors
+  - Verify successful log creation redirects to appropriate logs view page
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Form functionality and error-free operation_
+
+- [x] 22. Fix My Payroll page HMR module instantiation error
+  - Debug "Module factory is not available" error in my-payroll-view.tsx
+  - Fix import issues with lib/actions/data module
+  - Resolve HMR (Hot Module Replacement) update conflicts
+  - Ensure proper server/client component separation for payroll data
+  - Test My Payroll page loads without module instantiation errors
+  - Verify payroll data displays correctly after fixing module issues
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Payroll functionality and development stability_

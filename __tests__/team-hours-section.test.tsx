@@ -12,6 +12,26 @@ vi.mock('@/hooks/useSession', () => ({
   }),
 }));
 
+// Mock employees data
+const mockEmployees = [
+  {
+    id: '1',
+    fullName: 'John Captain',
+    email: 'john@example.com',
+    roles: ['captain'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '2',
+    fullName: 'Jane Wingman',
+    email: 'jane@example.com',
+    roles: ['wingman'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
 // Test wrapper component that provides form context
 function TestWrapper({ 
   children, 
@@ -50,6 +70,7 @@ describe('TeamHoursSection', () => {
         <TeamHoursSection
           title="Other Hours"
           description="Record training, administrative, and other non-job hours for team members."
+          employees={mockEmployees}
         />
       </TestWrapper>
     );
@@ -66,6 +87,7 @@ describe('TeamHoursSection', () => {
         <TeamHoursSection
           title="Other Hours"
           description="Record training, administrative, and other non-job hours for team members."
+          employees={mockEmployees}
         />
       </TestWrapper>
     );
@@ -92,6 +114,7 @@ describe('TeamHoursSection', () => {
         <TeamHoursSection
           title="Other Hours"
           description="Record training, administrative, and other non-job hours for team members."
+          employees={mockEmployees}
         />
       </TestWrapper>
     );
@@ -118,6 +141,7 @@ describe('TeamHoursSection', () => {
         <TeamHoursSection
           title="Other Hours"
           description="Record training, administrative, and other non-job hours for team members."
+          employees={mockEmployees}
         />
       </TestWrapper>
     );
@@ -149,6 +173,7 @@ describe('TeamHoursSection', () => {
         <TeamHoursSection
           title="Other Hours"
           description="Record training, administrative, and other non-job hours for team members."
+          employees={mockEmployees}
         />
       </TestWrapper>
     );

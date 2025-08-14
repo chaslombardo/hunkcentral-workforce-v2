@@ -17,7 +17,7 @@ import {
   IconBriefcase,
   IconShield,
 } from '@tabler/icons-react';
-import { Decimal } from '@prisma/client/runtime/library';
+// Remove Prisma import - use number type instead
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 
 import { deleteUser } from '@/lib/actions/users';
+import { formatDate, formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 
@@ -57,21 +58,21 @@ interface User {
   email: string;
   fullName: string;
   roles: string[];
-  rateJunkCaptain?: Decimal | null;
-  rateJunkWingman?: Decimal | null;
-  rateMoveCaptain?: Decimal | null;
-  rateMoveWingman?: Decimal | null;
-  rateZigma?: Decimal | null;
-  rateTraining?: Decimal | null;
-  rateEstimating?: Decimal | null;
-  rateWarehouse?: Decimal | null;
-  rateAdmin?: Decimal | null;
-  salaryAmount?: Decimal | null;
+  rateJunkCaptain?: number | null;
+  rateJunkWingman?: number | null;
+  rateMoveCaptain?: number | null;
+  rateMoveWingman?: number | null;
+  rateZigma?: number | null;
+  rateTraining?: number | null;
+  rateEstimating?: number | null;
+  rateWarehouse?: number | null;
+  rateAdmin?: number | null;
+  salaryAmount?: number | null;
   salaryFrequency?: string | null;
   salaryType?: string | null;
-  commissionRate?: Decimal | null;
-  junkBonusGoal: Decimal;
-  moveBonusGoal: Decimal;
+  commissionRate?: number | null;
+  junkBonusGoal: number;
+  moveBonusGoal: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -105,7 +106,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const formatCurrency = (amount?: Decimal | null) => {
+  const formatCurrency = (amount?: number | null) => {
     if (!amount) return '-';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -113,7 +114,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
     }).format(Number(amount));
   };
 
-  const formatPercentage = (value?: Decimal | null) => {
+  const formatPercentage = (value?: number | null) => {
     if (!value) return '-';
     return `${(Number(value) * 100).toFixed(1)}%`;
   };
@@ -311,13 +312,10 @@ export function UserDetailView({ user }: UserDetailViewProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Date(user.createdAt).toLocaleDateString('en-US', { 
-                month: 'short', 
-                year: 'numeric' 
-              })}
+              {formatDate(user.createdAt)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {new Date(user.createdAt).toLocaleDateString()}
+              {formatDateDisplay(user.createdAt)}
             </p>
           </CardContent>
         </Card>

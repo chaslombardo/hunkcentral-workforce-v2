@@ -409,7 +409,25 @@ export async function getUserById(userId: string) {
       });
     }
 
-    return { success: true, user };
+    // Convert Decimal fields to numbers for client components
+    const userWithNumbers = {
+      ...user,
+      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : null,
+      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : null,
+      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : null,
+      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : null,
+      rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
+      rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
+      rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,
+      rateWarehouse: user.rateWarehouse ? Number(user.rateWarehouse) : null,
+      rateAdmin: user.rateAdmin ? Number(user.rateAdmin) : null,
+      salaryAmount: user.salaryAmount ? Number(user.salaryAmount) : null,
+      commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
+      junkBonusGoal: Number(user.junkBonusGoal),
+      moveBonusGoal: Number(user.moveBonusGoal),
+    };
+
+    return { success: true, user: userWithNumbers };
   } catch (error) {
     // Error fetching user
     return { 

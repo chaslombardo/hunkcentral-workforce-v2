@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/toggle-group';
 
 import type { PayPeriod } from '@/types';
+import { formatDateForChart } from '@/lib/formatters';
 
 interface PayrollChartProps {
   selectedPeriod: PayPeriod | null;
@@ -242,11 +243,7 @@ export function PayrollChart({ selectedPeriod }: PayrollChartProps) {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+                return formatDateForChart(value);
               }}
             />
             <ChartTooltip
@@ -254,10 +251,7 @@ export function PayrollChart({ selectedPeriod }: PayrollChartProps) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    });
+                    return formatDateForChart(value);
                   }}
                   indicator="dot"
                   formatter={(value, name) => {

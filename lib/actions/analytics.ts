@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { convertUserDecimalFields } from '@/lib/decimal-utils';
+import { safeFormatDate } from '@/lib/date-utils';
 
 export interface AnalyticsOverview {
   totalRevenue: number;
@@ -508,7 +509,7 @@ export async function getPerformanceMetrics(): Promise<{
       const efficiency = revenue > 0 ? (laborCost / revenue) * 100 : 0;
 
       monthlyTrends.push({
-        month: monthStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        month: safeFormatDate(monthStart, { month: 'short', year: 'numeric' }),
         revenue,
         jobs,
         efficiency,
@@ -643,7 +644,7 @@ export async function getTrendAnalysis(): Promise<{
       const growth = previousRevenue > 0 ? ((revenue - previousRevenue) / previousRevenue) * 100 : 0;
 
       revenueGrowth.push({
-        period: monthStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        period: safeFormatDate(monthStart, { month: 'short', year: 'numeric' }),
         revenue,
         growth,
       });
@@ -690,7 +691,7 @@ export async function getTrendAnalysis(): Promise<{
 
     const seasonalPatterns = Array.from(seasonalData.entries())
       .map(([monthNumber, data]) => ({
-        month: new Date(2024, monthNumber, 1).toLocaleDateString('en-US', { month: 'long' }),
+        month: safeFormatDate(new Date(2024, monthNumber, 1), { month: 'long' }),
         avgRevenue: data.count > 0 ? data.revenue / data.count : 0,
         avgJobs: data.count > 0 ? data.jobs / data.count : 0,
       }))

@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import Link from "next/link"
 import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization"
 import {
   Home,
@@ -239,22 +238,20 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
               index === 0 && "hidden md:flex" // Hide first item on smaller screens
             )}>
               {breadcrumb.href ? (
-                <BreadcrumbLink asChild>
-                  <Link 
-                    href={breadcrumb.href} 
-                    className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-                    aria-label={`Navigate to ${breadcrumb.label}`}
-                  >
-                    {breadcrumb.icon && (
-                      <breadcrumb.icon 
-                        className="h-3.5 w-3.5" 
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className="truncate max-w-[120px] sm:max-w-[160px]">
-                      {breadcrumb.label}
-                    </span>
-                  </Link>
+                <BreadcrumbLink 
+                  href={breadcrumb.href}
+                  className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                  aria-label={`Navigate to ${breadcrumb.label}`}
+                >
+                  {breadcrumb.icon && (
+                    <breadcrumb.icon 
+                      className="h-3.5 w-3.5" 
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="truncate max-w-[120px] sm:max-w-[160px]">
+                    {breadcrumb.label}
+                  </span>
                 </BreadcrumbLink>
               ) : (
                 <BreadcrumbPage 

@@ -25,6 +25,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 import Link from 'next/link'
+import { formatDateDisplay } from '@/lib/formatters'
 
 export default function DashboardPage() {
   const { user } = useSession()
@@ -103,7 +104,7 @@ export default function DashboardPage() {
     const diffInDays = Math.floor(diffInHours / 24)
     if (diffInDays < 7) return `${diffInDays}d ago`
     
-    return date.toLocaleDateString()
+    return formatDateDisplay(date)
   }
 
   return (

@@ -2,6 +2,8 @@
  * Utility functions for formatting data in reports and UI components
  */
 
+import { safeFormatDate, isValidDate, toSafeDate } from './date-utils';
+
 /**
  * Format a number as currency (USD)
  */
@@ -21,9 +23,10 @@ export const formatHours = (hours: number): string => {
 
 /**
  * Format a date in short format (e.g., "Jan 15, 2025")
+ * Now uses safe date handling to prevent "toLocaleDateString is not a function" errors
  */
-export const formatDate = (date: Date): string => {
-  return date.toLocaleDateString('en-US', {
+export const formatDate = (date: unknown): string => {
+  return safeFormatDate(date, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -55,4 +58,49 @@ export const calculateTrend = (current: number, previous: number): { percentage:
     percentage: change,
     isPositive: change > 0,
   };
+};
+
+/**
+ * Format a date for display in tables and lists
+ * Safe wrapper around toLocaleDateString with fallback handling
+ */
+export const formatDateDisplay = (date: unknown): string => {
+  return safeFormatDate(date);
+};
+
+/**
+ * Format a date with time for detailed views
+ */
+export const formatDateTime = (date: unknown): string => {
+  return safeFormatDate(date, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+/**
+ * Format a date for form inputs (YYYY-MM-DD)
+ */
+export const formatDateForInput = (date: unknown): string => {
+  const safeDate = toSafeDate(date);
+  if (!safeDate) return '';
+  
+  try {
+    return safeDate.toISOString().split('T')[0];
+  } catch (error) {
+    return '';
+  }
+};
+
+/**
+ * Format a date for chart labels
+ */
+export const formatDateForChart = (date: unknown): string => {
+  return safeFormatDate(date, {
+    month: 'short',
+    day: 'numeric',
+  });
 };
