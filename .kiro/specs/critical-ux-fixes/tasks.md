@@ -189,7 +189,7 @@
   - Commit changes with descriptive message
   - _Requirements: Development environment optimization_
 
-- [-] 19. Investigate and fix theme switching functionality
+- [x] 19. Investigate and fix theme switching functionality
   - Debug why theme randomly switches back to light mode
   - Locate and verify theme switcher button/control is accessible to users
   - Test theme persistence across page reloads and navigation
@@ -212,7 +212,7 @@
   - Commit changes with descriptive message
   - _Requirements: Form usability and data consistency_
 
-- [ ] 21. Fix React.Fragment className errors in create log form
+- [-] 21. Fix React.Fragment className errors in create log form
   - Debug and fix "Invalid prop className supplied to React.Fragment" console errors
   - Identify components incorrectly passing className to React.Fragment
   - Replace React.Fragment with proper div or remove className props
