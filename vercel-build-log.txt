@@ -1,0 +1,333 @@
+[23:20:06.812] Running build in Washington, D.C., USA (East) – iad1
+[23:20:06.813] Build machine configuration: 4 cores, 8 GB
+[23:20:06.827] Cloning github.com/chaslombardo/hunkcentral-new (Branch: main, Commit: 6b5d8ff)
+[23:20:07.388] Cloning completed: 561.000ms
+[23:20:10.343] Restored build cache from previous deployment (J58erRNZhtjRqr6vu4MfdPFD1zng)
+[23:20:17.474] Running "vercel build"
+[23:20:17.973] Vercel CLI 44.7.3
+[23:20:18.345] Running "install" command: `npm ci`...
+[23:20:48.126] 
+[23:20:48.127] added 739 packages, and audited 740 packages in 30s
+[23:20:48.127] 
+[23:20:48.127] 196 packages are looking for funding
+[23:20:48.127]   run `npm fund` for details
+[23:20:48.128] 
+[23:20:48.128] found 0 vulnerabilities
+[23:20:48.217] Detected Next.js version: 15.4.1
+[23:20:48.217] Running "npm run vercel:build"
+[23:20:48.348] 
+[23:20:48.348] > hunkcentral-v2@0.1.0 vercel:build
+[23:20:48.348] > npm run db:generate && npm run build
+[23:20:48.348] 
+[23:20:48.479] 
+[23:20:48.479] > hunkcentral-v2@0.1.0 db:generate
+[23:20:48.479] > prisma generate
+[23:20:48.479] 
+[23:20:49.463] Environment variables loaded from .env
+[23:20:49.464] Prisma schema loaded from prisma/schema.prisma
+[23:20:49.876] ┌─────────────────────────────────────────────────────────┐
+[23:20:49.877] │  Update available 6.12.0 -> 6.14.0                      │
+[23:20:49.877] │  Run the following to update                            │
+[23:20:49.877] │    npm i --save-dev prisma@latest                       │
+[23:20:49.877] │    npm i @prisma/client@latest                          │
+[23:20:49.877] └─────────────────────────────────────────────────────────┘
+[23:20:49.877] 
+[23:20:49.877] ✔ Generated Prisma Client (v6.12.0) to ./node_modules/@prisma/client in 174ms
+[23:20:49.877] 
+[23:20:49.877] Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+[23:20:49.877] 
+[23:20:49.877] Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+[23:20:49.878] 
+[23:20:50.025] 
+[23:20:50.025] > hunkcentral-v2@0.1.0 build
+[23:20:50.025] > next build
+[23:20:50.025] 
+[23:20:51.045]    ▲ Next.js 15.4.1
+[23:20:51.046]    - Environments: .env
+[23:20:51.046]    - Experiments (use with caution):
+[23:20:51.046]      · optimizePackageImports
+[23:20:51.046] 
+[23:20:51.085]    Creating an optimized production build ...
+[23:21:26.163]  ✓ Compiled successfully in 34.0s
+[23:21:26.174]    Linting and checking validity of types ...
+[23:21:37.441] 
+[23:21:37.442] ./app/(protected)/reports/analytics/page.tsx
+[23:21:37.442] 263:40  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.442] 318:64  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.442] 
+[23:21:37.442] ./app/api/analytics/route.ts
+[23:21:37.442] 21:34  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.442] 34:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.442] 
+[23:21:37.442] ./app/api/payroll/daily-work/route.ts
+[23:21:37.442] 27:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.443] 
+[23:21:37.443] ./app/api/payroll/detailed/route.ts
+[23:21:37.443] 27:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.443] 
+[23:21:37.443] ./app/api/payroll/discrepancy-report/route.ts
+[23:21:37.443] 26:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.443] 
+[23:21:37.443] ./app/api/payroll/route.ts
+[23:21:37.443] 27:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.443] 
+[23:21:37.443] ./app/api/payroll/validation/route.ts
+[23:21:37.444] 27:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.444] 
+[23:21:37.444] ./components/brand/metric-card.tsx
+[23:21:37.444] 139:10  Warning: '_trend' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.444] 
+[23:21:37.444] ./components/features/admin/ab-test-manager.tsx
+[23:21:37.444] 9:10  Warning: 'Select' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.444] 9:18  Warning: 'SelectContent' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.450] 9:33  Warning: 'SelectItem' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.450] 9:45  Warning: 'SelectTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 9:60  Warning: 'SelectValue' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 23:3  Warning: 'Target' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 26:10  Warning: 'abTesting' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 48:62  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.451] 167:52  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 303:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.451] 443:61  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.451] 616:28  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 
+[23:21:37.451] ./components/features/admin/analytics-dashboard.tsx
+[23:21:37.451] 24:10  Warning: 'analytics' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.451] 28:28  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.451] 29:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.451] 30:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.452] 31:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.452] 32:17  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.453] 157:9  Warning: 'getTrendIcon' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.453] 377:79  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.453] 391:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.453] 
+[23:21:37.454] ./components/features/admin/feedback-manager.tsx
+[23:21:37.454] 8:10  Warning: 'Textarea' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.454] 12:10  Warning: 'Tabs' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.455] 12:16  Warning: 'TabsContent' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.455] 12:29  Warning: 'TabsList' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.455] 12:39  Warning: 'TabsTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.455] 347:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.456] 352:68  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.456] 395:84  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.456] 398:80  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.456] 
+[23:21:37.456] ./components/features/commission/commission-list-with-actions.tsx
+[23:21:37.457] 117:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.457] 152:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.457] 184:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.457] 
+[23:21:37.457] ./components/features/reports/my-payroll-view.tsx
+[23:21:37.457] 151:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.458] 216:20  Warning: 'parseError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.458] 254:20  Warning: 'validationError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.458] 260:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.458] 268:69  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.458] 271:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.458] 278:68  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.459] 279:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.459] 282:59  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.460] 318:75  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.460] 324:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.460] 338:20  Warning: 'parseError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.460] 404:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.461] 412:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.461] 415:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.461] 422:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.461] 423:64  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.461] 426:57  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.462] 
+[23:21:37.462] ./components/features/reports/payroll-data-table.tsx
+[23:21:37.462] 375:19  Warning: 'setLoading' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.462] 376:11  Warning: 'isMobile' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.462] 
+[23:21:37.462] ./components/features/reports/payroll-error-boundary.tsx
+[23:21:37.463] 106:14  Warning: 'retryError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 121:14  Warning: 'cacheError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 145:14  Warning: 'cacheError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 384:17  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 384:24  Warning: 'errorInfo' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 
+[23:21:37.463] ./components/features/reports/payroll-fallback-views.tsx
+[23:21:37.463] 56:14  Warning: 'retryError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.463] 72:14  Warning: 'cacheError' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.464] 80:11  Warning: 'isNetworkError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.464] 
+[23:21:37.464] ./components/features/reports/payroll-report-dashboard.tsx
+[23:21:37.464] 51:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.464] 
+[23:21:37.465] ./components/features/reports/rankings-client.tsx
+[23:21:37.465] 14:3  Warning: 'BarChart3' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.466] 20:3  Warning: 'Truck' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.466] 21:3  Warning: 'Package' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.468] 430:30  Warning: 'captains' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.469] 430:40  Warning: 'currentUserId' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.469] 430:55  Warning: 'isCurrentUserCaptain' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.469] 430:77  Warning: 'formatCurrency' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.469] 430:93  Warning: 'formatPercentage' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.470] 430:113  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.470] 434:30  Warning: 'captains' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.470] 434:40  Warning: 'currentUserId' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.470] 434:55  Warning: 'isCurrentUserCaptain' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.471] 434:77  Warning: 'formatCurrency' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.471] 434:93  Warning: 'formatPercentage' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.471] 434:113  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.471] 438:30  Warning: 'captain' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.471] 
+[23:21:37.472] ./components/forms/form-feedback-demo.tsx
+[23:21:37.472] 8:43  Warning: 'formToastPresets' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.472] 105:60  Warning: Expected an assignment or function call and instead saw an expression.  @typescript-eslint/no-unused-expressions
+[23:21:37.473] 
+[23:21:37.473] ./components/forms/form-toast.tsx
+[23:21:37.473] 6:3  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.473] 7:3  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.473] 8:3  Warning: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.474] 9:3  Warning: 'Info' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.474] 10:3  Warning: 'Loader2' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.474] 11:3  Warning: 'X' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.474] 
+[23:21:37.474] ./components/forms/smart-input-demo.tsx
+[23:21:37.475] 26:72  Warning: 'errors' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.475] 
+[23:21:37.475] ./components/layout/unified-mobile-navigation.tsx
+[23:21:37.475] 228:9  Warning: 'pathname' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.475] 266:9  Warning: 'pathname' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.476] 
+[23:21:37.476] ./components/performance-monitor.tsx
+[23:21:37.476] 182:50  Warning: The ref value 'startTimeRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'startTimeRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+[23:21:37.476] 183:49  Warning: The ref value 'interactionCountRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'interactionCountRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+[23:21:37.476] 209:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.476] 225:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.476] 280:72  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.486] 290:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.487] 303:91  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.487] 305:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.487] 
+[23:21:37.487] ./lib/ab-testing.ts
+[23:21:37.487] 8:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.487] 22:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.487] 28:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.488] 52:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.488] 166:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.488] 356:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.488] 
+[23:21:37.488] ./lib/actions/payroll-validation.ts
+[23:21:37.488] 72:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.488] 112:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.488] 147:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.489] 168:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.489] 403:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.489] 432:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.489] 524:15  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.489] 
+[23:21:37.489] ./lib/analytics.ts
+[23:21:37.489] 5:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.489] 22:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.489] 115:84  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.489] 189:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 
+[23:21:37.490] ./lib/decimal-utils.client.ts
+[23:21:37.490] 12:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 29:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 46:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 47:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 48:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 49:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.490] 50:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 51:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 52:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 53:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 54:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 55:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 56:20  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 57:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.491] 58:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 96:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 97:9  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 98:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 99:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 100:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 101:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 125:10  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.492] 139:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.493] 140:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.493] 141:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+[23:21:37.493] 
+[23:21:37.493] ./lib/formatters.ts
+[23:21:37.493] 5:26  Warning: 'isValidDate' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.493] 93:12  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.493] 
+[23:21:37.493] ./lib/payCalculator.ts
+[23:21:37.493] 1007:7  Warning: 'CACHE_DURATION' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+[23:21:37.493] 
+[23:21:37.493] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[23:21:49.150]    Collecting page data ...
+[23:21:53.581]    Generating static pages (0/39) ...
+[23:21:54.287]    Generating static pages (9/39) 
+[23:21:54.492]    Generating static pages (19/39) 
+[23:21:54.699]    Generating static pages (29/39) 
+[23:21:54.803]  ✓ Generating static pages (39/39)
+[23:21:56.170]    Finalizing page optimization ...
+[23:21:56.172]    Collecting build traces ...
+[23:22:19.582] 
+[23:22:19.594] Route (app)                                 Size  First Load JS
+[23:22:19.594] ┌ ○ /                                      171 B         545 kB
+[23:22:19.595] ├ ○ /_not-found                            189 B         545 kB
+[23:22:19.595] ├ ƒ /admin/analytics                      9.7 kB         574 kB
+[23:22:19.595] ├ ƒ /admin/audit                         3.15 kB         567 kB
+[23:22:19.595] ├ ƒ /admin/pay-periods                   3.58 kB         567 kB
+[23:22:19.595] ├ ƒ /admin/users                         4.61 kB         575 kB
+[23:22:19.595] ├ ƒ /admin/users/[id]                    3.36 kB         573 kB
+[23:22:19.595] ├ ƒ /api/analytics                         171 B         545 kB
+[23:22:19.595] ├ ƒ /api/analytics/performance             171 B         545 kB
+[23:22:19.595] ├ ƒ /api/auth/[...nextauth]                171 B         545 kB
+[23:22:19.595] ├ ƒ /api/feedback                          171 B         545 kB
+[23:22:19.595] ├ ƒ /api/health                            171 B         545 kB
+[23:22:19.595] ├ ƒ /api/navigation/draft-logs             171 B         545 kB
+[23:22:19.595] ├ ƒ /api/navigation/pending-commissions    171 B         545 kB
+[23:22:19.595] ├ ƒ /api/navigation/pending-logs           171 B         545 kB
+[23:22:19.595] ├ ƒ /api/pay-periods                       171 B         545 kB
+[23:22:19.595] ├ ƒ /api/payroll                           171 B         545 kB
+[23:22:19.595] ├ ƒ /api/payroll/daily-work                171 B         545 kB
+[23:22:19.595] ├ ƒ /api/payroll/detailed                  171 B         545 kB
+[23:22:19.595] ├ ƒ /api/payroll/discrepancy-report        171 B         545 kB
+[23:22:19.595] ├ ƒ /api/payroll/validation                171 B         545 kB
+[23:22:19.595] ├ ƒ /api/users                             171 B         545 kB
+[23:22:19.595] ├ ○ /auth/login                          2.65 kB         575 kB
+[23:22:19.595] ├ ƒ /commission/create                   5.27 kB         578 kB
+[23:22:19.595] ├ ƒ /commission/list                     8.65 kB         581 kB
+[23:22:19.596] ├ ƒ /dashboard                           3.27 kB         579 kB
+[23:22:19.596] ├ ƒ /dashboard/breadcrumbs-demo          2.83 kB         570 kB
+[23:22:19.596] ├ ƒ /dashboard/empty-states-demo         3.39 kB         567 kB
+[23:22:19.596] ├ ƒ /dashboard/form-feedback-demo          729 B         580 kB
+[23:22:19.596] ├ ƒ /dashboard/metric-cards-example        986 B         576 kB
+[23:22:19.596] ├ ƒ /dashboard/mobile-form-demo          1.54 kB         581 kB
+[23:22:19.596] ├ ƒ /dashboard/motion-demo               3.77 kB         589 kB
+[23:22:19.596] ├ ƒ /dashboard/smart-input-demo          1.24 kB         578 kB
+[23:22:19.596] ├ ○ /offline                             2.39 kB         575 kB
+[23:22:19.596] ├ ƒ /reports                               160 B         545 kB
+[23:22:19.596] ├ ƒ /reports/analytics                   1.73 kB         574 kB
+[23:22:19.596] ├ ƒ /reports/my-payroll                  20.2 kB         589 kB
+[23:22:19.596] ├ ƒ /reports/payroll                     8.58 kB         586 kB
+[23:22:19.596] └ ƒ /reports/rankings                    4.69 kB         577 kB
+[23:22:19.596] + First Load JS shared by all             545 kB
+[23:22:19.596]   └ chunks/vendors-77433bd198235d94.js    543 kB
+[23:22:19.596]   └ other shared chunks (total)          2.07 kB
+[23:22:19.596] 
+[23:22:19.596] 
+[23:22:19.596] ƒ Middleware                             60.8 kB
+[23:22:19.597] 
+[23:22:19.598] ○  (Static)   prerendered as static content
+[23:22:19.598] ƒ  (Dynamic)  server-rendered on demand
+[23:22:19.598] 
+[23:22:19.859] Traced Next.js server files in: 89.387ms
+[23:22:20.241] Created all serverless functions in: 381.712ms
+[23:22:20.303] Collected static files (public/, static/, .next/static): 10.94ms
+[23:22:20.425] Build Completed in /vercel/output [2m]
+[23:22:20.620] Deploying outputs...
+[23:22:34.813] Deployment completed
+[23:22:35.784] Creating build cache...
+[23:22:59.831] Created build cache: 24.046s
+[23:22:59.832] Uploading build cache [325.91 MB]
+[23:23:03.778] Build cache uploaded: 3.946s

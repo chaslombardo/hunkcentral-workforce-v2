@@ -69,8 +69,10 @@ export const config = {
      * - manifest.json (PWA manifest)
      * - sw.js (service worker)
      * - icon-*.png (PWA icons)
-     * - public folder
+     * - browserconfig.xml (IE/Edge config)
+     * - robots.txt (SEO)
+     * - sitemap.xml (SEO)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icon-.*\\.png|public).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icon-.*\\.png|browserconfig.xml|robots.txt|sitemap.xml).*)',
   ],
 };

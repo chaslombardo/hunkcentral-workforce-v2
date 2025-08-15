@@ -168,7 +168,7 @@
   - Commit changes with descriptive message
   - _Requirements: Robust data type handling_
 
-- [ ] 17. Fix PWA manifest access and authentication issues
+- [x] 17. Fix PWA manifest access and authentication issues
   - Fix 401 Unauthorized error when accessing `/manifest.json`
   - Ensure PWA manifest is accessible without authentication requirements
   - Verify service worker registration works without errors
@@ -235,3 +235,52 @@
   - Remove any console.logs in the production code.
   - Commit changes with descriptive message
   - _Requirements: Payroll functionality and development stability_
+
+## Phase 6: Critical Deployment and Build Issues (Priority 1)
+
+- [ ] 23. Fix Vercel deployment missing pages and build issues
+  - Investigate why log pages and other routes return 404 on Vercel but work locally
+  - Check for environment variable differences between local and Vercel deployment
+  - Verify all dynamic routes are properly configured for static generation
+  - Check next.config.js for deployment-specific configurations
+  - Ensure all required pages are being built and deployed to Vercel
+  - Test that all application routes work correctly on Vercel deployment
+  - Run `npm run build` locally to verify build process matches Vercel
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Complete application deployment and routing integrity_
+
+- [ ] 24. Commit all uncommitted files and clean up version control
+  - Review all uncommitted changes in the repository
+  - Stage and commit appropriate files with descriptive commit messages
+  - Remove any temporary files or build artifacts that shouldn't be committed
+  - Ensure .gitignore is properly configured to exclude unnecessary files
+  - Verify repository is in clean state with no uncommitted changes
+  - Push all committed changes to remote repository
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - _Requirements: Version control integrity and deployment consistency_
+
+- [ ] 25. Remove "demo" from dashboard names and fix branding
+  - Locate and remove "demo" text from all dashboard page titles and headers
+  - Update dashboard navigation labels to remove demo references
+  - Ensure all dashboard pages have proper production-ready titles
+  - Update any demo placeholder content with appropriate production content
+  - Test that all dashboard pages display proper branding and titles
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Professional branding and user experience_
+
+- [ ] 26. Resolve 152 Vercel deployment warnings
+  - Review Vercel build logs to identify all 152 warnings
+  - Categorize warnings by type (TypeScript, ESLint, build warnings, etc.)
+  - Fix TypeScript warnings related to type safety and unused variables
+  - Fix ESLint warnings related to code quality and best practices
+  - Fix Next.js build warnings related to optimization and performance
+  - Ensure all warnings are resolved without breaking functionality
+  - Verify clean build with zero warnings locally and on Vercel
+  - Run `npm run lint` and `npm run tsc` to ensure code quality
+  - Remove any console.logs in the production code.
+  - Commit changes with descriptive message
+  - _Requirements: Code quality and deployment optimization_
