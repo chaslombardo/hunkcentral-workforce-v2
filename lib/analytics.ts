@@ -2,7 +2,7 @@
 export interface AnalyticsEvent {
   eventType: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp?: Date;
 }
 
@@ -19,7 +19,7 @@ export interface PerformanceMetric {
   page: string;
   userId?: string;
   timestamp?: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Client-side analytics service (no database access)
@@ -112,7 +112,7 @@ class AnalyticsService {
   }
 
   // Track errors
-  trackError(error: Error, page: string, userId?: string, context?: Record<string, any>) {
+  trackError(error: Error, page: string, userId?: string, context?: Record<string, unknown>) {
     this.trackInteraction({
       eventType: 'error',
       page,
@@ -186,7 +186,7 @@ export function useAnalytics() {
     analytics.trackFormInteraction(formName, 'submit', page);
   };
 
-  const trackError = (error: Error, page: string, context?: Record<string, any>) => {
+  const trackError = (error: Error, page: string, context?: Record<string, unknown>) => {
     analytics.trackError(error, page, undefined, context);
   };
 

@@ -5,7 +5,7 @@ import { analytics } from "@/lib/analytics";
 export interface ABTestVariant {
   name: string;
   weight: number; // 0-100, percentage of traffic
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface ABTestConfig {
@@ -19,13 +19,13 @@ export interface ABTestConfig {
 
 export interface ABTestResult {
   variant: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isControl: boolean;
 }
 
 class ABTestingService {
   private static instance: ABTestingService;
-  private cache = new Map<string, any>();
+  private cache = new Map<string, unknown>();
   private cacheExpiry = new Map<string, number>();
 
   private constructor() {}
@@ -49,7 +49,7 @@ class ABTestingService {
       data: {
         name: config.name,
         description: config.description,
-        variants: config.variants as any,
+        variants: config.variants as ABTestVariant[],
         targetMetric: config.targetMetric,
         startDate: config.startDate,
         endDate: config.endDate,
@@ -163,7 +163,7 @@ class ABTestingService {
     userId?: string,
     sessionId?: string,
     value?: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ) {
     const experiment = await this.getExperiment(experimentName);
     if (!experiment || experiment.status !== "active") {
@@ -353,7 +353,7 @@ export function useABTest(experimentName: string, userId?: string) {
   }, [experimentName, userId]);
 
   const trackEvent = useCallback(
-    (eventType: string, value?: number, metadata?: Record<string, any>) => {
+    (eventType: string, value?: number, metadata?: Record<string, unknown>) => {
       if (variant) {
         const sessionId = userId ? undefined : generateSessionId();
         abTesting.trackEvent(experimentName, eventType, userId, sessionId, value, metadata);

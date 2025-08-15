@@ -11,14 +11,11 @@ import { RankingsPageSkeleton, RankingsTabSkeleton } from '@/components/ui/skele
 import { usePerformanceOptimization } from '@/hooks/usePerformanceOptimization';
 import type { CaptainPerformanceData, PerformanceRankingsResponse } from '@/types';
 import { 
-  BarChart3, 
   Users, 
   DollarSign, 
   Target,
   Download,
   Trophy,
-  Truck,
-  Package,
   Eye,
   Info,
   TrendingUp,
@@ -427,14 +424,14 @@ const CaptainDetailDialog = React.memo(function CaptainDetailDialog({
 });
 
 // Placeholder components for tabs (these would be implemented similarly)
-function JunkOperationsTab({ captains, currentUserId, isCurrentUserCaptain, formatCurrency, formatPercentage }: any) {
+function JunkOperationsTab({ captains: _captains, currentUserId: _currentUserId, isCurrentUserCaptain: _isCurrentUserCaptain, formatCurrency: _formatCurrency, formatPercentage: _formatPercentage }: any) {
   return <RankingsTabSkeleton />;
 }
 
-function MoveOperationsTab({ captains, currentUserId, isCurrentUserCaptain, formatCurrency, formatPercentage }: any) {
+function MoveOperationsTab({ captains: _captains, currentUserId: _currentUserId, isCurrentUserCaptain: _isCurrentUserCaptain, formatCurrency: _formatCurrency, formatPercentage: _formatPercentage }: any) {
   return <RankingsTabSkeleton />;
 }
 
-function CaptainDetailView({ captain }: { captain: CaptainPerformanceData }) {
+function CaptainDetailView({ captain: _captain }: { captain: CaptainPerformanceData }) {
   return <div>Captain detail view placeholder</div>;
 }

@@ -118,6 +118,32 @@ interface DetailedPayrollData {
   departmentBreakdown: DepartmentBreakdownData[];
   dailyWorkHistory: DailyWorkEntry[];
   tipsDetails: TipEntry[];
+}
+
+// API response interfaces
+interface ApiDepartmentData {
+  department: string;
+  hours: number;
+  rate: number;
+  grossPay: number;
+  isPrimary: boolean;
+}
+
+interface ApiDayData {
+  date: string;
+  logIds: string[];
+  departments: Array<{
+    department: string;
+    hours: number;
+    rate: number;
+  }>;
+  tips: number;
+}
+
+interface ApiTipData {
+  date: string;
+  amount: number;
+  source: string;
   workPatternStats: WorkPatternStats;
   validationResult?: PayrollValidationResult;
 }
@@ -148,7 +174,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             setSelectedPeriod(openPeriod || periods[0]);
           }
         }
-      } catch (error) {
+      } catch {
         // Fallback to default period if API fails
         const defaultPeriod: PayPeriod = {
           id: 'current',
@@ -213,7 +239,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             const parsed = JSON.parse(cachedData);
             setSummaryData(parsed);
             setHasOfflineData(true);
-          } catch (parseError) {
+          } catch {
             // Failed to parse cached data
           }
         }
@@ -251,13 +277,13 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             if (validationResponse.ok) {
               validationResult = await validationResponse.json();
             }
-          } catch (validationError) {
+          } catch {
             // Validation data unavailable - continue without it
           }
         }
         
         const formattedData: DetailedPayrollData = {
-          departmentBreakdown: enhancedData.departmentBreakdown.map((dept: any) => ({
+          departmentBreakdown: enhancedData.departmentBreakdown.map((dept: ApiDepartmentData) => ({
             department: dept.department,
             hours: dept.hours,
             rate: dept.rate,
@@ -265,21 +291,21 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             percentage: dept.percentage,
             isPrimary: dept.isPrimary,
           })),
-          dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: any) => ({
+          dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: ApiDayData) => ({
             date: new Date(day.date),
             logId: day.logIds[0] || '',
-            departments: day.departments.map((dept: any) => ({
+            departments: day.departments.map((dept: { department: string; hours: number; rate: number }) => ({
               department: dept.department,
               hours: dept.hours,
               rate: dept.rate,
               role: day.role,
             })),
             tips: day.tips,
-            totalHours: day.departments.reduce((sum: number, dept: any) => sum + dept.hours, 0),
-            grossPay: day.departments.reduce((sum: number, dept: any) => sum + (dept.hours * dept.rate), 0),
+            totalHours: day.departments.reduce((sum: number, dept: { hours: number }) => sum + dept.hours, 0),
+            grossPay: day.departments.reduce((sum: number, dept: { hours: number; rate: number }) => sum + (dept.hours * dept.rate), 0),
             jobsCompleted: 1, // Simplified - could be enhanced
           })),
-          tipsDetails: enhancedData.tipsDetails.map((tip: any) => ({
+          tipsDetails: enhancedData.tipsDetails.map((tip: ApiTipData) => ({
             ...tip,
             date: new Date(tip.date),
           })),
@@ -315,13 +341,13 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
             const parsed = JSON.parse(cachedData);
             // Convert date strings back to Date objects
             if (parsed.dailyWorkHistory) {
-              parsed.dailyWorkHistory = parsed.dailyWorkHistory.map((day: any) => ({
+              parsed.dailyWorkHistory = parsed.dailyWorkHistory.map((day: { date: string; [key: string]: unknown }) => ({
                 ...day,
                 date: new Date(day.date),
               }));
             }
             if (parsed.tipsDetails) {
-              parsed.tipsDetails = parsed.tipsDetails.map((tip: any) => ({
+              parsed.tipsDetails = parsed.tipsDetails.map((tip: { date: string; [key: string]: unknown }) => ({
                 ...tip,
                 date: new Date(tip.date),
               }));
@@ -335,7 +361,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
               };
             }
             setDetailedData(parsed);
-          } catch (parseError) {
+          } catch {
             // Failed to parse cached data
           }
         }
@@ -401,7 +427,7 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
       const enhancedData = await response.json();
       
       const formattedData: DetailedPayrollData = {
-        departmentBreakdown: enhancedData.departmentBreakdown.map((dept: any) => ({
+        departmentBreakdown: enhancedData.departmentBreakdown.map((dept: ApiDepartmentData) => ({
           department: dept.department,
           hours: dept.hours,
           rate: dept.rate,
@@ -409,21 +435,21 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
           percentage: dept.percentage,
           isPrimary: dept.isPrimary,
         })),
-        dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: any) => ({
+        dailyWorkHistory: enhancedData.dailyWorkHistory.map((day: ApiDayData) => ({
           date: new Date(day.date),
           logId: day.logIds[0] || '',
-          departments: day.departments.map((dept: any) => ({
+          departments: day.departments.map((dept: { department: string; hours: number; rate: number }) => ({
             department: dept.department,
             hours: dept.hours,
             rate: dept.rate,
             role: day.role,
           })),
           tips: day.tips,
-          totalHours: day.departments.reduce((sum: number, dept: any) => sum + dept.hours, 0),
-          grossPay: day.departments.reduce((sum: number, dept: any) => sum + (dept.hours * dept.rate), 0),
+          totalHours: day.departments.reduce((sum: number, dept: { hours: number }) => sum + dept.hours, 0),
+          grossPay: day.departments.reduce((sum: number, dept: { hours: number; rate: number }) => sum + (dept.hours * dept.rate), 0),
           jobsCompleted: 1, // Simplified - could be enhanced
         })),
-        tipsDetails: enhancedData.tipsDetails.map((tip: any) => ({
+        tipsDetails: enhancedData.tipsDetails.map((tip: ApiTipData) => ({
           ...tip,
           date: new Date(tip.date),
         })),

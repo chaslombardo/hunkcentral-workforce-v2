@@ -37,7 +37,7 @@ export function ServiceWorkerRegistration() {
             }
           })
         }
-      } catch (error) {
+      } catch {
         // Service Worker registration failed - silently handle in production
       }
     }

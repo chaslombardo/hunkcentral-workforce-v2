@@ -260,7 +260,7 @@ async function PerformanceTab() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {monthlyTrends.map((trend, index) => (
+            {monthlyTrends.map((trend) => (
               <div key={trend.month} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
                   <div className="font-medium">{trend.month}</div>
@@ -315,7 +315,14 @@ async function PerformanceTab() {
 }
 
 // Commission Tab Component
-function CommissionTab({ commissionStats }: { commissionStats: any }) {
+interface CommissionStats {
+  totalCommissions: number;
+  avgAccuracy: number;
+  pendingEntries: number;
+  matchedEntries: number;
+}
+
+function CommissionTab({ commissionStats }: { commissionStats: CommissionStats }) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

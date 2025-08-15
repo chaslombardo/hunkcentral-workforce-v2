@@ -159,6 +159,10 @@ export function PerformanceMonitor({
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Copy ref values for cleanup function
+    const startTime = startTimeRef.current;
+    const interactionCount = interactionCountRef.current;
+
     // Cleanup
     return () => {
       if (trackInteractions) {
@@ -179,8 +183,8 @@ export function PerformanceMonitor({
         userId,
         metadata: {
           action: 'unload',
-          sessionTime: Date.now() - startTimeRef.current,
-          interactionCount: interactionCountRef.current,
+          sessionTime: Date.now() - startTime,
+          interactionCount: interactionCount,
         },
       });
     };
@@ -206,10 +210,10 @@ export function PerformanceMonitor({
       // Track First Input Delay (FID)
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
+        entries.forEach((entry: PerformanceEntry & { processingStart?: number }) => {
           analytics.trackPerformance({
             metricType: 'interaction_delay',
-            value: entry.processingStart - entry.startTime,
+            value: (entry.processingStart || 0) - entry.startTime,
             page: pageName,
             userId,
             metadata: { metric: 'first-input-delay' },
@@ -222,9 +226,9 @@ export function PerformanceMonitor({
         let clsValue = 0;
         const entries = list.getEntries();
         
-        entries.forEach((entry: any) => {
+        entries.forEach((entry: PerformanceEntry & { hadRecentInput?: boolean; value?: number }) => {
           if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+            clsValue += entry.value || 0;
           }
         });
 

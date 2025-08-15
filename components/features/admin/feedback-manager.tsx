@@ -5,11 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Bug, 
   Lightbulb, 
@@ -344,12 +342,12 @@ export function FeedbackManager() {
                     <div className="max-w-xs truncate">{item.title}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getPriorityColor(item.priority) as any}>
+                    <Badge variant={getPriorityColor(item.priority) as "default" | "secondary" | "destructive" | "outline"}>
                       {item.priority}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(item.status) as any}>
+                    <Badge variant={getStatusColor(item.status) as "default" | "secondary" | "destructive" | "outline"}>
                       {item.status.replace('_', ' ')}
                     </Badge>
                   </TableCell>
@@ -392,10 +390,10 @@ export function FeedbackManager() {
                 </DialogTitle>
                 <DialogDescription>
                   <div className="flex items-center gap-4 mt-2">
-                    <Badge variant={getPriorityColor(selectedFeedback.priority) as any}>
+                    <Badge variant={getPriorityColor(selectedFeedback.priority) as "default" | "secondary" | "destructive" | "outline"}>
                       {selectedFeedback.priority} priority
                     </Badge>
-                    <Badge variant={getStatusColor(selectedFeedback.status) as any}>
+                    <Badge variant={getStatusColor(selectedFeedback.status) as "default" | "secondary" | "destructive" | "outline"}>
                       {selectedFeedback.status.replace('_', ' ')}
                     </Badge>
                     <span className="text-sm text-muted-foreground">

@@ -103,7 +103,7 @@ function PayrollErrorFallback({
     
     try {
       resetError();
-    } catch (retryError) {
+    } catch {
       // Retry failed
     } finally {
       setIsRetrying(false);
@@ -118,7 +118,7 @@ function PayrollErrorFallback({
         key.startsWith('payroll-details-')
       );
       keys.forEach(key => localStorage.removeItem(key));
-    } catch (cacheError) {
+    } catch {
       // Failed to clear cache before reload
     }
     
@@ -142,7 +142,7 @@ function PayrollErrorFallback({
       
       // Attempt retry after clearing cache
       handleRetry();
-    } catch (cacheError) {
+    } catch {
       // Failed to clear cache
     }
   };
@@ -381,7 +381,7 @@ export function PayrollComponentErrorBoundary({
           </CardContent>
         </Card>
       )}
-      onError={(error, errorInfo) => {
+      onError={() => {
         // Component error occurred
       }}
     >

@@ -21,15 +21,28 @@ import {
   Pie,
   Cell
 } from "recharts";
-import { analytics } from "@/lib/analytics";
 import { Download, RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface AnalyticsData {
-  userInteractionPatterns: any;
-  performanceMetrics: any[];
-  topPages: any[];
-  errorRates: any[];
-  userActivity: any[];
+  userInteractionPatterns: Record<string, unknown>;
+  performanceMetrics: Array<{
+    name: string;
+    value: number;
+    change: number;
+  }>;
+  topPages: Array<{
+    page: string;
+    views: number;
+    bounceRate: number;
+  }>;
+  errorRates: Array<{
+    date: string;
+    errors: number;
+  }>;
+  userActivity: Array<{
+    hour: number;
+    users: number;
+  }>;
 }
 
 export function AnalyticsDashboard() {
@@ -154,7 +167,7 @@ export function AnalyticsDashboard() {
     return <div className="flex items-center justify-center h-64">Failed to load analytics</div>;
   }
 
-  const getTrendIcon = (current: number, previous: number) => {
+  const _getTrendIcon = (current: number, previous: number) => {
     if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return <Minus className="h-4 w-4 text-gray-500" />;
@@ -374,7 +387,7 @@ export function AnalyticsDashboard() {
                 <CardTitle className="text-sm font-medium">Most Clicked Elements</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {data.userInteractionPatterns.commonClickTargets.map((target: any, index: number) => (
+                {data.userInteractionPatterns.commonClickTargets.map((target: { element: string; count: number }, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-sm truncate">{target.element}</span>
                     <Badge variant="secondary">{target.count}</Badge>
@@ -388,7 +401,7 @@ export function AnalyticsDashboard() {
                 <CardTitle className="text-sm font-medium">Common Navigation Paths</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {data.userInteractionPatterns.navigationPaths.map((path: any, index: number) => (
+                {data.userInteractionPatterns.navigationPaths.map((path: { path: string; frequency: number }, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-xs truncate">{path.path}</span>
                     <Badge variant="outline">{path.count}</Badge>

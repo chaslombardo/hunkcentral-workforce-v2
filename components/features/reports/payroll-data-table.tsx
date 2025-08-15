@@ -372,8 +372,8 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
     pageIndex: 0,
     pageSize: 10,
   });
-  const [loading, setLoading] = React.useState(false);
-  const { isMobile } = useResponsiveTable();
+  const [loading, _setLoading] = React.useState(false);
+  const { isMobile: _isMobile } = useResponsiveTable();
 
   // Use mock data for development
   const data = payrollData.length > 0 ? payrollData : mockPayrollData;

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
@@ -20,10 +20,9 @@ import {
   BarChart3, 
   TrendingUp,
   Users,
-  Target,
   Calendar
 } from "lucide-react";
-import { abTesting, ABTestConfig, ABTestVariant } from "@/lib/ab-testing";
+import { ABTestConfig, ABTestVariant } from "@/lib/ab-testing";
 
 interface ABTestExperiment {
   id: string;
@@ -45,7 +44,27 @@ export function ABTestManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [selectedExperiment, setSelectedExperiment] = useState<ABTestExperiment | null>(null);
-  const [experimentResults, setExperimentResults] = useState<any>(null);
+  const [experimentResults, setExperimentResults] = useState<{
+    experiment: {
+      name: string;
+      description?: string;
+      status: string;
+      startDate?: string;
+      endDate?: string;
+      targetMetric: string;
+    };
+    results: Array<{
+      variant: string;
+      participants: number;
+      conversions: number;
+      conversionRate: number;
+      interactions: number;
+      averageValue: number;
+      totalValue: number;
+    }>;
+    totalParticipants: number;
+    totalEvents: number;
+  } | null>(null);
 
   useEffect(() => {
     loadExperiments();
@@ -164,7 +183,7 @@ export function ABTestManager() {
           endDate: experiment.endDate,
           targetMetric: experiment.targetMetric,
         },
-        results: experiment.variants.map((variant, index) => ({
+        results: experiment.variants.map((variant) => ({
           variant: variant.name,
           participants: Math.floor(experiment.participants * (variant.weight / 100)),
           conversions: Math.floor(experiment.conversions * (variant.weight / 100) * (0.8 + Math.random() * 0.4)),
@@ -300,7 +319,7 @@ export function ABTestManager() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(experiment.status) as any}>
+                    <Badge variant={getStatusColor(experiment.status) as "default" | "secondary" | "destructive" | "outline"}>
                       <div className="flex items-center gap-1">
                         {getStatusIcon(experiment.status)}
                         {experiment.status}
@@ -440,7 +459,7 @@ export function ABTestManager() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Variant Performance</h3>
                   <div className="grid gap-4">
-                    {experimentResults.results.map((result: any, index: number) => (
+                    {experimentResults.results.map((result, index: number) => (
                       <Card key={index}>
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between">
@@ -613,7 +632,7 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
                     const newVariants = [...config.variants];
                     newVariants[index].config = JSON.parse(e.target.value);
                     setConfig(prev => ({ ...prev, variants: newVariants }));
-                  } catch (error) {
+                  } catch {
                     // Invalid JSON, ignore
                   }
                 }}

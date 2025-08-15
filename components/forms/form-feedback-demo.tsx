@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { FormFeedback, useFormFeedback, formFeedbackPresets } from './form-feedback';
-import { useFormToast, useFormSubmission, formToastPresets } from './form-toast';
+import { useFormToast, useFormSubmission } from './form-toast';
 import { SmartInput, commonValidationRules } from './smart-input';
 
 export function FormFeedbackDemo() {
@@ -102,7 +102,7 @@ export function FormFeedbackDemo() {
         successMessage: 'Your daily log has been submitted successfully!',
         errorMessage: 'Failed to submit daily log. Please try again.',
         onSuccess: () => {/* Form submitted successfully */},
-        onError: (error) => {/* Form submission failed: */ error}
+        onError: () => {/* Form submission failed */}
       }
     );
   };

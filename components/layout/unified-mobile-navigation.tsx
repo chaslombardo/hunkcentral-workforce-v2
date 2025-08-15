@@ -225,7 +225,7 @@ const getNavigationData = (userRoles: string[] = []) => {
 // Mobile header component
 export function UnifiedMobileHeader() {
   const { user } = useSession()
-  const pathname = usePathname()
+  const _pathname = usePathname()
   
   if (!user) {
     return null
@@ -263,7 +263,7 @@ export function UnifiedMobileHeader() {
 // Bottom navigation component
 export function UnifiedBottomNavigation() {
   const { user } = useSession()
-  const pathname = usePathname()
+  const _pathname = usePathname()
   const { tapFeedback } = useHapticFeedback()
   const { state, isActiveRoute } = useNavigation()
   

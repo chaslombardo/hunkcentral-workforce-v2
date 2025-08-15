@@ -48,7 +48,7 @@ export function PayrollReportDashboard() {
             setSelectedPeriod(periodsResult.data[0]);
           }
         }
-      } catch (error) {
+      } catch {
         // Error loading payroll data
       } finally {
         setIsLoading(false);
