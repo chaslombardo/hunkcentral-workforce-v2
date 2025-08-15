@@ -26,7 +26,7 @@ export function SmartBreadcrumbsDemo() {
   return (
     <Card className="w-full max-w-4xl">
       <CardHeader>
-        <CardTitle>Smart Breadcrumbs Demo</CardTitle>
+        <CardTitle>Smart Breadcrumbs System</CardTitle>
         <CardDescription>
           Test the smart breadcrumb system with different route patterns
         </CardDescription>

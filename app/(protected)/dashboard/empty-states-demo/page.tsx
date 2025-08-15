@@ -17,11 +17,11 @@ import {
   LoadingEmptyState
 } from "@/components/features/empty-states"
 
-export default function EmptyStatesDemoPage() {
+export default function EmptyStatesPage() {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Empty States Demo</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-hunks-green">Empty State Components</h1>
         <p className="text-muted-foreground">
           Showcase of all empty state components with engaging illustrations and helpful messaging.
         </p>

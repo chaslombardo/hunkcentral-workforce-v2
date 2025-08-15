@@ -111,9 +111,9 @@ export function FormFeedbackDemo() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Form Feedback System Demo</CardTitle>
+          <CardTitle>Form Feedback System</CardTitle>
           <CardDescription>
-            Demonstration of the enhanced form feedback components with branded styling and animations.
+            Enhanced form feedback components with branded styling and animations.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

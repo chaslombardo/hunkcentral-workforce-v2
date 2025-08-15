@@ -45,9 +45,9 @@ export function MotionPreferencesDemo() {
   return (
     <div className="space-y-6 p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Motion Preferences Demo</h1>
+        <h1 className="text-3xl font-bold">Motion Preferences System</h1>
         <p className="text-muted-foreground">
-          Demonstrating motion-aware animations that respect user preferences
+          Motion-aware animations that respect user accessibility preferences
         </p>
       </div>
 

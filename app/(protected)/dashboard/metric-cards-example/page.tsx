@@ -29,7 +29,7 @@ export default function MetricCardsExamplePage() {
               Enhanced Metric Cards
             </h1>
             <p className="text-muted-foreground">
-              Demonstration of the new MetricCard component with real data integration
+              Enhanced MetricCard component with real data integration and brand styling
             </p>
           </div>
         </div>
