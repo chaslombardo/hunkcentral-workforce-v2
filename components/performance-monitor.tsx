@@ -281,7 +281,7 @@ function getElementInfo(element: HTMLElement): string {
 
 // Hook for manual performance tracking
 export function usePerformanceTracking(pageName: string, userId?: string) {
-  const trackInteraction = (element: string, metadata?: Record<string, any>) => {
+  const trackInteraction = (element: string, metadata?: Record<string, unknown>) => {
     analytics.trackInteraction({
       eventType: 'click',
       element,
@@ -291,7 +291,7 @@ export function usePerformanceTracking(pageName: string, userId?: string) {
     });
   };
 
-  const trackFormSubmission = (formName: string, metadata?: Record<string, any>) => {
+  const trackFormSubmission = (formName: string, metadata?: Record<string, unknown>) => {
     analytics.trackFormInteraction(formName, 'submit', pageName, userId);
     if (metadata) {
       analytics.trackInteraction({
@@ -304,9 +304,9 @@ export function usePerformanceTracking(pageName: string, userId?: string) {
     }
   };
 
-  const trackCustomMetric = (metricType: string, value: number, metadata?: Record<string, any>) => {
+  const trackCustomMetric = (metricType: string, value: number, metadata?: Record<string, unknown>) => {
     analytics.trackPerformance({
-      metricType: metricType as any,
+      metricType: metricType as 'page_load' | 'interaction_delay' | 'bundle_size' | 'render_time',
       value,
       page: pageName,
       userId,

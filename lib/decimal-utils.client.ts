@@ -5,11 +5,14 @@
  * without importing Prisma client dependencies.
  */
 
+// Type for decimal values from Prisma
+type DecimalValue = { toString(): string } | number | string | null | undefined;
+
 /**
  * Convert a decimal value to a JavaScript number
  * Returns 0 if the value is null or undefined
  */
-export function decimalToNumber(decimal: any): number {
+export function decimalToNumber(decimal: DecimalValue): number {
   if (!decimal) return 0;
   return Number(decimal);
 }
@@ -26,7 +29,7 @@ export function numberToDecimal(num: number | null | undefined): number | null {
 /**
  * Convert an optional decimal to an optional JavaScript number
  */
-export function optionalDecimalToNumber(decimal: any): number | undefined {
+export function optionalDecimalToNumber(decimal: DecimalValue): number | undefined {
   if (!decimal) return undefined;
   return Number(decimal);
 }
@@ -43,19 +46,19 @@ export function optionalNumberToDecimal(num: number | null | undefined): number 
  * Convert a User model with decimal fields to numbers (client-safe)
  */
 export function convertUserDecimalFields<T extends {
-  rateJunkCaptain?: any;
-  rateJunkWingman?: any;
-  rateMoveCaptain?: any;
-  rateMoveWingman?: any;
-  rateZigma?: any;
-  rateTraining?: any;
-  rateEstimating?: any;
-  rateWarehouse?: any;
-  rateAdmin?: any;
-  salaryAmount?: any;
-  commissionRate?: any;
-  junkBonusGoal: any;
-  moveBonusGoal: any;
+  rateJunkCaptain?: DecimalValue;
+  rateJunkWingman?: DecimalValue;
+  rateMoveCaptain?: DecimalValue;
+  rateMoveWingman?: DecimalValue;
+  rateZigma?: DecimalValue;
+  rateTraining?: DecimalValue;
+  rateEstimating?: DecimalValue;
+  rateWarehouse?: DecimalValue;
+  rateAdmin?: DecimalValue;
+  salaryAmount?: DecimalValue;
+  commissionRate?: DecimalValue;
+  junkBonusGoal: DecimalValue;
+  moveBonusGoal: DecimalValue;
 }>(user: T): Omit<T, 'rateJunkCaptain' | 'rateJunkWingman' | 'rateMoveCaptain' | 'rateMoveWingman' | 'rateZigma' | 'rateTraining' | 'rateEstimating' | 'rateWarehouse' | 'rateAdmin' | 'salaryAmount' | 'commissionRate' | 'junkBonusGoal' | 'moveBonusGoal'> & {
   rateJunkCaptain?: number;
   rateJunkWingman?: number;
@@ -93,12 +96,12 @@ export function convertUserDecimalFields<T extends {
  * Convert a LogJob model with decimal fields to numbers (client-safe)
  */
 export function convertLogJobDecimalFields<T extends {
-  revenue: any;
-  tips: any;
-  junkOnMove?: any;
-  valuation?: any;
-  materials?: any;
-  disposalCost?: any;
+  revenue: DecimalValue;
+  tips: DecimalValue;
+  junkOnMove?: DecimalValue;
+  valuation?: DecimalValue;
+  materials?: DecimalValue;
+  disposalCost?: DecimalValue;
 }>(job: T): Omit<T, 'revenue' | 'tips' | 'junkOnMove' | 'valuation' | 'materials' | 'disposalCost'> & {
   revenue: number;
   tips: number;
@@ -122,7 +125,7 @@ export function convertLogJobDecimalFields<T extends {
  * Convert a LogHour model with decimal fields to numbers (client-safe)
  */
 export function convertLogHourDecimalFields<T extends {
-  hours: any;
+  hours: DecimalValue;
 }>(hour: T): Omit<T, 'hours'> & {
   hours: number;
 } {
@@ -136,9 +139,9 @@ export function convertLogHourDecimalFields<T extends {
  * Convert a CommissionEntry model with decimal fields to numbers (client-safe)
  */
 export function convertCommissionDecimalFields<T extends {
-  estimatedRevenue: any;
-  actualRevenue?: any;
-  commissionAmount?: any;
+  estimatedRevenue: DecimalValue;
+  actualRevenue?: DecimalValue;
+  commissionAmount?: DecimalValue;
 }>(commission: T): Omit<T, 'estimatedRevenue' | 'actualRevenue' | 'commissionAmount'> & {
   estimatedRevenue: number;
   actualRevenue: number | null;

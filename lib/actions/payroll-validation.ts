@@ -400,7 +400,7 @@ export async function submitDiscrepancyReport(
     // Verify pay period exists
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching pay period for report
       throw new Error('Unable to verify pay period. Please try again.');
     });
@@ -429,7 +429,7 @@ export async function submitDiscrepancyReport(
         status: 'open',
         reportedById: session.user.id,
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error creating discrepancy report
       throw new Error('Unable to submit your report. Please try again.');
     });
@@ -521,7 +521,7 @@ export async function getEmployeeDiscrepancyReports(
       orderBy: {
         createdAt: 'desc',
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching discrepancy reports
       throw new Error('Unable to load discrepancy reports. Please try again.');
     });

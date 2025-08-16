@@ -55,7 +55,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField, useResponsiveTable } from '@/components/ui/responsive-table';
+import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } from '@/components/ui/responsive-table';
 import { SortableHeader, getSortDirection } from '@/components/ui/sortable-header';
 import { PayrollTableSkeleton } from '@/components/ui/skeleton-components';
 import type { PayPeriod, User } from '@/types';
@@ -372,8 +372,9 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
     pageIndex: 0,
     pageSize: 10,
   });
-  const [loading, _setLoading] = React.useState(false);
-  const { isMobile: _isMobile } = useResponsiveTable();
+  const [loading] = React.useState(false);
+  // Mobile responsiveness will be implemented in future iteration
+  // const { isMobile } = useResponsiveTable();
 
   // Use mock data for development
   const data = payrollData.length > 0 ? payrollData : mockPayrollData;

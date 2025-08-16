@@ -60,7 +60,7 @@ class ABTestingService {
       data: {
         name: config.name,
         description: config.description,
-        variants: config.variants as any,
+        variants: JSON.parse(JSON.stringify(config.variants)),
         targetMetric: config.targetMetric,
         startDate: config.startDate,
         endDate: config.endDate,
@@ -202,7 +202,7 @@ class ABTestingService {
         variant: assignment.variant,
         eventType,
         value,
-        metadata: (metadata || {}) as any,
+        metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : null,
       },
     });
 

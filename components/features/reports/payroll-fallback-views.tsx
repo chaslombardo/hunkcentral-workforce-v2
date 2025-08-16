@@ -77,9 +77,8 @@ export function PayrollSummaryFallback({
 
   if (!summaryData) {
     const isCacheError = error?.includes('corrupted') || error?.includes('parse');
-    const _isNetworkError = error?.includes('network') || error?.includes('fetch') || isOffline;
-    // Use the variable to avoid unused warning
-    // Network error detected
+    // Network error detection for future error handling improvements
+    // const isNetworkError = error?.includes('network') || error?.includes('fetch') || isOffline;
     
     return (
       <Card 

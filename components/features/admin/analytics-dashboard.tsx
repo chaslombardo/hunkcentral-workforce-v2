@@ -21,7 +21,7 @@ import {
   Pie,
   Cell
 } from "recharts";
-import { Download, RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 
 interface AnalyticsData {
   userInteractionPatterns: {
@@ -165,11 +165,12 @@ export function AnalyticsDashboard() {
     return <div className="flex items-center justify-center h-64">Failed to load analytics</div>;
   }
 
-  const _getTrendIcon = (current: number, previous: number) => {
-    if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-gray-500" />;
-  };
+  // Trend icon functionality reserved for future implementation
+  // const getTrendIcon = (current: number, previous: number) => {
+  //   if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
+  //   if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
+  //   return <Minus className="h-4 w-4 text-gray-500" />;
+  // };
 
   return (
     <div className="space-y-6">

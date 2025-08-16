@@ -233,23 +233,11 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
         </TabsContent>
 
         <TabsContent value="junk" className="space-y-6">
-          <JunkOperationsTab 
-            captains={performanceData?.captains || []} 
-            currentUserId={currentUserId} 
-            isCurrentUserCaptain={isCurrentUserCaptain}
-            formatCurrency={formatCurrency}
-            formatPercentage={formatPercentage}
-          />
+          <JunkOperationsTab />
         </TabsContent>
 
         <TabsContent value="move" className="space-y-6">
-          <MoveOperationsTab 
-            captains={performanceData?.captains || []} 
-            currentUserId={currentUserId} 
-            isCurrentUserCaptain={isCurrentUserCaptain}
-            formatCurrency={formatCurrency}
-            formatPercentage={formatPercentage}
-          />
+          <MoveOperationsTab />
         </TabsContent>
       </Tabs>
 
@@ -424,14 +412,14 @@ const CaptainDetailDialog = React.memo(function CaptainDetailDialog({
 });
 
 // Placeholder components for tabs (these would be implemented similarly)
-function JunkOperationsTab({ captains: _captains, currentUserId: _currentUserId, isCurrentUserCaptain: _isCurrentUserCaptain, formatCurrency: _formatCurrency, formatPercentage: _formatPercentage }: any) {
+function JunkOperationsTab() {
   return <RankingsTabSkeleton />;
 }
 
-function MoveOperationsTab({ captains: _captains, currentUserId: _currentUserId, isCurrentUserCaptain: _isCurrentUserCaptain, formatCurrency: _formatCurrency, formatPercentage: _formatPercentage }: any) {
+function MoveOperationsTab() {
   return <RankingsTabSkeleton />;
 }
 
-function CaptainDetailView({ captain: _captain }: { captain: CaptainPerformanceData }) {
-  return <div>Captain detail view placeholder</div>;
+function CaptainDetailView({ captain }: { captain: CaptainPerformanceData }) {
+  return <div>Captain detail view placeholder for {captain.captainName}</div>;
 }
