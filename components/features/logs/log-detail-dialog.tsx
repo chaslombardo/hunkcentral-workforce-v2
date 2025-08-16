@@ -166,6 +166,10 @@ export function LogDetailDialog({ logId, children }: LogDetailDialogProps) {
           {children}
         </DialogTrigger>
         <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Loading Log Details</DialogTitle>
+            <DialogDescription>Please wait while we load the log information.</DialogDescription>
+          </DialogHeader>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>

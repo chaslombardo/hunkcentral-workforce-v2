@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   title: 'HUNKCentral - Workforce Management',
   description:
     'Digital workforce management system for College Hunks Hauling Junk & Moving',
-  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -37,7 +36,6 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-title': 'HUNKCentral',
     'application-name': 'HUNKCentral',
     'msapplication-TileColor': '#026937',
-    'msapplication-config': '/browserconfig.xml',
   },
 };
 
