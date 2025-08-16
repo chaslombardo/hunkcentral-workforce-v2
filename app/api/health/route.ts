@@ -8,11 +8,8 @@ export async function GET() {
     
     return NextResponse.json({
       status: 'healthy',
+      database: 'connected',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      checks: {
-        database: true,
-      },
     });
   } catch (error) {
     console.error('Health check failed:', error);
@@ -20,19 +17,11 @@ export async function GET() {
     return NextResponse.json(
       {
         status: 'unhealthy',
+        database: 'disconnected',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
-        version: process.env.npm_package_version || '1.0.0',
-        checks: {
-          database: false,
-        },
-        error: 'Database connection failed',
       },
-      { status: 503 }
+      { status: 500 }
     );
   }
-}
-
-export async function HEAD() {
-  // Support HEAD requests for health checks
-  return GET();
 }
