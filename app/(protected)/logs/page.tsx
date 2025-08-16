@@ -11,15 +11,16 @@ import { Plus, FileText, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function LogsPage() {
-  const session = await auth();
-  
-  if (!session?.user) {
-    redirect('/auth/login');
-  }
+  try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      redirect('/auth/login');
+    }
 
-  const userRoles = session.user.roles || [];
-  const canCreateLogs = userRoles.includes('captain') || userRoles.includes('admin');
-  const canReviewLogs = userRoles.includes('manager') || userRoles.includes('admin');
+    const userRoles = session.user.roles || [];
+    const canCreateLogs = userRoles.includes('captain') || userRoles.includes('admin');
+    const canReviewLogs = userRoles.includes('manager') || userRoles.includes('admin');
 
   return (
     <div className="container mx-auto py-6">
@@ -164,4 +165,25 @@ export default async function LogsPage() {
       )}
     </div>
   );
+  } catch (error) {
+    console.error('Error in LogsPage:', error);
+    
+    return (
+      <div className="container mx-auto py-6">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle className="text-destructive">Error Loading Page</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              There was an error loading the logs page. Please try refreshing or contact support.
+            </p>
+            <p className="text-xs font-mono mt-2 p-2 bg-muted rounded">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 }
