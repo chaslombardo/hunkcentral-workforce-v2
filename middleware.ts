@@ -16,7 +16,10 @@ export default withAuth(
     }
 
     // Require authentication for protected routes
-    if (pathname.startsWith('/(protected)') || pathname === '/dashboard') {
+    const protectedRoutes = ['/dashboard', '/logs', '/commission', '/reports'];
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    
+    if (isProtectedRoute) {
       if (!token) {
         return NextResponse.redirect(new URL('/auth/login', req.url));
       }
