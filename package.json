@@ -23,6 +23,7 @@
     "test:performance": "vitest run __tests__/performance/**/*.test.ts",
     "test:comprehensive": "tsx __tests__/test-runner.ts",
     "db:generate": "prisma generate",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
