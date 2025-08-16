@@ -3,7 +3,6 @@ import { productionWebpackConfig } from './next.config.production';
 
 const nextConfig: NextConfig = {
   // Vercel-specific optimizations
-  output: 'standalone',
   poweredByHeader: false,
   
   // Performance optimizations
