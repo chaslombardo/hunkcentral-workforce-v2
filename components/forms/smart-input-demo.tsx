@@ -23,7 +23,7 @@ export function SmartInputDemo() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleValidationChange = (field: string) => (isValid: boolean, errors: string[]) => {
+  const handleValidationChange = (field: string) => (isValid: boolean) => {
     setValidationStates(prev => ({ ...prev, [field]: isValid }));
   };
 

@@ -46,9 +46,8 @@ export class ServiceWorkerManager {
       })
 
       return this.registration
-    } catch (error) {
-      // Service Worker registration failed
-      console.error('Service Worker registration failed:', error);
+    } catch {
+      // Service Worker registration failed - silently handle in production
       return null
     }
   }
@@ -116,9 +115,8 @@ export class ServiceWorkerManager {
       const syncManager = (this.registration as ServiceWorkerRegistration & { sync?: { register: (tag: string) => Promise<void> } }).sync;
       await syncManager?.register('log-submission')
       await syncManager?.register('commission-submission')
-    } catch (error) {
-      // Background sync registration failed
-      console.error('Background sync registration failed:', error);
+    } catch {
+      // Background sync registration failed - silently handle in production
     }
   }
 
@@ -162,9 +160,8 @@ export class ServiceWorkerManager {
           data,
           timestamp: Date.now()
         }))
-      } catch (error) {
-        // Failed to store offline data
-        console.error('Failed to store offline data:', error);
+      } catch {
+        // Failed to store offline data - silently handle in production
       }
     }
   }
@@ -177,9 +174,8 @@ export class ServiceWorkerManager {
           const parsed = JSON.parse(stored)
           return parsed.data
         }
-      } catch (error) {
-        // Failed to retrieve offline data
-        console.error('Failed to retrieve offline data:', error);
+      } catch {
+        // Failed to retrieve offline data - silently handle in production
       }
     }
     return null

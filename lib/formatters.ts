@@ -2,7 +2,7 @@
  * Utility functions for formatting data in reports and UI components
  */
 
-import { safeFormatDate, isValidDate, toSafeDate } from './date-utils';
+import { safeFormatDate, toSafeDate } from './date-utils';
 
 /**
  * Format a number as currency (USD)
@@ -90,7 +90,7 @@ export const formatDateForInput = (date: unknown): string => {
   
   try {
     return safeDate.toISOString().split('T')[0];
-  } catch (error) {
+  } catch {
     return '';
   }
 };

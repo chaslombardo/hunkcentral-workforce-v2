@@ -69,7 +69,7 @@ export async function validateEmployeePayroll(
     // Get pay period with error handling
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching pay period
       throw new Error('Unable to access pay period data. Please try again.');
     });
@@ -109,7 +109,7 @@ export async function validateEmployeePayroll(
         createdAt: true,
         updatedAt: true,
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching employee
       throw new Error('Unable to access employee data. Please try again.');
     });
@@ -144,7 +144,7 @@ export async function validateEmployeePayroll(
           },
         },
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching logs
       throw new Error('Unable to access work log data. Please try again.');
     });
@@ -165,7 +165,7 @@ export async function validateEmployeePayroll(
         matchedLog: true,
         sales: true,
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching commissions
       throw new Error('Unable to access commission data. Please try again.');
     });
@@ -400,7 +400,7 @@ export async function submitDiscrepancyReport(
     // Verify pay period exists
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching pay period for report
       throw new Error('Unable to verify pay period. Please try again.');
     });
@@ -429,7 +429,7 @@ export async function submitDiscrepancyReport(
         status: 'open',
         reportedById: session.user.id,
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error creating discrepancy report
       throw new Error('Unable to submit your report. Please try again.');
     });
@@ -521,7 +521,7 @@ export async function getEmployeeDiscrepancyReports(
       orderBy: {
         createdAt: 'desc',
       },
-    }).catch((error) => {
+    }).catch(() => {
       // Database error fetching discrepancy reports
       throw new Error('Unable to load discrepancy reports. Please try again.');
     });

@@ -1004,7 +1004,8 @@ export function calculateMovePerformanceMetrics(
 
 // Performance calculation cache
 const performanceCache = new Map<string, CaptainPerformanceData>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+// Cache duration for performance calculations (5 minutes)
+// const CACHE_DURATION = 5 * 60 * 1000;
 
 /**
  * Generate cache key for performance calculations

@@ -136,7 +136,7 @@ const MetricCard = React.memo(function MetricCard({
   change,
   icon: Icon,
   color = 'neutral',
-  trend: _trend, // Reserved for future mini-chart implementation
+  // trend reserved for future mini-chart implementation
   loading = false,
   footer,
   className,

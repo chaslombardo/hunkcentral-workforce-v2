@@ -21,15 +21,43 @@ import {
   Pie,
   Cell
 } from "recharts";
-import { analytics } from "@/lib/analytics";
-import { Download, RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 
 interface AnalyticsData {
-  userInteractionPatterns: any;
-  performanceMetrics: any[];
-  topPages: any[];
-  errorRates: any[];
-  userActivity: any[];
+  userInteractionPatterns: {
+    sessionDuration: number;
+    commonClickTargets: Array<{
+      element: string;
+      count: number;
+    }>;
+    navigationPaths: Array<{
+      path: string;
+      frequency: number;
+      count: number;
+    }>;
+  };
+  performanceMetrics: Array<{
+    name: string;
+    value: number;
+    change: number;
+  }>;
+  topPages: Array<{
+    page: string;
+    views: number;
+    bounceRate: number;
+    avgTime: number;
+  }>;
+  errorRates: Array<{
+    date: string;
+    errors: number;
+    total: number;
+  }>;
+  userActivity: Array<{
+    name: string;
+    hour: number;
+    users: number;
+    color?: string;
+  }>;
 }
 
 export function AnalyticsDashboard() {
@@ -45,13 +73,7 @@ export function AnalyticsDashboard() {
       // For now, we'll simulate the data structure
       const mockData: AnalyticsData = {
         userInteractionPatterns: {
-          mostVisitedPages: [
-            { page: "/dashboard", count: 1234 },
-            { page: "/logs/create", count: 856 },
-            { page: "/reports/payroll", count: 645 },
-            { page: "/commission/create", count: 432 },
-            { page: "/logs/review", count: 321 },
-          ],
+          sessionDuration: 18, // minutes
           commonClickTargets: [
             { element: "submit-log-button", count: 456 },
             { element: "navigation-menu", count: 234 },
@@ -60,32 +82,20 @@ export function AnalyticsDashboard() {
             { element: "export-button", count: 123 },
           ],
           navigationPaths: [
-            { path: "/dashboard → /logs/create", count: 234 },
-            { path: "/logs/create → /dashboard", count: 189 },
-            { path: "/dashboard → /reports/payroll", count: 156 },
-            { path: "/logs/review → /logs/[id]", count: 134 },
-            { path: "/commission/create → /commission/list", count: 98 },
+            { path: "/dashboard → /logs/create", frequency: 234, count: 234 },
+            { path: "/logs/create → /dashboard", frequency: 189, count: 189 },
+            { path: "/dashboard → /reports/payroll", frequency: 156, count: 156 },
+            { path: "/logs/review → /logs/[id]", frequency: 134, count: 134 },
+            { path: "/commission/create → /commission/list", frequency: 98, count: 98 },
           ],
-          formInteractions: [
-            { form: "captain-log-form", count: 456 },
-            { form: "commission-form", count: 234 },
-            { form: "user-form", count: 123 },
-            { form: "feedback-form", count: 89 },
-          ],
-          timeOfDayActivity: Array.from({ length: 24 }, (_, hour) => ({
-            hour,
-            count: Math.floor(Math.random() * 100) + 20,
-          })),
-          sessionDuration: 18, // minutes
         },
         performanceMetrics: [
-          { date: "2024-01-01", pageLoad: 1.2, renderTime: 0.8, interactionDelay: 0.1 },
-          { date: "2024-01-02", pageLoad: 1.1, renderTime: 0.7, interactionDelay: 0.09 },
-          { date: "2024-01-03", pageLoad: 1.3, renderTime: 0.9, interactionDelay: 0.12 },
-          { date: "2024-01-04", pageLoad: 1.0, renderTime: 0.6, interactionDelay: 0.08 },
-          { date: "2024-01-05", pageLoad: 0.9, renderTime: 0.5, interactionDelay: 0.07 },
-          { date: "2024-01-06", pageLoad: 1.1, renderTime: 0.7, interactionDelay: 0.09 },
-          { date: "2024-01-07", pageLoad: 1.0, renderTime: 0.6, interactionDelay: 0.08 },
+          { name: "Page Load Time", value: 1.2, change: -0.1 },
+          { name: "Render Time", value: 0.8, change: 0.05 },
+          { name: "Interaction Delay", value: 0.1, change: -0.02 },
+          { name: "Bundle Size", value: 245.5, change: 12.3 },
+          { name: "First Paint", value: 0.95, change: -0.08 },
+          { name: "Time to Interactive", value: 1.8, change: 0.15 },
         ],
         topPages: [
           { page: "/dashboard", views: 1234, bounceRate: 0.12, avgTime: 180 },
@@ -103,11 +113,12 @@ export function AnalyticsDashboard() {
           { date: "2024-01-06", errors: 9, total: 1150 },
           { date: "2024-01-07", errors: 7, total: 1250 },
         ],
-        userActivity: [
-          { name: "Active Users", value: 234, color: "#026937" },
-          { name: "Inactive Users", value: 56, color: "#ea7200" },
-          { name: "New Users", value: 89, color: "#3b82f6" },
-        ],
+        userActivity: Array.from({ length: 24 }, (_, hour) => ({
+          name: `${hour}:00`,
+          hour,
+          users: Math.floor(Math.random() * 100) + 20,
+          color: hour % 2 === 0 ? "#026937" : "#ea7200"
+        })),
       };
 
       setData(mockData);
@@ -154,11 +165,12 @@ export function AnalyticsDashboard() {
     return <div className="flex items-center justify-center h-64">Failed to load analytics</div>;
   }
 
-  const getTrendIcon = (current: number, previous: number) => {
-    if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Minus className="h-4 w-4 text-gray-500" />;
-  };
+  // Trend icon functionality reserved for future implementation
+  // const getTrendIcon = (current: number, previous: number) => {
+  //   if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />;
+  //   if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />;
+  //   return <Minus className="h-4 w-4 text-gray-500" />;
+  // };
 
   return (
     <div className="space-y-6">
@@ -374,7 +386,7 @@ export function AnalyticsDashboard() {
                 <CardTitle className="text-sm font-medium">Most Clicked Elements</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {data.userInteractionPatterns.commonClickTargets.map((target: any, index: number) => (
+                {data.userInteractionPatterns.commonClickTargets.map((target: { element: string; count: number }, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-sm truncate">{target.element}</span>
                     <Badge variant="secondary">{target.count}</Badge>
@@ -388,7 +400,7 @@ export function AnalyticsDashboard() {
                 <CardTitle className="text-sm font-medium">Common Navigation Paths</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {data.userInteractionPatterns.navigationPaths.map((path: any, index: number) => (
+                {data.userInteractionPatterns.navigationPaths.map((path: { path: string; frequency: number; count: number }, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-xs truncate">{path.path}</span>
                     <Badge variant="outline">{path.count}</Badge>
@@ -407,7 +419,7 @@ export function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={data.userInteractionPatterns.timeOfDayActivity}>
+                <BarChart data={data.userActivity}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="hour" />
                   <YAxis />

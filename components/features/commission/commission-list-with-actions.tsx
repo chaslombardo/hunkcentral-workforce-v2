@@ -114,7 +114,7 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
             variant: 'destructive',
           });
         }
-      } catch (error) {
+      } catch {
         toast({
           title: 'Error',
           description: 'An unexpected error occurred while approving the commission.',
@@ -149,7 +149,7 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
             variant: 'destructive',
           });
         }
-      } catch (error) {
+      } catch {
         toast({
           title: 'Error',
           description: 'An unexpected error occurred while deleting the commission.',
@@ -181,7 +181,7 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
             variant: 'destructive',
           });
         }
-      } catch (error) {
+      } catch {
         toast({
           title: 'Error',
           description: 'An unexpected error occurred while rejecting the commission.',

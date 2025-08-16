@@ -26,34 +26,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Create Log",
-      "short_name": "New Log",
-      "description": "Create a new daily log",
-      "url": "/logs/create",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Review Logs",
-      "short_name": "Review",
-      "description": "Review pending logs",
-      "url": "/logs/review",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Commission",
-      "short_name": "Commission",
-      "description": "Add commission entry",
-      "url": "/commission/create",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to dashboard",
+      "url": "/dashboard",
       "icons": [
         {
           "src": "/icon-192x192.png",

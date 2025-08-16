@@ -5,7 +5,7 @@ import { analytics } from "@/lib/analytics";
 export interface ABTestVariant {
   name: string;
   weight: number; // 0-100, percentage of traffic
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface ABTestConfig {
@@ -19,13 +19,24 @@ export interface ABTestConfig {
 
 export interface ABTestResult {
   variant: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isControl: boolean;
+}
+
+interface ABTestExperiment {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  startDate?: Date;
+  endDate?: Date;
+  targetMetric: string;
+  variants: ABTestVariant[];
 }
 
 class ABTestingService {
   private static instance: ABTestingService;
-  private cache = new Map<string, any>();
+  private cache = new Map<string, unknown>();
   private cacheExpiry = new Map<string, number>();
 
   private constructor() {}
@@ -49,7 +60,7 @@ class ABTestingService {
       data: {
         name: config.name,
         description: config.description,
-        variants: config.variants as any,
+        variants: JSON.parse(JSON.stringify(config.variants)),
         targetMetric: config.targetMetric,
         startDate: config.startDate,
         endDate: config.endDate,
@@ -105,7 +116,7 @@ class ABTestingService {
     // Check cache first
     const cacheKey = `${experimentName}:${userId || sessionId}`;
     if (this.isValidCache(cacheKey)) {
-      return this.cache.get(cacheKey);
+      return this.cache.get(cacheKey) as ABTestResult | null;
     }
 
     // Get experiment
@@ -163,7 +174,7 @@ class ABTestingService {
     userId?: string,
     sessionId?: string,
     value?: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ) {
     const experiment = await this.getExperiment(experimentName);
     if (!experiment || experiment.status !== "active") {
@@ -191,7 +202,7 @@ class ABTestingService {
         variant: assignment.variant,
         eventType,
         value,
-        metadata: metadata || {},
+        metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : null,
       },
     });
 
@@ -270,10 +281,10 @@ class ABTestingService {
   }
 
   // Helper methods
-  private async getExperiment(name: string) {
+  private async getExperiment(name: string): Promise<ABTestExperiment | null> {
     const cacheKey = `experiment:${name}`;
     if (this.isValidCache(cacheKey)) {
-      return this.cache.get(cacheKey);
+      return this.cache.get(cacheKey) as ABTestExperiment | null;
     }
 
     const experiment = await prisma.aBTestExperiment.findUnique({
@@ -285,7 +296,7 @@ class ABTestingService {
       this.cacheExpiry.set(cacheKey, Date.now() + 10 * 60 * 1000); // 10 minutes
     }
 
-    return experiment;
+    return experiment as ABTestExperiment | null;
   }
 
   private selectVariant(variants: ABTestVariant[]): ABTestVariant {
@@ -353,7 +364,7 @@ export function useABTest(experimentName: string, userId?: string) {
   }, [experimentName, userId]);
 
   const trackEvent = useCallback(
-    (eventType: string, value?: number, metadata?: Record<string, any>) => {
+    (eventType: string, value?: number, metadata?: Record<string, unknown>) => {
       if (variant) {
         const sessionId = userId ? undefined : generateSessionId();
         abTesting.trackEvent(experimentName, eventType, userId, sessionId, value, metadata);

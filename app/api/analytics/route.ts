@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Process analytics events
     if (events && events.length > 0) {
       await prisma.analyticsEvent.createMany({
-        data: events.map((event: any) => ({
+        data: events.map((event: { eventType: string; metadata?: Record<string, unknown>; timestamp?: string }) => ({
           eventType: event.eventType,
           userId: session?.user?.id || null,
           metadata: event.metadata || {},
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Process performance metrics
     if (metrics && metrics.length > 0) {
       await prisma.performanceMetric.createMany({
-        data: metrics.map((metric: any) => ({
+        data: metrics.map((metric: { metricType: string; value: number; page: string; metadata?: Record<string, unknown>; timestamp?: string }) => ({
           metricType: metric.metricType,
           value: metric.value,
           page: metric.page,
