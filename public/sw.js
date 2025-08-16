@@ -6,7 +6,6 @@ const DYNAMIC_CACHE_NAME = 'hunkcentral-dynamic-v1'
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
-  '/logs/create',
   '/offline',
   '/manifest.json',
   // Add critical CSS and JS files
@@ -318,7 +317,6 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body,
     icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
     tag: data.tag || 'default',
     data: data.data || {},
     actions: data.actions || []
