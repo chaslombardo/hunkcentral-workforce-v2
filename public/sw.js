@@ -5,7 +5,6 @@ const DYNAMIC_CACHE_NAME = 'hunkcentral-dynamic-v1'
 // Assets to cache immediately
 const STATIC_ASSETS = [
   '/',
-  '/dashboard',
   '/offline',
   '/manifest.json',
   // Add critical CSS and JS files
@@ -13,9 +12,9 @@ const STATIC_ASSETS = [
 
 // API routes that should be cached
 const CACHEABLE_ROUTES = [
-  '/api/logs',
   '/api/users',
-  '/api/commission',
+  '/api/payroll',
+  '/api/analytics',
 ]
 
 // Install event - cache static assets
