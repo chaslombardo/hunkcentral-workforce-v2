@@ -118,6 +118,8 @@ interface DetailedPayrollData {
   departmentBreakdown: DepartmentBreakdownData[];
   dailyWorkHistory: DailyWorkEntry[];
   tipsDetails: TipEntry[];
+  workPatternStats?: WorkPatternStats;
+  validationResult?: PayrollValidationResult;
 }
 
 // API response interfaces
@@ -126,12 +128,14 @@ interface ApiDepartmentData {
   hours: number;
   rate: number;
   grossPay: number;
+  percentage: number;
   isPrimary: boolean;
 }
 
 interface ApiDayData {
   date: string;
   logIds: string[];
+  role: string;
   departments: Array<{
     department: string;
     hours: number;
@@ -941,7 +945,16 @@ export function MyPayrollView({ userId, initialPayPeriod }: MyPayrollViewProps =
                 ) : detailedData ? (
                   <DailyWorkCalendar
                     workEntries={detailedData.dailyWorkHistory}
-                    workPatternStats={detailedData.workPatternStats}
+                    workPatternStats={detailedData.workPatternStats || {
+                      totalDaysWorked: 0,
+                      avgHoursPerDay: 0,
+                      mostCommonDepartment: 'junk' as Department,
+                      totalJobsCompleted: 0,
+                      avgTipsPerDay: 0,
+                      busiestDay: new Date(),
+                      highestTipDay: new Date(),
+                      highestPayDay: new Date()
+                    }}
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
                     payPeriodStart={selectedPeriod?.startDate || new Date()}
