@@ -56,7 +56,6 @@ Thumbs.db
 *.sqlite3
 
 # Logs
-logs
 *.log
 
 # Runtime data
