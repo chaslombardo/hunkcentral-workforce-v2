@@ -504,3 +504,56 @@ self.addEventListener('notificationclick', (event) => {
       })
   )
 })
+
+// Enhanced message handling for communication with the main thread
+self.addEventListener('message', (event) => {
+  const { data, ports } = event
+  
+  if (data?.type === 'SKIP_WAITING') {
+    // Force activation of new service worker
+    self.skipWaiting()
+  } else if (data?.type === 'CLAIM_CLIENTS') {
+    // Take control of all clients
+    self.clients.claim()
+  } else if (data?.type === 'SW_HEALTH_CHECK') {
+    // Respond to health check from main thread
+    if (ports && ports[0]) {
+      ports[0].postMessage({
+        type: 'SW_HEALTH_RESPONSE',
+        status: 'ok',
+        timestamp: Date.now(),
+        version: SW_VERSION
+      })
+    }
+  } else if (data?.type === 'CLEAR_CACHE') {
+    // Handle cache clearing request
+    handleCacheClear().then(() => {
+      if (ports && ports[0]) {
+        ports[0].postMessage({
+          type: 'CACHE_CLEARED',
+          status: 'success'
+        })
+      }
+    }).catch((error) => {
+      if (ports && ports[0]) {
+        ports[0].postMessage({
+          type: 'CACHE_CLEARED',
+          status: 'error',
+          error: error.message
+        })
+      }
+    })
+  }
+})
+
+// Helper function for cache clearing
+async function handleCacheClear() {
+  try {
+    const cacheNames = await caches.keys()
+    await Promise.all(
+      cacheNames.map(cacheName => caches.delete(cacheName))
+    )
+  } catch (error) {
+    throw new Error(`Cache clearing failed: ${error.message}`)
+  }
+}

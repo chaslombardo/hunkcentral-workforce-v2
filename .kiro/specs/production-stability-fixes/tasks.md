@@ -35,7 +35,7 @@
   - **Ensure code is linted, TypeScript checked, console.logs removed from production code, and committed**
   - _Requirements: 3.1, 3.2_
 
-- [ ] 6. Add Service Worker Registration Safety
+- [-] 6. Add Service Worker Registration Safety
   - Modify service worker registration to fail gracefully
   - Add environment-based registration logic
   - Implement service worker update handling without breaking sessions
@@ -46,5 +46,5 @@
   - Create integration tests for service worker scenarios
   - Test error handling paths with simulated failures
   - Validate that cache clearing is no longer required
-  - **Ensure code is linted, TypeScript checked, console.logs removed from production code, and committed**
+  - **Ensure code is linted, TypeScript checked, console.logs removed from production code, and commit all changes**
   - _Requirements: 1.1, 2.1, 3.5_
