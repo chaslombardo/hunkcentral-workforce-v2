@@ -1,6 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+export const dynamic = 'force-dynamic'
 import { Separator } from "@/components/ui/separator"
 import {
   NoLogsEmptyState,

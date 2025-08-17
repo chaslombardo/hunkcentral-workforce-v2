@@ -1,6 +1,8 @@
 // Authentication utilities and session helpers
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
+import { logAuthError } from '@/lib/errorLogger';
+import { prisma } from '@/lib/prisma';
 import type { User, UserRole } from '@/types';
 
 export type { UserRole, User };
@@ -14,18 +16,116 @@ export interface SessionUser {
 
 // Server-side session helper (alias for compatibility)
 export async function auth() {
-  return await getServerSession(authOptions);
+  try {
+    return await getServerSession(authOptions);
+  } catch (error) {
+    await logAuthError(error, {
+      action: 'session_validation',
+      url: '/auth-helper',
+      additionalData: { function: 'auth' }
+    });
+    return null;
+  }
 }
 
 // Server-side session helper
 export async function getSession() {
-  return await getServerSession(authOptions);
+  try {
+    return await getServerSession(authOptions);
+  } catch (error) {
+    await logAuthError(error, {
+      action: 'session_validation',
+      url: '/auth-helper',
+      additionalData: { function: 'getSession' }
+    });
+    return null;
+  }
 }
 
-// Server-side user helper
+// Server-side user helper with validation
 export async function getCurrentUser(): Promise<SessionUser | null> {
-  const session = await getSession();
-  return session?.user as SessionUser | null;
+  try {
+    const session = await getSession();
+    if (!session?.user) {
+      return null;
+    }
+
+    const user = session.user as SessionUser;
+
+    // Validate user still exists in database
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { id: true, email: true, fullName: true, roles: true }
+      });
+
+      if (!dbUser) {
+        await logAuthError(
+          new Error('Session user no longer exists in database'),
+          {
+            action: 'session_validation',
+            userId: user.id,
+            url: '/current-user',
+            additionalData: { sessionEmail: user.email }
+          }
+        );
+        return null;
+      }
+
+      // Return user with current database data
+      return {
+        id: dbUser.id,
+        email: dbUser.email,
+        fullName: dbUser.fullName,
+        roles: dbUser.roles as UserRole[]
+      };
+    } catch (dbError) {
+      await logAuthError(dbError, {
+        action: 'session_validation',
+        userId: user.id,
+        url: '/current-user',
+        additionalData: { error: 'database_validation_failed' }
+      });
+      // Return session user if database validation fails
+      return user;
+    }
+  } catch (error) {
+    await logAuthError(error, {
+      action: 'session_validation',
+      url: '/current-user',
+      additionalData: { function: 'getCurrentUser' }
+    });
+    return null;
+  }
+}
+
+// Enhanced session validation with error recovery
+export async function validateSession(): Promise<{ 
+  user: SessionUser | null; 
+  isValid: boolean; 
+  error?: string 
+}> {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      return { user: null, isValid: false, error: 'No valid session' };
+    }
+
+    return { user, isValid: true };
+  } catch (error) {
+    await logAuthError(error, {
+      action: 'session_validation',
+      url: '/validate-session',
+      additionalData: { function: 'validateSession' }
+    });
+    
+    return { 
+      user: null, 
+      isValid: false, 
+      error: error instanceof Error ? error.message : 'Session validation failed' 
+    };
+  }
 }
 
 // Role checking utilities
@@ -37,23 +137,62 @@ export function hasAnyRole(user: SessionUser | User, roles: UserRole[]): boolean
   return roles.some((role) => user.roles.includes(role));
 }
 
-export function requireAuth(user: SessionUser | User | null): asserts user is SessionUser | User {
+export function requireAuth(user: SessionUser | User | null, context?: { url?: string; action?: string }): asserts user is SessionUser | User {
   if (!user) {
-    throw new Error('Authentication required');
+    const error = new Error('Authentication required');
+    if (context) {
+      logAuthError(error, {
+        action: 'permission_check',
+        url: context.url || '/unknown',
+        additionalData: { 
+          check: 'requireAuth',
+          action: context.action 
+        }
+      });
+    }
+    throw error;
   }
 }
 
-export function requireRole(user: SessionUser | User | null, role: UserRole): asserts user is SessionUser | User {
-  requireAuth(user);
+export function requireRole(user: SessionUser | User | null, role: UserRole, context?: { url?: string; action?: string }): asserts user is SessionUser | User {
+  requireAuth(user, context);
   if (!hasRole(user, role)) {
-    throw new Error(`Role '${role}' required`);
+    const error = new Error(`Role '${role}' required`);
+    if (context) {
+      logAuthError(error, {
+        action: 'permission_check',
+        userId: user.id,
+        url: context.url || '/unknown',
+        additionalData: { 
+          check: 'requireRole',
+          requiredRole: role,
+          userRoles: user.roles,
+          action: context.action 
+        }
+      });
+    }
+    throw error;
   }
 }
 
-export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[]): asserts user is SessionUser | User {
-  requireAuth(user);
+export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[], context?: { url?: string; action?: string }): asserts user is SessionUser | User {
+  requireAuth(user, context);
   if (roles.length > 0 && !hasAnyRole(user, roles)) {
-    throw new Error(`One of roles [${roles.join(', ')}] required`);
+    const error = new Error(`One of roles [${roles.join(', ')}] required`);
+    if (context) {
+      logAuthError(error, {
+        action: 'permission_check',
+        userId: user.id,
+        url: context.url || '/unknown',
+        additionalData: { 
+          check: 'requireAnyRole',
+          requiredRoles: roles,
+          userRoles: user.roles,
+          action: context.action 
+        }
+      });
+    }
+    throw error;
   }
 }
 

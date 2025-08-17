@@ -1,5 +1,7 @@
 import { MobileFormDemo } from '@/components/forms/mobile-form-demo';
 
+export const dynamic = 'force-dynamic'
+
 export default function MobileFormPage() {
   return (
     <div className="container mx-auto py-6">

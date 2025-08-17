@@ -1,6 +1,8 @@
 "use client"
 
 import { ProtectedRoute } from '@/components/auth/protected-route'
+
+export const dynamic = 'force-dynamic'
 import { useSession } from '@/hooks/useSession'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { MetricCard } from '@/components/brand/metric-card'

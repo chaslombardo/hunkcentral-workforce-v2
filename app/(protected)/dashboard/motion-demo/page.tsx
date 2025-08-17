@@ -1,5 +1,7 @@
 import { MotionPreferencesDemo } from "@/components/demos/motion-preferences-demo"
 
+export const dynamic = 'force-dynamic'
+
 export default function MotionPreferencesPage() {
   return (
     <div className="container mx-auto py-6">

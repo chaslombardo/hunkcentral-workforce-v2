@@ -23,56 +23,81 @@ export class ServiceWorkerManager {
   }
 
   async register(): Promise<ServiceWorkerRegistration | null> {
+    // Conservative environment checks
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return null
     }
 
-    try {
-      // Check if we're in development mode and skip registration if SW is causing issues
-      const isDevelopment = process.env.NODE_ENV === 'development'
-      const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === 'true'
-      
-      if (isDevelopment && !swEnabled) {
-        // Service Worker registration skipped in development
-        return null
-      }
+    // Enhanced environment detection
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === 'true'
+    
+    // Conservative registration policy
+    if (isDevelopment && !swEnabled) {
+      return null
+    }
 
+    try {
+      // Register with conservative options
       this.registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
-        updateViaCache: 'none' // Prevent aggressive caching of the service worker itself
+        updateViaCache: 'none' // Always fetch fresh service worker
       })
 
-      // Handle updates more gracefully
+      // Conservative update handling - don't force updates
       this.registration.addEventListener('updatefound', () => {
         const newWorker = this.registration?.installing
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New version available - don't force immediate update
+              // Notify about update but don't force it
               this.notifyUpdate()
             }
           })
         }
       })
 
-      // Handle service worker errors
+      // Graceful error handling
       navigator.serviceWorker.addEventListener('error', (error) => {
-        console.warn('Service Worker error:', error)
-        // Don't let SW errors break the application
+        if (isDevelopment) {
+          console.warn('SW: Service Worker error:', error)
+        }
+        // Don't let SW errors break the application - continue normally
       })
 
-      // Handle controller changes
+      // Conservative controller change handling
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Service worker has been updated and is now controlling the page
-        // Controller changed
+        // Don't automatically reload - let user decide
       })
+
+      // Add message handling for SW communication
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'SW_ERROR') {
+          if (isDevelopment) {
+            console.warn('SW: Service Worker reported error:', event.data.error)
+          }
+        }
+      })
+
+
 
       return this.registration
     } catch (error) {
-      // Service Worker registration failed - log in development, silent in production
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Service Worker registration failed:', error)
+      // Registration failed - graceful degradation
+      if (isDevelopment) {
+        console.warn('SW: Registration failed:', error)
       }
+      
+      // Clear any existing registration that might be causing issues
+      try {
+        const existingRegistration = await navigator.serviceWorker.getRegistration()
+        if (existingRegistration) {
+          await existingRegistration.unregister()
+        }
+      } catch {
+        // Ignore cleanup errors
+      }
+      
       return null
     }
   }
@@ -122,29 +147,28 @@ export class ServiceWorkerManager {
   }
 
   private notifyUpdate(): void {
-    // More graceful update notification - don't force immediate refresh
+    // Conservative update notification - let user choose when to update
     if (typeof window !== 'undefined') {
       // Dispatch a custom event that components can listen to
       const updateEvent = new CustomEvent('sw-update-available', {
-        detail: { registration: this.registration }
+        detail: { 
+          registration: this.registration,
+          timestamp: Date.now()
+        }
       })
       window.dispatchEvent(updateEvent)
+      
+
     }
   }
 
   private async syncOfflineData(): Promise<void> {
-    if (!this.registration || !('sync' in this.registration)) {
-      return
-    }
-
-    try {
-      // Trigger background sync for different data types
-      const syncManager = (this.registration as ServiceWorkerRegistration & { sync?: { register: (tag: string) => Promise<void> } }).sync;
-      await syncManager?.register('log-submission')
-      await syncManager?.register('commission-submission')
-    } catch {
-      // Background sync registration failed - silently handle in production
-    }
+    // Conservative sync - disabled to avoid complexity and potential conflicts
+    // Applications should handle offline scenarios through UI feedback instead
+    
+    // Instead of background sync, just notify the app that we're back online
+    // The app can then handle any pending data through normal UI flows
+    return Promise.resolve()
   }
 
   // Cache management

@@ -1,5 +1,7 @@
 import { FormFeedbackDemo } from '@/components/forms/form-feedback-demo';
 
+export const dynamic = 'force-dynamic'
+
 export default function FormFeedbackPage() {
   return (
     <div className="container mx-auto py-6">

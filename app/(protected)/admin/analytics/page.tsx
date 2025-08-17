@@ -9,6 +9,8 @@ import { ABTestManager } from "@/components/features/admin/ab-test-manager";
 import { PerformanceMonitor } from "@/components/performance-monitor";
 import { BarChart3, MessageSquare, TestTube, TrendingUp, Users, Clock } from "lucide-react";
 
+export const dynamic = 'force-dynamic'
+
 export default async function AnalyticsPage() {
   const session = await auth();
   
