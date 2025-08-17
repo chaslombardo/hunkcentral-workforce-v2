@@ -1,58 +1,74 @@
-const CACHE_NAME = 'hunkcentral-v1'
-const STATIC_CACHE_NAME = 'hunkcentral-static-v1'
-const DYNAMIC_CACHE_NAME = 'hunkcentral-dynamic-v1'
+const CACHE_NAME = 'hunkcentral-v2'
+const STATIC_CACHE_NAME = 'hunkcentral-static-v2'
+const DYNAMIC_CACHE_NAME = 'hunkcentral-dynamic-v2'
 
-// Assets to cache immediately
+// Minimal assets to cache immediately - avoid caching root to prevent navigation issues
 const STATIC_ASSETS = [
-  '/',
   '/offline',
   '/manifest.json',
-  // Add critical CSS and JS files
+  '/icon-192x192.png',
+  '/icon-512x512.png'
 ]
 
-// API routes that should be cached
+// Conservative API routes that are safe to cache
 const CACHEABLE_ROUTES = [
   '/api/users',
-  '/api/payroll',
-  '/api/analytics',
+  '/api/analytics'
+  // Removed /api/payroll to avoid stale data issues
 ]
 
-// Install event - cache static assets
+// Install event - cache static assets with error handling
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
-        return cache.addAll(STATIC_ASSETS)
+        // Cache assets individually to avoid failing the entire installation
+        return Promise.allSettled(
+          STATIC_ASSETS.map(asset => 
+            cache.add(asset).catch(error => {
+              console.warn(`Service Worker: Failed to cache ${asset}:`, error)
+              return null
+            })
+          )
+        )
       })
       .then(() => {
-        return self.skipWaiting()
+        // Don't skip waiting immediately to avoid breaking existing sessions
+        // Installation complete
       })
       .catch((error) => {
-        // Service Worker: Error caching static assets
+        console.warn('Service Worker: Error during installation:', error)
       })
   )
 })
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches with error handling
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
-        return Promise.all(
+        return Promise.allSettled(
           cacheNames.map((cacheName) => {
             if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
-              return caches.delete(cacheName)
+              return caches.delete(cacheName).catch(error => {
+                console.warn(`Service Worker: Failed to delete cache ${cacheName}:`, error)
+                return null
+              })
             }
           })
         )
       })
       .then(() => {
+        // Only claim clients if no errors occurred
         return self.clients.claim()
+      })
+      .catch((error) => {
+        console.warn('Service Worker: Error during activation:', error)
       })
   )
 })
 
-// Fetch event - serve from cache or network
+// Fetch event - serve from cache or network with proper redirect handling
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
@@ -67,13 +83,18 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Skip requests with redirect modes that could cause issues
+  if (request.redirect === 'error') {
+    return
+  }
+
   // Handle API requests
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(handleApiRequest(request))
     return
   }
 
-  // Handle page requests
+  // Handle page requests with conservative caching
   if (request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(handlePageRequest(request))
     return
@@ -83,27 +104,49 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(handleStaticRequest(request))
 })
 
-// Handle API requests with network-first strategy
+// Handle API requests with network-first strategy and proper redirect handling
 async function handleApiRequest(request) {
   const url = new URL(request.url)
   
   try {
+    // Create a new request with proper redirect mode to avoid redirect errors
+    const fetchRequest = new Request(request, {
+      redirect: 'follow',
+      credentials: 'same-origin'
+    })
+    
     // Try network first
-    const networkResponse = await fetch(request)
+    const networkResponse = await fetch(fetchRequest)
+    
+    // Handle redirects properly - don't cache redirect responses
+    if (networkResponse.type === 'opaqueredirect' || 
+        (networkResponse.status >= 300 && networkResponse.status < 400)) {
+      return networkResponse
+    }
     
     // Cache successful responses for cacheable routes
     if (networkResponse.ok && CACHEABLE_ROUTES.some(route => url.pathname.startsWith(route))) {
-      const cache = await caches.open(DYNAMIC_CACHE_NAME)
-      cache.put(request, networkResponse.clone())
+      try {
+        const cache = await caches.open(DYNAMIC_CACHE_NAME)
+        cache.put(request, networkResponse.clone())
+      } catch (cacheError) {
+        // Cache operation failed, but continue with network response
+        console.warn('Service Worker: Failed to cache API response', cacheError)
+      }
     }
     
     return networkResponse
   } catch (error) {
+    console.warn('Service Worker: Network request failed', error)
     
     // Try cache if network fails
-    const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
+    try {
+      const cachedResponse = await caches.match(request)
+      if (cachedResponse) {
+        return cachedResponse
+      }
+    } catch (cacheError) {
+      console.warn('Service Worker: Cache lookup failed', cacheError)
     }
     
     // Return offline response for API requests
@@ -120,31 +163,60 @@ async function handleApiRequest(request) {
   }
 }
 
-// Handle page requests with cache-first strategy for static pages
+// Handle page requests with network-first strategy to avoid navigation issues
 async function handlePageRequest(request) {
+  const url = new URL(request.url)
+  
   try {
-    // Try cache first for static pages
-    const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
+    // Create a new request with proper redirect mode
+    const fetchRequest = new Request(request, {
+      redirect: 'follow',
+      credentials: 'same-origin'
+    })
+    
+    // Try network first to ensure fresh navigation
+    const networkResponse = await fetch(fetchRequest)
+    
+    // Handle redirects properly - don't interfere with navigation redirects
+    if (networkResponse.type === 'opaqueredirect' || 
+        (networkResponse.status >= 300 && networkResponse.status < 400)) {
+      return networkResponse
     }
     
-    // Try network
-    const networkResponse = await fetch(request)
-    
-    // Cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE_NAME)
-      cache.put(request, networkResponse.clone())
+    // Only cache successful page responses, avoid caching dynamic pages
+    if (networkResponse.ok && !url.pathname.includes('/api/') && 
+        !url.pathname.includes('/auth/') && !url.search) {
+      try {
+        const cache = await caches.open(DYNAMIC_CACHE_NAME)
+        cache.put(request, networkResponse.clone())
+      } catch (cacheError) {
+        // Cache operation failed, but continue with network response
+        console.warn('Service Worker: Failed to cache page response', cacheError)
+      }
     }
     
     return networkResponse
   } catch (error) {
+    console.warn('Service Worker: Page request failed', error)
     
-    // Return offline page
-    const offlineResponse = await caches.match('/offline')
-    if (offlineResponse) {
-      return offlineResponse
+    // Try cache only if network completely fails
+    try {
+      const cachedResponse = await caches.match(request)
+      if (cachedResponse) {
+        return cachedResponse
+      }
+    } catch (cacheError) {
+      console.warn('Service Worker: Cache lookup failed', cacheError)
+    }
+    
+    // Return offline page as last resort
+    try {
+      const offlineResponse = await caches.match('/offline')
+      if (offlineResponse) {
+        return offlineResponse
+      }
+    } catch (offlineError) {
+      console.warn('Service Worker: Offline page not found', offlineError)
     }
     
     // Fallback offline response
@@ -214,31 +286,52 @@ async function handlePageRequest(request) {
   }
 }
 
-// Handle static assets with cache-first strategy
+// Handle static assets with cache-first strategy and proper error boundaries
 async function handleStaticRequest(request) {
   try {
-    // Try cache first
+    // Try cache first for static assets
     const cachedResponse = await caches.match(request)
     if (cachedResponse) {
       return cachedResponse
     }
     
+    // Create a new request with proper redirect mode
+    const fetchRequest = new Request(request, {
+      redirect: 'follow'
+    })
+    
     // Try network
-    const networkResponse = await fetch(request)
+    const networkResponse = await fetch(fetchRequest)
+    
+    // Handle redirects properly
+    if (networkResponse.type === 'opaqueredirect' || 
+        (networkResponse.status >= 300 && networkResponse.status < 400)) {
+      return networkResponse
+    }
     
     // Cache successful responses
     if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE_NAME)
-      cache.put(request, networkResponse.clone())
+      try {
+        const cache = await caches.open(STATIC_CACHE_NAME)
+        cache.put(request, networkResponse.clone())
+      } catch (cacheError) {
+        // Cache operation failed, but continue with network response
+        console.warn('Service Worker: Failed to cache static asset', cacheError)
+      }
     }
     
     return networkResponse
   } catch (error) {
+    console.warn('Service Worker: Static asset request failed', error)
     
-    // Return cached version if available
-    const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
+    // Try cache as fallback
+    try {
+      const cachedResponse = await caches.match(request)
+      if (cachedResponse) {
+        return cachedResponse
+      }
+    } catch (cacheError) {
+      console.warn('Service Worker: Cache lookup failed for static asset', cacheError)
     }
     
     // Return 404 for missing static assets

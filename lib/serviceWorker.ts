@@ -28,26 +28,51 @@ export class ServiceWorkerManager {
     }
 
     try {
+      // Check if we're in development mode and skip registration if SW is causing issues
+      const isDevelopment = process.env.NODE_ENV === 'development'
+      const swEnabled = process.env.NEXT_PUBLIC_SW_ENABLED === 'true'
+      
+      if (isDevelopment && !swEnabled) {
+        // Service Worker registration skipped in development
+        return null
+      }
+
       this.registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
+        updateViaCache: 'none' // Prevent aggressive caching of the service worker itself
       })
 
-      // Handle updates
+      // Handle updates more gracefully
       this.registration.addEventListener('updatefound', () => {
         const newWorker = this.registration?.installing
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New version available
+              // New version available - don't force immediate update
               this.notifyUpdate()
             }
           })
         }
       })
 
+      // Handle service worker errors
+      navigator.serviceWorker.addEventListener('error', (error) => {
+        console.warn('Service Worker error:', error)
+        // Don't let SW errors break the application
+      })
+
+      // Handle controller changes
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // Service worker has been updated and is now controlling the page
+        // Controller changed
+      })
+
       return this.registration
-    } catch {
-      // Service Worker registration failed - silently handle in production
+    } catch (error) {
+      // Service Worker registration failed - log in development, silent in production
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Service Worker registration failed:', error)
+      }
       return null
     }
   }
@@ -97,11 +122,13 @@ export class ServiceWorkerManager {
   }
 
   private notifyUpdate(): void {
-    // Optionally show a toast or modal to the user
-    if (typeof window !== 'undefined' && 'confirm' in window) {
-      if (confirm('A new version of HUNKCentral is available. Refresh now?')) {
-        window.location.reload()
-      }
+    // More graceful update notification - don't force immediate refresh
+    if (typeof window !== 'undefined') {
+      // Dispatch a custom event that components can listen to
+      const updateEvent = new CustomEvent('sw-update-available', {
+        detail: { registration: this.registration }
+      })
+      window.dispatchEvent(updateEvent)
     }
   }
 
