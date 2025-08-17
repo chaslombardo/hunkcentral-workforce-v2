@@ -362,14 +362,19 @@ export async function submitLog(
         },
       });
 
-      // Create audit log entry for submission
-      await logDailyLogChange(
-        'submit',
-        submittedLog.id,
-        session.user.id,
-        { status: 'draft' },
-        { status: 'submitted', submittedAt: submittedLog.submittedAt }
-      );
+      // Create audit log entry for submission (non-blocking)
+      try {
+        await logDailyLogChange(
+          'submit',
+          submittedLog.id,
+          session.user.id,
+          { status: 'draft' },
+          { status: 'submitted', submittedAt: submittedLog.submittedAt }
+        );
+      } catch (auditError) {
+        console.error('Audit logging failed (non-critical):', auditError);
+        // Don't fail the submission if audit logging fails
+      }
 
       revalidatePath('/logs');
       revalidatePath('/dashboard');
@@ -389,10 +394,19 @@ export async function submitLog(
       };
     }
   } catch (error) {
-    // Error submitting log
+    console.error('Error in submitLog:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return { 
+        success: false, 
+        error: handleDatabaseError(error, 'submitLog')
+      };
+    }
+    
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : 'Failed to submit log' 
+      error: error instanceof Error ? error.message : 'Failed to submit log due to an unexpected error' 
     };
   }
 }

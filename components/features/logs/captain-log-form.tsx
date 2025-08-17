@@ -154,8 +154,16 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
           description: 'Your daily log has been submitted for review.',
         });
         
-        // Redirect to logs list after successful submission
-        router.push('/logs');
+        // Use a timeout to ensure toast is shown before navigation
+        setTimeout(() => {
+          try {
+            router.push('/logs');
+          } catch (navError) {
+            console.error('Navigation error:', navError);
+            // Fallback to window location if router fails
+            window.location.href = '/logs';
+          }
+        }, 1000);
       } else {
         toast({
           title: 'Submission Failed',
