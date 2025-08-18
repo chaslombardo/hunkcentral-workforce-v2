@@ -70,14 +70,14 @@
   - **Ensure code is linted, TypeScript checked, console.logs removed from production code, and committed for github push**
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [-] 11. Add Production Service Worker Registration
+- [x] 11. Add Production Service Worker Registration
   - Modify service worker registration to fail gracefully
   - Add environment-based registration logic
   - Implement service worker update handling without breaking sessions
   - **Ensure code is linted, TypeScript checked, console.logs removed from production code, and committed for github push**
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 12. Add Production Service Worker Caching
+- [-] 12. Add Production Service Worker Caching
   - Create simplified caching strategy that avoids navigation conflicts
   - Add development/production environment detection
   - Implement graceful degradation when service worker fails
