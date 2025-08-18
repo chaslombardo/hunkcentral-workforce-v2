@@ -29,39 +29,73 @@ export async function logServerError(
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
     
+    // Enhanced error context with more debugging information
+    const enhancedContext = {
+      ...context,
+      timestamp: Date.now(),
+      stack,
+      // Add comprehensive debugging context
+      errorDetails: {
+        name: error instanceof Error ? error.name : 'Unknown',
+        cause: error instanceof Error ? (error as any).cause : undefined, // Type assertion for cause property
+        message: errorMessage,
+        stackTrace: stack,
+      },
+      systemInfo: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        memoryUsage: process.memoryUsage(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV,
+      },
+      requestInfo: {
+        timestamp: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+    };
+    
     const errorLog: ServerErrorLog = {
       level: 'error',
       message: errorMessage,
-      context: {
-        ...context,
-        timestamp: Date.now(),
-        stack,
-      },
+      context: enhancedContext,
       resolved: false,
     };
 
     // Enhanced production logging
     if (process.env.NODE_ENV === 'production') {
       try {
-        // Store error in database for production monitoring
+        // Store error in database for production monitoring with enhanced context
+        const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await prisma.auditLog.create({
           data: {
             entityType: 'system_error',
-            entityId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            entityId: errorId,
             action: 'server_error',
             userId: context.userId || 'system',
             changes: JSON.parse(JSON.stringify({
+              errorId,
               level: errorLog.level,
               message: errorLog.message,
               component: context.component,
               action: context.action,
               url: context.url,
               userAgent: context.userAgent,
-              stack: stack?.substring(0, 2000), // Increased stack trace length for better debugging
+              // Enhanced stack trace with full context
+              errorDetails: enhancedContext.errorDetails,
+              systemInfo: enhancedContext.systemInfo,
+              requestInfo: enhancedContext.requestInfo,
               additionalData: context.additionalData,
               environment: process.env.NODE_ENV,
               timestamp: new Date(errorLog.context.timestamp).toISOString(),
               severity: determineSeverity(errorMessage, context.component),
+              // Add debugging helpers
+              debugInfo: {
+                stackLines: stack ? stack.split('\n').length : 0,
+                errorType: error instanceof Error ? error.constructor.name : typeof error,
+                hasStack: !!stack,
+                hasCause: !!(error instanceof Error && (error as any).cause),
+              },
             })),
           },
         });
