@@ -1,14 +1,30 @@
-// Conservative Service Worker Strategy
-// Version 3 - Simplified caching to avoid navigation conflicts
+// Production Service Worker Strategy
+// Version 4 - Enhanced stability with graceful failure handling
 
-const CACHE_VERSION = 'v3'
+const SW_VERSION = 'v4.0.0'
+const CACHE_VERSION = 'v4'
 const STATIC_CACHE_NAME = `hunkcentral-static-${CACHE_VERSION}`
 const RUNTIME_CACHE_NAME = `hunkcentral-runtime-${CACHE_VERSION}`
 
-// Environment detection
-const isDevelopment = self.location.hostname === 'localhost' || 
-                     self.location.hostname === '127.0.0.1' ||
-                     self.location.hostname.includes('dev')
+// Enhanced environment detection with fallbacks
+const isDevelopment = (() => {
+  try {
+    return self.location.hostname === 'localhost' || 
+           self.location.hostname === '127.0.0.1' ||
+           self.location.hostname === '0.0.0.0' ||
+           self.location.hostname.includes('dev') ||
+           self.location.hostname.includes('local')
+  } catch {
+    return false
+  }
+})()
+
+// Production logging helper - only logs in development
+const logInDevelopment = (message, ...args) => {
+  if (isDevelopment) {
+    console.info(`SW ${SW_VERSION}:`, message, ...args)
+  }
+}
 
 // Minimal static assets - only essential files to avoid navigation conflicts
 const ESSENTIAL_ASSETS = [
@@ -27,85 +43,203 @@ const SAFE_API_ROUTES = [
 // Maximum cache age for runtime cache (5 minutes)
 const MAX_CACHE_AGE = 5 * 60 * 1000
 
-// Install event - conservative asset caching with graceful failure
+// Install event - production-ready asset caching with comprehensive error handling
 self.addEventListener('install', (event) => {
-  // Skip waiting in development for faster iteration
-  if (isDevelopment) {
-    self.skipWaiting()
-  }
-
+  logInDevelopment('Installing service worker', SW_VERSION)
+  
+  // Enhanced installation strategy
   event.waitUntil(
-    caches.open(STATIC_CACHE_NAME)
-      .then((cache) => {
-        // Cache essential assets individually with error isolation
-        return Promise.allSettled(
-          ESSENTIAL_ASSETS.map(async (asset) => {
-            try {
-              const response = await fetch(asset)
-              if (response.ok) {
-                return cache.put(asset, response)
-              }
-            } catch (error) {
-              // Silently handle individual asset failures
-              if (isDevelopment) {
-                console.warn(`SW: Failed to cache ${asset}:`, error)
-              }
-            }
-            return null
-          })
-        )
-      })
+    performInstallation()
       .then(() => {
-        // Installation complete - don't force activation to avoid breaking sessions
+        logInDevelopment('Installation completed successfully')
+        
+        // In development, skip waiting for faster iteration
+        // In production, let the user control when to activate
+        if (isDevelopment) {
+          return self.skipWaiting()
+        }
       })
       .catch((error) => {
-        // Installation failed - log in development only
-        if (isDevelopment) {
-          console.warn('SW: Installation error:', error)
-        }
+        logInDevelopment('Installation failed:', error)
+        
+        // Installation failure should not prevent the service worker from being installed
+        // The app will continue to work without caching
+        return Promise.resolve()
       })
   )
 })
 
-// Activate event - conservative cache cleanup with graceful degradation
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.resolve()
-      .then(async () => {
+async function performInstallation() {
+  try {
+    const cache = await caches.open(STATIC_CACHE_NAME)
+    
+    // Cache essential assets with individual error handling
+    const cacheResults = await Promise.allSettled(
+      ESSENTIAL_ASSETS.map(async (asset) => {
         try {
-          // Clean up old cache versions
-          const cacheNames = await caches.keys()
-          const oldCaches = cacheNames.filter(cacheName => 
-            cacheName.startsWith('hunkcentral-') && 
-            !cacheName.includes(CACHE_VERSION)
-          )
-
-          // Delete old caches with error isolation
-          await Promise.allSettled(
-            oldCaches.map(async (cacheName) => {
-              try {
-                await caches.delete(cacheName)
-              } catch (error) {
-                if (isDevelopment) {
-                  console.warn(`SW: Failed to delete cache ${cacheName}:`, error)
-                }
-              }
+          const response = await fetch(asset, {
+            cache: 'no-cache', // Ensure fresh assets during installation
+            credentials: 'same-origin'
+          })
+          
+          if (response.ok) {
+            // Add timestamp for cache validation
+            const headers = new Headers(response.headers)
+            headers.set('sw-cached-at', Date.now().toString())
+            headers.set('sw-version', SW_VERSION)
+            
+            const cachedResponse = new Response(response.body, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: headers
             })
-          )
-
-          // Claim clients only in development for faster iteration
-          if (isDevelopment) {
-            await self.clients.claim()
+            
+            await cache.put(asset, cachedResponse)
+            logInDevelopment(`Cached asset: ${asset}`)
+            return { asset, status: 'cached' }
+          } else {
+            logInDevelopment(`Failed to cache ${asset}: ${response.status}`)
+            return { asset, status: 'failed', reason: `HTTP ${response.status}` }
           }
         } catch (error) {
-          // Activation error - log in development only
-          if (isDevelopment) {
-            console.warn('SW: Activation error:', error)
-          }
+          logInDevelopment(`Error caching ${asset}:`, error)
+          return { asset, status: 'error', error: error.message }
         }
+      })
+    )
+    
+    // Log installation summary
+    const successful = cacheResults.filter(result => 
+      result.status === 'fulfilled' && result.value.status === 'cached'
+    ).length
+    
+    logInDevelopment(`Installation summary: ${successful}/${ESSENTIAL_ASSETS.length} assets cached`)
+    
+    // Installation is considered successful even if some assets failed
+    // This ensures the service worker can still provide offline functionality
+    return Promise.resolve()
+  } catch (error) {
+    logInDevelopment('Cache opening failed:', error)
+    // Even if cache opening fails, don't prevent installation
+    return Promise.resolve()
+  }
+}
+
+// Activate event - production-ready cache cleanup with session protection
+self.addEventListener('activate', (event) => {
+  logInDevelopment('Activating service worker', SW_VERSION)
+  
+  event.waitUntil(
+    performActivation()
+      .then(() => {
+        logInDevelopment('Activation completed successfully')
+      })
+      .catch((error) => {
+        logInDevelopment('Activation failed:', error)
+        // Continue activation even if cleanup fails
+        return Promise.resolve()
       })
   )
 })
+
+async function performActivation() {
+  try {
+    // Enhanced cache cleanup with error isolation
+    await cleanupOldCaches()
+    
+    // Client claiming strategy based on environment
+    await handleClientClaiming()
+    
+    // Notify clients of successful activation
+    await notifyClientsOfActivation()
+    
+  } catch (error) {
+    logInDevelopment('Activation process error:', error)
+    // Don't throw - allow activation to complete
+  }
+}
+
+async function cleanupOldCaches() {
+  try {
+    const cacheNames = await caches.keys()
+    const oldCaches = cacheNames.filter(cacheName => 
+      cacheName.startsWith('hunkcentral-') && 
+      !cacheName.includes(CACHE_VERSION)
+    )
+
+    if (oldCaches.length > 0) {
+      logInDevelopment(`Cleaning up ${oldCaches.length} old cache(s):`, oldCaches)
+      
+      const cleanupResults = await Promise.allSettled(
+        oldCaches.map(async (cacheName) => {
+          try {
+            const deleted = await caches.delete(cacheName)
+            logInDevelopment(`Cache cleanup: ${cacheName} - ${deleted ? 'deleted' : 'not found'}`)
+            return { cacheName, deleted }
+          } catch (error) {
+            logInDevelopment(`Failed to delete cache ${cacheName}:`, error)
+            return { cacheName, deleted: false, error: error.message }
+          }
+        })
+      )
+      
+      const successfulCleanups = cleanupResults.filter(result => 
+        result.status === 'fulfilled' && result.value.deleted
+      ).length
+      
+      logInDevelopment(`Cache cleanup summary: ${successfulCleanups}/${oldCaches.length} caches deleted`)
+    }
+  } catch (error) {
+    logInDevelopment('Cache cleanup failed:', error)
+  }
+}
+
+async function handleClientClaiming() {
+  try {
+    // In development, claim clients immediately for faster iteration
+    if (isDevelopment) {
+      await self.clients.claim()
+      logInDevelopment('Claimed all clients (development mode)')
+    } else {
+      // In production, be more conservative about claiming clients
+      // Only claim if there are no active clients to avoid disrupting user sessions
+      const clients = await self.clients.matchAll({ includeUncontrolled: true })
+      if (clients.length === 0) {
+        await self.clients.claim()
+        logInDevelopment('Claimed clients (no active sessions)')
+      } else {
+        logInDevelopment(`Skipped claiming clients (${clients.length} active sessions)`)
+      }
+    }
+  } catch (error) {
+    logInDevelopment('Client claiming failed:', error)
+  }
+}
+
+async function notifyClientsOfActivation() {
+  try {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true })
+    
+    // Notify all clients of successful activation
+    clients.forEach(client => {
+      try {
+        client.postMessage({
+          type: 'SW_ACTIVATED',
+          version: SW_VERSION,
+          timestamp: Date.now()
+        })
+      } catch (error) {
+        logInDevelopment('Failed to notify client:', error)
+      }
+    })
+    
+    if (clients.length > 0) {
+      logInDevelopment(`Notified ${clients.length} client(s) of activation`)
+    }
+  } catch (error) {
+    logInDevelopment('Client notification failed:', error)
+  }
+}
 
 // Fetch event - conservative strategy with graceful degradation
 self.addEventListener('fetch', (event) => {
@@ -505,46 +639,162 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
-// Enhanced message handling for communication with the main thread
+// Production-ready message handling for communication with the main thread
 self.addEventListener('message', (event) => {
-  const { data, ports } = event
+  const { data, ports, source } = event
   
-  if (data?.type === 'SKIP_WAITING') {
-    // Force activation of new service worker
-    self.skipWaiting()
-  } else if (data?.type === 'CLAIM_CLIENTS') {
-    // Take control of all clients
-    self.clients.claim()
-  } else if (data?.type === 'SW_HEALTH_CHECK') {
-    // Respond to health check from main thread
+  logInDevelopment('Received message:', data?.type)
+  
+  try {
+    switch (data?.type) {
+      case 'SKIP_WAITING':
+        handleSkipWaiting(ports)
+        break
+        
+      case 'CLAIM_CLIENTS':
+        handleClaimClients(ports)
+        break
+        
+      case 'SW_HEALTH_CHECK':
+        handleHealthCheck(ports)
+        break
+        
+      case 'CLEAR_CACHE':
+        handleCacheClearRequest(ports)
+        break
+        
+      case 'GET_SW_STATUS':
+        handleStatusRequest(ports)
+        break
+        
+      case 'UPDATE_READY':
+        handleUpdateReady(source)
+        break
+        
+      default:
+        logInDevelopment('Unknown message type:', data?.type)
+        if (ports && ports[0]) {
+          ports[0].postMessage({
+            type: 'SW_ERROR',
+            error: 'Unknown message type',
+            timestamp: Date.now()
+          })
+        }
+    }
+  } catch (error) {
+    logInDevelopment('Message handling error:', error)
     if (ports && ports[0]) {
       ports[0].postMessage({
-        type: 'SW_HEALTH_RESPONSE',
-        status: 'ok',
-        timestamp: Date.now(),
-        version: SW_VERSION
+        type: 'SW_ERROR',
+        error: error.message,
+        timestamp: Date.now()
       })
     }
-  } else if (data?.type === 'CLEAR_CACHE') {
-    // Handle cache clearing request
-    handleCacheClear().then(() => {
+  }
+})
+
+function handleSkipWaiting(ports) {
+  logInDevelopment('Skipping waiting phase')
+  self.skipWaiting()
+  
+  if (ports && ports[0]) {
+    ports[0].postMessage({
+      type: 'SKIP_WAITING_RESPONSE',
+      status: 'success',
+      timestamp: Date.now()
+    })
+  }
+}
+
+function handleClaimClients(ports) {
+  logInDevelopment('Claiming clients')
+  
+  self.clients.claim()
+    .then(() => {
+      if (ports && ports[0]) {
+        ports[0].postMessage({
+          type: 'CLAIM_CLIENTS_RESPONSE',
+          status: 'success',
+          timestamp: Date.now()
+        })
+      }
+    })
+    .catch((error) => {
+      logInDevelopment('Client claiming failed:', error)
+      if (ports && ports[0]) {
+        ports[0].postMessage({
+          type: 'CLAIM_CLIENTS_RESPONSE',
+          status: 'error',
+          error: error.message,
+          timestamp: Date.now()
+        })
+      }
+    })
+}
+
+function handleHealthCheck(ports) {
+  if (ports && ports[0]) {
+    ports[0].postMessage({
+      type: 'SW_HEALTH_RESPONSE',
+      status: 'ok',
+      version: SW_VERSION,
+      timestamp: Date.now(),
+      cacheVersion: CACHE_VERSION,
+      isDevelopment: isDevelopment
+    })
+  }
+}
+
+function handleCacheClearRequest(ports) {
+  logInDevelopment('Clearing all caches')
+  
+  handleCacheClear()
+    .then(() => {
       if (ports && ports[0]) {
         ports[0].postMessage({
           type: 'CACHE_CLEARED',
-          status: 'success'
+          status: 'success',
+          timestamp: Date.now()
         })
       }
-    }).catch((error) => {
+    })
+    .catch((error) => {
+      logInDevelopment('Cache clearing failed:', error)
       if (ports && ports[0]) {
         ports[0].postMessage({
           type: 'CACHE_CLEARED',
           status: 'error',
-          error: error.message
+          error: error.message,
+          timestamp: Date.now()
         })
       }
     })
+}
+
+function handleStatusRequest(ports) {
+  if (ports && ports[0]) {
+    ports[0].postMessage({
+      type: 'SW_STATUS_RESPONSE',
+      status: 'active',
+      version: SW_VERSION,
+      cacheVersion: CACHE_VERSION,
+      isDevelopment: isDevelopment,
+      timestamp: Date.now()
+    })
   }
-})
+}
+
+function handleUpdateReady(source) {
+  logInDevelopment('Update ready notification received')
+  
+  // Notify the specific client that sent the message
+  if (source) {
+    source.postMessage({
+      type: 'SW_UPDATE_ACKNOWLEDGED',
+      timestamp: Date.now()
+    })
+  }
+}
 
 // Helper function for cache clearing
 async function handleCacheClear() {
