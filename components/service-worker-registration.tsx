@@ -99,7 +99,7 @@ export function ServiceWorkerRegistration() {
         const reason = process.env.NEXT_PUBLIC_SW_DISABLED === 'true' ? 'disabled' : 
                       process.env.NEXT_PUBLIC_SW_ENABLED !== 'true' ? 'not enabled for development' :
                       'environment or capability check failed'
-        console.info(`SW: Registration skipped (${reason})`)
+        console.warn(`SW: Registration skipped (${reason})`)
       }
       
       // Set flag to indicate app is running without service worker
@@ -354,13 +354,13 @@ export function ServiceWorkerRegistration() {
     if (registrationDecision.register) {
       // Register service worker - no logging in production
       if (process.env.NODE_ENV === 'development') {
-        console.info(`SW: Registering service worker (${registrationDecision.reason})`)
+        console.warn(`SW: Registering service worker (${registrationDecision.reason})`)
       }
       registerServiceWorker()
     } else {
       // Skip registration - log only in development
       if (process.env.NODE_ENV === 'development') {
-        console.info(`SW: Skipping service worker registration (${registrationDecision.reason})`)
+        console.warn(`SW: Skipping service worker registration (${registrationDecision.reason})`)
       }
       // Set status for debugging
       sessionStorage.setItem('sw-status', 'skipped')

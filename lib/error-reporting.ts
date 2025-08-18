@@ -372,7 +372,7 @@ export function extractErrorDebugInfo(error: Error | unknown): {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      cause: (error as any).cause, // Type assertion for cause property
+      cause: (error as Error & { cause?: unknown }).cause,
     };
   }
 

@@ -5,6 +5,41 @@ import { prisma } from '@/lib/prisma';
 import { logServerError } from '@/lib/errorLogger';
 import { getErrorStatistics } from '@/lib/production-error-logger';
 
+// TypeScript interfaces for error handling
+interface ErrorLogChanges {
+  level?: string;
+  component?: string;
+  message?: string;
+  action?: string;
+  sessionId?: string;
+  url?: string;
+  userAgent?: string;
+  environment?: string;
+  errorDetails?: {
+    stackTrace?: string;
+    [key: string]: unknown;
+  };
+  systemInfo?: Record<string, unknown>;
+  requestInfo?: Record<string, unknown>;
+  additionalData?: Record<string, unknown>;
+  debugInfo?: Record<string, unknown>;
+  resolved?: boolean;
+  resolution?: {
+    resolvedAt: string;
+    resolvedBy: string;
+    resolution: string;
+  };
+  [key: string]: unknown;
+}
+
+interface PrismaWhereClause {
+  entityType: string;
+  changes?: {
+    path: string[];
+    equals: string;
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,7 +60,7 @@ export async function GET(request: NextRequest) {
     // const resolved = searchParams.get('resolved'); // TODO: Implement resolved filtering
 
     // Build where clause for filtering
-    const where: any = {
+    const where: PrismaWhereClause = {
       entityType: 'system_error',
     };
 
@@ -64,12 +99,12 @@ export async function GET(request: NextRequest) {
 
     // Transform audit logs to error reports format
     const errors = errorLogs.map(log => {
-      const changes = log.changes as any;
+      const changes = log.changes as ErrorLogChanges;
       return {
         id: log.entityId,
         timestamp: log.createdAt.toISOString(),
         level: changes.level || 'medium',
-        type: determineErrorType(changes.component, changes.message),
+        type: determineErrorType(changes.component || 'unknown', changes.message || 'Unknown error'),
         message: changes.message || 'Unknown error',
         stack: changes.errorDetails?.stackTrace,
         context: {
@@ -154,8 +189,8 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedChanges = {
-      ...(errorLog.changes as any),
+    const updatedChanges: ErrorLogChanges = {
+      ...(errorLog.changes as ErrorLogChanges),
       resolved: true,
       resolution: {
         resolvedAt: new Date().toISOString(),
@@ -167,7 +202,7 @@ export async function PATCH(request: NextRequest) {
     await prisma.auditLog.update({
       where: { id: errorLog.id },
       data: {
-        changes: updatedChanges,
+        changes: JSON.parse(JSON.stringify(updatedChanges)),
       },
     });
 
@@ -211,10 +246,10 @@ async function getErrorStats() {
     };
 
     errorLogs.forEach(log => {
-      const changes = log.changes as any;
+      const changes = log.changes as ErrorLogChanges;
       const level = changes.level || 'medium';
       const component = changes.component || 'unknown';
-      const type = determineErrorType(component, changes.message);
+      const type = determineErrorType(component, changes.message || 'Unknown error');
 
       // Count by level
       if (level === 'critical') stats.critical++;
@@ -245,7 +280,7 @@ async function getErrorStats() {
     else if (recentErrors < previousErrors * 0.8) stats.trend = 'down';
 
     return stats;
-  } catch (error) {
+  } catch {
     return {
       total: 0,
       critical: 0,

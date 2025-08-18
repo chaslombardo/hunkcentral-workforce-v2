@@ -235,7 +235,15 @@ export async function logProductionError(
 
     if (existingError) {
       // Update existing error with new occurrence
-      const existingChanges = existingError.changes as any;
+      const existingChanges = existingError.changes as {
+        occurrenceCount?: number;
+        lastOccurrence?: string;
+        recentOccurrences?: Array<{
+          timestamp: string;
+          context: EnhancedErrorContext;
+        }>;
+        [key: string]: unknown;
+      };
       const updatedChanges = {
         ...existingChanges,
         occurrenceCount: (existingChanges.occurrenceCount || 1) + 1,
@@ -254,13 +262,14 @@ export async function logProductionError(
       await prisma.auditLog.update({
         where: { id: existingError.id },
         data: {
-          changes: updatedChanges,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          changes: updatedChanges as any, // Prisma JSON handling requires any
         },
       });
 
       // Update the error log with existing data
       errorLog.occurrenceCount = updatedChanges.occurrenceCount;
-      errorLog.firstOccurrence = existingChanges.firstOccurrence || errorLog.firstOccurrence;
+      errorLog.firstOccurrence = (existingChanges.firstOccurrence as string) || errorLog.firstOccurrence;
     } else {
       // Create new error log entry
       await prisma.auditLog.create({
@@ -281,7 +290,7 @@ export async function logProductionError(
               stackFrameCount: parsedStack.length,
               errorType: errorObj.constructor.name,
               hasStack: !!errorObj.stack,
-              hasCause: !!(errorObj as any).cause,
+              hasCause: !!(errorObj as Error & { cause?: unknown }).cause,
             },
             // Request context
             requestInfo: {
@@ -553,10 +562,25 @@ export async function getErrorStatistics(timeRange: {
       }>,
     };
 
-    const errorMap = new Map<string, any>();
+    const errorMap = new Map<string, {
+      fingerprint: string;
+      message: string;
+      occurrenceCount: number;
+      component: string;
+      severity: string;
+    }>();
 
     errorLogs.forEach(log => {
-      const changes = log.changes as any;
+      const changes = log.changes as {
+        severity?: string;
+        category?: string;
+        component?: string;
+        fingerprint?: string;
+        message?: string;
+        occurrenceCount?: number;
+        resolved?: boolean;
+        [key: string]: unknown;
+      };
       const severity = changes.severity || 'medium';
       const category = changes.category || 'server';
       const component = changes.component || 'unknown';
@@ -581,7 +605,7 @@ export async function getErrorStatistics(timeRange: {
         if (!errorMap.has(fingerprint)) {
           errorMap.set(fingerprint, {
             fingerprint,
-            message: changes.message,
+            message: changes.message || 'Unknown error',
             occurrenceCount: changes.occurrenceCount || 1,
             component,
             severity,

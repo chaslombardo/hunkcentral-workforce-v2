@@ -211,6 +211,61 @@ export default function DashboardPage() {
             {roleMetrics.captain && (
               <>
                 <MetricCard
+                  title="Pay Period Revenue"
+                  description="Current period total"
+                  value={`$${roleMetrics.captain.currentPayPeriodRevenue.toLocaleString()}`}
+                  icon={DollarSign}
+                  color="green"
+                  footer={{
+                    primary: `${roleMetrics.captain.currentPayPeriodHours}h worked`,
+                    secondary: "Revenue generated"
+                  }}
+                />
+                <MetricCard
+                  title="Total Tips"
+                  description="Current pay period"
+                  value={`$${roleMetrics.captain.currentPayPeriodTips.toLocaleString()}`}
+                  icon={DollarSign}
+                  color="green"
+                  footer={{
+                    primary: "Team tip earnings",
+                    secondary: "Shared with crew"
+                  }}
+                />
+                <MetricCard
+                  title="Junk Labor Bonus"
+                  description="Weekly average"
+                  value={`$${roleMetrics.captain.junkLaborBonus.toLocaleString()}`}
+                  icon={BarChart3}
+                  color={roleMetrics.captain.junkLaborBonus > 0 ? "green" : "neutral"}
+                  footer={{
+                    primary: roleMetrics.captain.junkLaborBonus > 0 ? "Efficiency bonus earned" : "No bonus earned",
+                    secondary: "Based on labor cost %"
+                  }}
+                />
+                <MetricCard
+                  title="Move Labor Bonus"
+                  description="Weekly average"
+                  value={`$${roleMetrics.captain.moveLaborBonus.toLocaleString()}`}
+                  icon={BarChart3}
+                  color={roleMetrics.captain.moveLaborBonus > 0 ? "green" : "neutral"}
+                  footer={{
+                    primary: roleMetrics.captain.moveLaborBonus > 0 ? "Efficiency bonus earned" : "No bonus earned",
+                    secondary: "Based on labor cost %"
+                  }}
+                />
+                <MetricCard
+                  title="Average Hourly Rate"
+                  description="Including all compensation"
+                  value={`$${roleMetrics.captain.averageHourlyRate.toFixed(2)}`}
+                  icon={Clock}
+                  color="blue"
+                  footer={{
+                    primary: "Wages + tips + bonuses",
+                    secondary: "Per hour worked"
+                  }}
+                />
+                <MetricCard
                   title="My Draft Logs"
                   description="Unsaved work"
                   value={roleMetrics.captain.draftLogs}

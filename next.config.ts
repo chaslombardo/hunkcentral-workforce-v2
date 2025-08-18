@@ -93,7 +93,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/((?!_next/static|favicon\.ico|manifest\.json|sw\.js|icon-.*\.png).*)',
         headers: [
           {
             key: 'X-DNS-Prefetch-Control',

@@ -59,7 +59,7 @@ export class AuthErrorBoundary extends React.Component<
     const errorContext = {
       message: error.message,
       stack: error.stack,
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack || 'Not available',
       timestamp: new Date().toISOString(),
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
       userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
@@ -146,7 +146,16 @@ export class AuthErrorBoundary extends React.Component<
     }, delay);
   }
 
-  private async reportError(errorContext: any) {
+  private async reportError(errorContext: {
+    message: string;
+    stack?: string;
+    componentStack: string;
+    timestamp: string;
+    url: string;
+    userAgent: string;
+    errorCode: string;
+    isAuthError: boolean;
+  }) {
     try {
       await fetch('/api/errors/client', {
         method: 'POST',

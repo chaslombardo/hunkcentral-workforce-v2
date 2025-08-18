@@ -224,6 +224,13 @@ export interface RoleSpecificMetrics {
   captain?: {
     draftLogs: number;
     submittedLogs: number;
+    // Enhanced stats for captain dashboard
+    currentPayPeriodRevenue: number;
+    currentPayPeriodTips: number;
+    junkLaborBonus: number; // Weekly average
+    moveLaborBonus: number; // Weekly average
+    averageHourlyRate: number; // Including gross hourly + tips + bonuses per hour
+    currentPayPeriodHours: number;
   };
   sales?: {
     pendingCommissions: number;
@@ -251,6 +258,18 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
 
     // Captain-specific metrics
     if (userRoles.includes('captain')) {
+      // Get current pay period
+      const now = new Date();
+      const currentPayPeriod = await prisma.payPeriod.findFirst({
+        where: {
+          AND: [
+            { startDate: { lte: now } },
+            { endDate: { gte: now } }
+          ]
+        },
+        orderBy: { startDate: 'desc' }
+      });
+
       const myDraftLogs = await prisma.dailyLog.count({
         where: {
           captainId: session.user.id,
@@ -265,9 +284,173 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
         }
       });
 
+      // Get captain's approved logs in current pay period
+      const payPeriodStart = currentPayPeriod?.startDate || new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const payPeriodEnd = currentPayPeriod?.endDate || now;
+
+      const approvedLogs = await prisma.dailyLog.findMany({
+        where: {
+          captainId: session.user.id,
+          status: 'approved',
+          approvedAt: {
+            gte: payPeriodStart,
+            lte: payPeriodEnd
+          }
+        },
+        include: {
+          jobs: true,
+          hours: {
+            include: {
+              employee: {
+                select: {
+                  id: true,
+                  rateJunkCaptain: true,
+                  rateJunkWingman: true,
+                  rateMoveCaptain: true,
+                  rateMoveWingman: true,
+                  rateZigma: true,
+                  rateTraining: true,
+                  rateEstimating: true,
+                  rateWarehouse: true,
+                  rateAdmin: true,
+                },
+              },
+            },
+          },
+          captain: {
+            select: {
+              junkBonusGoal: true,
+              moveBonusGoal: true,
+            },
+          },
+        },
+      });
+
+      // Calculate current pay period revenue and tips
+      let currentPayPeriodRevenue = 0;
+      let currentPayPeriodTips = 0;
+      let totalHours = 0;
+      let totalGrossWages = 0;
+      
+      // Weekly aggregation for bonus calculations
+      let totalJunkRevenue = 0;
+      let totalJunkLaborCost = 0;
+      let totalMoveRevenue = 0;
+      let totalMoveLaborCost = 0;
+      let junkBonusGoal = 0.14; // Default
+      let moveBonusGoal = 0.24; // Default
+
+      for (const log of approvedLogs) {
+        // Update bonus goal from captain settings (use first log's settings)
+        if (approvedLogs.indexOf(log) === 0) {
+          junkBonusGoal = Number(log.captain.junkBonusGoal) || 0.14;
+          moveBonusGoal = Number(log.captain.moveBonusGoal) || 0.24;
+        }
+        
+        // Calculate revenue and tips
+        for (const job of log.jobs) {
+          currentPayPeriodRevenue += Number(job.revenue);
+          currentPayPeriodTips += Number(job.tips);
+          
+          // Aggregate revenue by job type for bonus calculation
+          if (job.jobType === 'junk') {
+            totalJunkRevenue += Number(job.revenue);
+          } else if (job.jobType === 'move') {
+            totalMoveRevenue += Number(job.revenue);
+          }
+        }
+
+        // Aggregate labor costs by department for bonus calculation
+        for (const hour of log.hours) {
+          if (hour.department === 'junk') {
+            const rate = log.captainId === hour.employeeId || hour.isCoCaptain
+              ? Number(hour.employee.rateJunkCaptain || 0)
+              : Number(hour.employee.rateJunkWingman || 0);
+            totalJunkLaborCost += Number(hour.hours) * rate;
+          } else if (hour.department === 'move') {
+            const rate = log.captainId === hour.employeeId || hour.isCoCaptain
+              ? Number(hour.employee.rateMoveCaptain || 0)
+              : Number(hour.employee.rateMoveWingman || 0);
+            totalMoveLaborCost += Number(hour.hours) * rate;
+          }
+
+          // Calculate captain's hours and wages
+          if (hour.employeeId === session.user.id) {
+            totalHours += Number(hour.hours);
+            
+            // Calculate hourly rate based on department
+            let rate = 0;
+            switch (hour.department) {
+              case 'junk':
+                rate = Number(hour.employee.rateJunkCaptain || 0);
+                break;
+              case 'move':
+                rate = Number(hour.employee.rateMoveCaptain || 0);
+                break;
+              case 'zigma':
+                rate = Number(hour.employee.rateZigma || 0);
+                break;
+              case 'training':
+                rate = Number(hour.employee.rateTraining || 0);
+                break;
+              case 'estimating':
+                rate = Number(hour.employee.rateEstimating || 0);
+                break;
+              case 'warehouse':
+                rate = Number(hour.employee.rateWarehouse || 0);
+                break;
+              case 'admin':
+                rate = Number(hour.employee.rateAdmin || 0);
+                break;
+            }
+            
+            totalGrossWages += Number(hour.hours) * rate;
+          }
+        }
+      }
+      
+      // Calculate weekly aggregated bonuses
+      let totalJunkBonus = 0;
+      let totalMoveBonus = 0;
+      
+      // Junk section bonus (weekly aggregate)
+      if (totalJunkRevenue > 0) {
+        const junkLaborPercentage = totalJunkLaborCost / totalJunkRevenue;
+        if (junkLaborPercentage < junkBonusGoal) {
+          totalJunkBonus = (junkBonusGoal - junkLaborPercentage) * totalJunkRevenue;
+        }
+      }
+      
+      // Move section bonus (weekly aggregate)
+      if (totalMoveRevenue > 0) {
+        const moveLaborPercentage = totalMoveLaborCost / totalMoveRevenue;
+        if (moveLaborPercentage < moveBonusGoal) {
+          totalMoveBonus = (moveBonusGoal - moveLaborPercentage) * totalMoveRevenue;
+        }
+      }
+
+      // Calculate weekly averages for bonuses (assuming 2-week pay periods)
+      const payPeriodDays = currentPayPeriod 
+        ? Math.ceil((payPeriodEnd.getTime() - payPeriodStart.getTime()) / (24 * 60 * 60 * 1000))
+        : 14;
+      const weeksInPeriod = payPeriodDays / 7;
+      
+      const junkLaborBonusWeekly = weeksInPeriod > 0 ? totalJunkBonus / weeksInPeriod : totalJunkBonus;
+      const moveLaborBonusWeekly = weeksInPeriod > 0 ? totalMoveBonus / weeksInPeriod : totalMoveBonus;
+
+      // Calculate average hourly rate including gross wages, tips, and bonuses
+      const totalCompensation = totalGrossWages + currentPayPeriodTips + totalJunkBonus + totalMoveBonus;
+      const averageHourlyRate = totalHours > 0 ? totalCompensation / totalHours : 0;
+
       metrics.captain = {
         draftLogs: myDraftLogs,
-        submittedLogs: mySubmittedLogs
+        submittedLogs: mySubmittedLogs,
+        currentPayPeriodRevenue: Math.round(currentPayPeriodRevenue * 100) / 100,
+        currentPayPeriodTips: Math.round(currentPayPeriodTips * 100) / 100,
+        junkLaborBonus: Math.round(junkLaborBonusWeekly * 100) / 100,
+        moveLaborBonus: Math.round(moveLaborBonusWeekly * 100) / 100,
+        averageHourlyRate: Math.round(averageHourlyRate * 100) / 100,
+        currentPayPeriodHours: Math.round(totalHours * 10) / 10, // Round to 1 decimal
       };
     }
 

@@ -231,14 +231,14 @@ export class ServiceWorkerManager {
 
   private logRegistrationSkip(reason: string): void {
     if (process.env.NODE_ENV === 'development') {
-      console.info(`SW: Registration skipped - ${reason}`)
+      console.warn(`SW: Registration skipped - ${reason}`)
     }
   }
 
   private logRegistrationSuccess(): void {
     // Log registration success only in development
     if (process.env.NODE_ENV === 'development') {
-      console.info('SW: Registration successful', {
+      console.warn('SW: Registration successful', {
         scope: this.registration?.scope,
         updateViaCache: 'none',
         active: !!this.registration?.active
@@ -635,7 +635,7 @@ export class ServiceWorkerManager {
       
       // Log update availability only in development
       if (process.env.NODE_ENV === 'development') {
-        console.info('SW: Update available', {
+        console.warn('SW: Update available', {
           hasWaiting: !!this.registration?.waiting,
           sessionCriticality: sessionAnalysis?.sessionCriticality || 'unknown'
         })

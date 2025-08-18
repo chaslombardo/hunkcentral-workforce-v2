@@ -3,8 +3,8 @@
  * Provides comprehensive error reporting utilities for production debugging
  */
 
-import { logProductionError, EnhancedErrorLog } from '@/lib/production-error-logger';
-import { reportClientError } from '@/lib/error-reporting';
+// Error reporting utilities - imports removed to fix unused variable warnings
+// These can be re-imported when the reporter functionality is fully implemented
 
 export interface ErrorReportConfig {
   enableAutoReporting: boolean;
@@ -316,7 +316,11 @@ class ProductionErrorReporter {
 
       // Memory usage
       if ('memory' in performance) {
-        const memory = (performance as any).memory;
+        const memory = (performance as { memory: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        } }).memory;
         metrics.memoryUsage = {
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,

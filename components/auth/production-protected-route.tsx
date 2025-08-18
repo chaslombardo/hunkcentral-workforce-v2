@@ -8,7 +8,7 @@
 import { useProductionAuth } from '@/hooks/useProductionAuth';
 import { AuthErrorBoundary } from '@/components/auth/auth-error-boundary';
 import { hasRouteAccess } from '@/lib/routes';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import type { UserRole } from '@/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -52,7 +52,6 @@ export function ProductionProtectedRoute({
     error,
     errorCode,
     isRecovering,
-    hasRole,
     hasAnyRole,
     recoverSession,
     validateSession,
@@ -61,7 +60,6 @@ export function ProductionProtectedRoute({
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   
   const [accessError, setAccessError] = useState<AccessError | null>(null);
   const [isValidating, setIsValidating] = useState(false);

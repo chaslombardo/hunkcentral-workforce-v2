@@ -123,7 +123,11 @@ export class ProductionErrorBoundary extends React.Component<
 
   getMemoryInfo = () => {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = (performance as { memory: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      } }).memory;
       return {
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,

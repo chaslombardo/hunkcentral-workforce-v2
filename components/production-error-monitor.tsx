@@ -74,13 +74,17 @@ export function ProductionErrorMonitor() {
       }
     };
 
-    // Memory usage monitoring
-    const monitorMemory = () => {
-      if ('memory' in performance) {
-        const memory = (performance as any).memory;
-        const usedMemory = memory.usedJSHeapSize;
-        const totalMemory = memory.totalJSHeapSize;
-        const memoryLimit = memory.jsHeapSizeLimit;
+  // Memory usage monitoring
+  const monitorMemory = () => {
+    if ('memory' in performance) {
+      const memory = (performance as { memory: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      } }).memory;
+      const usedMemory = memory.usedJSHeapSize;
+      const totalMemory = memory.totalJSHeapSize;
+      const memoryLimit = memory.jsHeapSizeLimit;
         
         // Report high memory usage
         if (usedMemory / memoryLimit > 0.8) {
@@ -187,7 +191,9 @@ export function ProductionErrorMonitor() {
     const handleResourceError = (event: Event) => {
       const target = event.target as HTMLElement;
       if (target && (target.tagName === 'IMG' || target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-        const resourceUrl = (target as any).src || (target as any).href;
+        const resourceUrl = target.tagName === 'LINK' 
+          ? (target as HTMLLinkElement).href 
+          : (target as HTMLImageElement | HTMLScriptElement).src;
         reportClientError(new Error(`Failed to load resource: ${resourceUrl}`), {
           component: 'resource_monitor',
           action: 'resource_load_error',

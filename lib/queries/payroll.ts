@@ -313,8 +313,7 @@ export async function getBonusDetails(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  // This would require more complex calculation based on labor efficiency
-  // For now, return a simplified structure that can be enhanced later
+  // Fetch all approved logs for the captain in the pay period
   const logs = await prisma.dailyLog.findMany({
     where: {
       captainId: employeeId,
@@ -348,69 +347,80 @@ export async function getBonusDetails(
     },
   });
 
-  const bonusDetails = [];
+  if (logs.length === 0) {
+    return [];
+  }
 
+  // Use weekly aggregation approach for bonus calculation
+  let totalJunkRevenue = 0;
+  let totalJunkLaborCost = 0;
+  let totalMoveRevenue = 0;
+  let totalMoveLaborCost = 0;
+  const junkBonusGoal = Number(logs[0].captain.junkBonusGoal) || 0.14;
+  const moveBonusGoal = Number(logs[0].captain.moveBonusGoal) || 0.24;
+
+  // Aggregate all sections across the pay period
   for (const log of logs) {
-    // Calculate junk section bonus
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const junkHours = log.hours.filter(hour => hour.department === 'junk');
-    
-    if (junkJobs.length > 0 && junkHours.length > 0) {
-      const junkRevenue = junkJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-      const junkLaborCost = junkHours.reduce((sum, hour) => {
-        const rate = log.captainId === hour.employeeId || hour.isCoCaptain
-          ? Number(hour.employee.rateJunkCaptain || 0)
-          : Number(hour.employee.rateJunkWingman || 0);
-        return sum + (Number(hour.hours) * rate);
-      }, 0);
-      
-      const actualPercentage = junkRevenue > 0 ? junkLaborCost / junkRevenue : 0;
-      const goalPercentage = Number(log.captain.junkBonusGoal);
-      
-      if (actualPercentage < goalPercentage) {
-        const bonusAmount = (goalPercentage - actualPercentage) * junkRevenue;
-        bonusDetails.push({
-          logId: log.id,
-          logDate: log.logDate,
-          sectionType: 'junk' as const,
-          revenue: junkRevenue,
-          laborCost: junkLaborCost,
-          actualPercentage,
-          goalPercentage,
-          bonusAmount,
-        });
+    // Aggregate revenue by job type
+    for (const job of log.jobs) {
+      if (job.jobType === 'junk') {
+        totalJunkRevenue += Number(job.revenue);
+      } else if (job.jobType === 'move') {
+        totalMoveRevenue += Number(job.revenue);
       }
     }
 
-    // Calculate move section bonus
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-    const moveHours = log.hours.filter(hour => hour.department === 'move');
-    
-    if (moveJobs.length > 0 && moveHours.length > 0) {
-      const moveRevenue = moveJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-      const moveLaborCost = moveHours.reduce((sum, hour) => {
+    // Aggregate labor costs by department
+    for (const hour of log.hours) {
+      if (hour.department === 'junk') {
+        const rate = log.captainId === hour.employeeId || hour.isCoCaptain
+          ? Number(hour.employee.rateJunkCaptain || 0)
+          : Number(hour.employee.rateJunkWingman || 0);
+        totalJunkLaborCost += Number(hour.hours) * rate;
+      } else if (hour.department === 'move') {
         const rate = log.captainId === hour.employeeId || hour.isCoCaptain
           ? Number(hour.employee.rateMoveCaptain || 0)
           : Number(hour.employee.rateMoveWingman || 0);
-        return sum + (Number(hour.hours) * rate);
-      }, 0);
-      
-      const actualPercentage = moveRevenue > 0 ? moveLaborCost / moveRevenue : 0;
-      const goalPercentage = Number(log.captain.moveBonusGoal);
-      
-      if (actualPercentage < goalPercentage) {
-        const bonusAmount = (goalPercentage - actualPercentage) * moveRevenue;
-        bonusDetails.push({
-          logId: log.id,
-          logDate: log.logDate,
-          sectionType: 'move' as const,
-          revenue: moveRevenue,
-          laborCost: moveLaborCost,
-          actualPercentage,
-          goalPercentage,
-          bonusAmount,
-        });
+        totalMoveLaborCost += Number(hour.hours) * rate;
       }
+    }
+  }
+
+  const bonusDetails = [];
+
+  // Calculate weekly aggregated junk bonus
+  if (totalJunkRevenue > 0) {
+    const actualPercentage = totalJunkLaborCost / totalJunkRevenue;
+    if (actualPercentage < junkBonusGoal) {
+      const bonusAmount = (junkBonusGoal - actualPercentage) * totalJunkRevenue;
+      bonusDetails.push({
+        logId: 'aggregated-junk', // Indicates this is aggregated across multiple logs
+        logDate: payPeriodStart, // Use pay period start as reference date
+        sectionType: 'junk' as const,
+        revenue: totalJunkRevenue,
+        laborCost: totalJunkLaborCost,
+        actualPercentage,
+        goalPercentage: junkBonusGoal,
+        bonusAmount,
+      });
+    }
+  }
+
+  // Calculate weekly aggregated move bonus
+  if (totalMoveRevenue > 0) {
+    const actualPercentage = totalMoveLaborCost / totalMoveRevenue;
+    if (actualPercentage < moveBonusGoal) {
+      const bonusAmount = (moveBonusGoal - actualPercentage) * totalMoveRevenue;
+      bonusDetails.push({
+        logId: 'aggregated-move', // Indicates this is aggregated across multiple logs
+        logDate: payPeriodStart, // Use pay period start as reference date
+        sectionType: 'move' as const,
+        revenue: totalMoveRevenue,
+        laborCost: totalMoveLaborCost,
+        actualPercentage,
+        goalPercentage: moveBonusGoal,
+        bonusAmount,
+      });
     }
   }
 

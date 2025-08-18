@@ -57,7 +57,7 @@ export default async function LogsPage() {
     const canCreateLogs = userRoles.includes('captain') || userRoles.includes('admin');
     const canReviewLogs = userRoles.includes('manager') || userRoles.includes('admin');
 
-  return (
+    return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Daily Logs</h1>
@@ -199,7 +199,7 @@ export default async function LogsPage() {
         </Card>
       )}
     </div>
-  );
+    );
   } catch (error) {
     // Log the error with comprehensive context
     await logPageError(error, {

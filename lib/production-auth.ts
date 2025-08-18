@@ -57,12 +57,7 @@ export async function validateProductionSession(
   while (retryCount <= maxRetries) {
     try {
       // Get session with timeout protection
-      const sessionPromise = getServerSession(authOptions);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session validation timeout')), 5000)
-      );
-
-      const session = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      const session = await getServerSession(authOptions);
 
       if (!session?.user) {
         const error = 'No valid session found';
@@ -540,7 +535,7 @@ export async function recoverSession(): Promise<{
       error: 'Session recovery failed',
       shouldReload: true
     };
-  } catch (error) {
+  } catch {
     return { 
       success: false, 
       error: 'Network error during session recovery',

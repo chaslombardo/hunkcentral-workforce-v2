@@ -37,7 +37,7 @@ export async function logServerError(
       // Add comprehensive debugging context
       errorDetails: {
         name: error instanceof Error ? error.name : 'Unknown',
-        cause: error instanceof Error ? (error as any).cause : undefined, // Type assertion for cause property
+        cause: error instanceof Error ? (error as Error & { cause?: unknown }).cause : undefined,
         message: errorMessage,
         stackTrace: stack,
       },
@@ -94,7 +94,7 @@ export async function logServerError(
                 stackLines: stack ? stack.split('\n').length : 0,
                 errorType: error instanceof Error ? error.constructor.name : typeof error,
                 hasStack: !!stack,
-                hasCause: !!(error instanceof Error && (error as any).cause),
+                hasCause: !!(error instanceof Error && (error as Error & { cause?: unknown }).cause),
               },
             })),
           },
