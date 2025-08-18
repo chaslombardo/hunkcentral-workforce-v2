@@ -78,9 +78,7 @@ export default async function CreateLogPage() {
             Record your daily work activities, jobs, and team hours.
           </p>
         </div>
-        <ErrorBoundary fallback={({ error, resetError }) => (
-          <LogCreateErrorFallback error={error} resetError={resetError} />
-        )}>
+        <ErrorBoundary fallback={LogCreateErrorFallback}>
           <CaptainLogForm />
         </ErrorBoundary>
       </div>

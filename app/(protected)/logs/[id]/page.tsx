@@ -67,9 +67,7 @@ export default async function LogDetailPage({ params }: LogDetailPageProps) {
 
     return (
       <div className="container mx-auto py-6">
-        <LogErrorBoundary fallback={({ error, retry }) => (
-          <LogDetailErrorFallback error={error} resetError={retry} />
-        )}>
+        <LogErrorBoundary fallback={LogDetailErrorFallback}>
           <Suspense fallback={<LogDetailSkeleton />}>
             <LogDetailView logId={logId} />
           </Suspense>

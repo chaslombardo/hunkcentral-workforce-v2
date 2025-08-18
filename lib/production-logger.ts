@@ -67,7 +67,7 @@ export function logInfo(
 ): void {
   if (process.env.NODE_ENV === 'production') {
     const logEntry = createLogEntry('INFO', message, context);
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 
@@ -90,9 +90,9 @@ export function logWarning(
   const logEntry = createLogEntry('WARN', message, context);
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.warn(JSON.stringify(logEntry));
   } else {
-    process.stdout.write(JSON.stringify(logEntry, null, 2) + '\n');
+    console.warn(JSON.stringify(logEntry, null, 2));
   }
 }
 
@@ -117,7 +117,7 @@ export function logAuthEvent(
   });
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 
@@ -151,7 +151,7 @@ export function logDatabaseOperation(
   });
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 
@@ -188,7 +188,7 @@ export function logApiRequest(
   });
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 
@@ -219,7 +219,7 @@ export function logPerformanceMetric(
   });
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 
@@ -250,7 +250,7 @@ export function logBusinessEvent(
   });
   
   if (process.env.NODE_ENV === 'production') {
-    process.stdout.write(JSON.stringify(logEntry) + '\n');
+    console.error(JSON.stringify(logEntry));
   }
 }
 

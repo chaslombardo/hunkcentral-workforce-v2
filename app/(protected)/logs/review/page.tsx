@@ -77,9 +77,7 @@ export default async function LogReviewPage() {
           </div>
         </div>
 
-        <LogErrorBoundary fallback={({ error, retry }) => (
-          <LogReviewErrorFallback error={error} resetError={retry} />
-        )}>
+        <LogErrorBoundary fallback={LogReviewErrorFallback}>
           <Suspense fallback={<LogReviewSkeleton />}>
             <LogReviewQueue />
           </Suspense>
