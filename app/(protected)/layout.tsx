@@ -10,6 +10,7 @@ import { PerformanceMonitor } from "@/components/performance-monitor"
 import { FeedbackDialog } from "@/components/features/feedback/feedback-dialog"
 import { ThemeDebug } from "@/components/theme-debug"
 import { PageErrorBoundary } from "@/components/ui/page-error-boundary"
+import { ProductionErrorBoundary } from "@/components/ui/production-error-boundary"
 import { auth } from "@/lib/auth"
 
 export const dynamic = 'force-dynamic'
@@ -22,8 +23,14 @@ export default async function ProtectedLayout({
   const session = await auth();
   
   return (
-    <PageErrorBoundary pageName="protected-layout">
-      <NavigationProvider>
+    <ProductionErrorBoundary 
+      level="page" 
+      name="protected-layout"
+      enableUserFeedback={true}
+      enableErrorReporting={true}
+    >
+      <PageErrorBoundary pageName="protected-layout">
+        <NavigationProvider>
         {/* Performance monitoring for all protected pages */}
         <PerformanceMonitor 
           pageName="protected-layout" 
@@ -61,7 +68,8 @@ export default async function ProtectedLayout({
         
         {/* Theme debug component - only in development */}
         <ThemeDebug enabled={process.env.NODE_ENV === 'development'} />
-      </NavigationProvider>
-    </PageErrorBoundary>
+        </NavigationProvider>
+      </PageErrorBoundary>
+    </ProductionErrorBoundary>
   )
 }

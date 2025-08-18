@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { logServerError } from '@/lib/errorLogger';
+import { getErrorStatistics } from '@/lib/production-error-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,8 +47,20 @@ export async function GET(request: NextRequest) {
       skip: offset,
     });
 
-    // Get error statistics
-    const stats = await getErrorStats();
+    // Get enhanced error statistics
+    const timeRange = {
+      start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+      end: new Date(),
+    };
+    
+    const enhancedStats = await getErrorStatistics(timeRange);
+    const legacyStats = await getErrorStats();
+    
+    // Combine both statistics for backward compatibility
+    const stats = {
+      ...legacyStats,
+      enhanced: enhancedStats,
+    };
 
     // Transform audit logs to error reports format
     const errors = errorLogs.map(log => {

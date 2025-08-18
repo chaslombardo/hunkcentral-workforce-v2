@@ -9,8 +9,10 @@ import { reportClientError } from '@/lib/error-reporting';
  * Sets up comprehensive error handling and monitoring for client-side errors
  */
 export function ProductionErrorMonitor() {
-  const [, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
   const [errorCount, setErrorCount] = useState(0);
+  const [criticalErrorCount, setCriticalErrorCount] = useState(0);
+  const [lastErrorTime, setLastErrorTime] = useState<Date | null>(null);
 
   useEffect(() => {
     // Set up global error handling for unhandled errors and promise rejections
@@ -96,26 +98,88 @@ export function ProductionErrorMonitor() {
       }
     };
 
-    // Console error monitoring
+    // Console error monitoring with enhanced filtering
     const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    
     console.error = (...args) => {
       // Call original console.error
       originalConsoleError.apply(console, args);
       
-      // Report console errors in production
+      // Report console errors in production with filtering
       if (process.env.NODE_ENV === 'production') {
         const errorMessage = args.map(arg => 
           typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
         ).join(' ');
         
-        reportClientError(new Error(`Console Error: ${errorMessage}`), {
-          component: 'console_monitor',
-          action: 'console_error',
-          metadata: {
-            arguments: args.length,
-            timestamp: new Date().toISOString(),
-          },
-        });
+        // Filter out known non-critical console errors
+        const ignoredPatterns = [
+          'Warning: ReactDOM.render is deprecated',
+          'Warning: componentWillReceiveProps',
+          'Download the React DevTools',
+          'The above error occurred in the',
+        ];
+        
+        const shouldIgnore = ignoredPatterns.some(pattern => 
+          errorMessage.includes(pattern)
+        );
+        
+        if (!shouldIgnore) {
+          reportClientError(new Error(`Console Error: ${errorMessage}`), {
+            component: 'console_monitor',
+            action: 'console_error',
+            metadata: {
+              arguments: args.length,
+              timestamp: new Date().toISOString(),
+              severity: errorMessage.toLowerCase().includes('critical') ? 'critical' : 'medium',
+            },
+          });
+          
+          setErrorCount(prev => prev + 1);
+          setLastErrorTime(new Date());
+          
+          if (errorMessage.toLowerCase().includes('critical')) {
+            setCriticalErrorCount(prev => prev + 1);
+          }
+        }
+      }
+    };
+    
+    console.warn = (...args) => {
+      // Call original console.warn
+      originalConsoleWarn.apply(console, args);
+      
+      // Report console warnings in production for critical issues only
+      if (process.env.NODE_ENV === 'production') {
+        const warningMessage = args.map(arg => 
+          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+        ).join(' ');
+        
+        // Only report warnings that might indicate serious issues
+        const criticalWarnings = [
+          'memory',
+          'performance',
+          'security',
+          'authentication',
+          'database',
+          'network timeout',
+        ];
+        
+        const isCriticalWarning = criticalWarnings.some(keyword => 
+          warningMessage.toLowerCase().includes(keyword)
+        );
+        
+        if (isCriticalWarning) {
+          reportClientError(new Error(`Console Warning: ${warningMessage}`), {
+            component: 'console_monitor',
+            action: 'console_warning',
+            metadata: {
+              arguments: args.length,
+              timestamp: new Date().toISOString(),
+              severity: 'medium',
+            },
+          });
+        }
       }
     };
 
@@ -154,32 +218,87 @@ export function ProductionErrorMonitor() {
       window.removeEventListener('error', handleResourceError, true);
       clearInterval(memoryInterval);
       
-      // Restore original console.error
+      // Restore original console methods
       console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
     };
   }, []);
 
-  // Monitor error count for debugging
+  // Enhanced error monitoring with categorization
   useEffect(() => {
-    const handleError = () => setErrorCount(prev => prev + 1);
+    const handleError = (event: ErrorEvent) => {
+      setErrorCount(prev => prev + 1);
+      setLastErrorTime(new Date());
+      
+      // Check if it's a critical error
+      const isCritical = event.error?.message?.toLowerCase().includes('critical') ||
+                        event.error?.stack?.toLowerCase().includes('database') ||
+                        event.error?.stack?.toLowerCase().includes('auth');
+      
+      if (isCritical) {
+        setCriticalErrorCount(prev => prev + 1);
+      }
+    };
+    
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      setErrorCount(prev => prev + 1);
+      setLastErrorTime(new Date());
+      
+      // Check if it's a critical promise rejection
+      const reason = String(event.reason);
+      const isCritical = reason.toLowerCase().includes('critical') ||
+                        reason.toLowerCase().includes('database') ||
+                        reason.toLowerCase().includes('auth');
+      
+      if (isCritical) {
+        setCriticalErrorCount(prev => prev + 1);
+      }
+    };
+    
     window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
     
     return () => {
       window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
 
-  // Development error counter (only visible in development)
+  // Enhanced development error counter with more information
   if (process.env.NODE_ENV === 'development' && errorCount > 0) {
     return (
-      <div className="fixed bottom-4 right-4 bg-red-500 text-white px-3 py-1 rounded text-sm z-50">
-        Errors: {errorCount}
+      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+        <div className="bg-red-500 text-white px-3 py-2 rounded text-sm shadow-lg">
+          <div className="font-semibold">Errors: {errorCount}</div>
+          {criticalErrorCount > 0 && (
+            <div className="text-xs">Critical: {criticalErrorCount}</div>
+          )}
+          {lastErrorTime && (
+            <div className="text-xs opacity-75">
+              Last: {lastErrorTime.toLocaleTimeString()}
+            </div>
+          )}
+        </div>
+        {!isOnline && (
+          <div className="bg-orange-500 text-white px-3 py-1 rounded text-xs shadow-lg">
+            Offline
+          </div>
+        )}
       </div>
     );
   }
 
-  // This component doesn't render anything in production
+  // Production monitoring indicator (minimal UI)
+  if (process.env.NODE_ENV === 'production' && criticalErrorCount > 0) {
+    return (
+      <div className="fixed top-4 right-4 z-50">
+        <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs shadow-lg animate-pulse">
+          {criticalErrorCount}
+        </div>
+      </div>
+    );
+  }
+
+  // This component doesn't render anything normally in production
   return null;
 }
