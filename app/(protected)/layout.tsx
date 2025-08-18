@@ -29,7 +29,8 @@ export default async function ProtectedLayout({
     allowGracefulDegradation: true,
   });
 
-  const user = authResult.user;
+  // Extract serializable user data only (no functions)
+  const userId = authResult.user?.id;
   
   return (
     <ProductionErrorBoundary 
@@ -44,7 +45,7 @@ export default async function ProtectedLayout({
             {/* Performance monitoring for all protected pages */}
             <PerformanceMonitor 
               pageName="protected-layout" 
-              userId={user?.id}
+              userId={userId}
               trackInteractions={true}
               trackFormSubmissions={true}
             />

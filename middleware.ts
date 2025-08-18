@@ -1,7 +1,7 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { logAuthEvent, logWarning, createRequestLogger } from '@/lib/production-logger';
+import { edgeLogAuthEvent, edgeLogWarning, createEdgeRequestLogger } from '@/lib/edge-logger';
 
 function createErrorRedirect(req: NextRequest, error: string, originalPath: string) {
   const loginUrl = new URL('/auth/login', req.url);
@@ -20,7 +20,7 @@ function createAccessDeniedRedirect(req: NextRequest, reason: string) {
 export default withAuth(
   function middleware(req) {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const logger = createRequestLogger({
+    const logger = createEdgeRequestLogger({
       requestId,
       url: req.url,
       userAgent: req.headers.get('user-agent') || 'unknown',
@@ -168,7 +168,7 @@ export default withAuth(
 
           // Validate token structure
           if (!token.id || !token.email) {
-            logWarning('Invalid token structure detected', {
+            edgeLogWarning('Invalid token structure detected', {
               component: 'middleware',
               action: 'token_validation',
               metadata: { 
@@ -182,7 +182,7 @@ export default withAuth(
 
           return true;
         } catch (error) {
-          logWarning('Authorization callback error', {
+          edgeLogWarning('Authorization callback error', {
             component: 'middleware',
             action: 'authorization_callback',
             metadata: {
