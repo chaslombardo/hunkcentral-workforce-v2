@@ -1,6 +1,7 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { logAuthEvent, logWarning, createRequestLogger } from '@/lib/production-logger';
 
 function createErrorRedirect(req: NextRequest, error: string, originalPath: string) {
   const loginUrl = new URL('/auth/login', req.url);
@@ -18,14 +19,35 @@ function createAccessDeniedRedirect(req: NextRequest, reason: string) {
 
 export default withAuth(
   function middleware(req) {
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const logger = createRequestLogger({
+      requestId,
+      url: req.url,
+      userAgent: req.headers.get('user-agent') || 'unknown',
+    });
+
     try {
       const token = req.nextauth.token;
       const { pathname } = req.nextUrl;
+
+      // Log request for production monitoring
+      logger.apiRequest('MIDDLEWARE', pathname, {
+        metadata: {
+          hasToken: !!token,
+          userRoles: token?.roles || [],
+          component: 'middleware',
+          action: 'route_protection',
+        },
+      });
 
       // Allow access to auth pages without token
       if (pathname.startsWith('/auth')) {
         // Redirect authenticated users away from login
         if (token) {
+          logger.authEvent('login_success', {
+            userId: token.id as string,
+            metadata: { reason: 'already_authenticated', redirectTo: '/dashboard' },
+          });
           return NextResponse.redirect(new URL('/dashboard', req.url));
         }
         return NextResponse.next();
@@ -46,11 +68,18 @@ export default withAuth(
       
       if (isProtectedRoute) {
         if (!token) {
+          logger.authEvent('permission_denied', {
+            metadata: { reason: 'no_token', requestedPath: pathname },
+          });
           return createErrorRedirect(req, 'session_required', pathname);
         }
 
         // Validate token structure
         if (!token.id || !token.roles) {
+          logger.authEvent('permission_denied', {
+            userId: token?.id as string || 'unknown',
+            metadata: { reason: 'invalid_token_structure', requestedPath: pathname },
+          });
           return createErrorRedirect(req, 'invalid_session', pathname);
         }
       }
@@ -61,6 +90,15 @@ export default withAuth(
       // Admin routes
       if (pathname.startsWith('/admin')) {
         if (!userRoles.includes('admin')) {
+          logger.authEvent('permission_denied', {
+            userId: token?.id as string || 'unknown',
+            metadata: { 
+              reason: 'insufficient_role', 
+              requiredRole: 'admin', 
+              userRoles,
+              requestedPath: pathname 
+            },
+          });
           return createAccessDeniedRedirect(req, 'admin_required');
         }
       }
@@ -68,6 +106,15 @@ export default withAuth(
       // Manager routes (managers and admins)
       if (pathname.includes('/review') || pathname.includes('/reports/payroll')) {
         if (!userRoles.includes('manager') && !userRoles.includes('admin')) {
+          logger.authEvent('permission_denied', {
+            userId: token?.id as string || 'unknown',
+            metadata: { 
+              reason: 'insufficient_role', 
+              requiredRole: 'manager_or_admin', 
+              userRoles,
+              requestedPath: pathname 
+            },
+          });
           return createAccessDeniedRedirect(req, 'manager_required');
         }
       }
@@ -75,14 +122,31 @@ export default withAuth(
       // Sales routes
       if (pathname.startsWith('/commission')) {
         if (!userRoles.includes('sales') && !userRoles.includes('admin')) {
+          logger.authEvent('permission_denied', {
+            userId: token?.id as string || 'unknown',
+            metadata: { 
+              reason: 'insufficient_role', 
+              requiredRole: 'sales_or_admin', 
+              userRoles,
+              requestedPath: pathname 
+            },
+          });
           return createAccessDeniedRedirect(req, 'sales_required');
         }
       }
 
       return NextResponse.next();
     } catch (error) {
-      // Log middleware errors and redirect to login
-      console.error('Middleware error:', error);
+      // Log middleware errors with proper context
+      logger.warning('Middleware error occurred', {
+        component: 'middleware',
+        action: 'error_handling',
+        metadata: {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          requestedPath: req.nextUrl.pathname,
+        },
+      });
       return createErrorRedirect(req, 'middleware_error', req.nextUrl.pathname);
     }
   },
@@ -104,13 +168,28 @@ export default withAuth(
 
           // Validate token structure
           if (!token.id || !token.email) {
-            console.error('Invalid token structure:', { hasId: !!token.id, hasEmail: !!token.email });
+            logWarning('Invalid token structure detected', {
+              component: 'middleware',
+              action: 'token_validation',
+              metadata: { 
+                hasId: !!token.id, 
+                hasEmail: !!token.email,
+                pathname: req.nextUrl.pathname,
+              },
+            });
             return false;
           }
 
           return true;
         } catch (error) {
-          console.error('Authorization callback error:', error);
+          logWarning('Authorization callback error', {
+            component: 'middleware',
+            action: 'authorization_callback',
+            metadata: {
+              error: error instanceof Error ? error.message : String(error),
+              pathname: req.nextUrl.pathname,
+            },
+          });
           return false;
         }
       },

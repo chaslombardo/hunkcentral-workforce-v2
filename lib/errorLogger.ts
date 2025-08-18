@@ -40,27 +40,14 @@ export async function logServerError(
       resolved: false,
     };
 
-    // Log to console in development for immediate visibility
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Server Error:', {
-        message: errorMessage,
-        component: context.component,
-        action: context.action,
-        userId: context.userId,
-        url: context.url,
-        stack,
-      });
-    }
-
-    // In production, we could send to external error tracking service
-    // For now, we'll store in database if available
+    // Enhanced production logging
     if (process.env.NODE_ENV === 'production') {
       try {
         // Store error in database for production monitoring
         await prisma.auditLog.create({
           data: {
             entityType: 'system_error',
-            entityId: `error_${Date.now()}`,
+            entityId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             action: 'server_error',
             userId: context.userId || 'system',
             changes: JSON.parse(JSON.stringify({
@@ -70,21 +57,132 @@ export async function logServerError(
               action: context.action,
               url: context.url,
               userAgent: context.userAgent,
-              stack: stack?.substring(0, 1000), // Limit stack trace length
+              stack: stack?.substring(0, 2000), // Increased stack trace length for better debugging
               additionalData: context.additionalData,
+              environment: process.env.NODE_ENV,
+              timestamp: new Date(errorLog.context.timestamp).toISOString(),
+              severity: determineSeverity(errorMessage, context.component),
             })),
           },
         });
+
+        // In production, also log critical errors to external monitoring
+        if (isCriticalError(errorMessage, context.component)) {
+          await logCriticalError(errorLog);
+        }
       } catch (dbError) {
-        // If database logging fails, fall back to console
-        console.error('Failed to log error to database:', dbError);
-        console.error('Original error:', errorLog);
+        // If database logging fails, use structured logging for production monitoring
+        const structuredLog = {
+          timestamp: new Date().toISOString(),
+          level: 'ERROR',
+          message: 'Database logging failed',
+          error: {
+            original: errorMessage,
+            component: context.component,
+            action: context.action,
+            userId: context.userId,
+            url: context.url,
+            stack: stack?.substring(0, 1000),
+          },
+          dbError: dbError instanceof Error ? dbError.message : String(dbError),
+        };
+        
+        // Use structured JSON logging for production monitoring tools
+        process.stderr.write(JSON.stringify(structuredLog) + '\n');
       }
+    } else {
+      // Development logging with enhanced context
+      const devLog = {
+        timestamp: new Date().toISOString(),
+        level: 'ERROR',
+        message: errorMessage,
+        component: context.component,
+        action: context.action,
+        userId: context.userId,
+        url: context.url,
+        stack,
+        additionalData: context.additionalData,
+      };
+      
+      // Use structured logging even in development for consistency
+      process.stderr.write(JSON.stringify(devLog, null, 2) + '\n');
     }
   } catch (loggingError) {
     // Ensure error logging never breaks the application
-    console.error('Error logging failed:', loggingError);
-    console.error('Original error:', error);
+    const fallbackLog = {
+      timestamp: new Date().toISOString(),
+      level: 'CRITICAL',
+      message: 'Error logging system failure',
+      originalError: error instanceof Error ? error.message : String(error),
+      loggingError: loggingError instanceof Error ? loggingError.message : String(loggingError),
+    };
+    
+    process.stderr.write(JSON.stringify(fallbackLog) + '\n');
+  }
+}
+
+/**
+ * Determines the severity level of an error based on message and component
+ */
+function determineSeverity(message: string, component: string): 'low' | 'medium' | 'high' | 'critical' {
+  const criticalKeywords = ['database', 'auth', 'payment', 'security', 'crash'];
+  const highKeywords = ['server', 'api', 'session', 'permission'];
+  const mediumKeywords = ['validation', 'form', 'ui', 'component'];
+  
+  const lowerMessage = message.toLowerCase();
+  const lowerComponent = component.toLowerCase();
+  
+  if (criticalKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+    return 'critical';
+  }
+  
+  if (highKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+    return 'high';
+  }
+  
+  if (mediumKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+    return 'medium';
+  }
+  
+  return 'low';
+}
+
+/**
+ * Checks if an error is critical and requires immediate attention
+ */
+function isCriticalError(message: string, component: string): boolean {
+  return determineSeverity(message, component) === 'critical';
+}
+
+/**
+ * Logs critical errors to external monitoring service
+ */
+async function logCriticalError(errorLog: ServerErrorLog): Promise<void> {
+  try {
+    // In a real production environment, this would send to services like:
+    // - Sentry
+    // - DataDog
+    // - New Relic
+    // - Custom webhook
+    
+    const criticalAlert = {
+      timestamp: new Date().toISOString(),
+      level: 'CRITICAL',
+      service: 'hunkcentral',
+      environment: process.env.NODE_ENV,
+      error: errorLog,
+      alertType: 'critical_error',
+    };
+    
+    // For now, log to stderr with CRITICAL prefix for monitoring tools to pick up
+    process.stderr.write(`CRITICAL_ALERT: ${JSON.stringify(criticalAlert)}\n`);
+    
+    // TODO: Implement actual external service integration
+    // Example: await sendToSentry(criticalAlert);
+    // Example: await sendToSlack(criticalAlert);
+  } catch (alertError) {
+    // Don't let critical alerting break the application
+    process.stderr.write(`ALERT_SYSTEM_FAILURE: ${JSON.stringify({ error: alertError })}\n`);
   }
 }
 

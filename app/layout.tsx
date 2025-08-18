@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 import { PerformanceMonitor } from '@/components/performance-monitor';
+import { ProductionErrorMonitor } from '@/components/production-error-monitor';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -51,6 +52,7 @@ export default function RootLayout({
         <Toaster />
         <ServiceWorkerRegistration />
         <PerformanceMonitor pageName="root-layout" />
+        <ProductionErrorMonitor />
       </body>
     </html>
   );
