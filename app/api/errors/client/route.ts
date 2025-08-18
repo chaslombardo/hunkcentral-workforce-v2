@@ -1,54 +1,120 @@
+/**
+ * Client-side Error Reporting API
+ * Handles authentication and other client-side errors for production monitoring
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { logServerError } from '@/lib/errorLogger';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-config';
+import { logProductionError } from '@/lib/production-error-logger';
+import { validateProductionSession } from '@/lib/production-auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
     const body = await request.json();
-    
-    const { level, message, context } = body;
-    
-    // Validate the request body
-    if (!message || !context || !context.component || !context.action) {
-      return NextResponse.json(
-        { error: 'Invalid error log format' },
-        { status: 400 }
-      );
+    const {
+      type,
+      error,
+      code,
+      context,
+      message,
+      stack,
+      url,
+      userAgent,
+      timestamp,
+    } = body;
+
+    // Validate session (but don't require it for error reporting)
+    const authResult = await validateProductionSession(request, {
+      requireAuth: false,
+      redirectOnFailure: false,
+      allowGracefulDegradation: true,
+    });
+
+    const userId = authResult.user?.id;
+
+    // Create error object
+    const clientError = new Error(message || error || 'Client-side error');
+    if (stack) {
+      clientError.stack = stack;
     }
 
-    // Create a client error object
-    const clientError = new Error(`[CLIENT] ${message}`);
-    clientError.stack = context.stack;
-
-    // Log the client error using our server error logger
-    await logServerError(clientError, {
-      component: `client_${context.component}`,
-      action: context.action,
-      userId: session?.user?.id || context.userId || 'anonymous',
-      userAgent: context.userAgent || request.headers.get('user-agent') || 'unknown',
-      url: context.url || 'unknown',
-      additionalData: {
-        level,
-        timestamp: context.timestamp,
-        clientContext: context.additionalData,
+    // Log the client error with enhanced context
+    await logProductionError(clientError, {
+      component: 'client',
+      action: type || 'client_error',
+      userId,
+      url: url || request.url,
+      userAgent: userAgent || request.headers.get('user-agent') || 'unknown',
+      category: 'component',
+      metadata: {
+        errorType: type,
+        errorCode: code,
+        clientContext: context,
+        timestamp: timestamp || new Date().toISOString(),
+        reportedFromClient: true,
+        // Browser information
+        browserInfo: {
+          userAgent: userAgent || request.headers.get('user-agent'),
+          referer: request.headers.get('referer'),
+          acceptLanguage: request.headers.get('accept-language'),
+        },
+        // Request information
+        requestInfo: {
+          method: request.method,
+          headers: Object.fromEntries(request.headers.entries()),
+          ip: request.headers.get('x-forwarded-for') || 
+              request.headers.get('x-real-ip') || 
+              'unknown',
+        },
       },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: 'Error reported successfully',
+      timestamp: new Date().toISOString(),
+    });
+
   } catch (error) {
-    // Log the error in processing client error logs
-    await logServerError(error, {
-      component: 'api_client_errors',
-      action: 'process_client_error',
+    console.error('Failed to process client error report:', error);
+
+    // Log the error reporting failure
+    await logProductionError(error, {
+      component: 'error_reporting',
+      action: 'client_error_report_failed',
       url: request.url,
       userAgent: request.headers.get('user-agent') || 'unknown',
+      category: 'api',
     });
 
     return NextResponse.json(
-      { error: 'Failed to log client error' },
+      {
+        success: false,
+        error: 'Failed to report error',
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }
+}
+
+// Handle other HTTP methods
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
 }

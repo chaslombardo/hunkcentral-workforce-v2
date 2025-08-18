@@ -25,6 +25,12 @@ const errorMessages = {
   invalid_session: 'Your session has expired. Please sign in again.',
   middleware_error: 'A system error occurred. Please try signing in again.',
   access_denied: 'Access denied. Please contact your administrator.',
+  session_recovery_failed: 'Unable to recover your session. Please sign in again.',
+  authentication_failed: 'Authentication failed. Please try again.',
+  signout_failed: 'There was a problem signing out. Please try again.',
+  account_deactivated: 'Your account has been deactivated. Contact your administrator.',
+  system_error: 'A system error occurred. Please try again.',
+  session_error: 'There was a problem with your session. Please sign in again.',
   CredentialsSignin: 'Invalid email or password. Please try again.',
   default: 'An unexpected error occurred. Please try again.'
 };
