@@ -7,7 +7,74 @@ const nextConfig: NextConfig = {
   
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ['@/components/ui', 'lucide-react', '@/components/brand', '@/components/forms'],
+    // Comprehensive package import optimization for better tree-shaking
+    optimizePackageImports: [
+      // Local component libraries
+      '@/components/ui', 
+      '@/components/brand', 
+      '@/components/forms',
+      
+      // Heavy icon libraries (major bundle size impact)
+      'lucide-react', 
+      '@tabler/icons-react',
+      
+      // Heavy chart/table libraries
+      'recharts',
+      '@tanstack/react-table',
+      
+      // Date libraries
+      'date-fns',
+      'react-day-picker',
+      
+      // Authentication
+      'next-auth',
+      'next-auth/react',
+      
+      // All Radix UI packages for comprehensive optimization
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-aspect-ratio',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-context-menu',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-form',
+      '@radix-ui/react-hover-card',
+      '@radix-ui/react-label',
+      '@radix-ui/react-menubar',
+      '@radix-ui/react-navigation-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-radio-group',
+      '@radix-ui/react-resizable-panels',
+      '@radix-ui/react-scroll-area',
+      '@radix-ui/react-select',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-sheet',
+      '@radix-ui/react-slider',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-toggle',
+      '@radix-ui/react-toggle-group',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-primitive',
+      '@radix-ui/react-visually-hidden',
+      
+      // Drag and drop
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
+      
+      // Utility libraries
+      'clsx',
+      'class-variance-authority',
+      'tailwind-merge',
+      'react-hook-form',
+    ],
   },
   
   // External packages that should not be bundled for client-side
@@ -26,7 +93,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/((?!_next/static|favicon\.ico|manifest\.json|sw\.js|icon-.*\.png).*)',
         headers: [
           {
             key: 'X-DNS-Prefetch-Control',

@@ -4,6 +4,8 @@ import { AuditTrailViewer } from '@/components/features/audit/AuditTrailViewer';
 import { AuditFilters } from '@/components/features/audit/AuditFilters';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
+export const dynamic = 'force-dynamic'
+
 export default function AuditTrailPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">

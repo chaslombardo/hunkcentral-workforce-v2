@@ -3,6 +3,8 @@
 
 import { useSession } from '@/hooks/useSession';
 import { hasRouteAccess } from '@/lib/routes';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import type { UserRole } from '@/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BrandButton } from '@/components/brand/brand-button';
@@ -20,9 +22,28 @@ export function ProtectedRoute({
   requiredRoles,
   currentRoute,
 }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading } = useSession();
+  const { user, isAuthenticated, isLoading, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [accessError, setAccessError] = useState<string | null>(null);
 
-  if (isLoading) {
+  // Handle access denied errors from URL parameters
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const reason = searchParams.get('reason');
+    
+    if (error === 'access_denied' && reason) {
+      const errorMessages = {
+        admin_required: 'Administrator access required for this page.',
+        manager_required: 'Manager access required for this page.',
+        sales_required: 'Sales access required for this page.',
+      };
+      
+      setAccessError(errorMessages[reason as keyof typeof errorMessages] || 'Access denied.');
+    }
+  }, [searchParams]);
+
+  if (isLoading || status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
@@ -33,7 +54,11 @@ export function ProtectedRoute({
     );
   }
 
-  if (!isAuthenticated || !user) {
+  // Handle authentication errors
+  if (status === 'unauthenticated' || !isAuthenticated || !user) {
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const loginUrl = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`;
+    
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
@@ -42,7 +67,32 @@ export function ProtectedRoute({
             Please sign in to access this page.
           </p>
           <BrandButton asChild variant="primary">
-            <Link href="/auth/login">Sign In</Link>
+            <Link href={loginUrl}>Sign In</Link>
+          </BrandButton>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied error if present
+  if (accessError) {
+    return (
+      <div className="container mx-auto py-8">
+        <Alert variant="destructive">
+          <AlertDescription>{accessError}</AlertDescription>
+        </Alert>
+        <div className="mt-4 space-x-2">
+          <BrandButton asChild variant="outline">
+            <Link href="/dashboard">Return to Dashboard</Link>
+          </BrandButton>
+          <BrandButton 
+            variant="ghost" 
+            onClick={() => {
+              setAccessError(null);
+              router.replace(window.location.pathname);
+            }}
+          >
+            Dismiss
           </BrandButton>
         </div>
       </div>

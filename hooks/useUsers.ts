@@ -41,10 +41,28 @@ export function useCaptains() {
 }
 
 export function useEmployees() {
-  const { users, loading, error } = useUsers();
-  
-  // All users can be employees for hour tracking
-  const employees = users;
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchEmployees() {
+      try {
+        const response = await fetch('/api/employees');
+        if (!response.ok) {
+          throw new Error('Failed to fetch employees');
+        }
+        const data = await response.json();
+        setEmployees(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch employees');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchEmployees();
+  }, []);
 
   return { employees, loading, error };
 }

@@ -3,11 +3,18 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AnalyticsDashboard } from "@/components/features/admin/analytics-dashboard";
-import { FeedbackManager } from "@/components/features/admin/feedback-manager";
-import { ABTestManager } from "@/components/features/admin/ab-test-manager";
 import { PerformanceMonitor } from "@/components/performance-monitor";
 import { BarChart3, MessageSquare, TestTube, TrendingUp, Users, Clock } from "lucide-react";
+import dynamicImport from 'next/dynamic';
+
+export const dynamic = 'force-dynamic'
+
+// Lazy load heavy dashboard components
+const AnalyticsDashboard = dynamicImport(() => import('@/components/features/admin/analytics-dashboard').then(mod => ({ default: mod.AnalyticsDashboard })));
+
+const FeedbackManager = dynamicImport(() => import('@/components/features/admin/feedback-manager').then(mod => ({ default: mod.FeedbackManager })));
+
+const ABTestManager = dynamicImport(() => import('@/components/features/admin/ab-test-manager').then(mod => ({ default: mod.ABTestManager })));
 
 export default async function AnalyticsPage() {
   const session = await auth();

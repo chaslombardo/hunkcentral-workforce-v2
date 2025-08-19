@@ -67,7 +67,7 @@ import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } f
 import { SortableHeader, getSortDirection } from '@/components/ui/sortable-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LogDetailDialog } from "./log-detail-dialog"
-import { getLogsForReview, bulkApproveLogs, bulkDeleteLogs, approveLog, deleteLog } from "@/lib/actions/logs"
+import { getLogsForReview, bulkApproveLogs, bulkDeleteLogs, approveLog, deleteLog, unapproveLog } from "@/lib/actions/logs"
 import { getUsers } from "@/lib/actions/users"
 import { getPayPeriods } from "@/lib/actions/pay-periods"
 import { LogReviewTableSkeleton } from "@/components/ui/skeleton-components"
@@ -92,6 +92,7 @@ export type LogReviewData = {
 
 function createColumns(
   onApprove: (logId: string) => Promise<void>,
+  onUnapprove: (logId: string) => Promise<void>,
   onDelete: (logId: string) => Promise<void>,
   userRoles: string[] = []
 ): ColumnDef<LogReviewData>[] {
@@ -291,6 +292,27 @@ function createColumns(
                   )}
                 </>
               )}
+              {row.original.status === "approved" && (userRoles.includes('manager') || userRoles.includes('admin')) && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="text-orange-600"
+                    onClick={() => onUnapprove(row.original.id)}
+                  >
+                    <IconLoader className="mr-2 h-4 w-4" />
+                    Unapprove
+                  </DropdownMenuItem>
+                  {userRoles.includes('admin') && (
+                    <DropdownMenuItem 
+                      className="text-red-600"
+                      onClick={() => onDelete(row.original.id)}
+                    >
+                      <IconX className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -420,6 +442,42 @@ export function LogReviewQueue() {
     } catch (error) {
       console.error('Error approving log:', error)
       toast.error('An unexpected error occurred while approving the log')
+    }
+  }
+
+  const handleUnapprove = async (logId: string) => {
+    // Show confirmation dialog before unapproving
+    if (!confirm('Are you sure you want to unapprove this log? It will be returned to submitted status for editing.')) {
+      return
+    }
+
+    try {
+      const result = await unapproveLog(logId)
+      if (result.success) {
+        toast.success('Log unapproved successfully and returned to submitted status')
+        // Refresh data
+        const refreshResult = await getLogsForReview()
+        if (refreshResult.success && refreshResult.data) {
+          setData(refreshResult.data as LogReviewData[])
+        }
+      } else {
+        if (result.error?.includes('Database connection')) {
+          toast.error('Database connection issue. Please try again.')
+        } else if (result.error?.includes('Authentication')) {
+          toast.error('Please log in again to continue.')
+        } else if (result.error?.includes('Manager access')) {
+          toast.error('Manager access is required to unapprove logs.')
+        } else if (result.error?.includes('pay period is locked')) {
+          toast.error('Cannot unapprove log - the pay period is locked or closed.')
+        } else if (result.error?.includes('Only approved logs')) {
+          toast.error('This log is not in approved status.')
+        } else {
+          toast.error(result.error || 'Failed to unapprove log')
+        }
+      }
+    } catch (error) {
+      console.error('Error unapproving log:', error)
+      toast.error('An unexpected error occurred while unapproving the log')
     }
   }
 
@@ -579,7 +637,7 @@ export function LogReviewQueue() {
     return filtered
   }, [data, selectedCaptain, captains, dateFilterType, selectedPayPeriod, payPeriods, customDateRange])
 
-  const columns = React.useMemo(() => createColumns(handleApprove, handleDelete, userRoles), [userRoles])
+  const columns = React.useMemo(() => createColumns(handleApprove, handleUnapprove, handleDelete, userRoles), [userRoles])
 
   const table = useReactTable({
     data: filteredData,

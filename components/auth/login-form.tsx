@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,6 +20,21 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+const errorMessages = {
+  session_required: 'Please sign in to access this page.',
+  invalid_session: 'Your session has expired. Please sign in again.',
+  middleware_error: 'A system error occurred. Please try signing in again.',
+  access_denied: 'Access denied. Please contact your administrator.',
+  session_recovery_failed: 'Unable to recover your session. Please sign in again.',
+  authentication_failed: 'Authentication failed. Please try again.',
+  signout_failed: 'There was a problem signing out. Please try again.',
+  account_deactivated: 'Your account has been deactivated. Contact your administrator.',
+  system_error: 'A system error occurred. Please try again.',
+  session_error: 'There was a problem with your session. Please sign in again.',
+  CredentialsSignin: 'Invalid email or password. Please try again.',
+  default: 'An unexpected error occurred. Please try again.'
+};
+
 export function LoginForm({
   className,
   ...props
@@ -27,6 +42,7 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     register,
@@ -36,24 +52,46 @@ export function LoginForm({
     resolver: zodResolver(loginSchema),
   });
 
+  // Handle URL error parameters
+  useEffect(() => {
+    const urlError = searchParams.get('error');
+    if (urlError) {
+      const errorMessage = errorMessages[urlError as keyof typeof errorMessages] || errorMessages.default;
+      setError(errorMessage);
+    }
+  }, [searchParams]);
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
+      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+      
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         redirect: false,
+        callbackUrl,
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        const errorMessage = errorMessages[result.error as keyof typeof errorMessages] || errorMessages.default;
+        setError(errorMessage);
       } else if (result?.ok) {
-        router.push('/dashboard');
+        // Clear any URL error parameters
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('error');
+        cleanUrl.searchParams.delete('callbackUrl');
+        
+        // Redirect to intended page or dashboard
+        router.push(callbackUrl);
         router.refresh();
+      } else {
+        setError('Authentication failed. Please try again.');
       }
-    } catch {
+    } catch (authError) {
+      console.error('Login error:', authError);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

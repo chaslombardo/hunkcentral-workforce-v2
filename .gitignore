@@ -71,3 +71,7 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Archon tool (external)
+archon/
+archon-ui-main/

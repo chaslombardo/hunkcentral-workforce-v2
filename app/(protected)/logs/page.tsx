@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { LogsPageErrorFallback } from '@/components/ui/logs-error-fallback';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -11,10 +14,42 @@ import { Plus, FileText, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function LogsPage() {
+  let session;
+  let userAgent: string | undefined;
+  let currentUrl: string = '/logs';
+
   try {
-    const session = await auth();
+    // Get request headers for error context
+    const headersList = await headers();
+    userAgent = headersList.get('user-agent') || undefined;
+    currentUrl = headersList.get('x-url') || '/logs';
+
+    // Authenticate user with comprehensive error handling
+    try {
+      session = await auth();
+    } catch (authError) {
+      await logAuthError(authError, {
+        action: 'session_validation',
+        url: currentUrl,
+        userAgent,
+        additionalData: {
+          page: 'logs',
+          timestamp: Date.now(),
+        },
+      });
+      throw authError;
+    }
     
     if (!session?.user) {
+      await logAuthError(new Error('No session found'), {
+        action: 'redirect',
+        url: currentUrl,
+        userAgent,
+        additionalData: {
+          page: 'logs',
+          redirectTo: '/auth/login',
+        },
+      });
       redirect('/auth/login');
     }
 
@@ -22,7 +57,7 @@ export default async function LogsPage() {
     const canCreateLogs = userRoles.includes('captain') || userRoles.includes('admin');
     const canReviewLogs = userRoles.includes('manager') || userRoles.includes('admin');
 
-  return (
+    return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Daily Logs</h1>
@@ -164,26 +199,29 @@ export default async function LogsPage() {
         </Card>
       )}
     </div>
-  );
-  } catch (error) {
-    console.error('Error in LogsPage:', error);
-    
-    return (
-      <div className="container mx-auto py-6">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle className="text-destructive">Error Loading Page</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              There was an error loading the logs page. Please try refreshing or contact support.
-            </p>
-            <p className="text-xs font-mono mt-2 p-2 bg-muted rounded">
-              {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
     );
+  } catch (error) {
+    // Log the error with comprehensive context
+    await logPageError(error, {
+      page: 'logs',
+      userId: session?.user?.id,
+      url: currentUrl || '/logs',
+      userAgent,
+      additionalData: {
+        hasSession: !!session,
+        userRoles: session?.user?.roles || [],
+        timestamp: Date.now(),
+        errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+      },
+    });
+    
+    // Return user-friendly error fallback
+    return <LogsPageErrorFallback 
+      error={error instanceof Error ? error : new Error('Unknown error occurred')}
+      context={{
+        page: 'logs',
+        userId: session?.user?.id,
+      }}
+    />;
   }
 }

@@ -1,6 +1,9 @@
 "use client"
 
+import { Suspense } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
+
+export const dynamic = 'force-dynamic'
 import { MetricCardDemo } from '@/components/brand/metric-card-demo'
 import { 
   Card,
@@ -15,7 +18,8 @@ import Link from 'next/link'
 
 export default function MetricCardsExamplePage() {
   return (
-    <ProtectedRoute>
+    <Suspense fallback={<div className="animate-pulse bg-muted h-96 rounded-lg" />}>
+      <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <BrandButton variant="outline" size="sm" asChild>
@@ -77,5 +81,6 @@ export default function MetricCardsExamplePage() {
         </div>
       </div>
     </ProtectedRoute>
+    </Suspense>
   )
 }

@@ -981,3 +981,102 @@ export async function bulkDeleteLogs(logIds: string[]): Promise<LogActionResult>
     };
   }
 }
+
+/**
+ * Unapprove a daily log (revert from approved back to submitted)
+ */
+export async function unapproveLog(logId: string): Promise<LogActionResult> {
+  try {
+    // Validate input
+    if (!logId || typeof logId !== 'string') {
+      return { success: false, error: 'Invalid log ID provided' };
+    }
+
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Check if user has manager or admin role
+    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+      return { success: false, error: 'Manager access required to unapprove logs' };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+    }
+
+    // Get the current log to validate it exists and check status
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: {
+        id: true,
+        status: true,
+        logDate: true,
+        approvedAt: true,
+        captainId: true,
+      },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    // Only approved logs can be unapproved
+    if (log.status !== 'approved') {
+      return { success: false, error: 'Only approved logs can be unapproved' };
+    }
+
+    // Check if data can be modified for this date (pay period must be open)
+    const canModify = await canModifyDataForDate(log.logDate);
+    if (!canModify) {
+      return { 
+        success: false, 
+        error: 'Cannot unapprove log - pay period is locked or closed' 
+      };
+    }
+
+    // Update the log status and clear approval fields
+    await prisma.dailyLog.update({
+      where: { id: logId },
+      data: {
+        status: 'submitted',
+        approvedAt: null,
+        approvedById: null,
+        lastEditedById: session.user.id,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Log the change for audit trail
+    await logDailyLogChange(
+      'unapprove',
+      logId,
+      session.user.id,
+      { status: 'approved', approvedAt: log.approvedAt },
+      { status: 'submitted', approvedAt: null },
+      {
+        reason: 'Manager unapproval for corrections',
+        unapprovedAt: new Date().toISOString(),
+      }
+    );
+
+    // Revalidate relevant paths
+    revalidatePath('/logs/review');
+    revalidatePath(`/logs/${logId}`);
+
+    return { 
+      success: true, 
+      data: { 
+        message: 'Log successfully unapproved and returned to submitted status' 
+      } 
+    };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: handleDatabaseError(error, 'unapprove log')
+    };
+  }
+}

@@ -4,6 +4,8 @@ import { PayPeriodSummaryTiles } from "@/components/features/admin/pay-period-su
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
+export const dynamic = 'force-dynamic'
+
 export default function PayPeriodsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

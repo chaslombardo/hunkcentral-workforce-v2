@@ -92,6 +92,7 @@
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
     "@eslint/eslintrc": "^3.3.1",
+    "@next/bundle-analyzer": "^15.4.6",
     "@playwright/test": "^1.54.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -113,6 +114,7 @@
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.3",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

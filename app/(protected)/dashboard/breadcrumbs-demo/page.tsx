@@ -1,5 +1,7 @@
 import { SmartBreadcrumbsDemo } from "@/components/layout/smart-breadcrumbs-demo"
 
+export const dynamic = 'force-dynamic'
+
 export default function BreadcrumbsPage() {
   return (
     <div className="container mx-auto py-6">
