@@ -76,7 +76,7 @@ This implementation plan breaks down the complete rebuild of HUNKCentral into ma
   - **Complete**: Run `npm run lint`, `npm run type-check`, fix all errors, Git commit
   - _Requirements: Comprehensive PRD for development reference_
 
-- [-] 1. Project Foundation and Setup
+- [ ] 1. Project Foundation and Setup
   - **AUDIT FIRST**: Verify existing Next.js 15, TypeScript, Tailwind CSS, and shadcn/ui setup
   - If already complete: verify correct configuration and fix any issues
   - If missing: set up Next.js 15 project with App Router and TypeScript strict mode
