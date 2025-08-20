@@ -268,12 +268,12 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
               {breadcrumb.href ? (
                 <BreadcrumbLink
                   href={breadcrumb.href}
-                  className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                  className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hunks-green focus-visible:ring-offset-2 rounded-sm text-hunks-green hover:text-hunks-green/80 transition-colors"
                   aria-label={`Navigate to ${breadcrumb.label}`}
                 >
                   {breadcrumb.icon && (
                     <breadcrumb.icon
-                      className="h-3.5 w-3.5"
+                      className="h-3.5 w-3.5 text-hunks-green"
                       aria-hidden="true"
                     />
                   )}
@@ -283,13 +283,13 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
                 </BreadcrumbLink>
               ) : (
                 <BreadcrumbPage
-                  className="flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 text-foreground font-medium"
                   aria-current="page"
                   aria-label={`Current page: ${breadcrumb.label}`}
                 >
                   {breadcrumb.icon && (
                     <breadcrumb.icon
-                      className="h-3.5 w-3.5"
+                      className="h-3.5 w-3.5 text-muted-foreground"
                       aria-hidden="true"
                     />
                   )}
