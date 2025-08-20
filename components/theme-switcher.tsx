@@ -34,9 +34,26 @@ export function ThemeSwitcher() {
     }
   }, [theme, mounted]);
 
-  const handleThemeChange = (newTheme: string) => {
+  const handleThemeChange = async (newTheme: string) => {
     try {
       setTheme(newTheme);
+
+      // Sync with database (fire and forget - don't block UI)
+      if (typeof window !== 'undefined') {
+        import('@/lib/actions/theme-actions').then(
+          ({ updateThemePreference }) => {
+            updateThemePreference(
+              newTheme as 'light' | 'dark' | 'system'
+            ).catch((error) => {
+              console.warn(
+                'Failed to sync theme preference to database:',
+                error
+              );
+            });
+          }
+        );
+      }
+
       // Verify the theme was set correctly
       setTimeout(() => {
         const storedTheme = localStorage.getItem('hunkcentral-theme');

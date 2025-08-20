@@ -1,19 +1,23 @@
 import { Suspense } from 'react';
 import { GalleryVerticalEnd } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="bg-hunks-green text-white flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            <span className="text-hunks-green font-bold">HUNK</span>
-            <span className="text-hunks-orange font-bold">Central</span>
-          </a>
+        <div className="flex justify-between items-center">
+          <div className="flex justify-center gap-2 md:justify-start">
+            <a href="#" className="flex items-center gap-2 font-medium">
+              <div className="bg-hunks-green text-white flex size-6 items-center justify-center rounded-md">
+                <GalleryVerticalEnd className="size-4" />
+              </div>
+              <span className="text-hunks-green font-bold">HUNK</span>
+              <span className="text-hunks-orange font-bold">Central</span>
+            </a>
+          </div>
+          <ThemeSwitcher />
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
