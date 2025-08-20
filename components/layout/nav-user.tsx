@@ -87,15 +87,15 @@ export function NavUser({ user }: { user: SessionUser }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <User />
+                <User className="text-hunks-green" />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Settings />
+                <Settings className="text-hunks-green" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Bell />
+                <Bell className="text-hunks-green" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -104,7 +104,7 @@ export function NavUser({ user }: { user: SessionUser }) {
               onClick={handleLogout}
               className="text-red-600 focus:text-red-600"
             >
-              <LogOut />
+              <LogOut className="text-red-600" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

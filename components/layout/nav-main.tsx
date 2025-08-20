@@ -19,7 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
+
 import { NavigationItemWithBadge } from '@/components/layout/navigation-badge';
 import { useNavigation } from '@/contexts/navigation-context';
 
@@ -67,33 +67,47 @@ export function NavMain({
   };
 
   return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupLabel className="text-hunks-green font-medium">
-          {title}
-        </SidebarGroupLabel>
-        <SidebarMenu>
-          {items.map((item) => {
-            const isActive = isActiveRoute(item.url);
-            const hasSubItems = item.items && item.items.length > 0;
-            const badgeInfo = getBadgeInfo(item.url);
+    <SidebarGroup>
+      <SidebarGroupLabel className="text-hunks-green font-medium">
+        {title}
+      </SidebarGroupLabel>
+      <SidebarMenu>
+        {items.map((item) => {
+          const isActive = isActiveRoute(item.url);
+          const hasSubItems = item.items && item.items.length > 0;
+          const badgeInfo = getBadgeInfo(item.url);
 
-            return (
-              <Collapsible
-                key={item.title}
-                asChild
-                defaultOpen={isActive}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      isActive={isActive}
-                      asChild={!hasSubItems}
-                      className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
-                    >
-                      {hasSubItems ? (
+          return (
+            <Collapsible
+              key={item.title}
+              asChild
+              defaultOpen={isActive}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={isActive}
+                    asChild={!hasSubItems}
+                    className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
+                  >
+                    {hasSubItems ? (
+                      <NavigationItemWithBadge
+                        badgeCount={badgeInfo.count}
+                        badgeType={badgeInfo.type}
+                        className="w-full"
+                      >
+                        <div className="flex items-center w-full">
+                          {item.icon && (
+                            <item.icon className="text-hunks-green" />
+                          )}
+                          <span>{item.title}</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-hunks-green" />
+                        </div>
+                      </NavigationItemWithBadge>
+                    ) : (
+                      <Link href={item.url} className="w-full">
                         <NavigationItemWithBadge
                           badgeCount={badgeInfo.count}
                           badgeType={badgeInfo.type}
@@ -104,64 +118,47 @@ export function NavMain({
                               <item.icon className="text-hunks-green" />
                             )}
                             <span>{item.title}</span>
-                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-hunks-green" />
                           </div>
                         </NavigationItemWithBadge>
-                      ) : (
-                        <Link href={item.url} className="w-full">
-                          <NavigationItemWithBadge
-                            badgeCount={badgeInfo.count}
-                            badgeType={badgeInfo.type}
-                            className="w-full"
-                          >
-                            <div className="flex items-center w-full">
-                              {item.icon && (
-                                <item.icon className="text-hunks-green" />
-                              )}
-                              <span>{item.title}</span>
-                            </div>
-                          </NavigationItemWithBadge>
-                        </Link>
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  {hasSubItems && (
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.items?.map((subItem) => {
-                          const isSubActive = pathname === subItem.url;
-                          const subBadgeInfo = getBadgeInfo(subItem.url);
+                      </Link>
+                    )}
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                {hasSubItems && (
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => {
+                        const isSubActive = pathname === subItem.url;
+                        const subBadgeInfo = getBadgeInfo(subItem.url);
 
-                          return (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={isSubActive}
-                                className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
-                              >
-                                <Link href={subItem.url} className="w-full">
-                                  <NavigationItemWithBadge
-                                    badgeCount={subBadgeInfo.count}
-                                    badgeType={subBadgeInfo.type}
-                                    className="w-full"
-                                  >
-                                    <span>{subItem.title}</span>
-                                  </NavigationItemWithBadge>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  )}
-                </SidebarMenuItem>
-              </Collapsible>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroup>
-      <Separator className="bg-hunks-green/20" />
-    </>
+                        return (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isSubActive}
+                              className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
+                            >
+                              <Link href={subItem.url} className="w-full">
+                                <NavigationItemWithBadge
+                                  badgeCount={subBadgeInfo.count}
+                                  badgeType={subBadgeInfo.type}
+                                  className="w-full"
+                                >
+                                  <span>{subItem.title}</span>
+                                </NavigationItemWithBadge>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                )}
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }
