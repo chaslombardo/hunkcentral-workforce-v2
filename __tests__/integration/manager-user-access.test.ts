@@ -117,7 +117,9 @@ describe('Manager User Access Integration', () => {
       const result = await getUsers();
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Unauthorized: Admin or Manager access required');
+      expect(result.error).toBe(
+        'Unauthorized: Admin or Manager access required'
+      );
     });
   });
 
@@ -194,7 +196,9 @@ describe('Manager User Access Integration', () => {
       const result = await getUserById('sales1');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Access denied: Managers can only view captain and wingman users');
+      expect(result.error).toBe(
+        'Access denied: Managers can only view captain and wingman users'
+      );
       expect(mockPrisma.auditLog.create).not.toHaveBeenCalled();
     });
 

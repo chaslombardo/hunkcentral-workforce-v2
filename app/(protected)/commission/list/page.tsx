@@ -10,13 +10,13 @@ import { Plus } from 'lucide-react';
 
 export default async function CommissionListPage() {
   const session = await auth();
-  
+
   if (!session?.user) {
     redirect('/auth/login');
   }
 
   // Check if user has permission to view commission entries
-  const canViewCommission = 
+  const canViewCommission =
     session.user.roles?.includes('sales') ||
     session.user.roles?.includes('manager') ||
     session.user.roles?.includes('admin') ||
@@ -34,9 +34,12 @@ export default async function CommissionListPage() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Commission Tracking</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Commission Tracking
+          </h1>
           <p className="text-muted-foreground">
-            Track commission entries and their matching status with completed jobs.
+            Track commission entries and their matching status with completed
+            jobs.
           </p>
         </div>
         <Link href="/commission/create">
@@ -52,13 +55,11 @@ export default async function CommissionListPage() {
           <TabsTrigger value="entries">Commission Entries</TabsTrigger>
           <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="entries" className="space-y-6">
-          <CommissionListWithActions 
-            entries={entries}
-          />
+          <CommissionListWithActions entries={entries} />
         </TabsContent>
-        
+
         <TabsContent value="conflicts" className="space-y-6">
           <CommissionConflicts />
         </TabsContent>

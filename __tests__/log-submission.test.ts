@@ -3,7 +3,16 @@
  * Tests the complete workflow from draft creation to submission
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, beforeAll, afterAll } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  beforeAll,
+  afterAll,
+} from 'vitest';
 import { saveDraftLog, submitLog, loadLog } from '@/lib/actions/logs';
 import { prisma } from '@/lib/prisma';
 import type { DailyLogFormData } from '@/lib/validations';
@@ -70,8 +79,8 @@ describe('Log Submission Integration Tests', () => {
         password: 'hashedpassword',
         fullName: 'Test User',
         roles: ['captain'],
-        rateJunkCaptain: 20.00,
-        rateJunkWingman: 15.00,
+        rateJunkCaptain: 20.0,
+        rateJunkWingman: 15.0,
       },
     });
   });

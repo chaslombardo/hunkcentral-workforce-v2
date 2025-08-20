@@ -53,8 +53,9 @@ export default async function CreateLogPage() {
 
     // Check user permissions
     const userRoles = session.user.roles || [];
-    const canCreateLogs = userRoles.includes('captain') || userRoles.includes('admin');
-    
+    const canCreateLogs =
+      userRoles.includes('captain') || userRoles.includes('admin');
+
     if (!canCreateLogs) {
       await logAuthError(new Error('Insufficient permissions'), {
         action: 'permission_check',
@@ -73,7 +74,9 @@ export default async function CreateLogPage() {
     return (
       <div className="container mx-auto py-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Create Daily Log</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Create Daily Log
+          </h1>
           <p className="text-muted-foreground">
             Record your daily work activities, jobs, and team hours.
           </p>
@@ -97,14 +100,18 @@ export default async function CreateLogPage() {
         errorType: error instanceof Error ? error.constructor.name : 'Unknown',
       },
     });
-    
+
     // Return user-friendly error fallback
-    return <LogCreateErrorFallback 
-      error={error instanceof Error ? error : new Error('Unknown error occurred')}
-      context={{
-        page: 'logs_create',
-        userId: session?.user?.id,
-      }}
-    />;
+    return (
+      <LogCreateErrorFallback
+        error={
+          error instanceof Error ? error : new Error('Unknown error occurred')
+        }
+        context={{
+          page: 'logs_create',
+          userId: session?.user?.id,
+        }}
+      />
+    );
   }
 }

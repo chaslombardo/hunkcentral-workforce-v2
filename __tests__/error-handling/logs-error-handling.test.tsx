@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { LogsPageErrorFallback, LogCreateErrorFallback, LogReviewErrorFallback, LogDetailErrorFallback } from '@/components/ui/logs-error-fallback';
+import {
+  LogsPageErrorFallback,
+  LogCreateErrorFallback,
+  LogReviewErrorFallback,
+  LogDetailErrorFallback,
+} from '@/components/ui/logs-error-fallback';
 
 // Mock Next.js Link component
 vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
 describe('Logs Error Handling Components', () => {
@@ -20,15 +29,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogsPageErrorFallback 
-          error={authError} 
+        <LogsPageErrorFallback
+          error={authError}
           resetError={resetError}
           context={{ page: 'logs', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Authentication Error')).toBeInTheDocument();
-      expect(screen.getByText(/There was a problem with your session/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/There was a problem with your session/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Back to Login')).toBeInTheDocument();
     });
 
@@ -37,15 +48,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogsPageErrorFallback 
-          error={dbError} 
+        <LogsPageErrorFallback
+          error={dbError}
           resetError={resetError}
           context={{ page: 'logs', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Database Error')).toBeInTheDocument();
-      expect(screen.getByText(/Unable to connect to the database/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Unable to connect to the database/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Back to Dashboard')).toBeInTheDocument();
     });
 
@@ -54,15 +67,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogsPageErrorFallback 
-          error={genericError} 
+        <LogsPageErrorFallback
+          error={genericError}
           resetError={resetError}
           context={{ page: 'logs', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Page Load Error')).toBeInTheDocument();
-      expect(screen.getByText(/There was an error loading the logs page/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/There was an error loading the logs page/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Try Again')).toBeInTheDocument();
       expect(screen.getByText('Refresh Page')).toBeInTheDocument();
     });
@@ -75,8 +90,8 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogsPageErrorFallback 
-          error={error} 
+        <LogsPageErrorFallback
+          error={error}
           resetError={resetError}
           context={{ page: 'logs', userId: 'test-user' }}
         />
@@ -94,15 +109,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogCreateErrorFallback 
-          error={error} 
+        <LogCreateErrorFallback
+          error={error}
           resetError={resetError}
           context={{ page: 'logs_create', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Form Loading Error')).toBeInTheDocument();
-      expect(screen.getByText(/Unable to load the log creation form/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Unable to load the log creation form/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Back to Logs')).toBeInTheDocument();
     });
   });
@@ -113,15 +130,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogReviewErrorFallback 
-          error={error} 
+        <LogReviewErrorFallback
+          error={error}
           resetError={resetError}
           context={{ page: 'logs_review', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Review Queue Error')).toBeInTheDocument();
-      expect(screen.getByText(/There was an error loading the review queue/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/There was an error loading the review queue/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Retry Loading')).toBeInTheDocument();
     });
 
@@ -130,15 +149,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogReviewErrorFallback 
-          error={dbError} 
+        <LogReviewErrorFallback
+          error={dbError}
           resetError={resetError}
           context={{ page: 'logs_review', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Database Connection Error')).toBeInTheDocument();
-      expect(screen.getByText(/Our team has been notified/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Our team has been notified/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -148,15 +169,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogDetailErrorFallback 
-          error={notFoundError} 
+        <LogDetailErrorFallback
+          error={notFoundError}
           resetError={resetError}
           context={{ page: 'logs_detail', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Log Not Found')).toBeInTheDocument();
-      expect(screen.getByText(/The requested log could not be found/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/The requested log could not be found/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Back to Logs')).toBeInTheDocument();
       expect(screen.getByText('Review Queue')).toBeInTheDocument();
     });
@@ -166,15 +189,17 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogDetailErrorFallback 
-          error={permissionError} 
+        <LogDetailErrorFallback
+          error={permissionError}
           resetError={resetError}
           context={{ page: 'logs_detail', userId: 'test-user' }}
         />
       );
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument();
-      expect(screen.getByText(/You do not have permission to view this log/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You do not have permission to view this log/)
+      ).toBeInTheDocument();
     });
 
     it('should render generic loading error with retry option', () => {
@@ -182,8 +207,8 @@ describe('Logs Error Handling Components', () => {
       const resetError = vi.fn();
 
       render(
-        <LogDetailErrorFallback 
-          error={loadingError} 
+        <LogDetailErrorFallback
+          error={loadingError}
           resetError={resetError}
           context={{ page: 'logs_detail', userId: 'test-user' }}
         />

@@ -41,7 +41,6 @@ import {
   Users,
   Calendar,
   TrendingUp,
-
   Award,
   ExternalLink,
   Search,
@@ -77,20 +76,30 @@ export function TipsDetailView({
   const safeTips = tips || [];
   const totalJobs = safeTips.length;
   const averageTipPerJob = totalJobs > 0 ? totalTips / totalJobs : 0;
-  const junkTips = safeTips.filter(tip => tip.jobType === 'junk');
-  const moveTips = safeTips.filter(tip => tip.jobType === 'move');
-  const averageJunkTip = junkTips.length > 0 ? junkTips.reduce((sum, tip) => sum + tip.myShare, 0) / junkTips.length : 0;
-  const averageMoveTip = moveTips.length > 0 ? moveTips.reduce((sum, tip) => sum + tip.myShare, 0) / moveTips.length : 0;
+  const junkTips = safeTips.filter((tip) => tip.jobType === 'junk');
+  const moveTips = safeTips.filter((tip) => tip.jobType === 'move');
+  const averageJunkTip =
+    junkTips.length > 0
+      ? junkTips.reduce((sum, tip) => sum + tip.myShare, 0) / junkTips.length
+      : 0;
+  const averageMoveTip =
+    moveTips.length > 0
+      ? moveTips.reduce((sum, tip) => sum + tip.myShare, 0) / moveTips.length
+      : 0;
 
   // Find highest tip day
-  const dailyTips = safeTips.reduce((acc, tip) => {
-    const dateKey = tip.date.toISOString().split('T')[0];
-    acc[dateKey] = (acc[dateKey] || 0) + tip.myShare;
-    return acc;
-  }, {} as Record<string, number>);
+  const dailyTips = safeTips.reduce(
+    (acc, tip) => {
+      const dateKey = tip.date.toISOString().split('T')[0];
+      acc[dateKey] = (acc[dateKey] || 0) + tip.myShare;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const highestTipDay = Object.entries(dailyTips).reduce((max, [date, amount]) => 
-    amount > max.amount ? { date: new Date(date), amount } : max, 
+  const highestTipDay = Object.entries(dailyTips).reduce(
+    (max, [date, amount]) =>
+      amount > max.amount ? { date: new Date(date), amount } : max,
     { date: new Date(), amount: 0 }
   );
 
@@ -103,15 +112,16 @@ export function TipsDetailView({
 
     // Apply job type filter
     if (filterBy !== 'all') {
-      filtered = filtered.filter(tip => tip.jobType === filterBy);
+      filtered = filtered.filter((tip) => tip.jobType === filterBy);
     }
 
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(tip => 
-        tip.clientName.toLowerCase().includes(query) ||
-        tip.jobId.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (tip) =>
+          tip.clientName.toLowerCase().includes(query) ||
+          tip.jobId.toLowerCase().includes(query)
       );
     }
 
@@ -148,13 +158,16 @@ export function TipsDetailView({
 
   return (
     <div className="space-y-6">
-        {/* Performance Metrics Cards */}
-        <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      {/* Performance Metrics Cards */}
+      <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {/* Total Tips */}
         <Card className="@container/card">
           <CardHeader>
             <CardDescription>Total Tips Earned</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl" data-testid="total-tips-amount">
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-testid="total-tips-amount"
+            >
               {formatCurrency(totalTips)}
             </CardTitle>
             <CardAction>
@@ -170,7 +183,10 @@ export function TipsDetailView({
         <Card className="@container/card">
           <CardHeader>
             <CardDescription>Average per Job</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl" data-testid="average-per-job">
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-testid="average-per-job"
+            >
               {formatCurrency(averageTipPerJob)}
             </CardTitle>
             <CardAction>
@@ -197,7 +213,10 @@ export function TipsDetailView({
         <Card className="@container/card">
           <CardHeader>
             <CardDescription>Highest Tip Day</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl" data-testid="highest-tip-day">
+            <CardTitle
+              className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl"
+              data-testid="highest-tip-day"
+            >
               {formatCurrency(highestTipDay.amount)}
             </CardTitle>
             <CardAction>
@@ -218,8 +237,12 @@ export function TipsDetailView({
         <Card className="@container/card">
           <CardHeader>
             <CardDescription>Junk vs Move Tips</CardDescription>
-            <CardTitle className="text-lg font-semibold tabular-nums @[250px]/card:text-xl" data-testid="job-type-comparison">
-              {formatCurrency(averageJunkTip)} / {formatCurrency(averageMoveTip)}
+            <CardTitle
+              className="text-lg font-semibold tabular-nums @[250px]/card:text-xl"
+              data-testid="job-type-comparison"
+            >
+              {formatCurrency(averageJunkTip)} /{' '}
+              {formatCurrency(averageMoveTip)}
             </CardTitle>
             <CardAction>
               <Badge variant="outline">
@@ -243,10 +266,11 @@ export function TipsDetailView({
             <div>
               <CardTitle>Tips Breakdown</CardTitle>
               <CardDescription>
-                Detailed breakdown of all tips earned from {formatDate(payPeriodStart)} to {formatDate(payPeriodEnd)}
+                Detailed breakdown of all tips earned from{' '}
+                {formatDate(payPeriodStart)} to {formatDate(payPeriodEnd)}
               </CardDescription>
             </div>
-            
+
             {/* Controls */}
             <div className="flex gap-2 flex-col sm:flex-row sm:items-center">
               {/* Search */}
@@ -262,7 +286,10 @@ export function TipsDetailView({
 
               <div className="flex gap-2">
                 {/* Filter */}
-                <Select value={filterBy} onValueChange={(value: FilterOption) => setFilterBy(value)}>
+                <Select
+                  value={filterBy}
+                  onValueChange={(value: FilterOption) => setFilterBy(value)}
+                >
                   <SelectTrigger className="w-full sm:w-[140px]">
                     <Filter className="h-4 w-4" />
                     <SelectValue placeholder="All Jobs" />
@@ -275,7 +302,10 @@ export function TipsDetailView({
                 </Select>
 
                 {/* Sort */}
-                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(value: SortOption) => setSortBy(value)}
+                >
                   <SelectTrigger className="w-full sm:w-[140px]">
                     <SelectValue placeholder="By Date" />
                   </SelectTrigger>
@@ -295,8 +325,8 @@ export function TipsDetailView({
           {filteredAndSortedTips.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-muted-foreground">
-                {searchQuery || filterBy !== 'all' 
-                  ? 'No tips match your current filters.' 
+                {searchQuery || filterBy !== 'all'
+                  ? 'No tips match your current filters.'
                   : 'No tips recorded for this period.'}
               </div>
             </div>
@@ -305,11 +335,17 @@ export function TipsDetailView({
               {/* Mobile Card View */}
               <div className="block md:hidden space-y-3">
                 {filteredAndSortedTips.map((tip, index) => (
-                  <Card key={`mobile-${tip.logId}-${tip.jobId}-${index}`} className="@container/card">
+                  <Card
+                    key={`mobile-${tip.logId}-${tip.jobId}-${index}`}
+                    className="@container/card"
+                  >
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-base truncate @[250px]/card:text-lg" data-testid={`mobile-client-${tip.clientName}`}>
+                          <div
+                            className="font-medium text-base truncate @[250px]/card:text-lg"
+                            data-testid={`mobile-client-${tip.clientName}`}
+                          >
                             {tip.clientName}
                           </div>
                           <div className="text-sm text-muted-foreground">
@@ -317,27 +353,37 @@ export function TipsDetailView({
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-2">
-                          <div className="font-mono text-xl font-semibold @[250px]/card:text-2xl" data-testid={`mobile-amount-${tip.myShare}`}>
+                          <div
+                            className="font-mono text-xl font-semibold @[250px]/card:text-2xl"
+                            data-testid={`mobile-amount-${tip.myShare}`}
+                          >
                             {formatCurrency(tip.myShare)}
                           </div>
-                          <Badge variant="outline" className="text-xs capitalize">
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
                             {tip.jobType}
                           </Badge>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2 p-2 bg-muted/30 rounded">
                             <DollarSign className="h-4 w-4" />
-                            <span className="font-medium">{formatCurrency(tip.totalJobTips)}</span>
+                            <span className="font-medium">
+                              {formatCurrency(tip.totalJobTips)}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 p-2 bg-muted/30 rounded">
                             <Users className="h-4 w-4" />
-                            <span className="font-medium">{tip.teamMembers}</span>
+                            <span className="font-medium">
+                              {tip.teamMembers}
+                            </span>
                           </div>
                         </div>
-                        
+
                         <Button variant="ghost" asChild>
                           <Link href={`/logs/${tip.logId}`}>
                             <ExternalLink className="h-4 w-4" />
@@ -363,14 +409,20 @@ export function TipsDetailView({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <button className="flex items-center justify-center gap-1" type="button">
+                              <button
+                                className="flex items-center justify-center gap-1"
+                                type="button"
+                              >
                                 <DollarSign className="h-3 w-3" />
                                 Total Tips
                                 <HelpCircle className="h-3 w-3" />
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Total tips collected for this job before team split</p>
+                              <p>
+                                Total tips collected for this job before team
+                                split
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -379,7 +431,10 @@ export function TipsDetailView({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <button className="flex items-center justify-center gap-1" type="button">
+                              <button
+                                className="flex items-center justify-center gap-1"
+                                type="button"
+                              >
                                 <Users className="h-3 w-3" />
                                 Team Size
                                 <HelpCircle className="h-3 w-3" />
@@ -431,7 +486,9 @@ export function TipsDetailView({
                           <Button variant="ghost" size="sm" asChild>
                             <Link href={`/logs/${tip.logId}`}>
                               <ExternalLink className="h-3 w-3" />
-                              <span className="sr-only">View log for {tip.clientName}</span>
+                              <span className="sr-only">
+                                View log for {tip.clientName}
+                              </span>
                             </Link>
                           </Button>
                         </TableCell>
@@ -445,13 +502,21 @@ export function TipsDetailView({
               <Separator />
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-sm">
                 <div className="text-muted-foreground">
-                  Showing {filteredAndSortedTips.length} of {tips.length} tip entries
+                  Showing {filteredAndSortedTips.length} of {tips.length} tip
+                  entries
                 </div>
                 <div className="flex items-center gap-4">
                   <div>
-                    <span className="text-muted-foreground">Filtered Total:</span>
+                    <span className="text-muted-foreground">
+                      Filtered Total:
+                    </span>
                     <span className="font-mono font-semibold ml-2">
-                      {formatCurrency(filteredAndSortedTips.reduce((sum, tip) => sum + tip.myShare, 0))}
+                      {formatCurrency(
+                        filteredAndSortedTips.reduce(
+                          (sum, tip) => sum + tip.myShare,
+                          0
+                        )
+                      )}
                     </span>
                   </div>
                 </div>
@@ -461,38 +526,45 @@ export function TipsDetailView({
         </CardContent>
       </Card>
 
-        {/* Tip Distribution Formula Explanation */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HelpCircle className="h-5 w-5" />
-              How Tips Are Calculated
-            </CardTitle>
-            <CardDescription>
-              Understanding how your tip share is determined
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <h4 className="font-medium">Tip Distribution Formula</h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>• Tips are shared equally among all team members working that job section</div>
-                  <div data-testid="tip-formula">• Your share = Total Job Tips ÷ Number of Team Members</div>
-                  <div>• Co-captains receive the same share as other team members</div>
+      {/* Tip Distribution Formula Explanation */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HelpCircle className="h-5 w-5" />
+            How Tips Are Calculated
+          </CardTitle>
+          <CardDescription>
+            Understanding how your tip share is determined
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <h4 className="font-medium">Tip Distribution Formula</h4>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <div>
+                  • Tips are shared equally among all team members working that
+                  job section
                 </div>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium">Example Calculation</h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>• Job collected $60 in tips</div>
-                  <div>• 3 team members worked the job</div>
-                  <div>• Your share: $60 ÷ 3 = $20.00</div>
+                <div data-testid="tip-formula">
+                  • Your share = Total Job Tips ÷ Number of Team Members
+                </div>
+                <div>
+                  • Co-captains receive the same share as other team members
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">Example Calculation</h4>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <div>• Job collected $60 in tips</div>
+                <div>• 3 team members worked the job</div>
+                <div>• Your share: $60 ÷ 3 = $20.00</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

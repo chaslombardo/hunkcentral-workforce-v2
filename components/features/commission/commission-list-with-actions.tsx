@@ -3,10 +3,10 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { CommissionList } from './commission-list';
-import { 
-  deleteCommissionEntry, 
-  approveCommissionEntry, 
-  rejectCommissionEntry 
+import {
+  deleteCommissionEntry,
+  approveCommissionEntry,
+  rejectCommissionEntry,
 } from '@/lib/actions/commission';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -73,11 +73,15 @@ interface CommissionListWithActionsProps {
   entries: CommissionEntry[];
 }
 
-export function CommissionListWithActions({ entries }: CommissionListWithActionsProps) {
+export function CommissionListWithActions({
+  entries,
+}: CommissionListWithActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState<CommissionEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<CommissionEntry | null>(
+    null
+  );
   const [rejectReason, setRejectReason] = useState('');
   const { toast } = useToast();
   const router = useRouter();
@@ -117,7 +121,8 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
       } catch {
         toast({
           title: 'Error',
-          description: 'An unexpected error occurred while approving the commission.',
+          description:
+            'An unexpected error occurred while approving the commission.',
           variant: 'destructive',
         });
       }
@@ -152,7 +157,8 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
       } catch {
         toast({
           title: 'Error',
-          description: 'An unexpected error occurred while deleting the commission.',
+          description:
+            'An unexpected error occurred while deleting the commission.',
           variant: 'destructive',
         });
       } finally {
@@ -167,7 +173,10 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
 
     startTransition(async () => {
       try {
-        const result = await rejectCommissionEntry(selectedEntry.id, rejectReason);
+        const result = await rejectCommissionEntry(
+          selectedEntry.id,
+          rejectReason
+        );
         if (result.success) {
           toast({
             title: 'Commission Rejected',
@@ -184,7 +193,8 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
       } catch {
         toast({
           title: 'Error',
-          description: 'An unexpected error occurred while rejecting the commission.',
+          description:
+            'An unexpected error occurred while rejecting the commission.',
           variant: 'destructive',
         });
       } finally {
@@ -213,8 +223,8 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Commission Entry</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the commission entry for job {selectedEntry?.jobId}? 
-              This action cannot be undone.
+              Are you sure you want to delete the commission entry for job{' '}
+              {selectedEntry?.jobId}? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -235,7 +245,8 @@ export function CommissionListWithActions({ entries }: CommissionListWithActions
           <DialogHeader>
             <DialogTitle>Reject Commission Entry</DialogTitle>
             <DialogDescription>
-              Please provide a reason for rejecting the commission entry for job {selectedEntry?.jobId}.
+              Please provide a reason for rejecting the commission entry for job{' '}
+              {selectedEntry?.jobId}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

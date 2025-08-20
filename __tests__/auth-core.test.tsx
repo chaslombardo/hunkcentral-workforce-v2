@@ -16,7 +16,9 @@ describe('Authentication Core Functionality', () => {
 
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /sign in/i })
+      ).toBeInTheDocument();
     });
 
     it('should show validation errors for empty fields', async () => {
@@ -27,7 +29,9 @@ describe('Authentication Core Functionality', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/please enter a valid email address/i)
+        ).toBeInTheDocument();
         expect(screen.getByText(/password is required/i)).toBeInTheDocument();
       });
     });
@@ -46,7 +50,7 @@ describe('Authentication Core Functionality', () => {
 
       // Form should be submittable (validation happens on submit)
       expect(submitButton).not.toBeDisabled();
-      
+
       // The form should accept the input (validation will happen on submit)
       expect(emailInput).toHaveValue('invalid-email');
       expect(passwordInput).toHaveValue('password123');
@@ -63,8 +67,12 @@ describe('Authentication Core Functionality', () => {
       await user.type(passwordInput, 'password123');
 
       // Should not show validation errors for valid input
-      expect(screen.queryByText(/please enter a valid email address/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/password is required/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/please enter a valid email address/i)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/password is required/i)
+      ).not.toBeInTheDocument();
     });
 
     it('should display loading state when submitting', async () => {
@@ -77,7 +85,7 @@ describe('Authentication Core Functionality', () => {
 
       await user.type(emailInput, 'test@example.com');
       await user.type(passwordInput, 'password123');
-      
+
       // The button should be enabled for valid input
       expect(submitButton).not.toBeDisabled();
     });

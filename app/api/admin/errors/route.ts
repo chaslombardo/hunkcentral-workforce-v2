@@ -43,13 +43,10 @@ interface PrismaWhereClause {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     // Check if user is admin
     if (!session?.user || !session.user.roles.includes('admin')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -87,10 +84,10 @@ export async function GET(request: NextRequest) {
       start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
       end: new Date(),
     };
-    
+
     const enhancedStats = await getErrorStatistics(timeRange);
     const legacyStats = await getErrorStats();
-    
+
     // Combine both statistics for backward compatibility
     const stats = {
       ...legacyStats,
@@ -98,13 +95,16 @@ export async function GET(request: NextRequest) {
     };
 
     // Transform audit logs to error reports format
-    const errors = errorLogs.map(log => {
+    const errors = errorLogs.map((log) => {
       const changes = log.changes as ErrorLogChanges;
       return {
         id: log.entityId,
         timestamp: log.createdAt.toISOString(),
         level: changes.level || 'medium',
-        type: determineErrorType(changes.component || 'unknown', changes.message || 'Unknown error'),
+        type: determineErrorType(
+          changes.component || 'unknown',
+          changes.message || 'Unknown error'
+        ),
         message: changes.message || 'Unknown error',
         stack: changes.errorDetails?.stackTrace,
         context: {
@@ -155,13 +155,10 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     // Check if user is admin
     if (!session?.user || !session.user.roles.includes('admin')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -183,10 +180,7 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!errorLog) {
-      return NextResponse.json(
-        { error: 'Error not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Error not found' }, { status: 404 });
     }
 
     const updatedChanges: ErrorLogChanges = {
@@ -245,11 +239,14 @@ async function getErrorStats() {
       trend: 'stable' as 'up' | 'down' | 'stable',
     };
 
-    errorLogs.forEach(log => {
+    errorLogs.forEach((log) => {
       const changes = log.changes as ErrorLogChanges;
       const level = changes.level || 'medium';
       const component = changes.component || 'unknown';
-      const type = determineErrorType(component, changes.message || 'Unknown error');
+      const type = determineErrorType(
+        component,
+        changes.message || 'Unknown error'
+      );
 
       // Count by level
       if (level === 'critical') stats.critical++;
@@ -268,12 +265,13 @@ async function getErrorStats() {
     });
 
     // Calculate trend (simplified)
-    const recentErrors = errorLogs.filter(log => 
-      log.createdAt > new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const recentErrors = errorLogs.filter(
+      (log) => log.createdAt > new Date(Date.now() - 24 * 60 * 60 * 1000)
     ).length;
-    const previousErrors = errorLogs.filter(log => 
-      log.createdAt > new Date(Date.now() - 48 * 60 * 60 * 1000) &&
-      log.createdAt <= new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const previousErrors = errorLogs.filter(
+      (log) =>
+        log.createdAt > new Date(Date.now() - 48 * 60 * 60 * 1000) &&
+        log.createdAt <= new Date(Date.now() - 24 * 60 * 60 * 1000)
     ).length;
 
     if (recentErrors > previousErrors * 1.2) stats.trend = 'up';
@@ -299,11 +297,16 @@ function determineErrorType(component: string, message: string): string {
   const lowerComponent = component.toLowerCase();
   const lowerMessage = message.toLowerCase();
 
-  if (lowerComponent.includes('auth') || lowerMessage.includes('auth')) return 'auth';
-  if (lowerComponent.includes('database') || lowerMessage.includes('database')) return 'database';
-  if (lowerComponent.includes('server') || lowerMessage.includes('server')) return 'server';
-  if (lowerComponent.includes('client') || lowerMessage.includes('client')) return 'client';
-  if (lowerComponent.includes('network') || lowerMessage.includes('network')) return 'network';
-  
+  if (lowerComponent.includes('auth') || lowerMessage.includes('auth'))
+    return 'auth';
+  if (lowerComponent.includes('database') || lowerMessage.includes('database'))
+    return 'database';
+  if (lowerComponent.includes('server') || lowerMessage.includes('server'))
+    return 'server';
+  if (lowerComponent.includes('client') || lowerMessage.includes('client'))
+    return 'client';
+  if (lowerComponent.includes('network') || lowerMessage.includes('network'))
+    return 'network';
+
   return 'component';
 }

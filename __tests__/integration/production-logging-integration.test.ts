@@ -44,13 +44,16 @@ describe('Production Logging Integration', () => {
         },
       };
 
-      const request = new NextRequest('http://localhost:3000/api/errors/client', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(errorLog),
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/errors/client',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(errorLog),
+        }
+      );
 
       const response = await POST(request);
       const responseData = await response.json();
@@ -70,13 +73,16 @@ describe('Production Logging Integration', () => {
     });
 
     it('should handle invalid request body', async () => {
-      const request = new NextRequest('http://localhost:3000/api/errors/client', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ invalid: 'data' }),
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/errors/client',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ invalid: 'data' }),
+        }
+      );
 
       const response = await POST(request);
       const responseData = await response.json();
@@ -103,13 +109,16 @@ describe('Production Logging Integration', () => {
         },
       };
 
-      const request = new NextRequest('http://localhost:3000/api/errors/client', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(errorLog),
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/errors/client',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(errorLog),
+        }
+      );
 
       const response = await POST(request);
       const responseData = await response.json();
@@ -128,10 +137,10 @@ describe('Production Logging Integration', () => {
   describe('Error Logger Integration', () => {
     it('should create proper error objects from client logs', async () => {
       const { logServerError } = await import('@/lib/errorLogger');
-      
+
       // Clear the mock to get the actual implementation
       vi.mocked(logServerError).mockRestore();
-      
+
       // Mock prisma to avoid database calls
       vi.mock('@/lib/prisma', () => ({
         prisma: {
@@ -145,8 +154,10 @@ describe('Production Logging Integration', () => {
       process.env.NODE_ENV = 'test';
 
       try {
-        const { logServerError: realLogServerError } = await import('@/lib/errorLogger');
-        
+        const { logServerError: realLogServerError } = await import(
+          '@/lib/errorLogger'
+        );
+
         const testError = new Error('Test error');
         await realLogServerError(testError, {
           component: 'test-component',

@@ -1,7 +1,13 @@
-"use client"
+'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -17,7 +23,10 @@ interface LogErrorBoundaryProps {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
-class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBoundaryState> {
+class LogErrorBoundary extends React.Component<
+  LogErrorBoundaryProps,
+  LogErrorBoundaryState
+> {
   constructor(props: LogErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -32,7 +41,7 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Log Error Boundary caught an error:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,
@@ -53,7 +62,12 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
       // Use custom fallback if provided
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
-        return <FallbackComponent error={this.state.error} retry={this.handleRetry} />;
+        return (
+          <FallbackComponent
+            error={this.state.error}
+            retry={this.handleRetry}
+          />
+        );
       }
 
       // Default error UI
@@ -65,7 +79,8 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
               Something went wrong
             </CardTitle>
             <CardDescription className="text-red-600">
-              There was an error loading the log data. This might be due to a server issue or network problem.
+              There was an error loading the log data. This might be due to a
+              server issue or network problem.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -75,7 +90,7 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
               </div>
             )}
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={this.handleRetry}
                 variant="outline"
                 className="border-red-300 text-red-700 hover:bg-red-100"
@@ -83,7 +98,7 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
-              <Button 
+              <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
                 className="border-red-300 text-red-700 hover:bg-red-100"
@@ -101,12 +116,12 @@ class LogErrorBoundary extends React.Component<LogErrorBoundaryProps, LogErrorBo
 }
 
 // Server Action Error Fallback Component
-export function ServerActionErrorFallback({ 
-  error, 
-  retry 
-}: { 
-  error?: Error; 
-  retry: () => void; 
+export function ServerActionErrorFallback({
+  error,
+  retry,
+}: {
+  error?: Error;
+  retry: () => void;
 }) {
   return (
     <Card className="border-yellow-200 bg-yellow-50">
@@ -116,7 +131,8 @@ export function ServerActionErrorFallback({
           Server Error
         </CardTitle>
         <CardDescription className="text-yellow-600">
-          Unable to load data from the server. Please check your connection and try again.
+          Unable to load data from the server. Please check your connection and
+          try again.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -126,7 +142,7 @@ export function ServerActionErrorFallback({
           </div>
         )}
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={retry}
             variant="outline"
             className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
@@ -134,8 +150,8 @@ export function ServerActionErrorFallback({
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
-          <Button 
-            onClick={() => window.location.href = '/logs'}
+          <Button
+            onClick={() => (window.location.href = '/logs')}
             variant="outline"
             className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
           >
@@ -148,12 +164,12 @@ export function ServerActionErrorFallback({
 }
 
 // Database Error Fallback Component
-export function DatabaseErrorFallback({ 
-  error, 
-  retry 
-}: { 
-  error?: Error; 
-  retry: () => void; 
+export function DatabaseErrorFallback({
+  error,
+  retry,
+}: {
+  error?: Error;
+  retry: () => void;
 }) {
   return (
     <Card className="border-red-200 bg-red-50">
@@ -173,7 +189,7 @@ export function DatabaseErrorFallback({
           </div>
         )}
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={retry}
             variant="outline"
             className="border-red-300 text-red-700 hover:bg-red-100"
@@ -181,8 +197,8 @@ export function DatabaseErrorFallback({
             <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
           </Button>
-          <Button 
-            onClick={() => window.location.href = '/dashboard'}
+          <Button
+            onClick={() => (window.location.href = '/dashboard')}
             variant="outline"
             className="border-red-300 text-red-700 hover:bg-red-100"
           >

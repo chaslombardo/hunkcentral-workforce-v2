@@ -1,28 +1,49 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
-import { 
-  TestTube, 
-  Play, 
-  Pause, 
-  Square, 
-  Plus, 
-  BarChart3, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
+import {
+  TestTube,
+  Play,
+  Pause,
+  Square,
+  Plus,
+  BarChart3,
   TrendingUp,
   Users,
-  Calendar
-} from "lucide-react";
-import { ABTestConfig, ABTestVariant } from "@/lib/ab-testing";
+  Calendar,
+} from 'lucide-react';
+import { ABTestConfig, ABTestVariant } from '@/lib/ab-testing';
 
 interface ABTestExperiment {
   id: string;
@@ -43,7 +64,8 @@ export function ABTestManager() {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
-  const [selectedExperiment, setSelectedExperiment] = useState<ABTestExperiment | null>(null);
+  const [selectedExperiment, setSelectedExperiment] =
+    useState<ABTestExperiment | null>(null);
   const [experimentResults, setExperimentResults] = useState<{
     experiment: {
       name: string;
@@ -77,47 +99,47 @@ export function ABTestManager() {
       // For now, we'll use mock data
       const mockExperiments: ABTestExperiment[] = [
         {
-          id: "1",
-          name: "dashboard-metrics-layout",
-          description: "Test different layouts for dashboard metric cards",
-          status: "active",
-          startDate: "2024-01-10T00:00:00Z",
+          id: '1',
+          name: 'dashboard-metrics-layout',
+          description: 'Test different layouts for dashboard metric cards',
+          status: 'active',
+          startDate: '2024-01-10T00:00:00Z',
           variants: [
-            { name: "control", weight: 50, config: { layout: "grid" } },
-            { name: "list-view", weight: 50, config: { layout: "list" } },
+            { name: 'control', weight: 50, config: { layout: 'grid' } },
+            { name: 'list-view', weight: 50, config: { layout: 'list' } },
           ],
-          targetMetric: "dashboard_engagement",
+          targetMetric: 'dashboard_engagement',
           participants: 234,
           conversions: 89,
           conversionRate: 38.0,
         },
         {
-          id: "2",
-          name: "button-color-test",
-          description: "Test primary button color variations",
-          status: "completed",
-          startDate: "2024-01-01T00:00:00Z",
-          endDate: "2024-01-08T00:00:00Z",
+          id: '2',
+          name: 'button-color-test',
+          description: 'Test primary button color variations',
+          status: 'completed',
+          startDate: '2024-01-01T00:00:00Z',
+          endDate: '2024-01-08T00:00:00Z',
           variants: [
-            { name: "control", weight: 33, config: { color: "#026937" } },
-            { name: "orange", weight: 33, config: { color: "#ea7200" } },
-            { name: "blue", weight: 34, config: { color: "#3b82f6" } },
+            { name: 'control', weight: 33, config: { color: '#026937' } },
+            { name: 'orange', weight: 33, config: { color: '#ea7200' } },
+            { name: 'blue', weight: 34, config: { color: '#3b82f6' } },
           ],
-          targetMetric: "form_completion",
+          targetMetric: 'form_completion',
           participants: 456,
           conversions: 234,
           conversionRate: 51.3,
         },
         {
-          id: "3",
-          name: "navigation-structure",
-          description: "Test simplified vs detailed navigation menu",
-          status: "draft",
+          id: '3',
+          name: 'navigation-structure',
+          description: 'Test simplified vs detailed navigation menu',
+          status: 'draft',
           variants: [
-            { name: "control", weight: 50, config: { style: "detailed" } },
-            { name: "simplified", weight: 50, config: { style: "simple" } },
+            { name: 'control', weight: 50, config: { style: 'detailed' } },
+            { name: 'simplified', weight: 50, config: { style: 'simple' } },
           ],
-          targetMetric: "navigation_efficiency",
+          targetMetric: 'navigation_efficiency',
           participants: 0,
           conversions: 0,
           conversionRate: 0,
@@ -126,7 +148,7 @@ export function ABTestManager() {
 
       setExperiments(mockExperiments);
     } catch (error) {
-      console.error("Failed to load experiments:", error);
+      console.error('Failed to load experiments:', error);
     } finally {
       setLoading(false);
     }
@@ -139,7 +161,7 @@ export function ABTestManager() {
         id: Date.now().toString(),
         name: config.name,
         description: config.description,
-        status: "draft",
+        status: 'draft',
         variants: config.variants,
         targetMetric: config.targetMetric,
         participants: 0,
@@ -147,27 +169,35 @@ export function ABTestManager() {
         conversionRate: 0,
       };
 
-      setExperiments(prev => [...prev, newExperiment]);
+      setExperiments((prev) => [...prev, newExperiment]);
       setShowCreateDialog(false);
     } catch (error) {
-      console.error("Failed to create experiment:", error);
+      console.error('Failed to create experiment:', error);
     }
   };
 
   const updateExperimentStatus = async (id: string, status: string) => {
     try {
-      setExperiments(prev => prev.map(exp => 
-        exp.id === id 
-          ? { 
-              ...exp, 
-              status,
-              startDate: status === 'active' ? new Date().toISOString() : exp.startDate,
-              endDate: status === 'completed' ? new Date().toISOString() : exp.endDate,
-            }
-          : exp
-      ));
+      setExperiments((prev) =>
+        prev.map((exp) =>
+          exp.id === id
+            ? {
+                ...exp,
+                status,
+                startDate:
+                  status === 'active'
+                    ? new Date().toISOString()
+                    : exp.startDate,
+                endDate:
+                  status === 'completed'
+                    ? new Date().toISOString()
+                    : exp.endDate,
+              }
+            : exp
+        )
+      );
     } catch (error) {
-      console.error("Failed to update experiment:", error);
+      console.error('Failed to update experiment:', error);
     }
   };
 
@@ -185,8 +215,14 @@ export function ABTestManager() {
         },
         results: experiment.variants.map((variant) => ({
           variant: variant.name,
-          participants: Math.floor(experiment.participants * (variant.weight / 100)),
-          conversions: Math.floor(experiment.conversions * (variant.weight / 100) * (0.8 + Math.random() * 0.4)),
+          participants: Math.floor(
+            experiment.participants * (variant.weight / 100)
+          ),
+          conversions: Math.floor(
+            experiment.conversions *
+              (variant.weight / 100) *
+              (0.8 + Math.random() * 0.4)
+          ),
           conversionRate: 35 + Math.random() * 20,
           interactions: Math.floor(Math.random() * 1000),
           averageValue: Math.random() * 100,
@@ -200,31 +236,44 @@ export function ABTestManager() {
       setSelectedExperiment(experiment);
       setShowResultsDialog(true);
     } catch (error) {
-      console.error("Failed to load results:", error);
+      console.error('Failed to load results:', error);
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "default";
-      case "completed": return "secondary";
-      case "paused": return "outline";
-      case "draft": return "outline";
-      default: return "outline";
+      case 'active':
+        return 'default';
+      case 'completed':
+        return 'secondary';
+      case 'paused':
+        return 'outline';
+      case 'draft':
+        return 'outline';
+      default:
+        return 'outline';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "active": return <Play className="h-4 w-4" />;
-      case "completed": return <Square className="h-4 w-4" />;
-      case "paused": return <Pause className="h-4 w-4" />;
-      default: return <TestTube className="h-4 w-4" />;
+      case 'active':
+        return <Play className="h-4 w-4" />;
+      case 'completed':
+        return <Square className="h-4 w-4" />;
+      case 'paused':
+        return <Pause className="h-4 w-4" />;
+      default:
+        return <TestTube className="h-4 w-4" />;
     }
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading A/B tests...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        Loading A/B tests...
+      </div>
+    );
   }
 
   return (
@@ -245,7 +294,7 @@ export function ABTestManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {experiments.filter(e => e.status === "active").length}
+              {experiments.filter((e) => e.status === 'active').length}
             </div>
           </CardContent>
         </Card>
@@ -255,13 +304,15 @@ export function ABTestManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {experiments.filter(e => e.status === "completed").length}
+              {experiments.filter((e) => e.status === 'completed').length}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Participants
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -319,7 +370,15 @@ export function ABTestManager() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(experiment.status) as "default" | "secondary" | "destructive" | "outline"}>
+                    <Badge
+                      variant={
+                        getStatusColor(experiment.status) as
+                          | 'default'
+                          | 'secondary'
+                          | 'destructive'
+                          | 'outline'
+                      }
+                    >
                       <div className="flex items-center gap-1">
                         {getStatusIcon(experiment.status)}
                         {experiment.status}
@@ -329,7 +388,11 @@ export function ABTestManager() {
                   <TableCell>
                     <div className="flex gap-1">
                       {experiment.variants.map((variant, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {variant.name} ({variant.weight}%)
                         </Badge>
                       ))}
@@ -352,45 +415,58 @@ export function ABTestManager() {
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          {Math.ceil((Date.now() - new Date(experiment.startDate).getTime()) / (1000 * 60 * 60 * 24))}d
+                          {Math.ceil(
+                            (Date.now() -
+                              new Date(experiment.startDate).getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )}
+                          d
                         </span>
                       </div>
                     )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {experiment.status === "draft" && (
+                      {experiment.status === 'draft' && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => updateExperimentStatus(experiment.id, "active")}
+                          onClick={() =>
+                            updateExperimentStatus(experiment.id, 'active')
+                          }
                         >
                           <Play className="h-4 w-4" />
                         </Button>
                       )}
-                      {experiment.status === "active" && (
+                      {experiment.status === 'active' && (
                         <>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateExperimentStatus(experiment.id, "paused")}
+                            onClick={() =>
+                              updateExperimentStatus(experiment.id, 'paused')
+                            }
                           >
                             <Pause className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateExperimentStatus(experiment.id, "completed")}
+                            onClick={() =>
+                              updateExperimentStatus(experiment.id, 'completed')
+                            }
                           >
                             <Square className="h-4 w-4" />
                           </Button>
                         </>
                       )}
-                      {experiment.status === "paused" && (
+                      {experiment.status === 'paused' && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => updateExperimentStatus(experiment.id, "active")}
+                          onClick={() =>
+                            updateExperimentStatus(experiment.id, 'active')
+                          }
                         >
                           <Play className="h-4 w-4" />
                         </Button>
@@ -431,26 +507,38 @@ export function ABTestManager() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Participants
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{experimentResults.totalParticipants}</div>
+                      <div className="text-2xl font-bold">
+                        {experimentResults.totalParticipants}
+                      </div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Total Events</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Events
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{experimentResults.totalEvents}</div>
+                      <div className="text-2xl font-bold">
+                        {experimentResults.totalEvents}
+                      </div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Target Metric</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Target Metric
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-lg font-medium">{selectedExperiment.targetMetric}</div>
+                      <div className="text-lg font-medium">
+                        {selectedExperiment.targetMetric}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
@@ -464,7 +552,13 @@ export function ABTestManager() {
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between">
                             <span className="capitalize">{result.variant}</span>
-                            <Badge variant={result.variant === "control" ? "default" : "secondary"}>
+                            <Badge
+                              variant={
+                                result.variant === 'control'
+                                  ? 'default'
+                                  : 'secondary'
+                              }
+                            >
                               {result.conversionRate.toFixed(1)}% conversion
                             </Badge>
                           </CardTitle>
@@ -472,20 +566,36 @@ export function ABTestManager() {
                         <CardContent>
                           <div className="grid gap-4 md:grid-cols-4">
                             <div>
-                              <div className="text-sm text-muted-foreground">Participants</div>
-                              <div className="text-2xl font-bold">{result.participants}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Participants
+                              </div>
+                              <div className="text-2xl font-bold">
+                                {result.participants}
+                              </div>
                             </div>
                             <div>
-                              <div className="text-sm text-muted-foreground">Conversions</div>
-                              <div className="text-2xl font-bold">{result.conversions}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Conversions
+                              </div>
+                              <div className="text-2xl font-bold">
+                                {result.conversions}
+                              </div>
                             </div>
                             <div>
-                              <div className="text-sm text-muted-foreground">Interactions</div>
-                              <div className="text-2xl font-bold">{result.interactions}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Interactions
+                              </div>
+                              <div className="text-2xl font-bold">
+                                {result.interactions}
+                              </div>
                             </div>
                             <div>
-                              <div className="text-sm text-muted-foreground">Avg Value</div>
-                              <div className="text-2xl font-bold">${result.averageValue.toFixed(0)}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Avg Value
+                              </div>
+                              <div className="text-2xl font-bold">
+                                ${result.averageValue.toFixed(0)}
+                              </div>
                             </div>
                           </div>
                           <div className="mt-4">
@@ -493,7 +603,10 @@ export function ABTestManager() {
                               <span>Conversion Rate</span>
                               <span>{result.conversionRate.toFixed(1)}%</span>
                             </div>
-                            <Progress value={result.conversionRate} className="h-2" />
+                            <Progress
+                              value={result.conversionRate}
+                              className="h-2"
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -518,7 +631,9 @@ export function ABTestManager() {
                       </div>
                       <div className="flex justify-between">
                         <span>Recommended Action:</span>
-                        <span className="font-medium">Implement winning variant</span>
+                        <span className="font-medium">
+                          Implement winning variant
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -526,10 +641,17 @@ export function ABTestManager() {
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowResultsDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowResultsDialog(false)}
+                >
                   Close
                 </Button>
-                <Button onClick={() => updateExperimentStatus(selectedExperiment.id, "completed")}>
+                <Button
+                  onClick={() =>
+                    updateExperimentStatus(selectedExperiment.id, 'completed')
+                  }
+                >
                   End Test
                 </Button>
               </DialogFooter>
@@ -541,15 +663,19 @@ export function ABTestManager() {
   );
 }
 
-function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig) => void }) {
+function CreateExperimentDialog({
+  onSubmit,
+}: {
+  onSubmit: (config: ABTestConfig) => void;
+}) {
   const [config, setConfig] = useState<ABTestConfig>({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     variants: [
-      { name: "control", weight: 50, config: {} },
-      { name: "variant", weight: 50, config: {} },
+      { name: 'control', weight: 50, config: {} },
+      { name: 'variant', weight: 50, config: {} },
     ],
-    targetMetric: "",
+    targetMetric: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -573,7 +699,9 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
             <Input
               id="name"
               value={config.name}
-              onChange={(e) => setConfig(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setConfig((prev) => ({ ...prev, name: e.target.value }))
+              }
               placeholder="e.g., button-color-test"
               required
             />
@@ -583,7 +711,9 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
             <Input
               id="targetMetric"
               value={config.targetMetric}
-              onChange={(e) => setConfig(prev => ({ ...prev, targetMetric: e.target.value }))}
+              onChange={(e) =>
+                setConfig((prev) => ({ ...prev, targetMetric: e.target.value }))
+              }
               placeholder="e.g., conversion_rate"
               required
             />
@@ -595,7 +725,9 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
           <Textarea
             id="description"
             value={config.description}
-            onChange={(e) => setConfig(prev => ({ ...prev, description: e.target.value }))}
+            onChange={(e) =>
+              setConfig((prev) => ({ ...prev, description: e.target.value }))
+            }
             placeholder="Describe what you're testing..."
           />
         </div>
@@ -603,13 +735,16 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
         <div className="space-y-2">
           <Label>Variants</Label>
           {config.variants.map((variant, index) => (
-            <div key={index} className="grid gap-2 md:grid-cols-3 p-3 border rounded">
+            <div
+              key={index}
+              className="grid gap-2 md:grid-cols-3 p-3 border rounded"
+            >
               <Input
                 value={variant.name}
                 onChange={(e) => {
                   const newVariants = [...config.variants];
                   newVariants[index].name = e.target.value;
-                  setConfig(prev => ({ ...prev, variants: newVariants }));
+                  setConfig((prev) => ({ ...prev, variants: newVariants }));
                 }}
                 placeholder="Variant name"
               />
@@ -619,7 +754,7 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
                 onChange={(e) => {
                   const newVariants = [...config.variants];
                   newVariants[index].weight = parseInt(e.target.value) || 0;
-                  setConfig(prev => ({ ...prev, variants: newVariants }));
+                  setConfig((prev) => ({ ...prev, variants: newVariants }));
                 }}
                 placeholder="Weight %"
                 min="0"
@@ -631,7 +766,7 @@ function CreateExperimentDialog({ onSubmit }: { onSubmit: (config: ABTestConfig)
                   try {
                     const newVariants = [...config.variants];
                     newVariants[index].config = JSON.parse(e.target.value);
-                    setConfig(prev => ({ ...prev, variants: newVariants }));
+                    setConfig((prev) => ({ ...prev, variants: newVariants }));
                   } catch {
                     // Invalid JSON, ignore
                   }

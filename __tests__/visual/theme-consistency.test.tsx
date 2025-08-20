@@ -1,6 +1,6 @@
 /**
  * Visual Regression Tests for Theme Consistency
- * 
+ *
  * Tests to ensure brand colors, typography, spacing, and visual elements
  * remain consistent across all components and states.
  */
@@ -38,21 +38,33 @@ describe('Theme Consistency Visual Tests', () => {
         <div data-testid="brand-green-container">
           <BrandButton variant="primary">Primary Button</BrandButton>
           <StatusIndicator status="approved" text="Approved" />
-          <FormFeedback type="success" title="Success" message="Success message" />
+          <FormFeedback
+            type="success"
+            title="Success"
+            message="Success message"
+          />
           <SmartInput label="Success Input" success="Valid input" />
         </div>
       );
 
       const primaryButton = screen.getByText('Primary Button');
-      const approvedStatus = screen.getByText('Approved').closest('[role="status"]');
-      const successFeedback = screen.getByText('Success').closest('[role="alert"]');
-      const successInput = screen.getByLabelText('Success Input').closest('div');
+      const approvedStatus = screen
+        .getByText('Approved')
+        .closest('[role="status"]');
+      const successFeedback = screen
+        .getByText('Success')
+        .closest('[role="alert"]');
+      const successInput = screen
+        .getByLabelText('Success Input')
+        .closest('div');
 
       // All should use hunks-green color variants
       expect(primaryButton).toHaveClass('bg-hunks-green');
       expect(approvedStatus).toHaveClass('bg-hunks-green');
       expect(successFeedback).toHaveClass('border-hunks-green');
-      expect(successInput?.querySelector('[data-testid="check-icon"]')).toHaveClass('text-hunks-green');
+      expect(
+        successInput?.querySelector('[data-testid="check-icon"]')
+      ).toHaveClass('text-hunks-green');
     });
 
     it('applies College Hunks Orange consistently across secondary elements', () => {
@@ -60,14 +72,22 @@ describe('Theme Consistency Visual Tests', () => {
         <div data-testid="brand-orange-container">
           <BrandButton variant="secondary">Secondary Button</BrandButton>
           <StatusIndicator status="pending" text="Pending" />
-          <FormFeedback type="warning" title="Warning" message="Warning message" />
+          <FormFeedback
+            type="warning"
+            title="Warning"
+            message="Warning message"
+          />
           <SmartInput label="Warning Input" error="Invalid input" />
         </div>
       );
 
       const secondaryButton = screen.getByText('Secondary Button');
-      const pendingStatus = screen.getByText('Pending').closest('[role="status"]');
-      const warningFeedback = screen.getByText('Warning').closest('[role="alert"]');
+      const pendingStatus = screen
+        .getByText('Pending')
+        .closest('[role="status"]');
+      const warningFeedback = screen
+        .getByText('Warning')
+        .closest('[role="alert"]');
 
       // All should use hunks-orange color variants
       expect(secondaryButton).toHaveClass('bg-hunks-orange');
@@ -91,10 +111,15 @@ describe('Theme Consistency Visual Tests', () => {
 
       const outlineButton = screen.getByText('Outline Primary');
       const ghostButton = screen.getByText('Ghost Primary');
-      const metricCard = screen.getByText('Revenue').closest('[data-testid="metric-card"]');
+      const metricCard = screen
+        .getByText('Revenue')
+        .closest('[data-testid="metric-card"]');
 
       // Should use consistent color shades
-      expect(outlineButton).toHaveClass('border-hunks-green', 'text-hunks-green');
+      expect(outlineButton).toHaveClass(
+        'border-hunks-green',
+        'text-hunks-green'
+      );
       expect(ghostButton).toHaveClass('text-hunks-green');
       expect(metricCard).toHaveClass('border-l-hunks-green');
     });
@@ -126,12 +151,12 @@ describe('Theme Consistency Visual Tests', () => {
     it('maintains proper font weight hierarchy', () => {
       render(
         <div data-testid="font-weight-container">
-          <MetricCard
-            title="Revenue"
-            value="$1,234"
-            color="green"
+          <MetricCard title="Revenue" value="$1,234" color="green" />
+          <FormFeedback
+            type="success"
+            title="Success Title"
+            message="Success message"
           />
-          <FormFeedback type="success" title="Success Title" message="Success message" />
         </div>
       );
 
@@ -152,16 +177,14 @@ describe('Theme Consistency Visual Tests', () => {
     it('uses consistent padding across card-like components', () => {
       render(
         <div data-testid="spacing-container">
-          <MetricCard
-            title="Revenue"
-            value="$1,234"
-            color="green"
-          />
+          <MetricCard title="Revenue" value="$1,234" color="green" />
           <FormFeedback type="info" title="Info" message="Info message" />
         </div>
       );
 
-      const metricCard = screen.getByText('Revenue').closest('[data-testid="metric-card"]');
+      const metricCard = screen
+        .getByText('Revenue')
+        .closest('[data-testid="metric-card"]');
       const feedbackCard = screen.getByText('Info').closest('[role="status"]');
 
       // Should use consistent padding
@@ -172,8 +195,8 @@ describe('Theme Consistency Visual Tests', () => {
     it('maintains consistent spacing between elements', () => {
       render(
         <div data-testid="element-spacing-container">
-          <SmartInput 
-            label="Test Input" 
+          <SmartInput
+            label="Test Input"
             hint="This is a hint"
             error="This is an error"
           />
@@ -181,7 +204,7 @@ describe('Theme Consistency Visual Tests', () => {
       );
 
       const inputContainer = screen.getByLabelText('Test Input').closest('div');
-      
+
       // Should have consistent spacing between label, input, hint, and error
       expect(inputContainer).toHaveClass('space-y-2');
     });
@@ -201,7 +224,9 @@ describe('Theme Consistency Visual Tests', () => {
       const button = screen.getByText('Button');
       const status = screen.getByText('Active').closest('[role="status"]');
       const input = screen.getByLabelText('Input');
-      const card = screen.getByText('Card').closest('[data-testid="metric-card"]');
+      const card = screen
+        .getByText('Card')
+        .closest('[data-testid="metric-card"]');
 
       // Should use consistent border radius
       expect(button).toHaveClass('rounded-md');
@@ -218,7 +243,9 @@ describe('Theme Consistency Visual Tests', () => {
         </div>
       );
 
-      const card = screen.getByText('Card').closest('[data-testid="metric-card"]');
+      const card = screen
+        .getByText('Card')
+        .closest('[data-testid="metric-card"]');
       const feedback = screen.getByText('Info').closest('[role="status"]');
 
       // Should use consistent shadow classes
@@ -244,7 +271,10 @@ describe('Theme Consistency Visual Tests', () => {
       // Should have consistent hover state patterns
       expect(primaryButton).toHaveClass('hover:bg-hunks-green-700');
       expect(secondaryButton).toHaveClass('hover:bg-hunks-orange-700');
-      expect(outlineButton).toHaveClass('hover:bg-hunks-green', 'hover:text-white');
+      expect(outlineButton).toHaveClass(
+        'hover:bg-hunks-green',
+        'hover:text-white'
+      );
     });
 
     it('applies consistent focus states for accessibility', () => {
@@ -259,8 +289,14 @@ describe('Theme Consistency Visual Tests', () => {
       const input = screen.getByLabelText('Input');
 
       // Should have consistent focus ring styles
-      expect(button).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-hunks-green/20');
-      expect(input).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-hunks-green/20');
+      expect(button).toHaveClass(
+        'focus-visible:ring-2',
+        'focus-visible:ring-hunks-green/20'
+      );
+      expect(input).toHaveClass(
+        'focus-visible:ring-2',
+        'focus-visible:ring-hunks-green/20'
+      );
     });
 
     it('applies consistent disabled states', () => {
@@ -275,8 +311,14 @@ describe('Theme Consistency Visual Tests', () => {
       const input = screen.getByLabelText('Disabled Input');
 
       // Should have consistent disabled styling
-      expect(button).toHaveClass('disabled:opacity-50', 'disabled:pointer-events-none');
-      expect(input).toHaveClass('disabled:opacity-50', 'disabled:cursor-not-allowed');
+      expect(button).toHaveClass(
+        'disabled:opacity-50',
+        'disabled:pointer-events-none'
+      );
+      expect(input).toHaveClass(
+        'disabled:opacity-50',
+        'disabled:cursor-not-allowed'
+      );
     });
   });
 
@@ -295,9 +337,13 @@ describe('Theme Consistency Visual Tests', () => {
       const loadingInput = screen.getByLabelText('Loading Input').parentElement;
 
       // Should have consistent loading indicators
-      expect(loadingButton.querySelector('[data-testid="loader-icon"]')).toHaveClass('animate-spin');
+      expect(
+        loadingButton.querySelector('[data-testid="loader-icon"]')
+      ).toHaveClass('animate-spin');
       expect(loadingSpinner).toHaveClass('animate-spin');
-      expect(loadingInput?.querySelector('[data-testid="loader-icon"]')).toHaveClass('animate-spin');
+      expect(
+        loadingInput?.querySelector('[data-testid="loader-icon"]')
+      ).toHaveClass('animate-spin');
     });
 
     it('maintains consistent loading state colors', () => {
@@ -328,7 +374,9 @@ describe('Theme Consistency Visual Tests', () => {
       );
 
       const button = screen.getByText('Mobile Button');
-      const card = screen.getByText('Mobile Card').closest('[data-testid="metric-card"]');
+      const card = screen
+        .getByText('Mobile Card')
+        .closest('[data-testid="metric-card"]');
       const input = screen.getByLabelText('Mobile Input');
 
       // Should have mobile-appropriate sizing
@@ -348,10 +396,16 @@ describe('Theme Consistency Visual Tests', () => {
         </div>
       );
 
-      const container = screen.getByTestId('breakpoint-container').firstElementChild;
+      const container = screen.getByTestId(
+        'breakpoint-container'
+      ).firstElementChild;
 
       // Should use consistent grid patterns
-      expect(container).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+      expect(container).toHaveClass(
+        'grid-cols-1',
+        'md:grid-cols-2',
+        'lg:grid-cols-3'
+      );
     });
   });
 
@@ -360,7 +414,7 @@ describe('Theme Consistency Visual Tests', () => {
       // Mock prefers-reduced-motion
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: vi.fn().mockImplementation(query => ({
+        value: vi.fn().mockImplementation((query) => ({
           matches: query === '(prefers-reduced-motion: reduce)',
           media: query,
           onchange: null,
@@ -380,7 +434,9 @@ describe('Theme Consistency Visual Tests', () => {
       );
 
       const spinner = screen.getByTestId('loader-icon');
-      const animatedStatus = screen.getByText('Processing').closest('[role="status"]');
+      const animatedStatus = screen
+        .getByText('Processing')
+        .closest('[role="status"]');
 
       // Should respect motion preferences
       expect(spinner).toHaveClass('animate-spin');
@@ -417,7 +473,9 @@ describe('Theme Consistency Visual Tests', () => {
       );
 
       const buttonIcon = screen.getByTestId('button-icon');
-      const statusIcon = screen.getByText('Active').parentElement?.querySelector('svg, div');
+      const statusIcon = screen
+        .getByText('Active')
+        .parentElement?.querySelector('svg, div');
       const inputIcon = screen.getByTestId('check-icon');
 
       // Should use consistent icon sizing
@@ -434,9 +492,15 @@ describe('Theme Consistency Visual Tests', () => {
         </div>
       );
 
-      const approvedStatus = screen.getByText('Approved').closest('[role="status"]');
-      const pendingStatus = screen.getByText('Pending').closest('[role="status"]');
-      const rejectedStatus = screen.getByText('Rejected').closest('[role="status"]');
+      const approvedStatus = screen
+        .getByText('Approved')
+        .closest('[role="status"]');
+      const pendingStatus = screen
+        .getByText('Pending')
+        .closest('[role="status"]');
+      const rejectedStatus = screen
+        .getByText('Rejected')
+        .closest('[role="status"]');
 
       // Should use brand-consistent icon colors
       expect(approvedStatus).toHaveClass('text-hunks-green');
@@ -458,7 +522,9 @@ describe('Theme Consistency Visual Tests', () => {
       );
 
       const button = screen.getByText('Dark Mode Button');
-      const card = screen.getByText('Dark Mode Card').closest('[data-testid="metric-card"]');
+      const card = screen
+        .getByText('Dark Mode Card')
+        .closest('[data-testid="metric-card"]');
 
       // Should maintain brand colors in dark mode
       expect(button).toHaveClass('bg-hunks-green');

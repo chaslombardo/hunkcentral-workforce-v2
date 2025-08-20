@@ -27,7 +27,10 @@ export interface ProductionAuthActions {
   hasAnyRole: (roles: UserRole[]) => boolean;
   refreshSession: () => Promise<boolean>;
   recoverSession: () => Promise<boolean>;
-  handleAuthError: (error: Error | string, context?: Record<string, unknown>) => void;
+  handleAuthError: (
+    error: Error | string,
+    context?: Record<string, unknown>
+  ) => void;
   signOutSafely: () => Promise<void>;
   validateSession: () => Promise<boolean>;
 }
@@ -36,11 +39,12 @@ const MAX_RETRY_ATTEMPTS = 3;
 const VALIDATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const RECOVERY_TIMEOUT = 10000; // 10 seconds
 
-export function useProductionAuth(): ProductionAuthState & ProductionAuthActions {
+export function useProductionAuth(): ProductionAuthState &
+  ProductionAuthActions {
   const { data: session, status, update } = useNextAuthSession();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   const [state, setState] = useState<ProductionAuthState>({
     user: null,
     isAuthenticated: false,
@@ -56,112 +60,125 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
   const recoveryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Validate session structure and integrity
-  const validateSessionData = useCallback((sessionData: any): { 
-    isValid: boolean; 
-    user: SessionUser | null; 
-    error?: string;
-    errorCode?: string;
-  } => {
-    if (!sessionData?.user) {
-      return { 
-        isValid: false, 
-        user: null, 
-        error: 'No session data',
-        errorCode: 'NO_SESSION'
-      };
-    }
+  const validateSessionData = useCallback(
+    (
+      sessionData: any
+    ): {
+      isValid: boolean;
+      user: SessionUser | null;
+      error?: string;
+      errorCode?: string;
+    } => {
+      if (!sessionData?.user) {
+        return {
+          isValid: false,
+          user: null,
+          error: 'No session data',
+          errorCode: 'NO_SESSION',
+        };
+      }
 
-    const user = sessionData.user as SessionUser;
+      const user = sessionData.user as SessionUser;
 
-    // Validate required fields
-    if (!user.id || !user.email || !user.roles) {
-      return { 
-        isValid: false, 
-        user: null, 
-        error: 'Invalid session structure',
-        errorCode: 'INVALID_SESSION_STRUCTURE'
-      };
-    }
+      // Validate required fields
+      if (!user.id || !user.email || !user.roles) {
+        return {
+          isValid: false,
+          user: null,
+          error: 'Invalid session structure',
+          errorCode: 'INVALID_SESSION_STRUCTURE',
+        };
+      }
 
-    // Validate roles array
-    if (!Array.isArray(user.roles) || user.roles.length === 0) {
-      return { 
-        isValid: false, 
-        user: null, 
-        error: 'Invalid user roles',
-        errorCode: 'INVALID_ROLES'
-      };
-    }
+      // Validate roles array
+      if (!Array.isArray(user.roles) || user.roles.length === 0) {
+        return {
+          isValid: false,
+          user: null,
+          error: 'Invalid user roles',
+          errorCode: 'INVALID_ROLES',
+        };
+      }
 
-    return { isValid: true, user };
-  }, []);
+      return { isValid: true, user };
+    },
+    []
+  );
 
   // Handle authentication errors with context logging
-  const handleAuthError = useCallback((
-    error: Error | string, 
-    context: Record<string, unknown> = {}
-  ) => {
-    const errorMessage = error instanceof Error ? error.message : error;
-    const errorCode = context.errorCode as string || 'UNKNOWN_ERROR';
-    
-    console.error('Production Auth Error:', {
-      message: errorMessage,
-      code: errorCode,
-      context,
-      timestamp: new Date().toISOString(),
-      pathname,
-      sessionStatus: status,
-    });
+  const handleAuthError = useCallback(
+    (error: Error | string, context: Record<string, unknown> = {}) => {
+      const errorMessage = error instanceof Error ? error.message : error;
+      const errorCode = (context.errorCode as string) || 'UNKNOWN_ERROR';
 
-    setState(prev => ({
-      ...prev,
-      error: errorMessage,
-      errorCode,
-      isAuthenticated: false,
-      user: null,
-    }));
-
-    // Send error to monitoring (in production)
-    if (process.env.NODE_ENV === 'production') {
-      // This would integrate with your error monitoring service
-      fetch('/api/errors/client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          error: errorMessage,
-          code: errorCode,
-          context: {
-            ...context,
-            pathname,
-            sessionStatus: status,
-            timestamp: new Date().toISOString(),
-          },
-        }),
-      }).catch(() => {
-        // Silently fail if error reporting fails
+      console.error('Production Auth Error:', {
+        message: errorMessage,
+        code: errorCode,
+        context,
+        timestamp: new Date().toISOString(),
+        pathname,
+        sessionStatus: status,
       });
-    }
-  }, [pathname, status]);
+
+      setState((prev) => ({
+        ...prev,
+        error: errorMessage,
+        errorCode,
+        isAuthenticated: false,
+        user: null,
+      }));
+
+      // Send error to monitoring (in production)
+      if (process.env.NODE_ENV === 'production') {
+        // This would integrate with your error monitoring service
+        fetch('/api/errors/client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: errorMessage,
+            code: errorCode,
+            context: {
+              ...context,
+              pathname,
+              sessionStatus: status,
+              timestamp: new Date().toISOString(),
+            },
+          }),
+        }).catch(() => {
+          // Silently fail if error reporting fails
+        });
+      }
+    },
+    [pathname, status]
+  );
 
   // Refresh session with retry logic
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null, errorCode: null }));
-      
+      setState((prev) => ({
+        ...prev,
+        isLoading: true,
+        error: null,
+        errorCode: null,
+      }));
+
       await update();
-      
+
       // Wait for session to update
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       return true;
     } catch (error) {
-      handleAuthError(error instanceof Error ? error : new Error(String(error)), {
-        action: 'refresh_session',
-        errorCode: 'REFRESH_FAILED'
-      });
+      handleAuthError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          action: 'refresh_session',
+          errorCode: 'REFRESH_FAILED',
+        }
+      );
       return false;
     } finally {
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     }
   }, [update, handleAuthError]);
 
@@ -171,13 +188,18 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
       return false;
     }
 
-    setState(prev => ({ ...prev, isRecovering: true, error: null, errorCode: null }));
+    setState((prev) => ({
+      ...prev,
+      isRecovering: true,
+      error: null,
+      errorCode: null,
+    }));
 
     try {
       // Strategy 1: Try to refresh the current session
       const refreshSuccess = await refreshSession();
       if (refreshSuccess) {
-        setState(prev => ({ ...prev, isRecovering: false, retryCount: 0 }));
+        setState((prev) => ({ ...prev, isRecovering: false, retryCount: 0 }));
         return true;
       }
 
@@ -187,16 +209,16 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
+          Pragma: 'no-cache',
         },
       });
 
       if (response.ok) {
         const sessionData = await response.json();
         const validation = validateSessionData(sessionData);
-        
+
         if (validation.isValid && validation.user) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             user: validation.user,
             isAuthenticated: true,
@@ -212,11 +234,13 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
 
       // Strategy 3: Force a page reload as last resort
       if (state.retryCount < MAX_RETRY_ATTEMPTS) {
-        setState(prev => ({ ...prev, retryCount: prev.retryCount + 1 }));
-        
+        setState((prev) => ({ ...prev, retryCount: prev.retryCount + 1 }));
+
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, state.retryCount)));
-        
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * Math.pow(2, state.retryCount))
+        );
+
         return recoverSession();
       }
 
@@ -229,15 +253,24 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
 
       return false;
     } catch (error) {
-      handleAuthError(error instanceof Error ? error : new Error(String(error)), {
-        action: 'recover_session',
-        errorCode: 'RECOVERY_ERROR'
-      });
+      handleAuthError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          action: 'recover_session',
+          errorCode: 'RECOVERY_ERROR',
+        }
+      );
       return false;
     } finally {
-      setState(prev => ({ ...prev, isRecovering: false }));
+      setState((prev) => ({ ...prev, isRecovering: false }));
     }
-  }, [state.isRecovering, state.retryCount, refreshSession, validateSessionData, handleAuthError]);
+  }, [
+    state.isRecovering,
+    state.retryCount,
+    refreshSession,
+    validateSessionData,
+    handleAuthError,
+  ]);
 
   // Validate current session
   const validateSession = useCallback(async (): Promise<boolean> => {
@@ -246,18 +279,18 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
     }
 
     const validation = validateSessionData(session);
-    
+
     if (!validation.isValid) {
       handleAuthError(validation.error || 'Session validation failed', {
         action: 'validate_session',
-        errorCode: validation.errorCode || 'VALIDATION_FAILED'
+        errorCode: validation.errorCode || 'VALIDATION_FAILED',
       });
-      
+
       // Attempt recovery
       return recoverSession();
     }
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       user: validation.user,
       isAuthenticated: true,
@@ -272,41 +305,50 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
   // Safe sign out with error handling
   const signOutSafely = useCallback(async (): Promise<void> => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
-      
-      await signOut({ 
+      setState((prev) => ({ ...prev, isLoading: true }));
+
+      await signOut({
         callbackUrl: '/auth/login',
-        redirect: true 
+        redirect: true,
       });
     } catch (error) {
-      handleAuthError(error instanceof Error ? error : new Error(String(error)), {
-        action: 'sign_out',
-        errorCode: 'SIGNOUT_FAILED'
-      });
-      
+      handleAuthError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          action: 'sign_out',
+          errorCode: 'SIGNOUT_FAILED',
+        }
+      );
+
       // Force redirect if signOut fails
       window.location.href = '/auth/login';
     }
   }, [handleAuthError]);
 
   // Role checking utilities
-  const hasRole = useCallback((role: UserRole): boolean => {
-    return state.user?.roles?.includes(role) ?? false;
-  }, [state.user]);
+  const hasRole = useCallback(
+    (role: UserRole): boolean => {
+      return state.user?.roles?.includes(role) ?? false;
+    },
+    [state.user]
+  );
 
-  const hasAnyRole = useCallback((roles: UserRole[]): boolean => {
-    return roles.some(role => hasRole(role));
-  }, [hasRole]);
+  const hasAnyRole = useCallback(
+    (roles: UserRole[]): boolean => {
+      return roles.some((role) => hasRole(role));
+    },
+    [hasRole]
+  );
 
   // Handle session changes
   useEffect(() => {
     if (status === 'loading') {
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: true }));
       return;
     }
 
     if (status === 'unauthenticated') {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         user: null,
         isAuthenticated: false,
@@ -319,7 +361,7 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
 
     if (status === 'authenticated') {
       validateSession();
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     }
   }, [status, validateSession]);
 
@@ -342,10 +384,10 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
   useEffect(() => {
     if (state.isRecovering) {
       recoveryTimeoutRef.current = setTimeout(() => {
-        setState(prev => ({ ...prev, isRecovering: false }));
+        setState((prev) => ({ ...prev, isRecovering: false }));
         handleAuthError('Session recovery timed out', {
           action: 'recovery_timeout',
-          errorCode: 'RECOVERY_TIMEOUT'
+          errorCode: 'RECOVERY_TIMEOUT',
         });
       }, RECOVERY_TIMEOUT);
     }
@@ -359,22 +401,35 @@ export function useProductionAuth(): ProductionAuthState & ProductionAuthActions
 
   // Auto-recovery on authentication errors
   useEffect(() => {
-    if (state.error && !state.isRecovering && state.retryCount < MAX_RETRY_ATTEMPTS) {
+    if (
+      state.error &&
+      !state.isRecovering &&
+      state.retryCount < MAX_RETRY_ATTEMPTS
+    ) {
       const shouldAutoRecover = [
         'INVALID_SESSION_STRUCTURE',
         'REFRESH_FAILED',
-        'VALIDATION_FAILED'
+        'VALIDATION_FAILED',
       ].includes(state.errorCode || '');
 
       if (shouldAutoRecover) {
-        const timeout = setTimeout(() => {
-          recoverSession();
-        }, 1000 * Math.pow(2, state.retryCount)); // Exponential backoff
+        const timeout = setTimeout(
+          () => {
+            recoverSession();
+          },
+          1000 * Math.pow(2, state.retryCount)
+        ); // Exponential backoff
 
         return () => clearTimeout(timeout);
       }
     }
-  }, [state.error, state.errorCode, state.isRecovering, state.retryCount, recoverSession]);
+  }, [
+    state.error,
+    state.errorCode,
+    state.isRecovering,
+    state.retryCount,
+    recoverSession,
+  ]);
 
   return {
     ...state,

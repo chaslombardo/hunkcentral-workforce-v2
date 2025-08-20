@@ -36,13 +36,13 @@ export interface WorkPatternStats {
 export async function getDailyWorkBreakdown(
   employeeId: string,
   payPeriodId: string
-): Promise<{ 
-  success: boolean; 
+): Promise<{
+  success: boolean;
   data?: {
     workEntries: DailyWorkEntry[];
     workPatternStats: WorkPatternStats;
-  }; 
-  error?: string 
+  };
+  error?: string;
 }> {
   try {
     const session = await getSession();
@@ -51,8 +51,10 @@ export async function getDailyWorkBreakdown(
     }
 
     // Check if user can access this payroll data
-    if (session.user.id !== employeeId && 
-        !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
+    if (
+      session.user.id !== employeeId &&
+      !session.user.roles?.some((role) => ['admin', 'manager'].includes(role))
+    ) {
       throw new Error('Unauthorized: Can only view your own payroll data');
     }
 
@@ -122,12 +124,12 @@ export async function getDailyWorkBreakdown(
     });
 
     // Process work entries
-    const workEntries: DailyWorkEntry[] = approvedLogs.map(log => {
-      const departments = log.hours.map(hour => {
+    const workEntries: DailyWorkEntry[] = approvedLogs.map((log) => {
+      const departments = log.hours.map((hour) => {
         const department = hour.department as Department;
         const isCaptain = log.captainId === employeeId;
         const isCoCaptain = hour.isCoCaptain;
-        
+
         let role: 'captain' | 'co-captain' | 'wingman' = 'wingman';
         if (isCaptain) role = 'captain';
         else if (isCoCaptain) role = 'co-captain';
@@ -136,14 +138,16 @@ export async function getDailyWorkBreakdown(
         let rate = 0;
         switch (department) {
           case 'junk':
-            rate = (isCaptain || isCoCaptain) 
-              ? Number(employee.rateJunkCaptain || 0)
-              : Number(employee.rateJunkWingman || 0);
+            rate =
+              isCaptain || isCoCaptain
+                ? Number(employee.rateJunkCaptain || 0)
+                : Number(employee.rateJunkWingman || 0);
             break;
           case 'move':
-            rate = (isCaptain || isCoCaptain)
-              ? Number(employee.rateMoveCaptain || 0)
-              : Number(employee.rateMoveWingman || 0);
+            rate =
+              isCaptain || isCoCaptain
+                ? Number(employee.rateMoveCaptain || 0)
+                : Number(employee.rateMoveWingman || 0);
             break;
           case 'zigma':
             rate = Number(employee.rateZigma || 0);
@@ -171,31 +175,54 @@ export async function getDailyWorkBreakdown(
       });
 
       const totalHours = departments.reduce((sum, dept) => sum + dept.hours, 0);
-      const grossPay = departments.reduce((sum, dept) => sum + (dept.hours * dept.rate), 0);
+      const grossPay = departments.reduce(
+        (sum, dept) => sum + dept.hours * dept.rate,
+        0
+      );
 
       // Calculate tips for this employee on this day
       let tips = 0;
-      const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-      const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+      const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+      const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
 
       // Get all employees who worked each section to calculate tip sharing
       const allHours = log.hours || [];
-      const junkEmployees = [...new Set(allHours
-        .filter(h => h.department === 'junk')
-        .map(h => h.employeeId))];
-      const moveEmployees = [...new Set(allHours
-        .filter(h => h.department === 'move')
-        .map(h => h.employeeId))];
+      const junkEmployees = [
+        ...new Set(
+          allHours
+            .filter((h) => h.department === 'junk')
+            .map((h) => h.employeeId)
+        ),
+      ];
+      const moveEmployees = [
+        ...new Set(
+          allHours
+            .filter((h) => h.department === 'move')
+            .map((h) => h.employeeId)
+        ),
+      ];
 
       // Calculate junk tips
-      if (departments.some(d => d.department === 'junk') && junkEmployees.length > 0) {
-        const junkTips = junkJobs.reduce((sum, job) => sum + Number(job.tips), 0);
+      if (
+        departments.some((d) => d.department === 'junk') &&
+        junkEmployees.length > 0
+      ) {
+        const junkTips = junkJobs.reduce(
+          (sum, job) => sum + Number(job.tips),
+          0
+        );
         tips += junkTips / junkEmployees.length;
       }
 
       // Calculate move tips
-      if (departments.some(d => d.department === 'move') && moveEmployees.length > 0) {
-        const moveTips = moveJobs.reduce((sum, job) => sum + Number(job.tips), 0);
+      if (
+        departments.some((d) => d.department === 'move') &&
+        moveEmployees.length > 0
+      ) {
+        const moveTips = moveJobs.reduce(
+          (sum, job) => sum + Number(job.tips),
+          0
+        );
         tips += moveTips / moveEmployees.length;
       }
 
@@ -212,33 +239,49 @@ export async function getDailyWorkBreakdown(
 
     // Calculate work pattern statistics
     const totalDaysWorked = workEntries.length;
-    const totalHours = workEntries.reduce((sum, entry) => sum + entry.totalHours, 0);
+    const totalHours = workEntries.reduce(
+      (sum, entry) => sum + entry.totalHours,
+      0
+    );
     const totalTips = workEntries.reduce((sum, entry) => sum + entry.tips, 0);
-    const totalJobs = workEntries.reduce((sum, entry) => sum + entry.jobsCompleted, 0);
+    const totalJobs = workEntries.reduce(
+      (sum, entry) => sum + entry.jobsCompleted,
+      0
+    );
 
-    const avgHoursPerDay = totalDaysWorked > 0 ? totalHours / totalDaysWorked : 0;
+    const avgHoursPerDay =
+      totalDaysWorked > 0 ? totalHours / totalDaysWorked : 0;
     const avgTipsPerDay = totalDaysWorked > 0 ? totalTips / totalDaysWorked : 0;
 
     // Find most common department
     const departmentHours: Record<string, number> = {};
-    workEntries.forEach(entry => {
-      entry.departments.forEach(dept => {
-        departmentHours[dept.department] = (departmentHours[dept.department] || 0) + dept.hours;
+    workEntries.forEach((entry) => {
+      entry.departments.forEach((dept) => {
+        departmentHours[dept.department] =
+          (departmentHours[dept.department] || 0) + dept.hours;
       });
     });
-    
-    const mostCommonDepartment = Object.entries(departmentHours)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] as Department || 'admin';
+
+    const mostCommonDepartment =
+      (Object.entries(departmentHours).sort(
+        ([, a], [, b]) => b - a
+      )[0]?.[0] as Department) || 'admin';
 
     // Find notable days
-    const busiestDay = workEntries.reduce((max, entry) => 
-      entry.totalHours > max.totalHours ? entry : max, workEntries[0] || { totalHours: 0, date: new Date() });
-    
-    const highestTipDay = workEntries.reduce((max, entry) => 
-      entry.tips > max.tips ? entry : max, workEntries[0] || { tips: 0, date: new Date() });
-    
-    const highestPayDay = workEntries.reduce((max, entry) => 
-      entry.grossPay > max.grossPay ? entry : max, workEntries[0] || { grossPay: 0, date: new Date() });
+    const busiestDay = workEntries.reduce(
+      (max, entry) => (entry.totalHours > max.totalHours ? entry : max),
+      workEntries[0] || { totalHours: 0, date: new Date() }
+    );
+
+    const highestTipDay = workEntries.reduce(
+      (max, entry) => (entry.tips > max.tips ? entry : max),
+      workEntries[0] || { tips: 0, date: new Date() }
+    );
+
+    const highestPayDay = workEntries.reduce(
+      (max, entry) => (entry.grossPay > max.grossPay ? entry : max),
+      workEntries[0] || { grossPay: 0, date: new Date() }
+    );
 
     const workPatternStats: WorkPatternStats = {
       totalDaysWorked,
@@ -262,7 +305,10 @@ export async function getDailyWorkBreakdown(
     // Error fetching daily work breakdown
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch daily work breakdown',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch daily work breakdown',
     };
   }
 }

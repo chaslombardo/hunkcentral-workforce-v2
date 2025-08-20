@@ -1,8 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { SmartInput, commonValidationRules, ValidationRule } from './smart-input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  SmartInput,
+  commonValidationRules,
+  ValidationRule,
+} from './smart-input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,24 +27,26 @@ export function SmartInputDemo() {
     username: '',
   });
 
-  const [validationStates, setValidationStates] = React.useState<Record<string, boolean>>({});
+  const [validationStates, setValidationStates] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const handleValueChange = (field: string) => (value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleValidationChange = (field: string) => (isValid: boolean) => {
-    setValidationStates(prev => ({ ...prev, [field]: isValid }));
+    setValidationStates((prev) => ({ ...prev, [field]: isValid }));
   };
 
   // Custom async validation rule for username availability
   const usernameAvailabilityRule: ValidationRule = {
     test: async (value) => {
       if (value.length < 3) return true; // Don't check short usernames
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Simulate some usernames being taken
       const takenUsernames = ['admin', 'user', 'test', 'demo'];
       return !takenUsernames.includes(value.toLowerCase());
@@ -59,7 +71,8 @@ export function SmartInputDemo() {
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">SmartInput Component Demo</h1>
         <p className="text-muted-foreground">
-          Interactive form inputs with progressive validation, real-time feedback, and accessibility features
+          Interactive form inputs with progressive validation, real-time
+          feedback, and accessibility features
         </p>
       </div>
 
@@ -167,7 +180,8 @@ export function SmartInputDemo() {
             <CardHeader>
               <CardTitle>Progressive Validation</CardTitle>
               <CardDescription>
-                Validation that appears progressively as the user interacts with the form
+                Validation that appears progressively as the user interacts with
+                the form
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -229,7 +243,8 @@ export function SmartInputDemo() {
             <CardHeader>
               <CardTitle>Advanced Features</CardTitle>
               <CardDescription>
-                Advanced input features including accessibility and custom validation
+                Advanced input features including accessibility and custom
+                validation
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -276,21 +291,20 @@ export function SmartInputDemo() {
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h4 className="text-sm font-medium">Form Validation Status</h4>
+                    <h4 className="text-sm font-medium">
+                      Form Validation Status
+                    </h4>
                     <p className="text-sm text-muted-foreground">
                       Overall form validation state
                     </p>
                   </div>
-                  <Badge variant={isFormValid ? "default" : "destructive"}>
-                    {isFormValid ? "Valid" : "Invalid"}
+                  <Badge variant={isFormValid ? 'default' : 'destructive'}>
+                    {isFormValid ? 'Valid' : 'Invalid'}
                   </Badge>
                 </div>
-                
+
                 <div className="mt-4">
-                  <Button 
-                    disabled={!isFormValid}
-                    className="w-full"
-                  >
+                  <Button disabled={!isFormValid} className="w-full">
                     Submit Form
                   </Button>
                 </div>
@@ -310,23 +324,33 @@ export function SmartInputDemo() {
         <CardContent>
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">ARIA</Badge>
+              <Badge variant="outline" className="text-xs">
+                ARIA
+              </Badge>
               Proper ARIA labels, descriptions, and invalid states
             </li>
             <li className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">Keyboard</Badge>
+              <Badge variant="outline" className="text-xs">
+                Keyboard
+              </Badge>
               Full keyboard navigation support
             </li>
             <li className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">Screen Reader</Badge>
+              <Badge variant="outline" className="text-xs">
+                Screen Reader
+              </Badge>
               Descriptive text for screen reader users
             </li>
             <li className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">Focus</Badge>
+              <Badge variant="outline" className="text-xs">
+                Focus
+              </Badge>
               Clear focus indicators and management
             </li>
             <li className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">Color</Badge>
+              <Badge variant="outline" className="text-xs">
+                Color
+              </Badge>
               Color-blind friendly with icons and text
             </li>
           </ul>

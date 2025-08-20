@@ -1,20 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { 
-  AlertTriangle, 
-  Bug, 
-  Database, 
-  Shield, 
-  Server, 
-  Smartphone, 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  AlertTriangle,
+  Bug,
+  Database,
+  Shield,
+  Server,
+  Smartphone,
   ChevronDown,
   RefreshCw,
   CheckCircle,
@@ -51,10 +68,14 @@ export function ErrorMonitoringDashboard({
   onResolveError,
 }: ErrorMonitoringDashboardProps) {
   const [selectedError, setSelectedError] = useState<ErrorReport | null>(null);
-  const [filter, setFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low' | 'unresolved'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | ErrorReport['type']>('all');
+  const [filter, setFilter] = useState<
+    'all' | 'critical' | 'high' | 'medium' | 'low' | 'unresolved'
+  >('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | ErrorReport['type']>(
+    'all'
+  );
 
-  const filteredErrors = errors.filter(error => {
+  const filteredErrors = errors.filter((error) => {
     if (filter !== 'all') {
       if (filter === 'unresolved' && error.resolved) return false;
       if (filter !== 'unresolved' && error.level !== filter) return false;
@@ -65,22 +86,33 @@ export function ErrorMonitoringDashboard({
 
   const getLevelColor = (level: ErrorReport['level']) => {
     switch (level) {
-      case 'critical': return 'destructive';
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
-      default: return 'outline';
+      case 'critical':
+        return 'destructive';
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'default';
+      case 'low':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
   const getTypeIcon = (type: ErrorReport['type']) => {
     switch (type) {
-      case 'database': return <Database className="h-4 w-4" />;
-      case 'auth': return <Shield className="h-4 w-4" />;
-      case 'server': return <Server className="h-4 w-4" />;
-      case 'client': return <Smartphone className="h-4 w-4" />;
-      case 'component': return <Bug className="h-4 w-4" />;
-      default: return <AlertTriangle className="h-4 w-4" />;
+      case 'database':
+        return <Database className="h-4 w-4" />;
+      case 'auth':
+        return <Shield className="h-4 w-4" />;
+      case 'server':
+        return <Server className="h-4 w-4" />;
+      case 'client':
+        return <Smartphone className="h-4 w-4" />;
+      case 'component':
+        return <Bug className="h-4 w-4" />;
+      default:
+        return <AlertTriangle className="h-4 w-4" />;
     }
   };
 
@@ -102,18 +134,23 @@ export function ErrorMonitoringDashboard({
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.resolved} resolved ({Math.round((stats.resolved / stats.total) * 100)}%)
+              {stats.resolved} resolved (
+              {Math.round((stats.resolved / stats.total) * 100)}%)
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Critical Errors</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Critical Errors
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{stats.critical}</div>
+            <div className="text-2xl font-bold text-destructive">
+              {stats.critical}
+            </div>
             <p className="text-xs text-muted-foreground">
               Require immediate attention
             </p>
@@ -126,7 +163,9 @@ export function ErrorMonitoringDashboard({
             <XCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">{stats.high}</div>
+            <div className="text-2xl font-bold text-orange-500">
+              {stats.high}
+            </div>
             <p className="text-xs text-muted-foreground">
               Need prompt resolution
             </p>
@@ -135,7 +174,9 @@ export function ErrorMonitoringDashboard({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolution Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Resolution Rate
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -166,26 +207,49 @@ export function ErrorMonitoringDashboard({
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
             <div className="flex gap-1">
-              {(['all', 'critical', 'high', 'medium', 'low', 'unresolved'] as const).map((level) => (
+              {(
+                [
+                  'all',
+                  'critical',
+                  'high',
+                  'medium',
+                  'low',
+                  'unresolved',
+                ] as const
+              ).map((level) => (
                 <Button
                   key={level}
                   variant={filter === level ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setFilter(level)}
                 >
-                  {level === 'all' ? 'All' : level.charAt(0).toUpperCase() + level.slice(1)}
+                  {level === 'all'
+                    ? 'All'
+                    : level.charAt(0).toUpperCase() + level.slice(1)}
                 </Button>
               ))}
             </div>
             <div className="flex gap-1">
-              {(['all', 'client', 'server', 'database', 'auth', 'component', 'network'] as const).map((type) => (
+              {(
+                [
+                  'all',
+                  'client',
+                  'server',
+                  'database',
+                  'auth',
+                  'component',
+                  'network',
+                ] as const
+              ).map((type) => (
                 <Button
                   key={type}
                   variant={typeFilter === type ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setTypeFilter(type)}
                 >
-                  {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type === 'all'
+                    ? 'All Types'
+                    : type.charAt(0).toUpperCase() + type.slice(1)}
                 </Button>
               ))}
             </div>
@@ -242,9 +306,7 @@ export function ErrorMonitoringDashboard({
                             Resolved
                           </Badge>
                         ) : (
-                          <Badge variant="destructive">
-                            Open
-                          </Badge>
+                          <Badge variant="destructive">Open</Badge>
                         )}
                       </TableCell>
                     </TableRow>
@@ -265,7 +327,10 @@ export function ErrorMonitoringDashboard({
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(stats.byType).map(([type, count]) => (
-                    <div key={type} className="flex items-center justify-between">
+                    <div
+                      key={type}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
                         {getTypeIcon(type as ErrorReport['type'])}
                         <span className="capitalize">{type}</span>
@@ -288,7 +353,10 @@ export function ErrorMonitoringDashboard({
                     .sort(([, a], [, b]) => b - a)
                     .slice(0, 10)
                     .map(([component, count]) => (
-                      <div key={component} className="flex items-center justify-between">
+                      <div
+                        key={component}
+                        className="flex items-center justify-between"
+                      >
                         <span className="truncate">{component}</span>
                         <Badge variant="outline">{count}</Badge>
                       </div>
@@ -320,28 +388,47 @@ export function ErrorMonitoringDashboard({
                 Close
               </Button>
             </div>
-            <CardDescription>
-              Error ID: {selectedError.id}
-            </CardDescription>
+            <CardDescription>Error ID: {selectedError.id}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold mb-2">Basic Information</h4>
                 <div className="space-y-2 text-sm">
-                  <div><strong>Type:</strong> {selectedError.type}</div>
-                  <div><strong>Component:</strong> {selectedError.context.component}</div>
-                  <div><strong>Action:</strong> {selectedError.context.action}</div>
-                  <div><strong>Timestamp:</strong> {new Date(selectedError.timestamp).toLocaleString()}</div>
-                  <div><strong>Environment:</strong> {selectedError.context.environment}</div>
+                  <div>
+                    <strong>Type:</strong> {selectedError.type}
+                  </div>
+                  <div>
+                    <strong>Component:</strong>{' '}
+                    {selectedError.context.component}
+                  </div>
+                  <div>
+                    <strong>Action:</strong> {selectedError.context.action}
+                  </div>
+                  <div>
+                    <strong>Timestamp:</strong>{' '}
+                    {new Date(selectedError.timestamp).toLocaleString()}
+                  </div>
+                  <div>
+                    <strong>Environment:</strong>{' '}
+                    {selectedError.context.environment}
+                  </div>
                 </div>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Context</h4>
                 <div className="space-y-2 text-sm">
-                  <div><strong>URL:</strong> {selectedError.context.url}</div>
-                  <div><strong>User ID:</strong> {selectedError.context.userId || 'Anonymous'}</div>
-                  <div><strong>User Agent:</strong> {selectedError.context.userAgent || 'Unknown'}</div>
+                  <div>
+                    <strong>URL:</strong> {selectedError.context.url}
+                  </div>
+                  <div>
+                    <strong>User ID:</strong>{' '}
+                    {selectedError.context.userId || 'Anonymous'}
+                  </div>
+                  <div>
+                    <strong>User Agent:</strong>{' '}
+                    {selectedError.context.userAgent || 'Unknown'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -364,7 +451,9 @@ export function ErrorMonitoringDashboard({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-2">
                   <div className="text-xs font-mono bg-muted p-4 rounded border max-h-60 overflow-y-auto">
-                    <pre className="whitespace-pre-wrap">{selectedError.stack}</pre>
+                    <pre className="whitespace-pre-wrap">
+                      {selectedError.stack}
+                    </pre>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -392,7 +481,10 @@ export function ErrorMonitoringDashboard({
               <div className="flex gap-2">
                 <Button
                   onClick={() => {
-                    onResolveError(selectedError.id, 'Manually resolved by admin');
+                    onResolveError(
+                      selectedError.id,
+                      'Manually resolved by admin'
+                    );
                     setSelectedError(null);
                   }}
                   className="flex-1"
@@ -407,9 +499,20 @@ export function ErrorMonitoringDashboard({
                 <h4 className="font-semibold mb-2">Resolution</h4>
                 <div className="bg-green-50 border border-green-200 rounded p-3">
                   <div className="text-sm">
-                    <div><strong>Resolved by:</strong> {selectedError.resolution.resolvedBy}</div>
-                    <div><strong>Resolved at:</strong> {new Date(selectedError.resolution.resolvedAt).toLocaleString()}</div>
-                    <div><strong>Resolution:</strong> {selectedError.resolution.resolution}</div>
+                    <div>
+                      <strong>Resolved by:</strong>{' '}
+                      {selectedError.resolution.resolvedBy}
+                    </div>
+                    <div>
+                      <strong>Resolved at:</strong>{' '}
+                      {new Date(
+                        selectedError.resolution.resolvedAt
+                      ).toLocaleString()}
+                    </div>
+                    <div>
+                      <strong>Resolution:</strong>{' '}
+                      {selectedError.resolution.resolution}
+                    </div>
                   </div>
                 </div>
               </div>

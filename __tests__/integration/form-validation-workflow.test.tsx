@@ -2,25 +2,61 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input';
-import { FormFeedback, useFormFeedback } from '@/components/forms/form-feedback';
-import { MobileFormValidation, useMobileFormValidation, mobileValidationRules } from '@/components/forms/mobile-form-validation';
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
+import {
+  FormFeedback,
+  useFormFeedback,
+} from '@/components/forms/form-feedback';
+import {
+  MobileFormValidation,
+  useMobileFormValidation,
+  mobileValidationRules,
+} from '@/components/forms/mobile-form-validation';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
 }));
 
 // Mock InlineSuccessCheck component
@@ -56,17 +92,25 @@ describe('Form Validation Workflow Integration Tests', () => {
         confirmPassword: '',
       });
 
-      const [fieldValidation, setFieldValidation] = React.useState<Record<string, boolean>>({});
-      const { feedback, showSuccess, showError, clearFeedback } = useFormFeedback();
-      const { errors, addError, removeError, clearErrors, hasErrors } = useMobileFormValidation();
+      const [fieldValidation, setFieldValidation] = React.useState<
+        Record<string, boolean>
+      >({});
+      const { feedback, showSuccess, showError, clearFeedback } =
+        useFormFeedback();
+      const { errors, addError, removeError, clearErrors, hasErrors } =
+        useMobileFormValidation();
 
       const handleFieldChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
       };
 
-      const handleFieldValidation = (field: string, isValid: boolean, fieldErrors: string[]) => {
-        setFieldValidation(prev => ({ ...prev, [field]: isValid }));
-        
+      const handleFieldValidation = (
+        field: string,
+        isValid: boolean,
+        fieldErrors: string[]
+      ) => {
+        setFieldValidation((prev) => ({ ...prev, [field]: isValid }));
+
         if (!isValid && fieldErrors.length > 0) {
           addError({
             field,
@@ -84,12 +128,15 @@ describe('Form Validation Workflow Integration Tests', () => {
 
         // Validate all fields
         const allFieldsValid = Object.values(fieldValidation).every(Boolean);
-        
+
         if (!allFieldsValid || hasErrors) {
           showError({
             title: 'Validation Error',
             message: 'Please fix all errors before submitting.',
-            suggestions: ['Check all required fields', 'Ensure passwords match'],
+            suggestions: [
+              'Check all required fields',
+              'Ensure passwords match',
+            ],
           });
           return;
         }
@@ -128,18 +175,26 @@ describe('Form Validation Workflow Integration Tests', () => {
               label="First Name"
               value={formData.firstName}
               onValueChange={(value) => handleFieldChange('firstName', value)}
-              onValidationChange={(isValid, errors) => handleFieldValidation('firstName', isValid, errors)}
-              validationRules={[commonValidationRules.required('First name is required')]}
+              onValidationChange={(isValid, errors) =>
+                handleFieldValidation('firstName', isValid, errors)
+              }
+              validationRules={[
+                commonValidationRules.required('First name is required'),
+              ]}
               validateOnBlur={true}
               progressiveValidation={true}
             />
-            
+
             <SmartInput
               label="Last Name"
               value={formData.lastName}
               onValueChange={(value) => handleFieldChange('lastName', value)}
-              onValidationChange={(isValid, errors) => handleFieldValidation('lastName', isValid, errors)}
-              validationRules={[commonValidationRules.required('Last name is required')]}
+              onValidationChange={(isValid, errors) =>
+                handleFieldValidation('lastName', isValid, errors)
+              }
+              validationRules={[
+                commonValidationRules.required('Last name is required'),
+              ]}
               validateOnBlur={true}
               progressiveValidation={true}
             />
@@ -151,7 +206,9 @@ describe('Form Validation Workflow Integration Tests', () => {
             keyboardType="email"
             value={formData.email}
             onValueChange={(value) => handleFieldChange('email', value)}
-            onValidationChange={(isValid, errors) => handleFieldValidation('email', isValid, errors)}
+            onValidationChange={(isValid, errors) =>
+              handleFieldValidation('email', isValid, errors)
+            }
             validationRules={[
               commonValidationRules.required('Email is required'),
               commonValidationRules.email('Please enter a valid email address'),
@@ -167,7 +224,9 @@ describe('Form Validation Workflow Integration Tests', () => {
             keyboardType="tel"
             value={formData.phone}
             onValueChange={(value) => handleFieldChange('phone', value)}
-            onValidationChange={(isValid, errors) => handleFieldValidation('phone', isValid, errors)}
+            onValidationChange={(isValid, errors) =>
+              handleFieldValidation('phone', isValid, errors)
+            }
             validationRules={[
               commonValidationRules.required('Phone number is required'),
               commonValidationRules.phone('Please enter a valid phone number'),
@@ -182,10 +241,15 @@ describe('Form Validation Workflow Integration Tests', () => {
             showPasswordToggle={true}
             value={formData.password}
             onValueChange={(value) => handleFieldChange('password', value)}
-            onValidationChange={(isValid, errors) => handleFieldValidation('password', isValid, errors)}
+            onValidationChange={(isValid, errors) =>
+              handleFieldValidation('password', isValid, errors)
+            }
             validationRules={[
               commonValidationRules.required('Password is required'),
-              commonValidationRules.minLength(8, 'Password must be at least 8 characters'),
+              commonValidationRules.minLength(
+                8,
+                'Password must be at least 8 characters'
+              ),
               commonValidationRules.strongPassword(),
             ]}
             validateOnChange={true}
@@ -197,8 +261,12 @@ describe('Form Validation Workflow Integration Tests', () => {
             type="password"
             showPasswordToggle={true}
             value={formData.confirmPassword}
-            onValueChange={(value) => handleFieldChange('confirmPassword', value)}
-            onValidationChange={(isValid, errors) => handleFieldValidation('confirmPassword', isValid, errors)}
+            onValueChange={(value) =>
+              handleFieldChange('confirmPassword', value)
+            }
+            onValidationChange={(isValid, errors) =>
+              handleFieldValidation('confirmPassword', isValid, errors)
+            }
             validationRules={[
               commonValidationRules.required('Please confirm your password'),
               {
@@ -217,7 +285,9 @@ describe('Form Validation Workflow Integration Tests', () => {
               errors={errors}
               onErrorClick={(field) => {
                 // Focus the field with error
-                const input = document.querySelector(`input[aria-label*="${field}"]`) as HTMLInputElement;
+                const input = document.querySelector(
+                  `input[aria-label*="${field}"]`
+                ) as HTMLInputElement;
                 input?.focus();
               }}
               onDismiss={removeError}
@@ -263,10 +333,16 @@ describe('Form Validation Workflow Integration Tests', () => {
       // Fill out the form with valid data
       await user.type(screen.getByLabelText('First Name'), 'John');
       await user.type(screen.getByLabelText('Last Name'), 'Doe');
-      await user.type(screen.getByLabelText('Email Address'), 'john.doe@example.com');
+      await user.type(
+        screen.getByLabelText('Email Address'),
+        'john.doe@example.com'
+      );
       await user.type(screen.getByLabelText('Phone Number'), '1234567890');
       await user.type(screen.getByLabelText('Password'), 'StrongPass123!');
-      await user.type(screen.getByLabelText('Confirm Password'), 'StrongPass123!');
+      await user.type(
+        screen.getByLabelText('Confirm Password'),
+        'StrongPass123!'
+      );
 
       // Submit the form
       const submitButton = screen.getByText('Submit Form');
@@ -275,7 +351,9 @@ describe('Form Validation Workflow Integration Tests', () => {
       // Should show success message
       await waitFor(() => {
         expect(screen.getByText('Success!')).toBeInTheDocument();
-        expect(screen.getByText('Your form has been submitted successfully.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your form has been submitted successfully.')
+        ).toBeInTheDocument();
       });
 
       // Should call the mock submit function
@@ -305,7 +383,9 @@ describe('Form Validation Workflow Integration Tests', () => {
       // Should show validation error feedback
       await waitFor(() => {
         expect(screen.getByText('Validation Error')).toBeInTheDocument();
-        expect(screen.getByText('Please fix all errors before submitting.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please fix all errors before submitting.')
+        ).toBeInTheDocument();
       });
 
       // Should not call submit function
@@ -321,14 +401,18 @@ describe('Form Validation Workflow Integration Tests', () => {
       await user.click(emailInput);
 
       // Initially no validation should be shown
-      expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Please enter a valid email address')
+      ).not.toBeInTheDocument();
 
       // Type invalid email
       await user.type(emailInput, 'invalid-email');
 
       // Should show validation error
       await waitFor(() => {
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
       });
 
       // Clear and type valid email
@@ -337,7 +421,9 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Should show success state
       await waitFor(() => {
-        expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Please enter a valid email address')
+        ).not.toBeInTheDocument();
         expect(screen.getByTestId('check-icon')).toBeInTheDocument();
       });
     });
@@ -365,7 +451,9 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Should remove the error
       await waitFor(() => {
-        expect(screen.queryByText('Passwords do not match')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Passwords do not match')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -386,7 +474,9 @@ describe('Form Validation Workflow Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByText(/error/)).toBeInTheDocument();
         expect(screen.getByText('First name is required')).toBeInTheDocument();
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
       });
 
       // Click on an error should focus the field
@@ -402,7 +492,10 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Fill out some fields
       await user.type(screen.getByLabelText('First Name'), 'John');
-      await user.type(screen.getByLabelText('Email Address'), 'john@example.com');
+      await user.type(
+        screen.getByLabelText('Email Address'),
+        'john@example.com'
+      );
 
       // Trigger some validation errors
       const lastNameInput = screen.getByLabelText('Last Name');
@@ -423,7 +516,9 @@ describe('Form Validation Workflow Integration Tests', () => {
       expect(screen.getByLabelText('Email Address')).toHaveValue('');
 
       // Validation errors should be cleared
-      expect(screen.queryByText('Last name is required')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Last name is required')
+      ).not.toBeInTheDocument();
     });
 
     it('handles server errors gracefully', async () => {
@@ -435,10 +530,16 @@ describe('Form Validation Workflow Integration Tests', () => {
       // Fill out valid form
       await user.type(screen.getByLabelText('First Name'), 'John');
       await user.type(screen.getByLabelText('Last Name'), 'Doe');
-      await user.type(screen.getByLabelText('Email Address'), 'john.doe@example.com');
+      await user.type(
+        screen.getByLabelText('Email Address'),
+        'john.doe@example.com'
+      );
       await user.type(screen.getByLabelText('Phone Number'), '1234567890');
       await user.type(screen.getByLabelText('Password'), 'StrongPass123!');
-      await user.type(screen.getByLabelText('Confirm Password'), 'StrongPass123!');
+      await user.type(
+        screen.getByLabelText('Confirm Password'),
+        'StrongPass123!'
+      );
 
       // Submit form
       const submitButton = screen.getByText('Submit Form');
@@ -447,7 +548,9 @@ describe('Form Validation Workflow Integration Tests', () => {
       // Should show error message
       await waitFor(() => {
         expect(screen.getByText('Submission Error')).toBeInTheDocument();
-        expect(screen.getByText('Failed to submit form. Please try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Failed to submit form. Please try again.')
+        ).toBeInTheDocument();
       });
 
       // Should have retry button
@@ -475,7 +578,7 @@ describe('Form Validation Workflow Integration Tests', () => {
         const asyncUsernameRule = {
           test: async (value: string) => {
             setIsValidating(true);
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
             setIsValidating(false);
             return value !== 'taken-username';
           },
@@ -509,7 +612,9 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Should show error after validation completes
       await waitFor(() => {
-        expect(screen.getByText('This username is already taken')).toBeInTheDocument();
+        expect(
+          screen.getByText('This username is already taken')
+        ).toBeInTheDocument();
       });
 
       // Should not show loading state anymore
@@ -525,7 +630,9 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Should not show error after validation completes
       await waitFor(() => {
-        expect(screen.queryByText('This username is already taken')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('This username is already taken')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -553,16 +660,21 @@ describe('Form Validation Workflow Integration Tests', () => {
       }
 
       // Should debounce validation calls
-      await waitFor(() => {
-        expect(onValidationChange).toHaveBeenCalledWith(true, []);
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          expect(onValidationChange).toHaveBeenCalledWith(true, []);
+        },
+        { timeout: 200 }
+      );
 
       // Should not have excessive validation calls
       expect(onValidationChange).toHaveBeenCalledTimes(1);
     });
 
     it('handles validation rule exceptions gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       const faultyRule = {
         test: () => {
@@ -588,11 +700,16 @@ describe('Form Validation Workflow Integration Tests', () => {
 
       // Should show generic error message
       await waitFor(() => {
-        expect(screen.getByText('Validation error occurred')).toBeInTheDocument();
+        expect(
+          screen.getByText('Validation error occurred')
+        ).toBeInTheDocument();
       });
 
       // Should log the error
-      expect(consoleSpy).toHaveBeenCalledWith('Validation rule error:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Validation rule error:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });

@@ -23,7 +23,7 @@ const mockPrisma = vi.mocked(prisma);
 describe('Rankings Role Access Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock database responses
     mockPrisma.user.findMany.mockResolvedValue([
       {
@@ -67,7 +67,9 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
@@ -80,13 +82,13 @@ describe('Rankings Role Access Integration Tests', () => {
       // Verify no sensitive payroll data is exposed in response
       if (data.captains && data.captains.length > 0) {
         const captain = data.captains[0] as CaptainPerformanceData;
-        
+
         // Should have performance metrics
         expect(captain).toHaveProperty('captainId');
         expect(captain).toHaveProperty('captainName');
         expect(captain).toHaveProperty('junkMetrics');
         expect(captain).toHaveProperty('moveMetrics');
-        
+
         // Should NOT have sensitive payroll data
         expect(captain).not.toHaveProperty('rateJunkCaptain');
         expect(captain).not.toHaveProperty('rateJunkWingman');
@@ -98,14 +100,14 @@ describe('Rankings Role Access Integration Tests', () => {
         expect(captain).not.toHaveProperty('commissionRate');
         expect(captain).not.toHaveProperty('junkBonusGoal');
         expect(captain).not.toHaveProperty('moveBonusGoal');
-        
+
         // Verify metrics structure contains only performance data
         expect(captain.junkMetrics).toHaveProperty('jobCount');
         expect(captain.junkMetrics).toHaveProperty('totalRevenue');
         expect(captain.junkMetrics).toHaveProperty('averageJobSize');
         expect(captain.junkMetrics).toHaveProperty('laborPercentage');
         expect(captain.junkMetrics).toHaveProperty('disposalPercentage');
-        
+
         expect(captain.moveMetrics).toHaveProperty('jobCount');
         expect(captain.moveMetrics).toHaveProperty('totalRevenue');
         expect(captain.moveMetrics).toHaveProperty('averageJobSize');
@@ -133,7 +135,9 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
@@ -141,16 +145,16 @@ describe('Rankings Role Access Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('captains');
       expect(data).toHaveProperty('totalCaptains');
-      
+
       // Verify no sensitive compensation data is displayed
       if (data.captains && data.captains.length > 0) {
         const captain = data.captains[0] as CaptainPerformanceData;
-        
+
         // Should NOT expose any rate or salary information
         expect(captain).not.toHaveProperty('rateJunkCaptain');
         expect(captain).not.toHaveProperty('salaryAmount');
         expect(captain).not.toHaveProperty('commissionRate');
-        
+
         // Should only have performance metrics
         expect(captain.junkMetrics).toHaveProperty('jobCount');
         expect(captain.junkMetrics).toHaveProperty('totalRevenue');
@@ -173,23 +177,25 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
       // Assert: Captain can access the endpoint
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('captains');
-      
+
       // Verify no sensitive compensation data is displayed (even for their own data)
       if (data.captains && data.captains.length > 0) {
         const captain = data.captains[0] as CaptainPerformanceData;
-        
+
         // Should NOT expose any payroll information
         expect(captain).not.toHaveProperty('rateJunkCaptain');
         expect(captain).not.toHaveProperty('salaryAmount');
         expect(captain).not.toHaveProperty('commissionRate');
-        
+
         // Should only have performance metrics
         expect(captain.junkMetrics).toHaveProperty('jobCount');
         expect(captain.junkMetrics).toHaveProperty('totalRevenue');
@@ -210,18 +216,20 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
       // Assert: Manager can access the endpoint
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('captains');
-      
+
       // Verify no sensitive compensation data is displayed
       if (data.captains && data.captains.length > 0) {
         const captain = data.captains[0] as CaptainPerformanceData;
-        
+
         // Should NOT expose any payroll information
         expect(captain).not.toHaveProperty('rateJunkCaptain');
         expect(captain).not.toHaveProperty('salaryAmount');
@@ -241,18 +249,20 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
       // Assert: Admin can access the endpoint
       expect(response.status).toBe(200);
       expect(data).toHaveProperty('captains');
-      
+
       // Verify no sensitive compensation data is displayed (even for admin)
       if (data.captains && data.captains.length > 0) {
         const captain = data.captains[0] as CaptainPerformanceData;
-        
+
         // Should NOT expose any payroll information in rankings API
         expect(captain).not.toHaveProperty('rateJunkCaptain');
         expect(captain).not.toHaveProperty('salaryAmount');
@@ -265,7 +275,9 @@ describe('Rankings Role Access Integration Tests', () => {
       mockAuth.mockResolvedValue(null);
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
 
       // Assert: Unauthenticated users are denied
@@ -288,7 +300,9 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
@@ -297,7 +311,7 @@ describe('Rankings Role Access Integration Tests', () => {
       expect(data).toHaveProperty('captains');
       expect(data).toHaveProperty('dateRange');
       expect(data).toHaveProperty('totalCaptains');
-      
+
       expect(data.dateRange).toHaveProperty('startDate');
       expect(data.dateRange).toHaveProperty('endDate');
       expect(typeof data.totalCaptains).toBe('number');
@@ -311,14 +325,14 @@ describe('Rankings Role Access Integration Tests', () => {
           expect(captain).toHaveProperty('captainName');
           expect(captain).toHaveProperty('junkMetrics');
           expect(captain).toHaveProperty('moveMetrics');
-          
+
           // Junk metrics structure
           expect(captain.junkMetrics).toHaveProperty('jobCount');
           expect(captain.junkMetrics).toHaveProperty('totalRevenue');
           expect(captain.junkMetrics).toHaveProperty('averageJobSize');
           expect(captain.junkMetrics).toHaveProperty('laborPercentage');
           expect(captain.junkMetrics).toHaveProperty('disposalPercentage');
-          
+
           // Move metrics structure
           expect(captain.moveMetrics).toHaveProperty('jobCount');
           expect(captain.moveMetrics).toHaveProperty('totalRevenue');
@@ -332,16 +346,27 @@ describe('Rankings Role Access Integration Tests', () => {
           expect(captain.moveMetrics).toHaveProperty('junkOnMovePercentage');
           expect(captain.moveMetrics).toHaveProperty('materialsRevenue');
           expect(captain.moveMetrics).toHaveProperty('materialsPercentage');
-          
+
           // Ensure no sensitive data is present
           const sensitiveFields = [
-            'rateJunkCaptain', 'rateJunkWingman', 'rateMoveCaptain', 'rateMoveWingman',
-            'rateZigma', 'rateTraining', 'rateEstimating', 'rateWarehouse', 'rateAdmin',
-            'salaryAmount', 'salaryFrequency', 'salaryType', 'commissionRate',
-            'junkBonusGoal', 'moveBonusGoal'
+            'rateJunkCaptain',
+            'rateJunkWingman',
+            'rateMoveCaptain',
+            'rateMoveWingman',
+            'rateZigma',
+            'rateTraining',
+            'rateEstimating',
+            'rateWarehouse',
+            'rateAdmin',
+            'salaryAmount',
+            'salaryFrequency',
+            'salaryType',
+            'commissionRate',
+            'junkBonusGoal',
+            'moveBonusGoal',
           ];
-          
-          sensitiveFields.forEach(field => {
+
+          sensitiveFields.forEach((field) => {
             expect(captain).not.toHaveProperty(field);
           });
         });
@@ -362,7 +387,9 @@ describe('Rankings Role Access Integration Tests', () => {
       });
 
       // Act: Call the API
-      const request = new Request('http://localhost:3000/api/analytics/performance');
+      const request = new Request(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
       const data = await response.json();
 
@@ -372,13 +399,13 @@ describe('Rankings Role Access Integration Tests', () => {
           // Should have labor percentage (performance metric)
           expect(captain.junkMetrics).toHaveProperty('laborPercentage');
           expect(captain.moveMetrics).toHaveProperty('laborPercentage');
-          
+
           // Should NOT have actual labor costs or rates
           expect(captain.junkMetrics).not.toHaveProperty('laborCost');
           expect(captain.junkMetrics).not.toHaveProperty('totalLaborCost');
           expect(captain.moveMetrics).not.toHaveProperty('laborCost');
           expect(captain.moveMetrics).not.toHaveProperty('totalLaborCost');
-          
+
           // Labor percentages should be numbers
           expect(typeof captain.junkMetrics.laborPercentage).toBe('number');
           expect(typeof captain.moveMetrics.laborPercentage).toBe('number');

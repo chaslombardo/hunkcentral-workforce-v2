@@ -14,15 +14,15 @@ const mockUsers: User[] = [
     email: 'captain@test.com',
     fullName: 'John Captain',
     roles: ['captain'],
-    rateJunkCaptain: 20.00,
-    rateJunkWingman: 15.00,
-    rateMoveCaptain: 22.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
-    rateTraining: 16.00,
-    rateEstimating: 25.00,
-    rateWarehouse: 14.00,
-    rateAdmin: 20.00,
+    rateJunkCaptain: 20.0,
+    rateJunkWingman: 15.0,
+    rateMoveCaptain: 22.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
+    rateTraining: 16.0,
+    rateEstimating: 25.0,
+    rateWarehouse: 14.0,
+    rateAdmin: 20.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -33,15 +33,15 @@ const mockUsers: User[] = [
     email: 'wingman@test.com',
     fullName: 'Mike Wingman',
     roles: ['wingman'],
-    rateJunkCaptain: 20.00,
-    rateJunkWingman: 15.00,
-    rateMoveCaptain: 22.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
-    rateTraining: 16.00,
-    rateEstimating: 25.00,
-    rateWarehouse: 14.00,
-    rateAdmin: 20.00,
+    rateJunkCaptain: 20.0,
+    rateJunkWingman: 15.0,
+    rateMoveCaptain: 22.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
+    rateTraining: 16.0,
+    rateEstimating: 25.0,
+    rateWarehouse: 14.0,
+    rateAdmin: 20.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -50,7 +50,13 @@ const mockUsers: User[] = [
 ];
 
 // Test wrapper component
-function TestWrapper({ children, defaultValues }: { children: React.ReactNode; defaultValues?: Partial<DailyLogFormData> }) {
+function TestWrapper({
+  children,
+  defaultValues,
+}: {
+  children: React.ReactNode;
+  defaultValues?: Partial<DailyLogFormData>;
+}) {
   const form = useForm<DailyLogFormData>({
     resolver: zodResolver(DailyLogFormSchema),
     defaultValues: {
@@ -68,11 +74,7 @@ function TestWrapper({ children, defaultValues }: { children: React.ReactNode; d
     },
   });
 
-  return (
-    <FormProvider {...form}>
-      {children}
-    </FormProvider>
-  );
+  return <FormProvider {...form}>{children}</FormProvider>;
 }
 
 describe('JobSection Team Hours Integration', () => {
@@ -88,8 +90,12 @@ describe('JobSection Team Hours Integration', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Team Hours - Junk Removal Jobs')).toBeInTheDocument();
-    expect(screen.getByText('Record employee hours for junk department work')).toBeInTheDocument();
+    expect(
+      screen.getByText('Team Hours - Junk Removal Jobs')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Record employee hours for junk department work')
+    ).toBeInTheDocument();
   });
 
   it('should render team hours section for move jobs', () => {
@@ -105,7 +111,9 @@ describe('JobSection Team Hours Integration', () => {
     );
 
     expect(screen.getByText('Team Hours - Moving Jobs')).toBeInTheDocument();
-    expect(screen.getByText('Record employee hours for move department work')).toBeInTheDocument();
+    expect(
+      screen.getByText('Record employee hours for move department work')
+    ).toBeInTheDocument();
   });
 
   it('should allow adding team members to junk section', async () => {
@@ -122,13 +130,14 @@ describe('JobSection Team Hours Integration', () => {
 
     // Find the "Add HUNK" button in the team hours section
     const addHunkButtons = screen.getAllByText('Add HUNK');
-    const teamHoursAddButton = addHunkButtons.find(button => 
-      button.closest('[data-testid="team-hours-section"]') || 
-      button.parentElement?.textContent?.includes('No team members added yet')
+    const teamHoursAddButton = addHunkButtons.find(
+      (button) =>
+        button.closest('[data-testid="team-hours-section"]') ||
+        button.parentElement?.textContent?.includes('No team members added yet')
     );
 
     expect(teamHoursAddButton).toBeInTheDocument();
-    
+
     // Click to add a team member
     fireEvent.click(teamHoursAddButton!);
 
@@ -152,13 +161,14 @@ describe('JobSection Team Hours Integration', () => {
 
     // Find the "Add HUNK" button in the team hours section
     const addHunkButtons = screen.getAllByText('Add HUNK');
-    const teamHoursAddButton = addHunkButtons.find(button => 
-      button.closest('[data-testid="team-hours-section"]') || 
-      button.parentElement?.textContent?.includes('No team members added yet')
+    const teamHoursAddButton = addHunkButtons.find(
+      (button) =>
+        button.closest('[data-testid="team-hours-section"]') ||
+        button.parentElement?.textContent?.includes('No team members added yet')
     );
 
     expect(teamHoursAddButton).toBeInTheDocument();
-    
+
     // Click to add a team member
     fireEvent.click(teamHoursAddButton!);
 
@@ -182,10 +192,10 @@ describe('JobSection Team Hours Integration', () => {
 
     // Add a team member
     const addHunkButtons = screen.getAllByText('Add HUNK');
-    const teamHoursAddButton = addHunkButtons.find(button => 
+    const teamHoursAddButton = addHunkButtons.find((button) =>
       button.parentElement?.textContent?.includes('No team members added yet')
     );
-    
+
     fireEvent.click(teamHoursAddButton!);
 
     // Wait for the accordion item to appear
@@ -200,7 +210,11 @@ describe('JobSection Team Hours Integration', () => {
     // Should show co-captain checkbox after expanding
     await waitFor(() => {
       expect(screen.getByText('Co-Captain')).toBeInTheDocument();
-      expect(screen.getByText('Check if this employee served as co-captain for this section')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Check if this employee served as co-captain for this section'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -244,7 +258,7 @@ describe('JobSection Team Hours Integration', () => {
     expect(screen.getByText('John Captain')).toBeInTheDocument();
     expect(screen.getByText('8h')).toBeInTheDocument();
     expect(screen.getByText('Junk Removal')).toBeInTheDocument();
-    
+
     // Should not show the move department entry
     expect(screen.queryByText('6h')).not.toBeInTheDocument();
   });

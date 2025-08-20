@@ -7,7 +7,11 @@ import {
   formatCurrency,
   formatPercentage,
 } from '@/lib/logCalculations';
-import type { LogJobFormData, LogHourFormData, DailyLogFormData } from '@/lib/validations';
+import type {
+  LogJobFormData,
+  LogHourFormData,
+  DailyLogFormData,
+} from '@/lib/validations';
 import type { User } from '@/types';
 
 // Mock user data for testing
@@ -17,15 +21,15 @@ const mockUsers: User[] = [
     email: 'captain@test.com',
     fullName: 'Test Captain',
     roles: ['captain'],
-    rateJunkCaptain: 20.00,
-    rateJunkWingman: 15.00,
-    rateMoveCaptain: 22.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
-    rateTraining: 16.00,
-    rateEstimating: 25.00,
-    rateWarehouse: 14.00,
-    rateAdmin: 20.00,
+    rateJunkCaptain: 20.0,
+    rateJunkWingman: 15.0,
+    rateMoveCaptain: 22.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
+    rateTraining: 16.0,
+    rateEstimating: 25.0,
+    rateWarehouse: 14.0,
+    rateAdmin: 20.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -36,15 +40,15 @@ const mockUsers: User[] = [
     email: 'wingman@test.com',
     fullName: 'Test Wingman',
     roles: ['wingman'],
-    rateJunkCaptain: 20.00,
-    rateJunkWingman: 15.00,
-    rateMoveCaptain: 22.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
-    rateTraining: 16.00,
-    rateEstimating: 25.00,
-    rateWarehouse: 14.00,
-    rateAdmin: 20.00,
+    rateJunkCaptain: 20.0,
+    rateJunkWingman: 15.0,
+    rateMoveCaptain: 22.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
+    rateTraining: 16.0,
+    rateEstimating: 25.0,
+    rateWarehouse: 14.0,
+    rateAdmin: 20.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -355,13 +359,17 @@ describe('Log Calculations', () => {
       expect(result.employeeSummary).toHaveLength(2);
 
       // Check employee summary
-      const captain = result.employeeSummary.find(emp => emp.employeeId === '1');
+      const captain = result.employeeSummary.find(
+        (emp) => emp.employeeId === '1'
+      );
       expect(captain).toBeDefined();
       expect(captain!.totalHours).toBe(10); // 8 + 2
       expect(captain!.totalTips).toBe(100); // Only gets junk tips (100/1 employee in junk)
       expect(captain!.departments).toHaveLength(2);
 
-      const wingman = result.employeeSummary.find(emp => emp.employeeId === '2');
+      const wingman = result.employeeSummary.find(
+        (emp) => emp.employeeId === '2'
+      );
       expect(wingman).toBeDefined();
       expect(wingman!.totalHours).toBe(10);
       expect(wingman!.totalTips).toBe(200); // Only gets move tips (200/1 employee in move)

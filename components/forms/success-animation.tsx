@@ -3,7 +3,10 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Sparkles } from 'lucide-react';
-import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
+import {
+  usePerformanceMonitor,
+  bundleAnalysis,
+} from '@/lib/performance-monitor';
 import { useMotionPreference } from '@/lib/motion-preferences';
 
 interface SuccessAnimationProps {
@@ -19,7 +22,7 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
   showSparkles = true,
   duration = 1000,
   onComplete,
-  className
+  className,
 }: SuccessAnimationProps) {
   const monitor = usePerformanceMonitor('SuccessAnimation');
   const startMarkRef = React.useRef<string>('');
@@ -36,9 +39,13 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
 
   // Warn about large props in development
   React.useEffect(() => {
-    bundleAnalysis.warnLargeProps('SuccessAnimation', { size, showSparkles, duration, className }, 200);
+    bundleAnalysis.warnLargeProps(
+      'SuccessAnimation',
+      { size, showSparkles, duration, className },
+      200
+    );
   }, [size, showSparkles, duration, className]);
-  
+
   const [isVisible, setIsVisible] = React.useState(false);
   const [showCheck, setShowCheck] = React.useState(false);
 
@@ -47,35 +54,59 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
   const checkDelay = prefersReducedMotion ? 50 : 200;
 
   // Memoize size classes to prevent unnecessary re-renders
-  const sizeClasses = React.useMemo(() => ({
-    sm: 'h-8 w-8',
-    md: 'h-12 w-12',
-    lg: 'h-16 w-16'
-  }), []);
+  const sizeClasses = React.useMemo(
+    () => ({
+      sm: 'h-8 w-8',
+      md: 'h-12 w-12',
+      lg: 'h-16 w-16',
+    }),
+    []
+  );
 
-  const sparkleSize = React.useMemo(() => ({
-    sm: 'h-3 w-3',
-    md: 'h-4 w-4',
-    lg: 'h-5 w-5'
-  }), []);
+  const sparkleSize = React.useMemo(
+    () => ({
+      sm: 'h-3 w-3',
+      md: 'h-4 w-4',
+      lg: 'h-5 w-5',
+    }),
+    []
+  );
 
   // Memoize check icon size
-  const checkIconSize = React.useMemo(() => 
-    size === 'sm' ? 'h-5 w-5' : size === 'md' ? 'h-7 w-7' : 'h-9 w-9',
+  const checkIconSize = React.useMemo(
+    () => (size === 'sm' ? 'h-5 w-5' : size === 'md' ? 'h-7 w-7' : 'h-9 w-9'),
     [size]
   );
 
   // Memoize sparkle positions
-  const sparklePositions = React.useMemo(() => ({
-    top: size === 'sm' ? '-top-2 -right-1' : size === 'md' ? '-top-3 -right-2' : '-top-4 -right-3',
-    bottom: size === 'sm' ? '-bottom-2 -left-1' : size === 'md' ? '-bottom-3 -left-2' : '-bottom-4 -left-3',
-    side: size === 'sm' ? 'top-0 -left-3' : size === 'md' ? 'top-1 -left-4' : 'top-2 -left-5'
-  }), [size]);
+  const sparklePositions = React.useMemo(
+    () => ({
+      top:
+        size === 'sm'
+          ? '-top-2 -right-1'
+          : size === 'md'
+            ? '-top-3 -right-2'
+            : '-top-4 -right-3',
+      bottom:
+        size === 'sm'
+          ? '-bottom-2 -left-1'
+          : size === 'md'
+            ? '-bottom-3 -left-2'
+            : '-bottom-4 -left-3',
+      side:
+        size === 'sm'
+          ? 'top-0 -left-3'
+          : size === 'md'
+            ? 'top-1 -left-4'
+            : 'top-2 -left-5',
+    }),
+    [size]
+  );
 
   React.useEffect(() => {
     // Start animation immediately
     setIsVisible(true);
-    
+
     // Show check mark after initial scale
     const checkTimer = setTimeout(() => {
       setShowCheck(true);
@@ -99,12 +130,14 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
         className={cn(
           'relative rounded-full bg-hunks-green flex items-center justify-center',
           sizeClasses[size],
-          prefersReducedMotion 
-            ? 'transition-opacity duration-200 ease-out' 
+          prefersReducedMotion
+            ? 'transition-opacity duration-200 ease-out'
             : 'transition-all duration-500 ease-out',
-          isVisible 
-            ? 'scale-100 opacity-100' 
-            : prefersReducedMotion ? 'opacity-0' : 'scale-0 opacity-0'
+          isVisible
+            ? 'scale-100 opacity-100'
+            : prefersReducedMotion
+              ? 'opacity-0'
+              : 'scale-0 opacity-0'
         )}
       >
         {/* Check mark */}
@@ -112,15 +145,17 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
           className={cn(
             'text-white',
             checkIconSize,
-            prefersReducedMotion 
-              ? 'transition-opacity duration-150 ease-out' 
+            prefersReducedMotion
+              ? 'transition-opacity duration-150 ease-out'
               : 'transition-all duration-300 ease-out',
-            showCheck 
-              ? 'scale-100 opacity-100' 
-              : prefersReducedMotion ? 'opacity-0' : 'scale-0 opacity-0'
+            showCheck
+              ? 'scale-100 opacity-100'
+              : prefersReducedMotion
+                ? 'opacity-0'
+                : 'scale-0 opacity-0'
           )}
         />
-        
+
         {/* Pulse ring - only show if motion is allowed */}
         {!prefersReducedMotion && (
           <div
@@ -130,7 +165,7 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
             )}
             style={{
               animationDuration: '1s',
-              animationIterationCount: '2'
+              animationIterationCount: '2',
             }}
           />
         )}
@@ -149,10 +184,10 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
             style={{
               animationDelay: '0.3s',
               animationDuration: '0.8s',
-              animationIterationCount: '2'
+              animationIterationCount: '2',
             }}
           />
-          
+
           {/* Bottom sparkle */}
           <Sparkles
             className={cn(
@@ -163,10 +198,10 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
             style={{
               animationDelay: '0.5s',
               animationDuration: '0.8s',
-              animationIterationCount: '2'
+              animationIterationCount: '2',
             }}
           />
-          
+
           {/* Side sparkle */}
           <Sparkles
             className={cn(
@@ -177,12 +212,12 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
             style={{
               animationDelay: '0.7s',
               animationDuration: '0.8s',
-              animationIterationCount: '2'
+              animationIterationCount: '2',
             }}
           />
         </>
       )}
-      
+
       {/* Static sparkles for reduced motion */}
       {showSparkles && isVisible && prefersReducedMotion && (
         <>
@@ -216,18 +251,20 @@ export const SuccessAnimation = React.memo(function SuccessAnimation({
 // Confetti-style success animation for major achievements
 export const ConfettiSuccess = React.memo(function ConfettiSuccess({
   onComplete,
-  className
+  className,
 }: {
   onComplete?: () => void;
   className?: string;
 }) {
-  const [particles, setParticles] = React.useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    color: string;
-    delay: number;
-  }>>([]);
+  const [particles, setParticles] = React.useState<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      color: string;
+      delay: number;
+    }>
+  >([]);
 
   React.useEffect(() => {
     // Generate random particles
@@ -236,9 +273,9 @@ export const ConfettiSuccess = React.memo(function ConfettiSuccess({
       x: Math.random() * 200 - 100, // -100 to 100
       y: Math.random() * 200 - 100,
       color: i % 2 === 0 ? '#026937' : '#ea7200', // Alternate brand colors
-      delay: Math.random() * 0.5
+      delay: Math.random() * 0.5,
     }));
-    
+
     setParticles(newParticles);
 
     // Complete animation
@@ -253,7 +290,7 @@ export const ConfettiSuccess = React.memo(function ConfettiSuccess({
     <div className={cn('relative flex items-center justify-center', className)}>
       {/* Central success icon */}
       <SuccessAnimation size="lg" showSparkles={false} />
-      
+
       {/* Confetti particles */}
       {particles.map((particle) => (
         <div
@@ -265,7 +302,7 @@ export const ConfettiSuccess = React.memo(function ConfettiSuccess({
             animationDelay: `${particle.delay}s`,
             animationDuration: '1.5s',
             animationIterationCount: '1',
-            animationFillMode: 'forwards'
+            animationFillMode: 'forwards',
           }}
         />
       ))}
@@ -275,7 +312,7 @@ export const ConfettiSuccess = React.memo(function ConfettiSuccess({
 
 // Subtle success checkmark for inline feedback
 export const InlineSuccessCheck = React.memo(function InlineSuccessCheck({
-  className
+  className,
 }: {
   className?: string;
 }) {
@@ -292,9 +329,7 @@ export const InlineSuccessCheck = React.memo(function InlineSuccessCheck({
     <CheckCircle2
       className={cn(
         'h-4 w-4 text-hunks-green transition-all duration-300 ease-out',
-        isVisible 
-          ? 'scale-100 opacity-100' 
-          : 'scale-0 opacity-0',
+        isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0',
         className
       )}
     />
@@ -305,7 +340,7 @@ export const InlineSuccessCheck = React.memo(function InlineSuccessCheck({
 export const LoadingToSuccess = React.memo(function LoadingToSuccess({
   isLoading,
   onComplete,
-  className
+  className,
 }: {
   isLoading: boolean;
   onComplete?: () => void;

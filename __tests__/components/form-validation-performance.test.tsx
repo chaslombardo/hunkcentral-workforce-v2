@@ -2,25 +2,58 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules, ValidationRule } from '@/components/forms/smart-input';
+import {
+  SmartInput,
+  commonValidationRules,
+  ValidationRule,
+} from '@/components/forms/smart-input';
 import { FormFeedback } from '@/components/forms/form-feedback';
-import { MobileFormValidation, ValidationError } from '@/components/forms/mobile-form-validation';
+import {
+  MobileFormValidation,
+  ValidationError,
+} from '@/components/forms/mobile-form-validation';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
 }));
 
 // Mock InlineSuccessCheck component
@@ -74,31 +107,36 @@ describe('Form Validation Performance Tests', () => {
       }
 
       // Wait for debouncing to settle
-      await waitFor(() => {
-        expect(validationCallCount).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(validationCallCount).toHaveBeenCalled();
+        },
+        { timeout: 1000 }
+      );
 
       const endTime = performance.now();
       const duration = endTime - startTime;
 
       // Should complete within reasonable time
       expect(duration).toBeLessThan(2000);
-      
+
       // Should not call validation for every keystroke due to debouncing
       expect(validationCallCount).toHaveBeenCalledTimes(1);
     });
 
     it('handles large validation rule sets without performance degradation', async () => {
       const ruleCallCounts = Array.from({ length: 20 }, () => vi.fn());
-      const manyRules: ValidationRule[] = ruleCallCounts.map((callCount, i) => ({
-        test: (value: string) => {
-          callCount();
-          return value.includes(`test${i}`) || value.length < 10;
-        },
-        message: `Rule ${i} failed`,
-        type: 'error' as const,
-        priority: i,
-      }));
+      const manyRules: ValidationRule[] = ruleCallCounts.map(
+        (callCount, i) => ({
+          test: (value: string) => {
+            callCount();
+            return value.includes(`test${i}`) || value.length < 10;
+          },
+          message: `Rule ${i} failed`,
+          type: 'error' as const,
+          priority: i,
+        })
+      );
 
       const startTime = performance.now();
 
@@ -134,7 +172,7 @@ describe('Form Validation Performance Tests', () => {
       const asyncRule: ValidationRule = {
         test: async (value: string) => {
           const currentRequest = ++requestCount;
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           // Only the latest request should matter
           return currentRequest === requestCount && value === 'valid';
         },
@@ -170,9 +208,12 @@ describe('Form Validation Performance Tests', () => {
       await user.type(input, 'valid', { delay: 10 });
 
       // Wait for final validation
-      await waitFor(() => {
-        expect(onValidationChange).toHaveBeenLastCalledWith(true, []);
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(onValidationChange).toHaveBeenLastCalledWith(true, []);
+        },
+        { timeout: 2000 }
+      );
 
       // Should have made multiple requests but only the last one matters
       expect(requestCount).toBeGreaterThan(1);
@@ -182,7 +223,7 @@ describe('Form Validation Performance Tests', () => {
       const cleanupSpy = vi.fn();
       const asyncRule: ValidationRule = {
         test: async (value: string) => {
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise((resolve) => setTimeout(resolve, 200));
           cleanupSpy();
           return value.length > 0;
         },
@@ -200,17 +241,17 @@ describe('Form Validation Performance Tests', () => {
       );
 
       const input = screen.getByLabelText('Cleanup Test');
-      
+
       // Start async validation
       await user.click(input);
       await user.type(input, 'test');
-      
+
       // Unmount before validation completes
       unmount();
 
       // Wait longer than validation would take
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Cleanup should not have been called since component unmounted
       expect(cleanupSpy).not.toHaveBeenCalled();
     });
@@ -219,16 +260,19 @@ describe('Form Validation Performance Tests', () => {
   describe('MobileFormValidation Performance', () => {
     it('handles large error lists efficiently', () => {
       const startTime = performance.now();
-      
-      const manyErrors: ValidationError[] = Array.from({ length: 1000 }, (_, i) => ({
-        field: `field${i}`,
-        message: `Error message ${i}`,
-        type: 'error' as const,
-        severity: 'medium' as const,
-      }));
+
+      const manyErrors: ValidationError[] = Array.from(
+        { length: 1000 },
+        (_, i) => ({
+          field: `field${i}`,
+          message: `Error message ${i}`,
+          type: 'error' as const,
+          severity: 'medium' as const,
+        })
+      );
 
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={manyErrors}
           collapsible={true}
           maxVisible={10}
@@ -243,7 +287,7 @@ describe('Form Validation Performance Tests', () => {
 
       // Should show summary correctly
       expect(screen.getByText('1000 errors')).toBeInTheDocument();
-      
+
       // Should only render visible errors initially
       expect(screen.getByText('Field0')).toBeInTheDocument();
       expect(screen.getByText('Field9')).toBeInTheDocument();
@@ -252,18 +296,19 @@ describe('Form Validation Performance Tests', () => {
 
     it('efficiently handles rapid error state changes', async () => {
       const startTime = performance.now();
-      
-      const { rerender } = render(
-        <MobileFormValidation errors={[]} />
-      );
+
+      const { rerender } = render(<MobileFormValidation errors={[]} />);
 
       // Rapidly change error states
       for (let i = 0; i < 100; i++) {
-        const errors: ValidationError[] = Array.from({ length: i % 10 }, (_, j) => ({
-          field: `field${j}`,
-          message: `Error ${j}`,
-          type: 'error' as const,
-        }));
+        const errors: ValidationError[] = Array.from(
+          { length: i % 10 },
+          (_, j) => ({
+            field: `field${j}`,
+            message: `Error ${j}`,
+            type: 'error' as const,
+          })
+        );
 
         rerender(<MobileFormValidation errors={errors} />);
       }
@@ -276,14 +321,17 @@ describe('Form Validation Performance Tests', () => {
     });
 
     it('optimizes collapsible expansion performance', async () => {
-      const manyErrors: ValidationError[] = Array.from({ length: 500 }, (_, i) => ({
-        field: `field${i}`,
-        message: `Error message ${i}`,
-        type: 'error' as const,
-      }));
+      const manyErrors: ValidationError[] = Array.from(
+        { length: 500 },
+        (_, i) => ({
+          field: `field${i}`,
+          message: `Error message ${i}`,
+          type: 'error' as const,
+        })
+      );
 
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={manyErrors}
           collapsible={true}
           maxVisible={5}
@@ -291,11 +339,11 @@ describe('Form Validation Performance Tests', () => {
       );
 
       const expandButton = screen.getByText('Show All (500)');
-      
+
       const startTime = performance.now();
       await user.click(expandButton);
       const endTime = performance.now();
-      
+
       const expansionTime = endTime - startTime;
 
       // Should expand within reasonable time
@@ -311,21 +359,24 @@ describe('Form Validation Performance Tests', () => {
   describe('FormFeedback Performance', () => {
     it('handles rapid feedback state changes efficiently', async () => {
       const startTime = performance.now();
-      
+
       const { rerender } = render(
         <FormFeedback type="info" message="Initial message" />
       );
 
       // Rapidly change feedback types and messages
       const feedbackTypes = ['success', 'error', 'warning', 'info'] as const;
-      
+
       for (let i = 0; i < 100; i++) {
         const type = feedbackTypes[i % feedbackTypes.length];
         rerender(
-          <FormFeedback 
-            type={type} 
+          <FormFeedback
+            type={type}
             message={`Message ${i}`}
-            suggestions={Array.from({ length: i % 5 }, (_, j) => `Suggestion ${j}`)}
+            suggestions={Array.from(
+              { length: i % 5 },
+              (_, j) => `Suggestion ${j}`
+            )}
           />
         );
       }
@@ -339,9 +390,10 @@ describe('Form Validation Performance Tests', () => {
 
     it('efficiently handles large suggestion lists', () => {
       const startTime = performance.now();
-      
-      const manySuggestions = Array.from({ length: 100 }, (_, i) => 
-        `This is suggestion number ${i + 1} with detailed information`
+
+      const manySuggestions = Array.from(
+        { length: 100 },
+        (_, i) => `This is suggestion number ${i + 1} with detailed information`
       );
 
       render(
@@ -359,8 +411,16 @@ describe('Form Validation Performance Tests', () => {
       expect(renderTime).toBeLessThan(300);
 
       // Should display all suggestions
-      expect(screen.getByText('This is suggestion number 1 with detailed information')).toBeInTheDocument();
-      expect(screen.getByText('This is suggestion number 100 with detailed information')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This is suggestion number 1 with detailed information'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This is suggestion number 100 with detailed information'
+        )
+      ).toBeInTheDocument();
     });
 
     it('optimizes auto-dismiss timer performance', async () => {
@@ -391,8 +451,16 @@ describe('Form Validation Performance Tests', () => {
     it('handles complex form with multiple validation components efficiently', async () => {
       function ComplexForm() {
         const [formData, setFormData] = React.useState({
-          field1: '', field2: '', field3: '', field4: '', field5: '',
-          field6: '', field7: '', field8: '', field9: '', field10: '',
+          field1: '',
+          field2: '',
+          field3: '',
+          field4: '',
+          field5: '',
+          field6: '',
+          field7: '',
+          field8: '',
+          field9: '',
+          field10: '',
         });
 
         const errors: ValidationError[] = Object.entries(formData)
@@ -410,7 +478,9 @@ describe('Form Validation Performance Tests', () => {
                 key={field}
                 label={field}
                 value={formData[field as keyof typeof formData]}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, [field]: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, [field]: value }))
+                }
                 validationRules={[
                   commonValidationRules.required(),
                   commonValidationRules.minLength(3),
@@ -418,9 +488,9 @@ describe('Form Validation Performance Tests', () => {
                 validateOnChange={true}
               />
             ))}
-            
+
             <MobileFormValidation errors={errors} />
-            
+
             <FormFeedback
               type="info"
               message="Fill all fields to continue"
@@ -431,9 +501,9 @@ describe('Form Validation Performance Tests', () => {
       }
 
       const startTime = performance.now();
-      
+
       render(<ComplexForm />);
-      
+
       const endTime = performance.now();
       const renderTime = endTime - startTime;
 
@@ -454,16 +524,20 @@ describe('Form Validation Performance Tests', () => {
         const [errors, setErrors] = React.useState<ValidationError[]>([]);
 
         const handleChange = (field: string, value: string) => {
-          setValues(prev => ({ ...prev, [field]: value }));
-          
+          setValues((prev) => ({ ...prev, [field]: value }));
+
           // Update errors
           if (!value.trim()) {
-            setErrors(prev => [
-              ...prev.filter(e => e.field !== field),
-              { field, message: `${field} is required`, type: 'error' as const }
+            setErrors((prev) => [
+              ...prev.filter((e) => e.field !== field),
+              {
+                field,
+                message: `${field} is required`,
+                type: 'error' as const,
+              },
             ]);
           } else {
-            setErrors(prev => prev.filter(e => e.field !== field));
+            setErrors((prev) => prev.filter((e) => e.field !== field));
           }
         };
 
@@ -480,7 +554,7 @@ describe('Form Validation Performance Tests', () => {
                 debounceMs={100}
               />
             ))}
-            
+
             <MobileFormValidation errors={errors} />
           </div>
         );
@@ -535,13 +609,18 @@ describe('Form Validation Performance Tests', () => {
                 key={field}
                 label={field}
                 value={values[field]}
-                onValueChange={(value) => setValues(prev => ({ ...prev, [field]: value }))}
+                onValueChange={(value) =>
+                  setValues((prev) => ({ ...prev, [field]: value }))
+                }
                 validationRules={[commonValidationRules.required()]}
                 validateOnChange={true}
               />
             ))}
-            
-            <button onClick={handleReset} className="bg-red-500 text-white p-2 rounded">
+
+            <button
+              onClick={handleReset}
+              className="bg-red-500 text-white p-2 rounded"
+            >
               Reset Form
             </button>
           </div>
@@ -554,11 +633,11 @@ describe('Form Validation Performance Tests', () => {
       expect(screen.getByDisplayValue('initial1')).toBeInTheDocument();
 
       const resetButton = screen.getByText('Reset Form');
-      
+
       const startTime = performance.now();
       await user.click(resetButton);
       const endTime = performance.now();
-      
+
       const resetTime = endTime - startTime;
 
       // Should reset efficiently
@@ -583,23 +662,23 @@ describe('Form Validation Performance Tests', () => {
       );
 
       const input = screen.getByLabelText('Memory Test');
-      
+
       // Start typing to create debounce timers
       await user.type(input, 'test');
-      
+
       // Unmount immediately
       unmount();
 
       // Wait longer than debounce time
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // If we get here without errors, timers were cleaned up properly
       expect(true).toBe(true);
     });
 
     it('efficiently handles component re-renders', () => {
       let renderCount = 0;
-      
+
       function CountingComponent() {
         renderCount++;
         return (

@@ -9,13 +9,16 @@ This document provides comprehensive guidelines on when and how to use the enhan
 #### When to Use BrandButton Variants
 
 ##### Primary (`variant="primary"`)
+
 **Use for:**
+
 - Main call-to-action on a page or section
 - Form submission buttons
 - Primary navigation actions
 - Confirmation actions in dialogs
 
 **Examples:**
+
 ```tsx
 // Form submission
 <BrandButton variant="primary" type="submit">
@@ -34,17 +37,21 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 **Guidelines:**
+
 - Limit to one primary button per section
 - Use for the most important action
 - Always make the action clear and specific
 
 ##### Secondary (`variant="secondary"`)
+
 **Use for:**
+
 - Secondary actions that need emphasis
 - Alternative paths or options
 - Actions that complement the primary action
 
 **Examples:**
+
 ```tsx
 // Complementary action
 <div className="flex gap-3">
@@ -59,18 +66,22 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 **Guidelines:**
+
 - Use sparingly - typically one per section
 - Should not compete with primary actions
 - Use for actions that are important but not primary
 
 ##### Outline (`variant="outline-primary"` / `variant="outline-secondary"`)
+
 **Use for:**
+
 - Cancel actions
 - Secondary navigation
 - Actions that need less visual weight
 - Paired with solid buttons
 
 **Examples:**
+
 ```tsx
 // Cancel action
 <div className="flex gap-3">
@@ -85,18 +96,22 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 **Guidelines:**
+
 - Perfect for cancel/back actions
 - Use when you need a button but don't want visual dominance
 - Good for secondary navigation items
 
 ##### Ghost (`variant="ghost-primary"` / `variant="ghost-secondary"`)
+
 **Use for:**
+
 - Tertiary actions
 - Navigation items
 - Actions within cards or lists
 - Minimal visual impact needed
 
 **Examples:**
+
 ```tsx
 // Navigation
 <nav className="flex space-x-1">
@@ -116,6 +131,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 **Guidelines:**
+
 - Use for actions that should be available but not prominent
 - Good for repeated actions in lists or cards
 - Ideal for navigation items
@@ -149,6 +165,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 #### SmartInput Usage
 
 ##### When to Use Progressive Validation
+
 ```tsx
 // Good: For complex forms where immediate feedback helps
 <SmartInput
@@ -176,6 +193,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 ##### When to Avoid Progressive Validation
+
 ```tsx
 // Simple forms with basic validation
 <SmartInput
@@ -187,6 +205,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 ##### Mobile Optimization
+
 ```tsx
 // Email input with appropriate keyboard
 <SmartInput
@@ -220,6 +239,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 #### MetricCard Usage
 
 ##### Color Selection Guidelines
+
 ```tsx
 // Revenue and financial metrics - use green
 <MetricCard
@@ -255,6 +275,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 ##### Layout Patterns
+
 ```tsx
 // Dashboard grid layout
 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -275,6 +296,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 #### Status Indicators
 
 ##### Status Mapping Guidelines
+
 ```tsx
 // Log statuses
 <StatusIndicator variant="success">Approved</StatusIndicator>
@@ -298,17 +320,18 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ### Mobile-First Approach
 
 #### Button Layouts
+
 ```tsx
 // Mobile: Full width, Desktop: Auto width
 <div className="flex flex-col sm:flex-row gap-3">
-  <BrandButton 
-    variant="primary" 
+  <BrandButton
+    variant="primary"
     className="w-full sm:w-auto"
   >
     Primary Action
   </BrandButton>
-  <BrandButton 
-    variant="outline-primary" 
+  <BrandButton
+    variant="outline-primary"
     className="w-full sm:w-auto"
   >
     Secondary Action
@@ -316,7 +339,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 </div>
 
 // Mobile: Larger touch targets
-<BrandButton 
+<BrandButton
   variant="primary"
   size="lg"
   className="md:size-default"
@@ -326,6 +349,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 #### Form Layouts
+
 ```tsx
 // Responsive form layout
 <form className="space-y-4 md:space-y-6">
@@ -333,24 +357,20 @@ This document provides comprehensive guidelines on when and how to use the enhan
     <SmartInput label="First Name" mobileOptimized />
     <SmartInput label="Last Name" mobileOptimized />
   </div>
-  
-  <SmartInput 
-    label="Email Address" 
+
+  <SmartInput
+    label="Email Address"
     type="email"
     keyboardType="email"
-    mobileOptimized 
+    mobileOptimized
   />
-  
+
   <div className="flex flex-col sm:flex-row gap-3 pt-4">
-    <BrandButton 
-      type="submit" 
-      variant="primary"
-      className="w-full sm:w-auto"
-    >
+    <BrandButton type="submit" variant="primary" className="w-full sm:w-auto">
       Submit
     </BrandButton>
-    <BrandButton 
-      type="button" 
+    <BrandButton
+      type="button"
       variant="outline-primary"
       className="w-full sm:w-auto"
     >
@@ -361,19 +381,20 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 #### Dashboard Layouts
+
 ```tsx
 // Responsive metric cards
 <div className="grid gap-4 sm:gap-6">
   {/* Single column on mobile, 2 on tablet, 4 on desktop */}
   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {primaryMetrics.map(metric => (
+    {primaryMetrics.map((metric) => (
       <MetricCard key={metric.id} {...metric} />
     ))}
   </div>
-  
+
   {/* Secondary metrics - 1 column on mobile, 3 on desktop */}
   <div className="grid gap-4 md:grid-cols-3">
-    {secondaryMetrics.map(metric => (
+    {secondaryMetrics.map((metric) => (
       <MetricCard key={metric.id} {...metric} />
     ))}
   </div>
@@ -383,6 +404,7 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ## ♿ Accessibility Best Practices
 
 ### Keyboard Navigation
+
 ```tsx
 // Ensure proper tab order
 <div className="space-y-4">
@@ -399,8 +421,8 @@ This document provides comprehensive guidelines on when and how to use the enhan
 </div>
 
 // Skip links for screen readers
-<a 
-  href="#main-content" 
+<a
+  href="#main-content"
   className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4"
 >
   Skip to main content
@@ -408,9 +430,10 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 ### ARIA Labels and Descriptions
+
 ```tsx
 // Descriptive button labels
-<BrandButton 
+<BrandButton
   variant="primary"
   aria-label="Save customer information and return to dashboard"
 >
@@ -441,9 +464,10 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ## 🎭 Animation and Motion
 
 ### Respecting User Preferences
+
 ```tsx
 // Components that respect reduced motion
-<BrandButton 
+<BrandButton
   variant="primary"
   loading={isLoading}
   respectReducedMotion={true} // Default
@@ -461,9 +485,10 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ```
 
 ### Appropriate Animation Usage
+
 ```tsx
 // Good: Subtle feedback animations
-<BrandButton 
+<BrandButton
   variant="primary"
   success={isSuccess}
   className="animate-success-celebration"
@@ -482,27 +507,29 @@ This document provides comprehensive guidelines on when and how to use the enhan
 ## 📊 Performance Guidelines
 
 ### Component Optimization
+
 ```tsx
 // Use React.memo for expensive components
-const OptimizedMetricCard = React.memo(MetricCard)
+const OptimizedMetricCard = React.memo(MetricCard);
 
 // Lazy load heavy components
-const HeavyDashboard = React.lazy(() => import('./HeavyDashboard'))
+const HeavyDashboard = React.lazy(() => import('./HeavyDashboard'));
 
 function App() {
   return (
     <Suspense fallback={<BrandLoading variant="spinner" />}>
       <HeavyDashboard />
     </Suspense>
-  )
+  );
 }
 ```
 
 ### Bundle Size Considerations
+
 ```tsx
 // Import only what you need
-import { BrandButton } from '@/components/brand/brand-button'
-import { MetricCard } from '@/components/brand/metric-card'
+import { BrandButton } from '@/components/brand/brand-button';
+import { MetricCard } from '@/components/brand/metric-card';
 
 // Avoid importing entire libraries
 // Don't: import * from '@/components/brand'
@@ -512,10 +539,11 @@ import { MetricCard } from '@/components/brand/metric-card'
 ## 🧪 Testing Guidelines
 
 ### Component Testing
+
 ```tsx
 // Test user interactions
-import { render, screen, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('Form Interaction', () => {
   it('should validate email input', async () => {
@@ -524,31 +552,32 @@ describe('Form Interaction', () => {
         label="Email"
         validationRules={[commonValidationRules.email()]}
       />
-    )
-    
-    const input = screen.getByLabelText(/email/i)
-    await userEvent.type(input, 'invalid-email')
-    fireEvent.blur(input)
-    
-    expect(screen.getByText(/valid email/i)).toBeInTheDocument()
-  })
-})
+    );
+
+    const input = screen.getByLabelText(/email/i);
+    await userEvent.type(input, 'invalid-email');
+    fireEvent.blur(input);
+
+    expect(screen.getByText(/valid email/i)).toBeInTheDocument();
+  });
+});
 ```
 
 ### Accessibility Testing
+
 ```tsx
 // Test keyboard navigation
 it('should be keyboard accessible', () => {
-  render(<BrandButton variant="primary">Click me</BrandButton>)
-  
-  const button = screen.getByRole('button')
-  button.focus()
-  
-  expect(button).toHaveFocus()
-  
-  fireEvent.keyDown(button, { key: 'Enter' })
+  render(<BrandButton variant="primary">Click me</BrandButton>);
+
+  const button = screen.getByRole('button');
+  button.focus();
+
+  expect(button).toHaveFocus();
+
+  fireEvent.keyDown(button, { key: 'Enter' });
   // Assert expected behavior
-})
+});
 
 // Test screen reader support
 it('should have proper ARIA labels', () => {
@@ -558,15 +587,16 @@ it('should have proper ARIA labels', () => {
       value="$1,000"
       aria-label="Revenue is $1,000, increased by 10% this month"
     />
-  )
-  
-  expect(screen.getByLabelText(/revenue is \$1,000/i)).toBeInTheDocument()
-})
+  );
+
+  expect(screen.getByLabelText(/revenue is \$1,000/i)).toBeInTheDocument();
+});
 ```
 
 ## 🔧 Customization Guidelines
 
 ### Theme Customization
+
 ```tsx
 // Extend theme colors
 const customTheme = {
@@ -576,24 +606,25 @@ const customTheme = {
     },
     'hunks-orange': {
       // Custom orange shades
-    }
-  }
-}
+    },
+  },
+};
 
 // Custom component variants
 const CustomButton = styled(BrandButton)`
   &.variant-custom {
-    background-color: ${props => props.theme.colors.custom};
+    background-color: ${(props) => props.theme.colors.custom};
     color: white;
-    
+
     &:hover {
-      background-color: ${props => props.theme.colors.customDark};
+      background-color: ${(props) => props.theme.colors.customDark};
     }
   }
-`
+`;
 ```
 
 ### CSS Custom Properties
+
 ```css
 /* Override theme variables */
 :root {
@@ -614,6 +645,7 @@ const CustomButton = styled(BrandButton)`
 ## 📋 Common Patterns
 
 ### Form Patterns
+
 ```tsx
 // Standard form layout
 function StandardForm() {
@@ -625,33 +657,33 @@ function StandardForm() {
           type="email"
           validationRules={[
             commonValidationRules.required(),
-            commonValidationRules.email()
+            commonValidationRules.email(),
           ]}
           progressiveValidation
         />
-        
+
         <SmartInput
           label="Password"
           type="password"
           showPasswordToggle
           validationRules={[
             commonValidationRules.required(),
-            commonValidationRules.strongPassword()
+            commonValidationRules.strongPassword(),
           ]}
           progressiveValidation
         />
       </div>
-      
+
       <div className="flex flex-col sm:flex-row gap-3">
-        <BrandButton 
-          type="submit" 
+        <BrandButton
+          type="submit"
           variant="primary"
           className="flex-1 sm:flex-none"
         >
           Sign In
         </BrandButton>
-        <BrandButton 
-          type="button" 
+        <BrandButton
+          type="button"
           variant="outline-primary"
           className="flex-1 sm:flex-none"
         >
@@ -659,11 +691,12 @@ function StandardForm() {
         </BrandButton>
       </div>
     </form>
-  )
+  );
 }
 ```
 
 ### Dashboard Patterns
+
 ```tsx
 // Dashboard layout with metrics and actions
 function DashboardLayout() {
@@ -681,29 +714,26 @@ function DashboardLayout() {
           </BrandButton>
         </div>
       </div>
-      
+
       {/* Metrics grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map(metric => (
+        {metrics.map((metric) => (
           <MetricCard key={metric.id} {...metric} />
         ))}
       </div>
-      
+
       {/* Content sections */}
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          {/* Main content */}
-        </div>
-        <div>
-          {/* Sidebar content */}
-        </div>
+        <div className="lg:col-span-2">{/* Main content */}</div>
+        <div>{/* Sidebar content */}</div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
 ### Navigation Patterns
+
 ```tsx
 // Breadcrumb navigation
 <nav aria-label="Breadcrumb" className="mb-6">

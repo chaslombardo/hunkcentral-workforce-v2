@@ -32,7 +32,9 @@ describe('/api/analytics/performance', () => {
     it('should return 401 when not authenticated', async () => {
       mockAuth.mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/analytics/performance');
+      const request = new NextRequest(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
 
       expect(response.status).toBe(401);
@@ -203,7 +205,9 @@ describe('/api/analytics/performance', () => {
       mockPrisma.user.findMany.mockResolvedValue(mockUsers as any);
       mockPrisma.dailyLog.findMany.mockResolvedValue(mockLogs as any);
 
-      const request = new NextRequest('http://localhost:3000/api/analytics/performance');
+      const request = new NextRequest(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
 
       expect(response.status).toBe(200);
@@ -216,7 +220,9 @@ describe('/api/analytics/performance', () => {
       expect(data.dateRange.endDate).toBeDefined();
 
       // Check captain performance data structure
-      const captain1Data = data.captains.find(c => c.captainId === 'captain-1');
+      const captain1Data = data.captains.find(
+        (c) => c.captainId === 'captain-1'
+      );
       expect(captain1Data).toBeDefined();
       expect(captain1Data?.captainName).toBe('Captain One');
       expect(captain1Data?.junkMetrics).toBeDefined();
@@ -255,11 +261,11 @@ describe('/api/analytics/performance', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/analytics/performance?startDate=${startDate}&endDate=${endDate}`
       );
-      
+
       const response = await GET(request);
 
       expect(response.status).toBe(200);
-      
+
       // Verify that prisma was called with the correct date filters
       expect(mockPrisma.dailyLog.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -339,7 +345,7 @@ describe('/api/analytics/performance', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/analytics/performance?captainIds=${captainIds}`
       );
-      
+
       const response = await GET(request);
 
       expect(response.status).toBe(200);
@@ -366,7 +372,7 @@ describe('/api/analytics/performance', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/analytics/performance?includeJunk=false&includeMove=true'
       );
-      
+
       const response = await GET(request);
 
       expect(response.status).toBe(200);
@@ -388,9 +394,13 @@ describe('/api/analytics/performance', () => {
       } as any);
 
       // Mock a database error
-      mockPrisma.user.findMany.mockRejectedValue(new Error('Database connection failed'));
+      mockPrisma.user.findMany.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/analytics/performance');
+      const request = new NextRequest(
+        'http://localhost:3000/api/analytics/performance'
+      );
       const response = await GET(request);
 
       expect(response.status).toBe(500);

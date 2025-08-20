@@ -1,27 +1,53 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  Bug, 
-  Lightbulb, 
-  Zap, 
-  AlertTriangle, 
-  MessageSquare, 
-  Eye, 
-  CheckCircle, 
+import { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Bug,
+  Lightbulb,
+  Zap,
+  AlertTriangle,
+  MessageSquare,
+  Eye,
+  CheckCircle,
   XCircle,
   Clock,
   Filter,
-  Search
-} from "lucide-react";
-import { formatDateDisplay } from "@/lib/formatters";
+  Search,
+} from 'lucide-react';
+import { formatDateDisplay } from '@/lib/formatters';
 
 interface FeedbackItem {
   id: string;
@@ -41,13 +67,15 @@ interface FeedbackItem {
 export function FeedbackManager() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
+  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(
+    null
+  );
   const [showDetails, setShowDetails] = useState(false);
   const [filter, setFilter] = useState({
-    status: "all",
-    type: "all",
-    priority: "all",
-    search: "",
+    status: 'all',
+    type: 'all',
+    priority: 'all',
+    search: '',
   });
 
   useEffect(() => {
@@ -61,145 +89,187 @@ export function FeedbackManager() {
       // For now, we'll use mock data
       const mockFeedback: FeedbackItem[] = [
         {
-          id: "1",
-          type: "bug",
-          title: "Log submission fails on mobile",
-          description: "When trying to submit a log on mobile, the form doesn't respond after clicking submit.",
-          priority: "high",
-          status: "open",
-          page: "/logs/create",
-          email: "captain@example.com",
-          timestamp: "2024-01-15T10:30:00Z",
+          id: '1',
+          type: 'bug',
+          title: 'Log submission fails on mobile',
+          description:
+            "When trying to submit a log on mobile, the form doesn't respond after clicking submit.",
+          priority: 'high',
+          status: 'open',
+          page: '/logs/create',
+          email: 'captain@example.com',
+          timestamp: '2024-01-15T10:30:00Z',
         },
         {
-          id: "2",
-          type: "feature",
-          title: "Add bulk approval for logs",
-          description: "It would be helpful to approve multiple logs at once instead of one by one.",
-          priority: "medium",
-          status: "in_progress",
-          page: "/logs/review",
-          timestamp: "2024-01-14T14:20:00Z",
+          id: '2',
+          type: 'feature',
+          title: 'Add bulk approval for logs',
+          description:
+            'It would be helpful to approve multiple logs at once instead of one by one.',
+          priority: 'medium',
+          status: 'in_progress',
+          page: '/logs/review',
+          timestamp: '2024-01-14T14:20:00Z',
         },
         {
-          id: "3",
-          type: "improvement",
-          title: "Dashboard loading is slow",
-          description: "The dashboard takes too long to load, especially the metrics cards.",
-          priority: "medium",
-          status: "resolved",
-          page: "/dashboard",
-          timestamp: "2024-01-13T09:15:00Z",
-          resolution: "Optimized database queries and added caching. Load time reduced from 3s to 1.2s.",
-          resolvedAt: "2024-01-14T16:45:00Z",
+          id: '3',
+          type: 'improvement',
+          title: 'Dashboard loading is slow',
+          description:
+            'The dashboard takes too long to load, especially the metrics cards.',
+          priority: 'medium',
+          status: 'resolved',
+          page: '/dashboard',
+          timestamp: '2024-01-13T09:15:00Z',
+          resolution:
+            'Optimized database queries and added caching. Load time reduced from 3s to 1.2s.',
+          resolvedAt: '2024-01-14T16:45:00Z',
         },
         {
-          id: "4",
-          type: "performance",
-          title: "Payroll report generation timeout",
-          description: "Large payroll reports fail to generate and show a timeout error.",
-          priority: "critical",
-          status: "open",
-          page: "/reports/payroll",
-          email: "admin@example.com",
-          timestamp: "2024-01-15T08:45:00Z",
+          id: '4',
+          type: 'performance',
+          title: 'Payroll report generation timeout',
+          description:
+            'Large payroll reports fail to generate and show a timeout error.',
+          priority: 'critical',
+          status: 'open',
+          page: '/reports/payroll',
+          email: 'admin@example.com',
+          timestamp: '2024-01-15T08:45:00Z',
         },
         {
-          id: "5",
-          type: "general",
-          title: "Love the new design!",
-          description: "The recent UI updates look great and make the app much easier to use.",
-          priority: "low",
-          status: "closed",
-          page: "/dashboard",
-          timestamp: "2024-01-12T16:30:00Z",
+          id: '5',
+          type: 'general',
+          title: 'Love the new design!',
+          description:
+            'The recent UI updates look great and make the app much easier to use.',
+          priority: 'low',
+          status: 'closed',
+          page: '/dashboard',
+          timestamp: '2024-01-12T16:30:00Z',
         },
       ];
 
       setFeedback(mockFeedback);
     } catch (error) {
-      console.error("Failed to load feedback:", error);
+      console.error('Failed to load feedback:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateFeedbackStatus = async (id: string, status: string, resolution?: string) => {
+  const updateFeedbackStatus = async (
+    id: string,
+    status: string,
+    resolution?: string
+  ) => {
     try {
       // In a real implementation, this would call your API
-      setFeedback(prev => prev.map(item => 
-        item.id === id 
-          ? { 
-              ...item, 
-              status, 
-              resolution,
-              resolvedAt: status === 'resolved' ? new Date().toISOString() : undefined
-            }
-          : item
-      ));
-      
+      setFeedback((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status,
+                resolution,
+                resolvedAt:
+                  status === 'resolved' ? new Date().toISOString() : undefined,
+              }
+            : item
+        )
+      );
+
       if (selectedFeedback?.id === id) {
-        setSelectedFeedback(prev => prev ? {
-          ...prev,
-          status,
-          resolution,
-          resolvedAt: status === 'resolved' ? new Date().toISOString() : undefined
-        } : null);
+        setSelectedFeedback((prev) =>
+          prev
+            ? {
+                ...prev,
+                status,
+                resolution,
+                resolvedAt:
+                  status === 'resolved' ? new Date().toISOString() : undefined,
+              }
+            : null
+        );
       }
     } catch (error) {
-      console.error("Failed to update feedback:", error);
+      console.error('Failed to update feedback:', error);
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "bug": return <Bug className="h-4 w-4 text-red-500" />;
-      case "feature": return <Lightbulb className="h-4 w-4 text-yellow-500" />;
-      case "improvement": return <Zap className="h-4 w-4 text-blue-500" />;
-      case "performance": return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      default: return <MessageSquare className="h-4 w-4 text-gray-500" />;
+      case 'bug':
+        return <Bug className="h-4 w-4 text-red-500" />;
+      case 'feature':
+        return <Lightbulb className="h-4 w-4 text-yellow-500" />;
+      case 'improvement':
+        return <Zap className="h-4 w-4 text-blue-500" />;
+      case 'performance':
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+      default:
+        return <MessageSquare className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "critical": return "destructive";
-      case "high": return "destructive";
-      case "medium": return "default";
-      case "low": return "secondary";
-      default: return "outline";
+      case 'critical':
+        return 'destructive';
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'default';
+      case 'low':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open": return "destructive";
-      case "in_progress": return "default";
-      case "resolved": return "default";
-      case "closed": return "secondary";
-      default: return "outline";
+      case 'open':
+        return 'destructive';
+      case 'in_progress':
+        return 'default';
+      case 'resolved':
+        return 'default';
+      case 'closed':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
-  const filteredFeedback = feedback.filter(item => {
-    if (filter.status !== "all" && item.status !== filter.status) return false;
-    if (filter.type !== "all" && item.type !== filter.type) return false;
-    if (filter.priority !== "all" && item.priority !== filter.priority) return false;
-    if (filter.search && !item.title.toLowerCase().includes(filter.search.toLowerCase()) &&
-        !item.description.toLowerCase().includes(filter.search.toLowerCase())) return false;
+  const filteredFeedback = feedback.filter((item) => {
+    if (filter.status !== 'all' && item.status !== filter.status) return false;
+    if (filter.type !== 'all' && item.type !== filter.type) return false;
+    if (filter.priority !== 'all' && item.priority !== filter.priority)
+      return false;
+    if (
+      filter.search &&
+      !item.title.toLowerCase().includes(filter.search.toLowerCase()) &&
+      !item.description.toLowerCase().includes(filter.search.toLowerCase())
+    )
+      return false;
     return true;
   });
 
   const stats = {
     total: feedback.length,
-    open: feedback.filter(f => f.status === "open").length,
-    inProgress: feedback.filter(f => f.status === "in_progress").length,
-    resolved: feedback.filter(f => f.status === "resolved").length,
-    critical: feedback.filter(f => f.priority === "critical").length,
+    open: feedback.filter((f) => f.status === 'open').length,
+    inProgress: feedback.filter((f) => f.status === 'in_progress').length,
+    resolved: feedback.filter((f) => f.status === 'resolved').length,
+    critical: feedback.filter((f) => f.priority === 'critical').length,
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading feedback...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        Loading feedback...
+      </div>
+    );
   }
 
   return (
@@ -227,7 +297,9 @@ export function FeedbackManager() {
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.inProgress}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -235,7 +307,9 @@ export function FeedbackManager() {
             <CardTitle className="text-sm font-medium">Resolved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.resolved}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -243,7 +317,9 @@ export function FeedbackManager() {
             <CardTitle className="text-sm font-medium">Critical</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.critical}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -263,11 +339,18 @@ export function FeedbackManager() {
               <Input
                 placeholder="Search feedback..."
                 value={filter.search}
-                onChange={(e) => setFilter(prev => ({ ...prev, search: e.target.value }))}
+                onChange={(e) =>
+                  setFilter((prev) => ({ ...prev, search: e.target.value }))
+                }
                 className="pl-9"
               />
             </div>
-            <Select value={filter.status} onValueChange={(value) => setFilter(prev => ({ ...prev, status: value }))}>
+            <Select
+              value={filter.status}
+              onValueChange={(value) =>
+                setFilter((prev) => ({ ...prev, status: value }))
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -279,7 +362,12 @@ export function FeedbackManager() {
                 <SelectItem value="closed">Closed</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filter.type} onValueChange={(value) => setFilter(prev => ({ ...prev, type: value }))}>
+            <Select
+              value={filter.type}
+              onValueChange={(value) =>
+                setFilter((prev) => ({ ...prev, type: value }))
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -292,7 +380,12 @@ export function FeedbackManager() {
                 <SelectItem value="general">General</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filter.priority} onValueChange={(value) => setFilter(prev => ({ ...prev, priority: value }))}>
+            <Select
+              value={filter.priority}
+              onValueChange={(value) =>
+                setFilter((prev) => ({ ...prev, priority: value }))
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
@@ -342,12 +435,28 @@ export function FeedbackManager() {
                     <div className="max-w-xs truncate">{item.title}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getPriorityColor(item.priority) as "default" | "secondary" | "destructive" | "outline"}>
+                    <Badge
+                      variant={
+                        getPriorityColor(item.priority) as
+                          | 'default'
+                          | 'secondary'
+                          | 'destructive'
+                          | 'outline'
+                      }
+                    >
                       {item.priority}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(item.status) as "default" | "secondary" | "destructive" | "outline"}>
+                    <Badge
+                      variant={
+                        getStatusColor(item.status) as
+                          | 'default'
+                          | 'secondary'
+                          | 'destructive'
+                          | 'outline'
+                      }
+                    >
                       {item.status.replace('_', ' ')}
                     </Badge>
                   </TableCell>
@@ -356,9 +465,7 @@ export function FeedbackManager() {
                       {item.page}
                     </code>
                   </TableCell>
-                  <TableCell>
-                    {formatDateDisplay(item.timestamp)}
-                  </TableCell>
+                  <TableCell>{formatDateDisplay(item.timestamp)}</TableCell>
                   <TableCell>
                     <Button
                       variant="outline"
@@ -390,10 +497,26 @@ export function FeedbackManager() {
                 </DialogTitle>
                 <DialogDescription>
                   <div className="flex items-center gap-4 mt-2">
-                    <Badge variant={getPriorityColor(selectedFeedback.priority) as "default" | "secondary" | "destructive" | "outline"}>
+                    <Badge
+                      variant={
+                        getPriorityColor(selectedFeedback.priority) as
+                          | 'default'
+                          | 'secondary'
+                          | 'destructive'
+                          | 'outline'
+                      }
+                    >
                       {selectedFeedback.priority} priority
                     </Badge>
-                    <Badge variant={getStatusColor(selectedFeedback.status) as "default" | "secondary" | "destructive" | "outline"}>
+                    <Badge
+                      variant={
+                        getStatusColor(selectedFeedback.status) as
+                          | 'default'
+                          | 'secondary'
+                          | 'destructive'
+                          | 'outline'
+                      }
+                    >
                       {selectedFeedback.status.replace('_', ' ')}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
@@ -434,7 +557,8 @@ export function FeedbackManager() {
                     </p>
                     {selectedFeedback.resolvedAt && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Resolved on {new Date(selectedFeedback.resolvedAt).toLocaleString()}
+                        Resolved on{' '}
+                        {new Date(selectedFeedback.resolvedAt).toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -446,8 +570,10 @@ export function FeedbackManager() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateFeedbackStatus(selectedFeedback.id, "in_progress")}
-                      disabled={selectedFeedback.status === "in_progress"}
+                      onClick={() =>
+                        updateFeedbackStatus(selectedFeedback.id, 'in_progress')
+                      }
+                      disabled={selectedFeedback.status === 'in_progress'}
                     >
                       <Clock className="h-4 w-4 mr-2" />
                       In Progress
@@ -456,12 +582,16 @@ export function FeedbackManager() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const resolution = prompt("Enter resolution details:");
+                        const resolution = prompt('Enter resolution details:');
                         if (resolution) {
-                          updateFeedbackStatus(selectedFeedback.id, "resolved", resolution);
+                          updateFeedbackStatus(
+                            selectedFeedback.id,
+                            'resolved',
+                            resolution
+                          );
                         }
                       }}
-                      disabled={selectedFeedback.status === "resolved"}
+                      disabled={selectedFeedback.status === 'resolved'}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Resolve
@@ -469,8 +599,10 @@ export function FeedbackManager() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateFeedbackStatus(selectedFeedback.id, "closed")}
-                      disabled={selectedFeedback.status === "closed"}
+                      onClick={() =>
+                        updateFeedbackStatus(selectedFeedback.id, 'closed')
+                      }
+                      disabled={selectedFeedback.status === 'closed'}
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       Close

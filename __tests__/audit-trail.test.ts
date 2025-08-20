@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getAuditLogs, getEntityAuditHistory, getUserActivitySummary } from '@/lib/actions/audit';
-import { createAuditLog, trackChanges, logDailyLogChange } from '@/lib/auditLogger';
+import {
+  getAuditLogs,
+  getEntityAuditHistory,
+  getUserActivitySummary,
+} from '@/lib/actions/audit';
+import {
+  createAuditLog,
+  trackChanges,
+  logDailyLogChange,
+} from '@/lib/auditLogger';
 import { prisma } from '@/lib/prisma';
 
 // Mock Prisma
@@ -288,15 +296,15 @@ describe('Audit Trail System', () => {
       });
 
       it('should ignore system fields', () => {
-        const before = { 
-          id: 'old-id', 
-          status: 'draft', 
+        const before = {
+          id: 'old-id',
+          status: 'draft',
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
         };
-        const after = { 
-          id: 'new-id', 
-          status: 'submitted', 
+        const after = {
+          id: 'new-id',
+          status: 'submitted',
           createdAt: new Date('2024-01-02'),
           updatedAt: new Date('2024-01-02'),
         };
@@ -335,15 +343,19 @@ describe('Audit Trail System', () => {
       });
 
       it('should handle errors gracefully', async () => {
-        mockPrisma.auditLog.create.mockRejectedValue(new Error('Database error'));
+        mockPrisma.auditLog.create.mockRejectedValue(
+          new Error('Database error')
+        );
 
         // Should not throw error
-        await expect(createAuditLog({
-          entityType: 'daily_log',
-          entityId: 'log-1',
-          action: 'create',
-          userId: 'user-1',
-        })).resolves.toBeUndefined();
+        await expect(
+          createAuditLog({
+            entityType: 'daily_log',
+            entityId: 'log-1',
+            action: 'create',
+            userId: 'user-1',
+          })
+        ).resolves.toBeUndefined();
       });
     });
 

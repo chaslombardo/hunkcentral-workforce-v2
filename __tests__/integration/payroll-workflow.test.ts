@@ -3,7 +3,15 @@
  * Tests complete payroll generation with mixed compensation models
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  vi,
+} from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { calculatePayroll } from '@/lib/payCalculator';
 import { submitLog, approveLog } from '@/lib/actions/logs';
@@ -26,7 +34,7 @@ const { auth } = await import('@/lib/auth');
 describe('Payroll Workflow Integration', () => {
   // Generate unique test IDs to avoid conflicts
   const testRunId = Date.now().toString();
-  
+
   const managerUser = {
     user: {
       id: `payroll-manager-${testRunId}`,
@@ -56,10 +64,10 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Payroll Captain',
           roles: ['captain'],
-          rateJunkCaptain: 22.00,
-          rateJunkWingman: 16.00,
-          rateMoveCaptain: 25.00,
-          rateMoveWingman: 18.00,
+          rateJunkCaptain: 22.0,
+          rateJunkWingman: 16.0,
+          rateMoveCaptain: 25.0,
+          rateMoveWingman: 18.0,
           junkBonusGoal: 0.15, // 15% goal for bonus testing
           moveBonusGoal: 0.25, // 25% goal for bonus testing
         },
@@ -70,8 +78,8 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Payroll Wingman',
           roles: ['wingman'],
-          rateJunkWingman: 16.00,
-          rateMoveWingman: 18.00,
+          rateJunkWingman: 16.0,
+          rateMoveWingman: 18.0,
         },
         // Base salary employee
         {
@@ -80,8 +88,8 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Base Salary Employee',
           roles: ['admin'],
-          rateAdmin: 20.00,
-          salaryAmount: 1000.00,
+          rateAdmin: 20.0,
+          salaryAmount: 1000.0,
           salaryFrequency: 'weekly',
           salaryType: 'base',
         },
@@ -92,8 +100,8 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Guaranteed Salary Employee',
           roles: ['estimating'],
-          rateEstimating: 25.00,
-          salaryAmount: 800.00,
+          rateEstimating: 25.0,
+          salaryAmount: 800.0,
           salaryFrequency: 'weekly',
           salaryType: 'guaranteed',
         },
@@ -104,8 +112,8 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Supplemental Salary Employee',
           roles: ['warehouse'],
-          rateWarehouse: 18.00,
-          salaryAmount: 200.00,
+          rateWarehouse: 18.0,
+          salaryAmount: 200.0,
           salaryFrequency: 'weekly',
           salaryType: 'supplemental',
         },
@@ -117,7 +125,7 @@ describe('Payroll Workflow Integration', () => {
           fullName: 'Payroll Sales',
           roles: ['sales'],
           commissionRate: 6.0,
-          rateAdmin: 15.00,
+          rateAdmin: 15.0,
         },
         // Manager
         {
@@ -126,7 +134,7 @@ describe('Payroll Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Payroll Manager',
           roles: ['manager'],
-          rateAdmin: 30.00,
+          rateAdmin: 30.0,
         },
       ],
     });
@@ -358,9 +366,18 @@ describe('Payroll Workflow Integration', () => {
       // Step 3: Approve all logs
       vi.mocked(auth).mockResolvedValue(managerUser);
 
-      const approve1Result = await approveLog(log1Result.data?.id, 'Payroll test approval 1');
-      const approve2Result = await approveLog(log2Result.data?.id, 'Payroll test approval 2');
-      const approve3Result = await approveLog(log3Result.data?.id, 'Payroll test approval 3');
+      const approve1Result = await approveLog(
+        log1Result.data?.id,
+        'Payroll test approval 1'
+      );
+      const approve2Result = await approveLog(
+        log2Result.data?.id,
+        'Payroll test approval 2'
+      );
+      const approve3Result = await approveLog(
+        log3Result.data?.id,
+        'Payroll test approval 3'
+      );
 
       expect(approve1Result.success).toBe(true);
       expect(approve2Result.success).toBe(true);
@@ -419,7 +436,9 @@ describe('Payroll Workflow Integration', () => {
       expect(payrollCalculations).toHaveLength(6);
 
       // Verify captain payroll (hourly + tips + bonus)
-      const captainPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-captain-id');
+      const captainPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-captain-id'
+      );
       expect(captainPayroll).toBeDefined();
       expect(captainPayroll!.totalHours).toBe(14); // 6 + 8 hours
       expect(captainPayroll!.grossWages).toBe(332); // (6 * 22) + (8 * 25)
@@ -428,7 +447,9 @@ describe('Payroll Workflow Integration', () => {
       expect(captainPayroll!.breakdown.salaryType).toBeNull(); // No salary
 
       // Verify wingman payroll (hourly + tips)
-      const wingmanPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-wingman-id');
+      const wingmanPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-wingman-id'
+      );
       expect(wingmanPayroll).toBeDefined();
       expect(wingmanPayroll!.totalHours).toBe(14); // 6 + 8 hours
       expect(wingmanPayroll!.grossWages).toBe(240); // (6 * 16) + (8 * 18)
@@ -436,7 +457,9 @@ describe('Payroll Workflow Integration', () => {
       expect(wingmanPayroll!.bonuses).toBe(0); // No bonuses for wingman
 
       // Verify base salary employee (salary replaces wages)
-      const baseSalaryPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-salary-base-id');
+      const baseSalaryPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-salary-base-id'
+      );
       expect(baseSalaryPayroll).toBeDefined();
       expect(baseSalaryPayroll!.totalHours).toBe(40);
       expect(baseSalaryPayroll!.grossWages).toBe(0); // Base salary replaces hourly wages
@@ -445,7 +468,9 @@ describe('Payroll Workflow Integration', () => {
       expect(baseSalaryPayroll!.totalPay).toBe(1000); // Just salary
 
       // Verify guaranteed salary employee (higher of wages vs guarantee)
-      const guaranteedSalaryPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-salary-guaranteed-id');
+      const guaranteedSalaryPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-salary-guaranteed-id'
+      );
       expect(guaranteedSalaryPayroll).toBeDefined();
       expect(guaranteedSalaryPayroll!.totalHours).toBe(4);
       expect(guaranteedSalaryPayroll!.grossWages).toBe(100); // 4 * 25 (co-captain rate)
@@ -455,7 +480,9 @@ describe('Payroll Workflow Integration', () => {
       expect(guaranteedSalaryPayroll!.totalPay).toBe(800);
 
       // Verify supplemental salary employee (wages + supplemental)
-      const supplementalSalaryPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-salary-supplemental-id');
+      const supplementalSalaryPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-salary-supplemental-id'
+      );
       expect(supplementalSalaryPayroll).toBeDefined();
       expect(supplementalSalaryPayroll!.totalHours).toBe(35);
       expect(supplementalSalaryPayroll!.grossWages).toBe(630); // 35 * 18
@@ -463,7 +490,9 @@ describe('Payroll Workflow Integration', () => {
       expect(supplementalSalaryPayroll!.totalPay).toBe(830); // 630 + 200
 
       // Verify sales employee (wages + commission)
-      const salesPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-sales-id');
+      const salesPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-sales-id'
+      );
       expect(salesPayroll).toBeDefined();
       expect(salesPayroll!.totalHours).toBe(20);
       expect(salesPayroll!.grossWages).toBe(300); // 20 * 15
@@ -471,10 +500,19 @@ describe('Payroll Workflow Integration', () => {
       expect(salesPayroll!.totalPay).toBe(540); // 300 + 240
 
       // Step 5: Verify total payroll calculations
-      const totalPayroll = payrollCalculations.reduce((sum, p) => sum + p.totalPay, 0);
-      const totalHours = payrollCalculations.reduce((sum, p) => sum + p.totalHours, 0);
+      const totalPayroll = payrollCalculations.reduce(
+        (sum, p) => sum + p.totalPay,
+        0
+      );
+      const totalHours = payrollCalculations.reduce(
+        (sum, p) => sum + p.totalHours,
+        0
+      );
       const totalTips = payrollCalculations.reduce((sum, p) => sum + p.tips, 0);
-      const totalCommission = payrollCalculations.reduce((sum, p) => sum + p.commission, 0);
+      const totalCommission = payrollCalculations.reduce(
+        (sum, p) => sum + p.commission,
+        0
+      );
 
       expect(totalHours).toBe(127); // Sum of all hours worked
       expect(totalTips).toBe(500); // 200 + 300 distributed
@@ -492,8 +530,8 @@ describe('Payroll Workflow Integration', () => {
             password: 'hashedpassword',
             fullName: 'Bi-weekly Salary Employee',
             roles: ['admin'],
-            rateAdmin: 20.00,
-            salaryAmount: 2000.00, // Bi-weekly
+            rateAdmin: 20.0,
+            salaryAmount: 2000.0, // Bi-weekly
             salaryFrequency: 'bi-weekly',
             salaryType: 'base',
           },
@@ -503,8 +541,8 @@ describe('Payroll Workflow Integration', () => {
             password: 'hashedpassword',
             fullName: 'Monthly Salary Employee',
             roles: ['admin'],
-            rateAdmin: 20.00,
-            salaryAmount: 4330.00, // Monthly
+            rateAdmin: 20.0,
+            salaryAmount: 4330.0, // Monthly
             salaryFrequency: 'monthly',
             salaryType: 'base',
           },
@@ -528,11 +566,15 @@ describe('Payroll Workflow Integration', () => {
       );
 
       // Verify bi-weekly conversion (2000 / 2 = 1000 weekly)
-      const biweeklyPayroll = payrollCalculations.find(p => p.employeeId === 'biweekly-salary-id');
+      const biweeklyPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'biweekly-salary-id'
+      );
       expect(biweeklyPayroll!.breakdown.salaryAmount).toBe(1000);
 
       // Verify monthly conversion (4330 / 4.33 ≈ 1000 weekly)
-      const monthlyPayroll = payrollCalculations.find(p => p.employeeId === 'monthly-salary-id');
+      const monthlyPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'monthly-salary-id'
+      );
       expect(monthlyPayroll!.breakdown.salaryAmount).toBeCloseTo(1000, 0);
 
       // Clean up
@@ -554,23 +596,25 @@ describe('Payroll Workflow Integration', () => {
       });
 
       // Create commission without corresponding hourly work
-      const commissions = [{
-        id: 'test-commission-id',
-        salesId: 'payroll-sales-id',
-        sales: users[0],
-        jobId: 'ZERO-HOURS-JOB',
-        clientName: 'Zero Hours Client',
-        jobType: 'junk' as const,
-        targetDate: new Date('2024-02-01'),
-        estimatedRevenue: 500,
-        actualRevenue: 600,
-        commissionAmount: 36, // 6% of 600
-        status: 'matched' as const,
-        matchedLogId: 'fake-log-id',
-        matchedLog: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }];
+      const commissions = [
+        {
+          id: 'test-commission-id',
+          salesId: 'payroll-sales-id',
+          sales: users[0],
+          jobId: 'ZERO-HOURS-JOB',
+          clientName: 'Zero Hours Client',
+          jobType: 'junk' as const,
+          targetDate: new Date('2024-02-01'),
+          estimatedRevenue: 500,
+          actualRevenue: 600,
+          commissionAmount: 36, // 6% of 600
+          status: 'matched' as const,
+          matchedLogId: 'fake-log-id',
+          matchedLog: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
 
       const payrollCalculations = calculatePayroll(
         users as User[],
@@ -580,7 +624,9 @@ describe('Payroll Workflow Integration', () => {
         new Date('2024-02-29')
       );
 
-      const salesPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-sales-id');
+      const salesPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-sales-id'
+      );
       expect(salesPayroll!.totalHours).toBe(0);
       expect(salesPayroll!.grossWages).toBe(0);
       expect(salesPayroll!.commission).toBe(36);
@@ -608,30 +654,34 @@ describe('Payroll Workflow Integration', () => {
         lastEditedBy: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        jobs: [{
-          id: 'high-tip-job-id',
-          logId: 'high-hour-log-id',
-          log: {} as DailyLog,
-          jobType: 'junk' as const,
-          jobId: 'HIGH-TIP-JOB',
-          clientName: 'High Tip Client',
-          revenue: 1000,
-          tips: 500, // High tips
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
-        hours: [{
-          id: 'high-hour-entry-id',
-          logId: 'high-hour-log-id',
-          log: {} as DailyLog,
-          employeeId: 'payroll-salary-guaranteed-id',
-          employee: users[0],
-          department: 'estimating' as const,
-          hours: 40, // 40 * 25 = 1000 wages + 500 tips = 1500 total
-          isCoCaptain: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
+        jobs: [
+          {
+            id: 'high-tip-job-id',
+            logId: 'high-hour-log-id',
+            log: {} as DailyLog,
+            jobType: 'junk' as const,
+            jobId: 'HIGH-TIP-JOB',
+            clientName: 'High Tip Client',
+            revenue: 1000,
+            tips: 500, // High tips
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        hours: [
+          {
+            id: 'high-hour-entry-id',
+            logId: 'high-hour-log-id',
+            log: {} as DailyLog,
+            employeeId: 'payroll-salary-guaranteed-id',
+            employee: users[0],
+            department: 'estimating' as const,
+            hours: 40, // 40 * 25 = 1000 wages + 500 tips = 1500 total
+            isCoCaptain: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       };
 
       const payrollCalculations = calculatePayroll(
@@ -642,7 +692,9 @@ describe('Payroll Workflow Integration', () => {
         new Date('2024-02-29')
       );
 
-      const guaranteedPayroll = payrollCalculations.find(p => p.employeeId === 'payroll-salary-guaranteed-id');
+      const guaranteedPayroll = payrollCalculations.find(
+        (p) => p.employeeId === 'payroll-salary-guaranteed-id'
+      );
       expect(guaranteedPayroll!.grossWages).toBe(1000); // 40 * 25
       expect(guaranteedPayroll!.tips).toBe(500);
       expect(guaranteedPayroll!.breakdown.salaryAmount).toBe(0); // No salary supplement needed

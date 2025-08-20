@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 12);
   const admin = await prisma.user.upsert({
@@ -16,16 +15,16 @@ async function main() {
       fullName: 'System Administrator',
       roles: ['admin', 'manager'],
       // Set default rates
-      rateJunkCaptain: 20.00,
-      rateJunkWingman: 15.00,
-      rateMoveCaptain: 22.00,
-      rateMoveWingman: 17.00,
-      rateZigma: 18.00,
-      rateTraining: 16.00,
-      rateEstimating: 25.00,
-      rateWarehouse: 14.00,
-      rateAdmin: 20.00,
-      commissionRate: 5.00,
+      rateJunkCaptain: 20.0,
+      rateJunkWingman: 15.0,
+      rateMoveCaptain: 22.0,
+      rateMoveWingman: 17.0,
+      rateZigma: 18.0,
+      rateTraining: 16.0,
+      rateEstimating: 25.0,
+      rateWarehouse: 14.0,
+      rateAdmin: 20.0,
+      commissionRate: 5.0,
     },
   });
 
@@ -39,10 +38,10 @@ async function main() {
       password: captainPassword,
       fullName: 'John Captain',
       roles: ['captain'],
-      rateJunkCaptain: 20.00,
-      rateJunkWingman: 15.00,
-      rateMoveCaptain: 22.00,
-      rateMoveWingman: 17.00,
+      rateJunkCaptain: 20.0,
+      rateJunkWingman: 15.0,
+      rateMoveCaptain: 22.0,
+      rateMoveWingman: 17.0,
     },
   });
 
@@ -56,8 +55,8 @@ async function main() {
       password: wingmanPassword,
       fullName: 'Mike Wingman',
       roles: ['wingman'],
-      rateJunkWingman: 15.00,
-      rateMoveWingman: 17.00,
+      rateJunkWingman: 15.0,
+      rateMoveWingman: 17.0,
     },
   });
 
@@ -71,7 +70,7 @@ async function main() {
       password: salesPassword,
       fullName: 'Sarah Sales',
       roles: ['sales'],
-      commissionRate: 8.00,
+      commissionRate: 8.0,
     },
   });
 
@@ -85,7 +84,7 @@ async function main() {
       password: managerPassword,
       fullName: 'Lisa Manager',
       roles: ['manager'],
-      rateAdmin: 25.00,
+      rateAdmin: 25.0,
     },
   });
 
@@ -97,20 +96,22 @@ async function main() {
   endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
 
   const payPeriodName = `Week of ${startOfWeek.toISOString().split('T')[0]}`;
-  
+
   // Check if pay period already exists
   const existingPayPeriod = await prisma.payPeriod.findFirst({
-    where: { name: payPeriodName }
+    where: { name: payPeriodName },
   });
 
-  const payPeriod = existingPayPeriod || await prisma.payPeriod.create({
-    data: {
-      name: payPeriodName,
-      startDate: startOfWeek,
-      endDate: endOfWeek,
-      status: 'open',
-    },
-  });
+  const payPeriod =
+    existingPayPeriod ||
+    (await prisma.payPeriod.create({
+      data: {
+        name: payPeriodName,
+        startDate: startOfWeek,
+        endDate: endOfWeek,
+        status: 'open',
+      },
+    }));
 
   // Seed completed successfully
 }

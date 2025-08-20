@@ -1,46 +1,59 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, Loader2, Sparkles, Settings, Play, Pause } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { 
-  useMotionPreference, 
+import * as React from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+  Settings,
+  Play,
+  Pause,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  useMotionPreference,
   getMicroInteractionClasses,
-  ANIMATION_PRESETS 
-} from "@/lib/motion-preferences"
-import { 
-  FadeIn, 
-  SlideIn, 
-  SuccessMotion, 
+  ANIMATION_PRESETS,
+} from '@/lib/motion-preferences';
+import {
+  FadeIn,
+  SlideIn,
+  SuccessMotion,
   HoverMotion,
-  StaggeredMotion 
-} from "@/components/ui/motion-wrapper"
-import { BrandButton } from "@/components/brand/brand-button"
-import { BrandLoading } from "@/components/brand/brand-loading"
-import { SuccessAnimation } from "@/components/forms/success-animation"
+  StaggeredMotion,
+} from '@/components/ui/motion-wrapper';
+import { BrandButton } from '@/components/brand/brand-button';
+import { BrandLoading } from '@/components/brand/brand-loading';
+import { SuccessAnimation } from '@/components/forms/success-animation';
 
 export function MotionPreferencesDemo() {
-  const { preference, prefersReducedMotion } = useMotionPreference()
-  const [showAnimations, setShowAnimations] = React.useState(false)
-  const [triggerSuccess, setTriggerSuccess] = React.useState(0)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const { preference, prefersReducedMotion } = useMotionPreference();
+  const [showAnimations, setShowAnimations] = React.useState(false);
+  const [triggerSuccess, setTriggerSuccess] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleTriggerAnimations = () => {
-    setShowAnimations(!showAnimations)
-  }
+    setShowAnimations(!showAnimations);
+  };
 
   const handleTriggerSuccess = () => {
-    setTriggerSuccess(prev => prev + 1)
-  }
+    setTriggerSuccess((prev) => prev + 1);
+  };
 
   const handleLoadingDemo = () => {
-    setIsLoading(true)
-    setTimeout(() => setIsLoading(false), 2000)
-  }
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 2000);
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -64,14 +77,13 @@ export function MotionPreferencesDemo() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <Badge variant={prefersReducedMotion ? "destructive" : "default"}>
+            <Badge variant={prefersReducedMotion ? 'destructive' : 'default'}>
               {preference === 'reduce' ? 'Reduced Motion' : 'No Preference'}
             </Badge>
             <p className="text-sm text-muted-foreground">
-              {prefersReducedMotion 
-                ? "Animations are simplified or disabled"
-                : "Full animations are enabled"
-              }
+              {prefersReducedMotion
+                ? 'Animations are simplified or disabled'
+                : 'Full animations are enabled'}
             </p>
           </div>
         </CardContent>
@@ -81,22 +93,30 @@ export function MotionPreferencesDemo() {
       <Card>
         <CardHeader>
           <CardTitle>Animation Controls</CardTitle>
-          <CardDescription>
-            Test different animation behaviors
-          </CardDescription>
+          <CardDescription>Test different animation behaviors</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <Button onClick={handleTriggerAnimations} variant="outline">
-              {showAnimations ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+              {showAnimations ? (
+                <Pause className="h-4 w-4 mr-2" />
+              ) : (
+                <Play className="h-4 w-4 mr-2" />
+              )}
               {showAnimations ? 'Reset' : 'Trigger'} Entrance Animations
             </Button>
             <Button onClick={handleTriggerSuccess} variant="outline">
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Trigger Success Animation
             </Button>
-            <Button onClick={handleLoadingDemo} variant="outline" disabled={isLoading}>
-              <Loader2 className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            <Button
+              onClick={handleLoadingDemo}
+              variant="outline"
+              disabled={isLoading}
+            >
+              <Loader2
+                className={cn('h-4 w-4 mr-2', isLoading && 'animate-spin')}
+              />
               {isLoading ? 'Loading...' : 'Test Loading'}
             </Button>
           </div>
@@ -119,7 +139,9 @@ export function MotionPreferencesDemo() {
             )}
             {!showAnimations && (
               <div className="h-16 bg-muted rounded-md flex items-center justify-center">
-                <span className="text-sm text-muted-foreground">Click &quot;Trigger&quot; to see animation</span>
+                <span className="text-sm text-muted-foreground">
+                  Click &quot;Trigger&quot; to see animation
+                </span>
               </div>
             )}
           </CardContent>
@@ -139,7 +161,9 @@ export function MotionPreferencesDemo() {
             )}
             {!showAnimations && (
               <div className="h-16 bg-muted rounded-md flex items-center justify-center">
-                <span className="text-sm text-muted-foreground">Click &quot;Trigger&quot; to see animation</span>
+                <span className="text-sm text-muted-foreground">
+                  Click &quot;Trigger&quot; to see animation
+                </span>
               </div>
             )}
           </CardContent>
@@ -151,8 +175,8 @@ export function MotionPreferencesDemo() {
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <SuccessMotion key={triggerSuccess} trigger={triggerSuccess}>
-              <SuccessAnimation 
-                size="md" 
+              <SuccessAnimation
+                size="md"
                 showSparkles={!prefersReducedMotion}
                 onComplete={() => {
                   // Animation completed
@@ -173,7 +197,10 @@ export function MotionPreferencesDemo() {
         </CardHeader>
         <CardContent>
           {showAnimations && (
-            <StaggeredMotion staggerDelay={100} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StaggeredMotion
+              staggerDelay={100}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            >
               {Array.from({ length: 8 }, (_, i) => (
                 <div
                   key={i}
@@ -191,7 +218,9 @@ export function MotionPreferencesDemo() {
                   key={i}
                   className="h-20 bg-muted rounded-md flex items-center justify-center"
                 >
-                  <span className="text-sm text-muted-foreground">Item {i + 1}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Item {i + 1}
+                  </span>
                 </div>
               ))}
             </div>
@@ -203,9 +232,7 @@ export function MotionPreferencesDemo() {
       <Card>
         <CardHeader>
           <CardTitle>Micro-interactions</CardTitle>
-          <CardDescription>
-            Subtle hover and focus effects
-          </CardDescription>
+          <CardDescription>Subtle hover and focus effects</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -215,7 +242,9 @@ export function MotionPreferencesDemo() {
                   <div className="text-center">
                     <Sparkles className="h-8 w-8 mx-auto mb-2 text-hunks-green" />
                     <p className="text-sm font-medium">Hover Card</p>
-                    <p className="text-xs text-muted-foreground">Hover to see effect</p>
+                    <p className="text-xs text-muted-foreground">
+                      Hover to see effect
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -227,7 +256,9 @@ export function MotionPreferencesDemo() {
                   <div className="text-center">
                     <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-hunks-orange" />
                     <p className="text-sm font-medium">CSS Hover</p>
-                    <p className="text-xs text-muted-foreground">Pure CSS animation</p>
+                    <p className="text-xs text-muted-foreground">
+                      Pure CSS animation
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -238,7 +269,9 @@ export function MotionPreferencesDemo() {
                 <div className="text-center">
                   <Settings className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm font-medium">Static Card</p>
-                  <p className="text-xs text-muted-foreground">No hover effect</p>
+                  <p className="text-xs text-muted-foreground">
+                    No hover effect
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -262,9 +295,7 @@ export function MotionPreferencesDemo() {
             <BrandButton variant="secondary" success={triggerSuccess > 0}>
               Success Button
             </BrandButton>
-            <BrandButton variant="outline-primary">
-              Outline Button
-            </BrandButton>
+            <BrandButton variant="outline-primary">Outline Button</BrandButton>
           </div>
 
           <Separator />
@@ -289,19 +320,21 @@ export function MotionPreferencesDemo() {
       <Card>
         <CardHeader>
           <CardTitle>Animation Presets</CardTitle>
-          <CardDescription>
-            Available animation configurations
-          </CardDescription>
+          <CardDescription>Available animation configurations</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(ANIMATION_PRESETS).map(([name, config]) => (
               <div key={name} className="p-3 border rounded-md">
-                <h4 className="font-medium capitalize">{name.replace(/([A-Z])/g, ' $1')}</h4>
+                <h4 className="font-medium capitalize">
+                  {name.replace(/([A-Z])/g, ' $1')}
+                </h4>
                 <div className="text-xs text-muted-foreground mt-1 space-y-1">
                   <div>Duration: {config.duration}ms</div>
                   <div>Easing: {config.easing}</div>
-                  {'iterations' in config && config.iterations && <div>Iterations: {config.iterations}</div>}
+                  {'iterations' in config && config.iterations && (
+                    <div>Iterations: {config.iterations}</div>
+                  )}
                 </div>
               </div>
             ))}
@@ -317,15 +350,25 @@ export function MotionPreferencesDemo() {
         <CardContent className="space-y-2 text-sm">
           <p>To test reduced motion preferences:</p>
           <ul className="list-disc list-inside space-y-1 ml-4">
-            <li><strong>macOS:</strong> System Preferences → Accessibility → Display → Reduce motion</li>
-            <li><strong>Windows:</strong> Settings → Ease of Access → Display → Show animations</li>
-            <li><strong>Browser:</strong> DevTools → Rendering → Emulate CSS prefers-reduced-motion</li>
+            <li>
+              <strong>macOS:</strong> System Preferences → Accessibility →
+              Display → Reduce motion
+            </li>
+            <li>
+              <strong>Windows:</strong> Settings → Ease of Access → Display →
+              Show animations
+            </li>
+            <li>
+              <strong>Browser:</strong> DevTools → Rendering → Emulate CSS
+              prefers-reduced-motion
+            </li>
           </ul>
           <p className="mt-4">
-            When reduced motion is enabled, animations will be simplified or replaced with static alternatives.
+            When reduced motion is enabled, animations will be simplified or
+            replaced with static alternatives.
           </p>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

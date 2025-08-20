@@ -4,7 +4,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateProductionSession, requireProductionAuth } from '@/lib/production-auth';
+import {
+  validateProductionSession,
+  requireProductionAuth,
+} from '@/lib/production-auth';
 import { logProductionError } from '@/lib/production-error-logger';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
@@ -202,8 +205,8 @@ describe('Production Authentication', () => {
 
     it('should handle session timeout', async () => {
       // Mock a session that rejects after timeout
-      mockGetServerSession.mockImplementation(
-        () => Promise.reject(new Error('Session validation timeout'))
+      mockGetServerSession.mockImplementation(() =>
+        Promise.reject(new Error('Session validation timeout'))
       );
 
       const result = await validateProductionSession(mockRequest, {
@@ -267,7 +270,9 @@ describe('Production Authentication', () => {
     it('should throw error for invalid session', async () => {
       mockGetServerSession.mockResolvedValue(null);
 
-      await expect(requireProductionAuth(mockRequest)).rejects.toThrow('No valid session found');
+      await expect(requireProductionAuth(mockRequest)).rejects.toThrow(
+        'No valid session found'
+      );
     });
 
     it('should redirect when configured', async () => {
@@ -356,7 +361,7 @@ describe('Production Authentication', () => {
 
       const results = await Promise.all(promises);
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.isValid).toBe(true);
       });
     });

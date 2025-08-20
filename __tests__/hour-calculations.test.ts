@@ -16,15 +16,15 @@ const mockUsers: User[] = [
     email: 'captain@test.com',
     fullName: 'John Captain',
     roles: ['captain'],
-    rateJunkCaptain: 20.00,
-    rateJunkWingman: 15.00,
-    rateMoveCaptain: 22.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
-    rateTraining: 16.00,
-    rateEstimating: 25.00,
-    rateWarehouse: 14.00,
-    rateAdmin: 20.00,
+    rateJunkCaptain: 20.0,
+    rateJunkWingman: 15.0,
+    rateMoveCaptain: 22.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
+    rateTraining: 16.0,
+    rateEstimating: 25.0,
+    rateWarehouse: 14.0,
+    rateAdmin: 20.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -35,9 +35,9 @@ const mockUsers: User[] = [
     email: 'wingman@test.com',
     fullName: 'Mike Wingman',
     roles: ['wingman'],
-    rateJunkWingman: 15.00,
-    rateMoveWingman: 17.00,
-    rateZigma: 18.00,
+    rateJunkWingman: 15.0,
+    rateMoveWingman: 17.0,
+    rateZigma: 18.0,
     junkBonusGoal: 0.14,
     moveBonusGoal: 0.24,
     createdAt: new Date(),
@@ -49,30 +49,30 @@ describe('Hour Calculations', () => {
   describe('getHourlyRate', () => {
     it('should return captain rate for co-captain in junk department', () => {
       const rate = getHourlyRate(mockUsers[0], 'junk', true);
-      expect(rate).toBe(20.00);
+      expect(rate).toBe(20.0);
     });
 
     it('should return wingman rate for regular employee in junk department', () => {
       const rate = getHourlyRate(mockUsers[0], 'junk', false);
-      expect(rate).toBe(15.00);
+      expect(rate).toBe(15.0);
     });
 
     it('should return captain rate for co-captain in move department', () => {
       const rate = getHourlyRate(mockUsers[0], 'move', true);
-      expect(rate).toBe(22.00);
+      expect(rate).toBe(22.0);
     });
 
     it('should return wingman rate for regular employee in move department', () => {
       const rate = getHourlyRate(mockUsers[0], 'move', false);
-      expect(rate).toBe(17.00);
+      expect(rate).toBe(17.0);
     });
 
     it('should return appropriate rate for other departments', () => {
-      expect(getHourlyRate(mockUsers[0], 'zigma', false)).toBe(18.00);
-      expect(getHourlyRate(mockUsers[0], 'training', false)).toBe(16.00);
-      expect(getHourlyRate(mockUsers[0], 'estimating', false)).toBe(25.00);
-      expect(getHourlyRate(mockUsers[0], 'warehouse', false)).toBe(14.00);
-      expect(getHourlyRate(mockUsers[0], 'admin', false)).toBe(20.00);
+      expect(getHourlyRate(mockUsers[0], 'zigma', false)).toBe(18.0);
+      expect(getHourlyRate(mockUsers[0], 'training', false)).toBe(16.0);
+      expect(getHourlyRate(mockUsers[0], 'estimating', false)).toBe(25.0);
+      expect(getHourlyRate(mockUsers[0], 'warehouse', false)).toBe(14.0);
+      expect(getHourlyRate(mockUsers[0], 'admin', false)).toBe(20.0);
     });
 
     it('should use default rates when employee rates are not set', () => {
@@ -81,9 +81,9 @@ describe('Hour Calculations', () => {
         rateJunkWingman: undefined,
         rateMoveWingman: undefined,
       };
-      
-      expect(getHourlyRate(userWithoutRates, 'junk', false)).toBe(15.00);
-      expect(getHourlyRate(userWithoutRates, 'move', false)).toBe(17.00);
+
+      expect(getHourlyRate(userWithoutRates, 'junk', false)).toBe(15.0);
+      expect(getHourlyRate(userWithoutRates, 'move', false)).toBe(17.0);
     });
   });
 
@@ -111,7 +111,7 @@ describe('Hour Calculations', () => {
 
     it('should calculate total hours and labor costs correctly', () => {
       const result = calculateSectionHours(mockHours, mockUsers);
-      
+
       expect(result.totalHours).toBe(18); // 8 + 6 + 4
       // Labor cost: (8 * 20) + (6 * 15) + (4 * 17) = 160 + 90 + 68 = 318
       expect(result.totalLaborCost).toBe(318);
@@ -119,7 +119,7 @@ describe('Hour Calculations', () => {
 
     it('should filter hours by section correctly', () => {
       const junkResult = calculateSectionHours(mockHours, mockUsers, 'junk');
-      
+
       expect(junkResult.totalHours).toBe(14); // 8 + 6
       // Labor cost: (8 * 20) + (6 * 15) = 160 + 90 = 250
       expect(junkResult.totalLaborCost).toBe(250);
@@ -127,17 +127,21 @@ describe('Hour Calculations', () => {
 
     it('should generate employee summary correctly', () => {
       const result = calculateSectionHours(mockHours, mockUsers);
-      
+
       expect(result.employeeSummary).toHaveLength(2);
-      
-      const captain = result.employeeSummary.find(emp => emp.employeeId === '1');
+
+      const captain = result.employeeSummary.find(
+        (emp) => emp.employeeId === '1'
+      );
       expect(captain).toBeDefined();
       expect(captain?.totalHours).toBe(12); // 8 + 4
       expect(captain?.laborCost).toBe(228); // (8 * 20) + (4 * 17)
       expect(captain?.isCoCaptain).toBe(true);
       expect(captain?.departments).toHaveLength(2);
 
-      const wingman = result.employeeSummary.find(emp => emp.employeeId === '2');
+      const wingman = result.employeeSummary.find(
+        (emp) => emp.employeeId === '2'
+      );
       expect(wingman).toBeDefined();
       expect(wingman?.totalHours).toBe(6);
       expect(wingman?.laborCost).toBe(90); // 6 * 15
@@ -162,7 +166,7 @@ describe('Hour Calculations', () => {
       ];
 
       const result = calculateSectionHours(otherHours, mockUsers, 'other');
-      
+
       expect(result.totalHours).toBe(5); // 2 + 3
       // Labor cost: (2 * 16) + (3 * 20) = 32 + 60 = 92
       expect(result.totalLaborCost).toBe(92);

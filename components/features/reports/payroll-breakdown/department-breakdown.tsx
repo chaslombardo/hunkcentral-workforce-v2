@@ -12,20 +12,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  TooltipProvider,
-} from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { Separator } from '@/components/ui/separator';
-import {
-  Clock,
-  Info,
-  Star,
-} from 'lucide-react';
+import { Clock, Info, Star } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 
 import type { Department, User } from '@/types';
@@ -66,14 +60,14 @@ const DEPARTMENT_COLORS: Record<Department, string> = {
   admin: 'bg-gray-500',
 };
 
-function DepartmentCard({ 
-  department, 
-  totalHours, 
+function DepartmentCard({
+  department,
+  totalHours,
   totalPay,
-  user
-}: { 
-  department: DepartmentBreakdownData; 
-  totalHours: number; 
+  user,
+}: {
+  department: DepartmentBreakdownData;
+  totalHours: number;
   totalPay: number;
   user: User;
 }) {
@@ -105,7 +99,9 @@ function DepartmentCard({
   const rateInfo = getRateInfo();
 
   return (
-    <Card className={`@container/card ${department.isPrimary ? 'border-hunks-green border-2' : ''}`}>
+    <Card
+      className={`@container/card ${department.isPrimary ? 'border-hunks-green border-2' : ''}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${colorClass} flex-shrink-0`} />
@@ -129,28 +125,37 @@ function DepartmentCard({
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">{departmentLabel} Rate Information</h4>
+                <h4 className="text-sm font-semibold">
+                  {departmentLabel} Rate Information
+                </h4>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>Current Rate:</span>
-                    <span className="font-mono">{formatCurrency(rateInfo.currentRate)}/hr</span>
+                    <span className="font-mono">
+                      {formatCurrency(rateInfo.currentRate)}/hr
+                    </span>
                   </div>
                   {rateInfo.captainRate && (
                     <div className="flex justify-between">
                       <span>Captain Rate:</span>
-                      <span className="font-mono">{formatCurrency(rateInfo.captainRate)}/hr</span>
+                      <span className="font-mono">
+                        {formatCurrency(rateInfo.captainRate)}/hr
+                      </span>
                     </div>
                   )}
                   {rateInfo.wingmanRate && (
                     <div className="flex justify-between">
                       <span>Wingman Rate:</span>
-                      <span className="font-mono">{formatCurrency(rateInfo.wingmanRate)}/hr</span>
+                      <span className="font-mono">
+                        {formatCurrency(rateInfo.wingmanRate)}/hr
+                      </span>
                     </div>
                   )}
                 </div>
                 <Separator />
                 <p className="text-xs text-muted-foreground">
-                  {department.department === 'junk' || department.department === 'move' 
+                  {department.department === 'junk' ||
+                  department.department === 'move'
                     ? 'Captain rates apply when you are the captain or co-captain on a job.'
                     : 'This department has a single hourly rate for all roles.'}
                 </p>
@@ -170,25 +175,24 @@ function DepartmentCard({
               {department.percentage.toFixed(1)}%
             </Badge>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Hours Distribution:</span>
               <span>{department.percentage.toFixed(1)}% of total</span>
             </div>
-            <Progress 
-              value={department.percentage} 
-              className="h-2"
-            />
+            <Progress value={department.percentage} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{department.hours} hours</span>
               <span>{totalHours} total</span>
             </div>
           </div>
-          
+
           <div className="flex justify-between text-sm">
             <span>Pay Distribution:</span>
-            <span>{((department.grossPay / totalPay) * 100).toFixed(1)}% of total</span>
+            <span>
+              {((department.grossPay / totalPay) * 100).toFixed(1)}% of total
+            </span>
           </div>
         </div>
       </CardContent>
@@ -196,11 +200,11 @@ function DepartmentCard({
   );
 }
 
-export function DepartmentBreakdown({ 
-  departments, 
-  totalHours, 
+export function DepartmentBreakdown({
+  departments,
+  totalHours,
   totalPay,
-  user 
+  user,
 }: DepartmentBreakdownProps) {
   // Handle undefined or null departments array
   if (!departments || !Array.isArray(departments)) {
@@ -215,10 +219,10 @@ export function DepartmentBreakdown({
       </Card>
     );
   }
-  
+
   // Filter out departments with no hours
-  const activeDepartments = departments.filter(dept => dept.hours > 0);
-  
+  const activeDepartments = departments.filter((dept) => dept.hours > 0);
+
   // Sort by hours (descending) to show primary department first
   const sortedDepartments = activeDepartments.sort((a, b) => b.hours - a.hours);
 
@@ -284,9 +288,7 @@ export function DepartmentBreakdown({
                 <div className="text-muted-foreground text-xs">Departments</div>
               </div>
               <div className="text-center">
-                <div className="font-semibold text-lg">
-                  {totalHours}h
-                </div>
+                <div className="font-semibold text-lg">{totalHours}h</div>
                 <div className="text-muted-foreground text-xs">Total Hours</div>
               </div>
               <div className="text-center">
@@ -299,7 +301,9 @@ export function DepartmentBreakdown({
                 <div className="font-semibold capitalize text-lg">
                   {sortedDepartments[0]?.department || 'N/A'}
                 </div>
-                <div className="text-muted-foreground text-xs">Primary Dept</div>
+                <div className="text-muted-foreground text-xs">
+                  Primary Dept
+                </div>
               </div>
             </div>
           </CardContent>

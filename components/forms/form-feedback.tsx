@@ -4,16 +4,19 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { 
-  AlertCircle, 
+import {
+  AlertCircle,
   AlertTriangle,
-  Info, 
+  Info,
   RefreshCw,
   ExternalLink,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react';
 import { InlineSuccessCheck } from './success-animation';
-import { usePerformanceMonitor, bundleAnalysis } from '@/lib/performance-monitor';
+import {
+  usePerformanceMonitor,
+  bundleAnalysis,
+} from '@/lib/performance-monitor';
 
 export interface FormFeedbackProps {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -44,7 +47,7 @@ const feedbackVariants = {
     iconClass: 'text-hunks-green',
     titleClass: 'text-hunks-green',
     messageClass: 'text-hunks-green/90',
-    animationClass: 'animate-in slide-in-from-top-2 duration-500'
+    animationClass: 'animate-in slide-in-from-top-2 duration-500',
   },
   error: {
     icon: AlertCircle,
@@ -52,7 +55,7 @@ const feedbackVariants = {
     iconClass: 'text-destructive',
     titleClass: 'text-destructive',
     messageClass: 'text-destructive/90',
-    animationClass: 'animate-in slide-in-from-top-2 duration-300'
+    animationClass: 'animate-in slide-in-from-top-2 duration-300',
   },
   warning: {
     icon: AlertTriangle,
@@ -60,7 +63,7 @@ const feedbackVariants = {
     iconClass: 'text-hunks-orange',
     titleClass: 'text-hunks-orange',
     messageClass: 'text-hunks-orange/90',
-    animationClass: 'animate-in slide-in-from-top-2 duration-400'
+    animationClass: 'animate-in slide-in-from-top-2 duration-400',
   },
   info: {
     icon: Info,
@@ -68,8 +71,8 @@ const feedbackVariants = {
     iconClass: 'text-blue-600',
     titleClass: 'text-blue-800',
     messageClass: 'text-blue-700',
-    animationClass: 'animate-in slide-in-from-top-2 duration-400'
-  }
+    animationClass: 'animate-in slide-in-from-top-2 duration-400',
+  },
 };
 
 export const FormFeedback = React.memo(function FormFeedback({
@@ -83,7 +86,7 @@ export const FormFeedback = React.memo(function FormFeedback({
   onRetry,
   onDismiss,
   showAnimation = true,
-  className
+  className,
 }: FormFeedbackProps) {
   const monitor = usePerformanceMonitor('FormFeedback');
   const startMarkRef = React.useRef<string>('');
@@ -99,7 +102,11 @@ export const FormFeedback = React.memo(function FormFeedback({
 
   // Warn about large props in development
   React.useEffect(() => {
-    bundleAnalysis.warnLargeProps('FormFeedback', { actions, suggestions }, 300);
+    bundleAnalysis.warnLargeProps(
+      'FormFeedback',
+      { actions, suggestions },
+      300
+    );
   }, [actions, suggestions]);
 
   // Memoize variant and icon
@@ -117,7 +124,7 @@ export const FormFeedback = React.memo(function FormFeedback({
   }, [type, onDismiss]);
 
   return (
-    <Alert 
+    <Alert
       className={cn(
         variant.alertClass,
         showAnimation && variant.animationClass,
@@ -126,26 +133,22 @@ export const FormFeedback = React.memo(function FormFeedback({
       )}
     >
       <Icon className={cn('h-4 w-4', variant.iconClass)} />
-      
+
       <div className="flex-1">
         {title && (
           <AlertTitle className={cn('mb-2', variant.titleClass)}>
             {title}
           </AlertTitle>
         )}
-        
+
         <AlertDescription className={variant.messageClass}>
           <div className="space-y-3">
             {/* Main message */}
             <p>{message}</p>
-            
+
             {/* Additional details */}
-            {details && (
-              <p className="text-sm opacity-80">
-                {details}
-              </p>
-            )}
-            
+            {details && <p className="text-sm opacity-80">{details}</p>}
+
             {/* Suggestions */}
             {suggestions.length > 0 && (
               <div className="space-y-2">
@@ -162,7 +165,7 @@ export const FormFeedback = React.memo(function FormFeedback({
                 </ul>
               </div>
             )}
-            
+
             {/* Actions */}
             {(actions.length > 0 || onRetry || helpLink) && (
               <div className="flex flex-wrap items-center gap-2 pt-2">
@@ -178,7 +181,7 @@ export const FormFeedback = React.memo(function FormFeedback({
                     Try Again
                   </Button>
                 )}
-                
+
                 {/* Custom actions */}
                 {actions.map((action, index) => {
                   const ActionIcon = action.icon;
@@ -195,7 +198,7 @@ export const FormFeedback = React.memo(function FormFeedback({
                     </Button>
                   );
                 })}
-                
+
                 {/* Help link */}
                 {helpLink && (
                   <Button
@@ -213,7 +216,7 @@ export const FormFeedback = React.memo(function FormFeedback({
           </div>
         </AlertDescription>
       </div>
-      
+
       {/* Dismiss button */}
       {onDismiss && (
         <Button
@@ -222,8 +225,7 @@ export const FormFeedback = React.memo(function FormFeedback({
           onClick={onDismiss}
           className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-black/5"
         >
-          <span className="sr-only">Dismiss</span>
-          ×
+          <span className="sr-only">Dismiss</span>×
         </Button>
       )}
     </Alert>
@@ -236,13 +238,13 @@ export const formFeedbackPresets = {
   formSubmitted: (entityName = 'form'): Omit<FormFeedbackProps, 'type'> => ({
     title: 'Success!',
     message: `Your ${entityName} has been submitted successfully.`,
-    showAnimation: true
+    showAnimation: true,
   }),
 
   dataSaved: (entityName = 'data'): Omit<FormFeedbackProps, 'type'> => ({
     title: 'Saved',
     message: `Your ${entityName} has been saved.`,
-    showAnimation: true
+    showAnimation: true,
   }),
 
   // Error presets
@@ -252,8 +254,8 @@ export const formFeedbackPresets = {
     suggestions: [
       'Check all required fields are filled',
       'Ensure all data is in the correct format',
-      'Review any highlighted fields for specific requirements'
-    ]
+      'Review any highlighted fields for specific requirements',
+    ],
   }),
 
   networkError: (): Omit<FormFeedbackProps, 'type'> => ({
@@ -263,12 +265,12 @@ export const formFeedbackPresets = {
     suggestions: [
       'Check your internet connection',
       'Try refreshing the page',
-      'Contact support if the problem persists'
+      'Contact support if the problem persists',
     ],
     helpLink: {
       text: 'Contact Support',
-      url: '/support'
-    }
+      url: '/support',
+    },
   }),
 
   serverError: (): Omit<FormFeedbackProps, 'type'> => ({
@@ -278,95 +280,115 @@ export const formFeedbackPresets = {
     suggestions: [
       'Try submitting again in a few minutes',
       'Save your work locally if possible',
-      'Contact support if you need immediate assistance'
+      'Contact support if you need immediate assistance',
     ],
     helpLink: {
       text: 'Contact Support',
-      url: '/support'
-    }
+      url: '/support',
+    },
   }),
 
   permissionError: (): Omit<FormFeedbackProps, 'type'> => ({
     title: 'Permission Denied',
-    message: 'You don\'t have permission to perform this action.',
+    message: "You don't have permission to perform this action.",
     suggestions: [
       'Contact your administrator for access',
-      'Make sure you\'re logged in with the correct account',
-      'Check if your session has expired'
+      "Make sure you're logged in with the correct account",
+      'Check if your session has expired',
     ],
     actions: [
       {
         label: 'Login Again',
-        onClick: () => window.location.href = '/auth/login',
-        variant: 'outline' as const
-      }
-    ]
+        onClick: () => (window.location.href = '/auth/login'),
+        variant: 'outline' as const,
+      },
+    ],
   }),
 
   // Warning presets
-  unsavedChanges: (onSave: () => void, onDiscard: () => void): Omit<FormFeedbackProps, 'type'> => ({
+  unsavedChanges: (
+    onSave: () => void,
+    onDiscard: () => void
+  ): Omit<FormFeedbackProps, 'type'> => ({
     title: 'Unsaved Changes',
     message: 'You have unsaved changes that will be lost.',
     actions: [
       {
         label: 'Save Changes',
         onClick: onSave,
-        variant: 'default' as const
+        variant: 'default' as const,
       },
       {
         label: 'Discard Changes',
         onClick: onDiscard,
-        variant: 'outline' as const
-      }
-    ]
+        variant: 'outline' as const,
+      },
+    ],
   }),
 
   // Info presets
   autoSaved: (): Omit<FormFeedbackProps, 'type'> => ({
     message: 'Your changes have been automatically saved.',
-    showAnimation: false
+    showAnimation: false,
   }),
 
   formTips: (tips: string[]): Omit<FormFeedbackProps, 'type'> => ({
     title: 'Tips',
     message: 'Here are some tips to help you complete this form:',
-    suggestions: tips
-  })
+    suggestions: tips,
+  }),
 };
 
 // Hook for managing form feedback state
 export function useFormFeedback() {
-  const [feedback, setFeedback] = React.useState<(FormFeedbackProps & { id: string }) | null>(null);
+  const [feedback, setFeedback] = React.useState<
+    (FormFeedbackProps & { id: string }) | null
+  >(null);
 
-  const showFeedback = React.useCallback((props: Omit<FormFeedbackProps, 'onDismiss'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    setFeedback({
-      ...props,
-      id,
-      onDismiss: () => setFeedback(null)
-    });
-  }, []);
+  const showFeedback = React.useCallback(
+    (props: Omit<FormFeedbackProps, 'onDismiss'>) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      setFeedback({
+        ...props,
+        id,
+        onDismiss: () => setFeedback(null),
+      });
+    },
+    []
+  );
 
   const clearFeedback = React.useCallback(() => {
     setFeedback(null);
   }, []);
 
   // Convenience methods for common feedback types
-  const showSuccess = React.useCallback((props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
-    showFeedback({ ...props, type: 'success' });
-  }, [showFeedback]);
+  const showSuccess = React.useCallback(
+    (props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
+      showFeedback({ ...props, type: 'success' });
+    },
+    [showFeedback]
+  );
 
-  const showError = React.useCallback((props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
-    showFeedback({ ...props, type: 'error' });
-  }, [showFeedback]);
+  const showError = React.useCallback(
+    (props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
+      showFeedback({ ...props, type: 'error' });
+    },
+    [showFeedback]
+  );
 
-  const showWarning = React.useCallback((props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
-    showFeedback({ ...props, type: 'warning' });
-  }, [showFeedback]);
+  const showWarning = React.useCallback(
+    (props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
+      showFeedback({ ...props, type: 'warning' });
+    },
+    [showFeedback]
+  );
 
-  const showInfo = React.useCallback((props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
-    showFeedback({ ...props, type: 'info' });
-  }, [showFeedback]);
+  const showInfo = React.useCallback(
+    (props: Omit<FormFeedbackProps, 'type' | 'onDismiss'>) => {
+      showFeedback({ ...props, type: 'info' });
+    },
+    [showFeedback]
+  );
 
   return {
     feedback,
@@ -375,6 +397,6 @@ export function useFormFeedback() {
     showError,
     showWarning,
     showInfo,
-    clearFeedback
+    clearFeedback,
   };
 }

@@ -3,9 +3,19 @@
 import React from 'react';
 import { AlertTriangle, Bug, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { logClientComponentError } from '@/lib/client-error-logger';
 
 interface ErrorBoundaryState {
@@ -17,12 +27,19 @@ interface ErrorBoundaryState {
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; resetError: () => void; errorId?: string }>;
+  fallback?: React.ComponentType<{
+    error: Error;
+    resetError: () => void;
+    errorId?: string;
+  }>;
   level?: 'page' | 'component' | 'section';
   name?: string;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -35,7 +52,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const errorId = this.state.errorId;
-    
+
     // Enhanced error logging with more context
     logClientComponentError(error, {
       component: this.props.name || 'error_boundary',
@@ -73,21 +90,25 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     if (this.state.hasError) {
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
-        return <FallbackComponent 
-          error={this.state.error!} 
-          resetError={this.resetError} 
-          errorId={this.state.errorId}
-        />;
+        return (
+          <FallbackComponent
+            error={this.state.error!}
+            resetError={this.resetError}
+            errorId={this.state.errorId}
+          />
+        );
       }
 
       const isPageLevel = this.props.level === 'page';
       const errorTitle = isPageLevel ? 'Page Error' : 'Component Error';
-      const errorDescription = isPageLevel 
+      const errorDescription = isPageLevel
         ? 'This page encountered an error and cannot be displayed properly.'
         : 'A component on this page encountered an error.';
 
       return (
-        <Card className={`${isPageLevel ? 'max-w-2xl mx-auto mt-8' : 'max-w-md mx-auto mt-4'} border-destructive/20`}>
+        <Card
+          className={`${isPageLevel ? 'max-w-2xl mx-auto mt-8' : 'max-w-md mx-auto mt-4'} border-destructive/20`}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
@@ -98,9 +119,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription>
-              {errorDescription}
-            </CardDescription>
+            <CardDescription>{errorDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -115,21 +134,24 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 </div>
               )}
 
-              {process.env.NODE_ENV === 'development' && this.state.error?.stack && (
-                <Collapsible>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Bug className="h-4 w-4 mr-2" />
-                      Show Stack Trace (Development)
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2">
-                    <div className="text-xs font-mono bg-muted p-3 rounded border max-h-40 overflow-y-auto">
-                      <pre className="whitespace-pre-wrap">{this.state.error.stack}</pre>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
+              {process.env.NODE_ENV === 'development' &&
+                this.state.error?.stack && (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Bug className="h-4 w-4 mr-2" />
+                        Show Stack Trace (Development)
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <div className="text-xs font-mono bg-muted p-3 rounded border max-h-40 overflow-y-auto">
+                        <pre className="whitespace-pre-wrap">
+                          {this.state.error.stack}
+                        </pre>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
               <div className="flex gap-2">
                 <Button onClick={this.resetError} className="flex-1">
@@ -137,9 +159,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   Try Again
                 </Button>
                 {isPageLevel && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.href = '/dashboard'}
+                  <Button
+                    variant="outline"
+                    onClick={() => (window.location.href = '/dashboard')}
                     className="flex-1"
                   >
                     <Home className="h-4 w-4 mr-2" />
@@ -150,7 +172,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
               {process.env.NODE_ENV === 'production' && (
                 <div className="text-xs text-muted-foreground text-center">
-                  Error ID: {this.state.errorId} - This error has been automatically reported.
+                  Error ID: {this.state.errorId} - This error has been
+                  automatically reported.
                 </div>
               )}
             </div>

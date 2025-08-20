@@ -49,7 +49,7 @@ class AnalyticsService {
   // Track user interactions
   trackInteraction(event: UserInteractionEvent) {
     if (typeof window === 'undefined') return; // Server-side guard
-    
+
     this.eventQueue.push({
       ...event,
       timestamp: event.timestamp || new Date(),
@@ -64,7 +64,7 @@ class AnalyticsService {
   // Track performance metrics
   trackPerformance(metric: PerformanceMetric) {
     if (typeof window === 'undefined') return; // Server-side guard
-    
+
     this.performanceQueue.push({
       ...metric,
       timestamp: metric.timestamp || new Date(),
@@ -91,7 +91,12 @@ class AnalyticsService {
   }
 
   // Track form interactions
-  trackFormInteraction(formName: string, action: 'start' | 'submit' | 'abandon', page: string, userId?: string) {
+  trackFormInteraction(
+    formName: string,
+    action: 'start' | 'submit' | 'abandon',
+    page: string,
+    userId?: string
+  ) {
     this.trackInteraction({
       eventType: action === 'submit' ? 'form_submit' : 'click',
       element: formName,
@@ -112,7 +117,12 @@ class AnalyticsService {
   }
 
   // Track errors
-  trackError(error: Error, page: string, userId?: string, context?: Record<string, unknown>) {
+  trackError(
+    error: Error,
+    page: string,
+    userId?: string,
+    context?: Record<string, unknown>
+  ) {
     this.trackInteraction({
       eventType: 'error',
       page,
@@ -145,7 +155,7 @@ class AnalyticsService {
             metrics: this.performanceQueue,
           }),
         });
-        
+
         this.eventQueue = [];
         this.performanceQueue = [];
       }
@@ -154,8 +164,6 @@ class AnalyticsService {
       // Don't throw error to prevent breaking the UI
     }
   }
-
-
 
   // Clean up on shutdown
   destroy() {
@@ -186,7 +194,11 @@ export function useAnalytics() {
     analytics.trackFormInteraction(formName, 'submit', page);
   };
 
-  const trackError = (error: Error, page: string, context?: Record<string, unknown>) => {
+  const trackError = (
+    error: Error,
+    page: string,
+    context?: Record<string, unknown>
+  ) => {
     analytics.trackError(error, page, undefined, context);
   };
 

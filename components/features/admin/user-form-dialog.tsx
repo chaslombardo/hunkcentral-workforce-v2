@@ -34,12 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 import { CreateUserSchema, UpdateUserSchema } from '@/lib/validations';
@@ -72,11 +67,32 @@ interface User {
 }
 
 const USER_ROLES: { value: UserRole; label: string; color: string }[] = [
-  { value: 'admin', label: 'Admin', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  { value: 'manager', label: 'Manager', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  { value: 'captain', label: 'Captain', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  { value: 'sales', label: 'Sales', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  { value: 'wingman', label: 'Wingman', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' },
+  {
+    value: 'admin',
+    label: 'Admin',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  },
+  {
+    value: 'manager',
+    label: 'Manager',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  },
+  {
+    value: 'captain',
+    label: 'Captain',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  },
+  {
+    value: 'sales',
+    label: 'Sales',
+    color:
+      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  },
+  {
+    value: 'wingman',
+    label: 'Wingman',
+    color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+  },
 ];
 
 const SALARY_FREQUENCIES: { value: SalaryFrequency; label: string }[] = [
@@ -85,10 +101,26 @@ const SALARY_FREQUENCIES: { value: SalaryFrequency; label: string }[] = [
   { value: 'monthly', label: 'Monthly' },
 ];
 
-const SALARY_TYPES: { value: SalaryType; label: string; description: string }[] = [
-  { value: 'base', label: 'Base Salary', description: 'Replaces hourly wages entirely' },
-  { value: 'guaranteed', label: 'Guaranteed Salary', description: 'Minimum guarantee (whichever is higher)' },
-  { value: 'supplemental', label: 'Supplemental Salary', description: 'Added on top of other earnings' },
+const SALARY_TYPES: {
+  value: SalaryType;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: 'base',
+    label: 'Base Salary',
+    description: 'Replaces hourly wages entirely',
+  },
+  {
+    value: 'guaranteed',
+    label: 'Guaranteed Salary',
+    description: 'Minimum guarantee (whichever is higher)',
+  },
+  {
+    value: 'supplemental',
+    label: 'Supplemental Salary',
+    description: 'Added on top of other earnings',
+  },
 ];
 
 interface UserFormDialogProps {
@@ -98,52 +130,77 @@ interface UserFormDialogProps {
   onSuccess?: () => void;
 }
 
-export function UserFormDialog({ 
-  mode, 
-  user, 
-  trigger, 
-  onSuccess 
+export function UserFormDialog({
+  mode,
+  user,
+  trigger,
+  onSuccess,
 }: UserFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const form = useForm({
-    resolver: zodResolver(mode === 'create' ? CreateUserSchema : UpdateUserSchema),
+    resolver: zodResolver(
+      mode === 'create' ? CreateUserSchema : UpdateUserSchema
+    ),
     mode: 'onChange',
-    defaultValues: mode === 'edit' && user ? {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      roles: (user.roles || []) as UserRole[],
-      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : undefined,
-      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : undefined,
-      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : undefined,
-      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : undefined,
-      rateZigma: user.rateZigma ? Number(user.rateZigma) : undefined,
-      rateTraining: user.rateTraining ? Number(user.rateTraining) : undefined,
-      rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : undefined,
-      rateWarehouse: user.rateWarehouse ? Number(user.rateWarehouse) : undefined,
-      rateAdmin: user.rateAdmin ? Number(user.rateAdmin) : undefined,
-      salaryAmount: user.salaryAmount ? Number(user.salaryAmount) : undefined,
-      salaryFrequency: user.salaryFrequency as SalaryFrequency || undefined,
-      salaryType: user.salaryType as SalaryType || undefined,
-      commissionRate: user.commissionRate ? Number(user.commissionRate) : undefined,
-      junkBonusGoal: Number(user.junkBonusGoal) || 0.14,
-      moveBonusGoal: Number(user.moveBonusGoal) || 0.24,
-    } : {
-      roles: [],
-      junkBonusGoal: 0.14,
-      moveBonusGoal: 0.24,
-    },
+    defaultValues:
+      mode === 'edit' && user
+        ? {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            roles: (user.roles || []) as UserRole[],
+            rateJunkCaptain: user.rateJunkCaptain
+              ? Number(user.rateJunkCaptain)
+              : undefined,
+            rateJunkWingman: user.rateJunkWingman
+              ? Number(user.rateJunkWingman)
+              : undefined,
+            rateMoveCaptain: user.rateMoveCaptain
+              ? Number(user.rateMoveCaptain)
+              : undefined,
+            rateMoveWingman: user.rateMoveWingman
+              ? Number(user.rateMoveWingman)
+              : undefined,
+            rateZigma: user.rateZigma ? Number(user.rateZigma) : undefined,
+            rateTraining: user.rateTraining
+              ? Number(user.rateTraining)
+              : undefined,
+            rateEstimating: user.rateEstimating
+              ? Number(user.rateEstimating)
+              : undefined,
+            rateWarehouse: user.rateWarehouse
+              ? Number(user.rateWarehouse)
+              : undefined,
+            rateAdmin: user.rateAdmin ? Number(user.rateAdmin) : undefined,
+            salaryAmount: user.salaryAmount
+              ? Number(user.salaryAmount)
+              : undefined,
+            salaryFrequency:
+              (user.salaryFrequency as SalaryFrequency) || undefined,
+            salaryType: (user.salaryType as SalaryType) || undefined,
+            commissionRate: user.commissionRate
+              ? Number(user.commissionRate)
+              : undefined,
+            junkBonusGoal: Number(user.junkBonusGoal) || 0.14,
+            moveBonusGoal: Number(user.moveBonusGoal) || 0.24,
+          }
+        : {
+            roles: [],
+            junkBonusGoal: 0.14,
+            moveBonusGoal: 0.24,
+          },
   });
 
   const onSubmit = async (data: CreateUserFormData | UpdateUserFormData) => {
     setIsSubmitting(true);
     try {
-      const result = mode === 'create' 
-        ? await createUser(data as CreateUserFormData)
-        : await updateUser(data as UpdateUserFormData);
+      const result =
+        mode === 'create'
+          ? await createUser(data as CreateUserFormData)
+          : await updateUser(data as UpdateUserFormData);
 
       if (result.success) {
         toast({
@@ -176,12 +233,18 @@ export function UserFormDialog({
     if (checked) {
       form.setValue('roles', [...currentRoles, role]);
     } else {
-      form.setValue('roles', currentRoles.filter(r => r !== role));
+      form.setValue(
+        'roles',
+        currentRoles.filter((r) => r !== role)
+      );
     }
   };
 
   const defaultTrigger = (
-    <Button variant={mode === 'create' ? 'default' : 'ghost'} size={mode === 'create' ? 'default' : 'sm'}>
+    <Button
+      variant={mode === 'create' ? 'default' : 'ghost'}
+      size={mode === 'create' ? 'default' : 'sm'}
+    >
       {mode === 'create' ? (
         <>
           <IconPlus className="h-4 w-4 mr-2" />
@@ -195,20 +258,19 @@ export function UserFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>
-              {mode === 'create' ? 'Create New User' : `Edit User: ${user?.fullName}`}
+              {mode === 'create'
+                ? 'Create New User'
+                : `Edit User: ${user?.fullName}`}
             </DialogTitle>
             <DialogDescription>
-              {mode === 'create' 
+              {mode === 'create'
                 ? 'Add a new employee with their compensation settings and role assignments.'
-                : 'Update employee information, compensation settings, and role assignments.'
-              }
+                : 'Update employee information, compensation settings, and role assignments.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -283,7 +345,8 @@ export function UserFormDialog({
                         id="password"
                         type="password"
                         {...form.register('password', {
-                          setValueAs: (value) => value === '' ? undefined : value
+                          setValueAs: (value) =>
+                            value === '' ? undefined : value,
                         })}
                         placeholder="Leave blank to keep current password"
                       />
@@ -304,8 +367,10 @@ export function UserFormDialog({
                           className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/50 has-[[aria-checked=true]]:border-primary has-[[aria-checked=true]]:bg-primary/5"
                         >
                           <Checkbox
-                            checked={form.watch('roles')?.includes(role.value) || false}
-                            onCheckedChange={(checked) => 
+                            checked={
+                              form.watch('roles')?.includes(role.value) || false
+                            }
+                            onCheckedChange={(checked) =>
                               handleRoleChange(role.value, checked as boolean)
                             }
                             className="data-[state=checked]:border-primary data-[state=checked]:bg-primary"
@@ -345,8 +410,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateJunkCaptain', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateJunkCaptain', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -358,8 +424,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateJunkWingman', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateJunkWingman', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -371,8 +438,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateMoveCaptain', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateMoveCaptain', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -384,8 +452,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateMoveWingman', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateMoveWingman', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -397,8 +466,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateZigma', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateZigma', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -410,8 +480,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateTraining', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateTraining', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -423,8 +494,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateEstimating', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateEstimating', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -436,8 +508,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateWarehouse', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateWarehouse', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -449,8 +522,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('rateAdmin', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('rateAdmin', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -477,8 +551,9 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        {...form.register('salaryAmount', { 
-                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        {...form.register('salaryAmount', {
+                          setValueAs: (value) =>
+                            value === '' ? undefined : Number(value),
                         })}
                         placeholder="0.00"
                       />
@@ -487,8 +562,11 @@ export function UserFormDialog({
                       <Label htmlFor="salaryFrequency">Salary Frequency</Label>
                       <Select
                         value={form.watch('salaryFrequency') || ''}
-                        onValueChange={(value) => 
-                          form.setValue('salaryFrequency', value as SalaryFrequency)
+                        onValueChange={(value) =>
+                          form.setValue(
+                            'salaryFrequency',
+                            value as SalaryFrequency
+                          )
                         }
                       >
                         <SelectTrigger>
@@ -545,8 +623,9 @@ export function UserFormDialog({
                       step="0.01"
                       min="0"
                       max="100"
-                      {...form.register('commissionRate', { 
-                        setValueAs: (value) => value === '' ? undefined : Number(value)
+                      {...form.register('commissionRate', {
+                        setValueAs: (value) =>
+                          value === '' ? undefined : Number(value),
                       })}
                       placeholder="0.00"
                     />
@@ -573,8 +652,9 @@ export function UserFormDialog({
                         step="0.01"
                         min="0"
                         max="1"
-                        {...form.register('junkBonusGoal', { 
-                          setValueAs: (value) => value === '' ? 0.14 : Number(value)
+                        {...form.register('junkBonusGoal', {
+                          setValueAs: (value) =>
+                            value === '' ? 0.14 : Number(value),
                         })}
                         placeholder="0.14"
                       />
@@ -590,8 +670,9 @@ export function UserFormDialog({
                         step="0.01"
                         min="0"
                         max="1"
-                        {...form.register('moveBonusGoal', { 
-                          setValueAs: (value) => value === '' ? 0.24 : Number(value)
+                        {...form.register('moveBonusGoal', {
+                          setValueAs: (value) =>
+                            value === '' ? 0.24 : Number(value),
                         })}
                         placeholder="0.24"
                       />
@@ -612,7 +693,11 @@ export function UserFormDialog({
               </Button>
             </DialogClose>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create User' : 'Update User'}
+              {isSubmitting
+                ? 'Saving...'
+                : mode === 'create'
+                  ? 'Create User'
+                  : 'Update User'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,12 +1,12 @@
 /**
  * Accessibility Utilities
- * 
+ *
  * Comprehensive utilities for ensuring WCAG 2.1 AA compliance across all components.
  * Includes color contrast checking, ARIA helpers, and keyboard navigation utilities.
  */
 
-import * as React from "react";
-import { type ClassValue, clsx } from "clsx";
+import * as React from 'react';
+import { type ClassValue, clsx } from 'clsx';
 
 // WCAG 2.1 AA contrast ratio requirements
 const WCAG_AA_NORMAL = 4.5;
@@ -19,18 +19,20 @@ const WCAG_AAA_LARGE = 4.5;
  */
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }
 
 /**
  * Calculate relative luminance of a color
  */
 function getLuminance(r: number, g: number, b: number): number {
-  const [rs, gs, bs] = [r, g, b].map(c => {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });
@@ -43,15 +45,15 @@ function getLuminance(r: number, g: number, b: number): number {
 export function getContrastRatio(color1: string, color2: string): number {
   const rgb1 = hexToRgb(color1);
   const rgb2 = hexToRgb(color2);
-  
+
   if (!rgb1 || !rgb2) return 0;
-  
+
   const lum1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
   const lum2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-  
+
   const brightest = Math.max(lum1, lum2);
   const darkest = Math.min(lum1, lum2);
-  
+
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
@@ -65,11 +67,11 @@ export function meetsContrastRequirement(
   isLargeText = false
 ): boolean {
   const ratio = getContrastRatio(foreground, background);
-  
+
   if (level === 'AAA') {
     return ratio >= (isLargeText ? WCAG_AAA_LARGE : WCAG_AAA_NORMAL);
   }
-  
+
   return ratio >= (isLargeText ? WCAG_AA_LARGE : WCAG_AA_NORMAL);
 }
 
@@ -89,7 +91,7 @@ export const BRAND_COLORS = {
     700: '#1e5a32',
     800: '#1a4a2a',
     900: '#163d24',
-    950: '#0b2214'
+    950: '#0b2214',
   },
   'hunks-orange': {
     DEFAULT: '#ea7200',
@@ -103,8 +105,8 @@ export const BRAND_COLORS = {
     700: '#b64906',
     800: '#92390c',
     900: '#78300d',
-    950: '#411703'
-  }
+    950: '#411703',
+  },
 } as const;
 
 /**
@@ -114,7 +116,7 @@ export function getAccessibleBrandColors() {
   const white = '#ffffff';
   // const black = '#000000';
   // const darkGray = '#1a1a1a';
-  
+
   return {
     'hunks-green': {
       onLight: BRAND_COLORS['hunks-green'][600], // #026937 on white - 4.52:1 ratio
@@ -127,7 +129,7 @@ export function getAccessibleBrandColors() {
       onDark: BRAND_COLORS['hunks-orange'][400], // #f59338 on dark - 4.9:1 ratio
       background: BRAND_COLORS['hunks-orange'][600],
       foreground: white, // White on #dc5f02 - 4.51:1 ratio
-    }
+    },
   };
 }
 
@@ -144,9 +146,12 @@ export const ariaLabels = {
     menu: 'Open menu',
     expand: 'Expand',
     collapse: 'Collapse',
-    toggle: (state: boolean, item: string) => `${state ? 'Hide' : 'Show'} ${item}`,
-    sort: (column: string, direction?: 'asc' | 'desc') => 
-      direction ? `Sort ${column} ${direction === 'asc' ? 'ascending' : 'descending'}` : `Sort by ${column}`,
+    toggle: (state: boolean, item: string) =>
+      `${state ? 'Hide' : 'Show'} ${item}`,
+    sort: (column: string, direction?: 'asc' | 'desc') =>
+      direction
+        ? `Sort ${column} ${direction === 'asc' ? 'ascending' : 'descending'}`
+        : `Sort by ${column}`,
   },
   form: {
     required: 'Required field',
@@ -156,7 +161,8 @@ export const ariaLabels = {
     loading: 'Validating input',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
-    characterCount: (current: number, max: number) => `${current} of ${max} characters`,
+    characterCount: (current: number, max: number) =>
+      `${current} of ${max} characters`,
     fieldError: (field: string, error: string) => `${field} error: ${error}`,
     fieldSuccess: (field: string) => `${field} is valid`,
   },
@@ -166,7 +172,8 @@ export const ariaLabels = {
     pagination: 'Pagination navigation',
     skipToContent: 'Skip to main content',
     currentPage: 'Current page',
-    menuItem: (item: string, isActive: boolean) => `${item}${isActive ? ', current page' : ''}`,
+    menuItem: (item: string, isActive: boolean) =>
+      `${item}${isActive ? ', current page' : ''}`,
     subMenu: (parent: string) => `${parent} submenu`,
   },
   status: {
@@ -175,11 +182,12 @@ export const ariaLabels = {
     error: 'Error',
     warning: 'Warning',
     info: 'Information',
-    badge: (count: number, type: string) => `${count} ${type}${count === 1 ? '' : 's'}`,
+    badge: (count: number, type: string) =>
+      `${count} ${type}${count === 1 ? '' : 's'}`,
   },
   table: {
     sortable: (column: string) => `Sort by ${column}`,
-    sorted: (column: string, direction: 'asc' | 'desc') => 
+    sorted: (column: string, direction: 'asc' | 'desc') =>
       `Sorted by ${column}, ${direction === 'asc' ? 'ascending' : 'descending'}`,
     rowSelected: (index: number) => `Row ${index + 1} selected`,
     selectAll: 'Select all rows',
@@ -192,13 +200,19 @@ export const ariaLabels = {
     title: (title: string) => `Dialog: ${title}`,
   },
   metric: {
-    value: (title: string, value: string | number, change?: { value: number; type: string }) => {
-      const changeText = change ? `, ${change.type} by ${Math.abs(change.value)}%` : '';
+    value: (
+      title: string,
+      value: string | number,
+      change?: { value: number; type: string }
+    ) => {
+      const changeText = change
+        ? `, ${change.type} by ${Math.abs(change.value)}%`
+        : '';
       return `${title}: ${value}${changeText}`;
     },
-    trend: (direction: 'up' | 'down' | 'neutral', percentage: number) => 
+    trend: (direction: 'up' | 'down' | 'neutral', percentage: number) =>
       `Trend ${direction === 'up' ? 'increasing' : direction === 'down' ? 'decreasing' : 'stable'} by ${percentage}%`,
-  }
+  },
 };
 
 /**
@@ -211,7 +225,9 @@ export function generateAccessibilityId(prefix: string): string {
 /**
  * Build aria-describedby string from array of IDs
  */
-export function buildAriaDescribedBy(ids: (string | undefined | null)[]): string | undefined {
+export function buildAriaDescribedBy(
+  ids: (string | undefined | null)[]
+): string | undefined {
   const validIds = ids.filter((id): id is string => Boolean(id));
   return validIds.length > 0 ? validIds.join(' ') : undefined;
 }
@@ -231,7 +247,9 @@ export const keyboardUtils = {
    * Check if key is an arrow key
    */
   isArrowKey: (event: React.KeyboardEvent): boolean => {
-    return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+    return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(
+      event.key
+    );
   },
 
   /**
@@ -265,7 +283,10 @@ export const keyboardUtils = {
   /**
    * Prevent default and stop propagation for handled keys
    */
-  handleKeyboardEvent: (event: React.KeyboardEvent, handler: () => void): void => {
+  handleKeyboardEvent: (
+    event: React.KeyboardEvent,
+    handler: () => void
+  ): void => {
     if (keyboardUtils.isActivationKey(event)) {
       event.preventDefault();
       event.stopPropagation();
@@ -297,7 +318,8 @@ export const keyboardUtils = {
           if (newIndex < 0) {
             // Wrap to bottom row
             const remainder = currentIndex % gridColumns;
-            const lastRowStart = Math.floor((totalItems - 1) / gridColumns) * gridColumns;
+            const lastRowStart =
+              Math.floor((totalItems - 1) / gridColumns) * gridColumns;
             newIndex = Math.min(lastRowStart + remainder, totalItems - 1);
           }
         }
@@ -371,7 +393,7 @@ export const keyboardUtils = {
         handler();
       }
     };
-  }
+  },
 };
 
 /**
@@ -393,7 +415,7 @@ export const focusUtils = {
       'details summary',
       'audio[controls]',
       'video[controls]',
-      'iframe'
+      'iframe',
     ].join(', ');
 
     return Array.from(container.querySelectorAll(focusableSelectors));
@@ -449,13 +471,13 @@ export const focusUtils = {
     direction: 'next' | 'previous'
   ): number => {
     let newIndex = currentIndex;
-    
+
     if (direction === 'next') {
       newIndex = currentIndex + 1 >= elements.length ? 0 : currentIndex + 1;
     } else {
       newIndex = currentIndex - 1 < 0 ? elements.length - 1 : currentIndex - 1;
     }
-    
+
     elements[newIndex]?.focus();
     return newIndex;
   },
@@ -476,7 +498,9 @@ export const focusUtils = {
    * Focus the first element with an error
    */
   focusFirstError: (container: HTMLElement = document.body): boolean => {
-    const errorElement = container.querySelector('[aria-invalid="true"], .error, [data-error="true"]') as HTMLElement;
+    const errorElement = container.querySelector(
+      '[aria-invalid="true"], .error, [data-error="true"]'
+    ) as HTMLElement;
     if (errorElement && typeof errorElement.focus === 'function') {
       errorElement.focus();
       return true;
@@ -489,7 +513,7 @@ export const focusUtils = {
    */
   createFocusTrap: (container: HTMLElement) => {
     const restoreFocus = focusUtils.saveFocus();
-    
+
     const handleKeyDown = (event: KeyboardEvent) => {
       focusUtils.trapFocus(container, event);
     };
@@ -508,7 +532,7 @@ export const focusUtils = {
       container.removeEventListener('keydown', handleKeyDown);
       restoreFocus();
     };
-  }
+  },
 };
 
 /**
@@ -518,15 +542,18 @@ export const screenReaderUtils = {
   /**
    * Announce message to screen readers
    */
-  announce: (message: string, priority: 'polite' | 'assertive' = 'polite'): void => {
+  announce: (
+    message: string,
+    priority: 'polite' | 'assertive' = 'polite'
+  ): void => {
     const announcer = document.createElement('div');
     announcer.setAttribute('aria-live', priority);
     announcer.setAttribute('aria-atomic', 'true');
     announcer.className = 'sr-only';
     announcer.textContent = message;
-    
+
     document.body.appendChild(announcer);
-    
+
     // Remove after announcement
     setTimeout(() => {
       if (document.body.contains(announcer)) {
@@ -545,9 +572,12 @@ export const screenReaderUtils = {
   /**
    * Create a live region for dynamic content announcements
    */
-  createLiveRegion: (id: string, priority: 'polite' | 'assertive' = 'polite'): HTMLElement => {
+  createLiveRegion: (
+    id: string,
+    priority: 'polite' | 'assertive' = 'polite'
+  ): HTMLElement => {
     let liveRegion = document.getElementById(id);
-    
+
     if (!liveRegion) {
       liveRegion = document.createElement('div');
       liveRegion.id = id;
@@ -556,7 +586,7 @@ export const screenReaderUtils = {
       liveRegion.className = 'sr-only';
       document.body.appendChild(liveRegion);
     }
-    
+
     return liveRegion;
   },
 
@@ -568,7 +598,7 @@ export const screenReaderUtils = {
     if (liveRegion) {
       liveRegion.textContent = message;
     }
-  }
+  },
 };
 
 /**
@@ -593,7 +623,7 @@ export const motionUtils = {
     return clsx(
       motionUtils.prefersReducedMotion() ? staticClasses : animatedClasses
     );
-  }
+  },
 };
 
 /**
@@ -615,8 +645,10 @@ export function validateBrandColorContrast(): void {
     const ratio = getContrastRatio(fg, bg);
     const meetsAA = meetsContrastRequirement(fg, bg, 'AA');
     const meetsAAA = meetsContrastRequirement(fg, bg, 'AAA');
-    
-    console.warn(`${name}: ${ratio.toFixed(2)}:1 - AA: ${meetsAA ? '✓' : '✗'} - AAA: ${meetsAAA ? '✓' : '✗'}`);
+
+    console.warn(
+      `${name}: ${ratio.toFixed(2)}:1 - AA: ${meetsAA ? '✓' : '✗'} - AAA: ${meetsAAA ? '✓' : '✗'}`
+    );
   });
 }
 
@@ -630,9 +662,10 @@ export const a11yTesting = {
   hasProperLabeling: (element: HTMLElement): boolean => {
     const hasAriaLabel = element.hasAttribute('aria-label');
     const hasAriaLabelledBy = element.hasAttribute('aria-labelledby');
-    const hasAssociatedLabel = element.id && !!document.querySelector(`label[for="${element.id}"]`);
+    const hasAssociatedLabel =
+      element.id && !!document.querySelector(`label[for="${element.id}"]`);
     const hasTitle = element.hasAttribute('title');
-    
+
     return hasAriaLabel || hasAriaLabelledBy || hasAssociatedLabel || hasTitle;
   },
 
@@ -643,16 +676,22 @@ export const a11yTesting = {
     const tagName = element.tagName.toLowerCase();
     const hasTabIndex = element.hasAttribute('tabindex');
     const tabIndex = element.getAttribute('tabindex');
-    
+
     // Naturally focusable elements
-    const naturallyFocusable = ['button', 'input', 'select', 'textarea', 'a'].includes(tagName);
-    
+    const naturallyFocusable = [
+      'button',
+      'input',
+      'select',
+      'textarea',
+      'a',
+    ].includes(tagName);
+
     // Elements with href
     const hasHref = element.hasAttribute('href');
-    
+
     // Elements with positive or zero tabindex
     const hasValidTabIndex = hasTabIndex && tabIndex !== '-1';
-    
+
     return naturallyFocusable || hasHref || hasValidTabIndex;
   },
 
@@ -663,17 +702,17 @@ export const a11yTesting = {
     const styles = window.getComputedStyle(element);
     const color = styles.color;
     const backgroundColor = styles.backgroundColor;
-    
+
     // Skip if we can't determine colors
     if (!color || !backgroundColor || backgroundColor === 'rgba(0, 0, 0, 0)') {
       return true; // Assume it's okay if we can't test
     }
-    
+
     try {
       // Convert colors to hex (simplified - would need full color parsing in production)
       // const fontSize = parseFloat(styles.fontSize);
       // const isLargeText = fontSize >= 18 || (fontSize >= 14 && styles.fontWeight === 'bold');
-      
+
       // This is a simplified check - in production you'd want proper color parsing
       return true; // Placeholder for actual contrast checking
     } catch {
@@ -684,51 +723,58 @@ export const a11yTesting = {
   /**
    * Run accessibility audit on element
    */
-  auditElement: (element: HTMLElement): {
+  auditElement: (
+    element: HTMLElement
+  ): {
     hasProperLabeling: boolean;
     isKeyboardAccessible: boolean;
     hasSufficientContrast: boolean;
     issues: string[];
   } => {
     const issues: string[] = [];
-    
+
     const hasProperLabeling = a11yTesting.hasProperLabeling(element);
     if (!hasProperLabeling) {
-      issues.push('Element lacks proper labeling (aria-label, aria-labelledby, or associated label)');
+      issues.push(
+        'Element lacks proper labeling (aria-label, aria-labelledby, or associated label)'
+      );
     }
-    
+
     const isKeyboardAccessible = a11yTesting.isKeyboardAccessible(element);
     if (!isKeyboardAccessible && element.onclick) {
       issues.push('Interactive element is not keyboard accessible');
     }
-    
+
     const hasSufficientContrast = a11yTesting.hasSufficientContrast(element);
     if (!hasSufficientContrast) {
       issues.push('Element may not have sufficient color contrast');
     }
-    
+
     return {
       hasProperLabeling,
       isKeyboardAccessible,
       hasSufficientContrast,
-      issues
+      issues,
     };
-  }
+  },
 };
 
 /**
  * React hook for accessibility testing in development
  */
-export function useAccessibilityTesting(ref: React.RefObject<HTMLElement>, enabled = process.env.NODE_ENV === 'development') {
+export function useAccessibilityTesting(
+  ref: React.RefObject<HTMLElement>,
+  enabled = process.env.NODE_ENV === 'development'
+) {
   React.useEffect(() => {
     if (!enabled || !ref.current) return;
-    
+
     const element = ref.current;
     const audit = a11yTesting.auditElement(element);
-    
+
     if (audit.issues.length > 0) {
       console.warn(`Accessibility issues found in element:`, element);
-      audit.issues.forEach(issue => console.warn(`- ${issue}`));
+      audit.issues.forEach((issue) => console.warn(`- ${issue}`));
     }
   }, [enabled, ref]);
 }

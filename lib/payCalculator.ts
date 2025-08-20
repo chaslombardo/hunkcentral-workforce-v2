@@ -1,15 +1,15 @@
 // Payroll and bonus calculation logic
-import type { 
-  User, 
-  Department, 
-  DailyLog, 
-  CommissionEntry, 
-  SalaryType, 
+import type {
+  User,
+  Department,
+  DailyLog,
+  CommissionEntry,
+  SalaryType,
   SalaryFrequency,
   CaptainPerformanceData,
   JunkPerformanceMetrics,
   MovePerformanceMetrics,
-  PerformanceFilters
+  PerformanceFilters,
 } from '@/types';
 import { LABOR_GOALS } from './constants';
 
@@ -155,7 +155,8 @@ export function calculateLaborCostPercentage(
   jobType: 'junk' | 'move'
 ): LaborCostCalculation {
   const percentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
-  const goal = jobType === 'junk' ? LABOR_GOALS.JUNK_DECIMAL : LABOR_GOALS.MOVE_DECIMAL;
+  const goal =
+    jobType === 'junk' ? LABOR_GOALS.JUNK_DECIMAL : LABOR_GOALS.MOVE_DECIMAL;
 
   return {
     totalRevenue,
@@ -175,7 +176,6 @@ export function calculateLaborBonus(
   goalPercentage: number,
   totalRevenue: number
 ): number {
-
   // Only captains are eligible for labor bonuses
   if (!captain.roles.includes('captain')) {
     return 0;
@@ -211,20 +211,25 @@ export function calculateTipDistribution(
 
   for (const log of approvedLogs) {
     // Group jobs by section type
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
 
     // Group hours by department/section
-    const junkHours = log.hours.filter(hour => hour.department === 'junk');
-    const moveHours = log.hours.filter(hour => hour.department === 'move');
-    const otherHours = log.hours.filter(hour => 
-      !['junk', 'move'].includes(hour.department)
+    const junkHours = log.hours.filter((hour) => hour.department === 'junk');
+    const moveHours = log.hours.filter((hour) => hour.department === 'move');
+    const otherHours = log.hours.filter(
+      (hour) => !['junk', 'move'].includes(hour.department)
     );
 
     // Calculate tips for junk section
     if (junkJobs.length > 0 && junkHours.length > 0) {
-      const totalJunkTips = junkJobs.reduce((sum, job) => sum + Number(job.tips), 0);
-      const junkEmployees = [...new Set(junkHours.map(hour => hour.employeeId))];
+      const totalJunkTips = junkJobs.reduce(
+        (sum, job) => sum + Number(job.tips),
+        0
+      );
+      const junkEmployees = [
+        ...new Set(junkHours.map((hour) => hour.employeeId)),
+      ];
       const tipsPerEmployee = totalJunkTips / junkEmployees.length;
 
       for (const employeeId of junkEmployees) {
@@ -235,8 +240,13 @@ export function calculateTipDistribution(
 
     // Calculate tips for move section
     if (moveJobs.length > 0 && moveHours.length > 0) {
-      const totalMoveTips = moveJobs.reduce((sum, job) => sum + Number(job.tips), 0);
-      const moveEmployees = [...new Set(moveHours.map(hour => hour.employeeId))];
+      const totalMoveTips = moveJobs.reduce(
+        (sum, job) => sum + Number(job.tips),
+        0
+      );
+      const moveEmployees = [
+        ...new Set(moveHours.map((hour) => hour.employeeId)),
+      ];
       const tipsPerEmployee = totalMoveTips / moveEmployees.length;
 
       for (const employeeId of moveEmployees) {
@@ -247,10 +257,17 @@ export function calculateTipDistribution(
 
     // Other hours don't typically have tips, but included for completeness
     // Tips from "other" jobs would be distributed among other hours employees
-    const otherJobs = log.jobs.filter(job => !['junk', 'move'].includes(job.jobType));
+    const otherJobs = log.jobs.filter(
+      (job) => !['junk', 'move'].includes(job.jobType)
+    );
     if (otherJobs.length > 0 && otherHours.length > 0) {
-      const totalOtherTips = otherJobs.reduce((sum, job) => sum + Number(job.tips), 0);
-      const otherEmployees = [...new Set(otherHours.map(hour => hour.employeeId))];
+      const totalOtherTips = otherJobs.reduce(
+        (sum, job) => sum + Number(job.tips),
+        0
+      );
+      const otherEmployees = [
+        ...new Set(otherHours.map((hour) => hour.employeeId)),
+      ];
       const tipsPerEmployee = totalOtherTips / otherEmployees.length;
 
       for (const employeeId of otherEmployees) {
@@ -274,11 +291,11 @@ export function calculateCommissionTotals(
   const employeeCommissions = new Map<string, number>();
 
   // Filter commission entries that were matched during the pay period
-  const matchedCommissions = commissionEntries.filter(entry => {
+  const matchedCommissions = commissionEntries.filter((entry) => {
     if (entry.status !== 'matched' || !entry.matchedLog?.approvedAt) {
       return false;
     }
-    
+
     const approvedDate = new Date(entry.matchedLog.approvedAt);
     return approvedDate >= payPeriodStart && approvedDate <= payPeriodEnd;
   });
@@ -287,7 +304,7 @@ export function calculateCommissionTotals(
   for (const commission of matchedCommissions) {
     const currentCommission = employeeCommissions.get(commission.salesId) || 0;
     employeeCommissions.set(
-      commission.salesId, 
+      commission.salesId,
       currentCommission + Number(commission.commissionAmount || 0)
     );
   }
@@ -305,25 +322,33 @@ export function calculateLaborBonusesTotals(
 
   for (const log of approvedLogs) {
     const captain = log.captain;
-    
+
     // Only captains are eligible for labor bonuses
     if (!captain.roles.includes('captain')) {
       continue;
     }
 
     // Calculate bonuses for junk section
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
     if (junkJobs.length > 0) {
-      const junkRevenue = junkJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-      const junkHours = log.hours.filter(hour => hour.department === 'junk');
-      
+      const junkRevenue = junkJobs.reduce(
+        (sum, job) => sum + Number(job.revenue),
+        0
+      );
+      const junkHours = log.hours.filter((hour) => hour.department === 'junk');
+
       if (junkHours.length > 0) {
         const totalJunkLaborCost = junkHours.reduce((sum, hour) => {
-          const rate = calculateHourlyWage(hour.employee, 'junk', hour.isCoCaptain);
-          return sum + (Number(hour.hours) * rate);
+          const rate = calculateHourlyWage(
+            hour.employee,
+            'junk',
+            hour.isCoCaptain
+          );
+          return sum + Number(hour.hours) * rate;
         }, 0);
 
-        const actualPercentage = junkRevenue > 0 ? totalJunkLaborCost / junkRevenue : 0;
+        const actualPercentage =
+          junkRevenue > 0 ? totalJunkLaborCost / junkRevenue : 0;
         const goalPercentage = Number(captain.junkBonusGoal);
 
         const bonus = calculateLaborBonus(
@@ -341,18 +366,26 @@ export function calculateLaborBonusesTotals(
     }
 
     // Calculate bonuses for move section
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
     if (moveJobs.length > 0) {
-      const moveRevenue = moveJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-      const moveHours = log.hours.filter(hour => hour.department === 'move');
-      
+      const moveRevenue = moveJobs.reduce(
+        (sum, job) => sum + Number(job.revenue),
+        0
+      );
+      const moveHours = log.hours.filter((hour) => hour.department === 'move');
+
       if (moveHours.length > 0) {
         const totalMoveLaborCost = moveHours.reduce((sum, hour) => {
-          const rate = calculateHourlyWage(hour.employee, 'move', hour.isCoCaptain);
-          return sum + (Number(hour.hours) * rate);
+          const rate = calculateHourlyWage(
+            hour.employee,
+            'move',
+            hour.isCoCaptain
+          );
+          return sum + Number(hour.hours) * rate;
         }, 0);
 
-        const actualPercentage = moveRevenue > 0 ? totalMoveLaborCost / moveRevenue : 0;
+        const actualPercentage =
+          moveRevenue > 0 ? totalMoveLaborCost / moveRevenue : 0;
         const goalPercentage = Number(captain.moveBonusGoal);
 
         const bonus = calculateLaborBonus(
@@ -403,7 +436,7 @@ export function applySalaryRules(
   bonuses: number
 ): PayrollBreakdown {
   const totalBeforeSalaryAdjustment = hourlyWages + tips + commission + bonuses;
-  
+
   if (!user.salaryAmount || !user.salaryFrequency || !user.salaryType) {
     // No salary - use hourly wages + other compensation
     return {
@@ -419,7 +452,10 @@ export function applySalaryRules(
     };
   }
 
-  const weeklySalaryAmount = convertSalaryToWeekly(Number(user.salaryAmount || 0), user.salaryFrequency);
+  const weeklySalaryAmount = convertSalaryToWeekly(
+    Number(user.salaryAmount || 0),
+    user.salaryFrequency
+  );
 
   switch (user.salaryType) {
     case 'base':
@@ -438,10 +474,14 @@ export function applySalaryRules(
 
     case 'guaranteed':
       // Guaranteed salary is minimum - whichever is higher
-      const guaranteedPay = Math.max(totalBeforeSalaryAdjustment, weeklySalaryAmount);
+      const guaranteedPay = Math.max(
+        totalBeforeSalaryAdjustment,
+        weeklySalaryAmount
+      );
       return {
         hourlyWages,
-        salaryAmount: guaranteedPay > totalBeforeSalaryAdjustment ? weeklySalaryAmount : 0,
+        salaryAmount:
+          guaranteedPay > totalBeforeSalaryAdjustment ? weeklySalaryAmount : 0,
         salaryType: user.salaryType,
         salaryFrequency: user.salaryFrequency,
         tips,
@@ -492,7 +532,7 @@ export function calculatePayroll(
   payPeriodEnd: Date
 ): PayrollCalculation[] {
   // Filter logs to pay period
-  const periodLogs = approvedLogs.filter(log => {
+  const periodLogs = approvedLogs.filter((log) => {
     if (!log.approvedAt) return false;
     const approvedDate = new Date(log.approvedAt);
     return approvedDate >= payPeriodStart && approvedDate <= payPeriodEnd;
@@ -531,15 +571,21 @@ export function calculatePayroll(
 
     // Sum up hours and calculate wages for this employee
     for (const log of periodLogs) {
-      const employeeHours = log.hours.filter(hour => hour.employeeId === user.id);
-      
+      const employeeHours = log.hours.filter(
+        (hour) => hour.employeeId === user.id
+      );
+
       for (const hour of employeeHours) {
         const hoursValue = Number(hour.hours);
         hoursByDepartment[hour.department] += hoursValue;
         totalHours += hoursValue;
 
         // Calculate wages for this hour entry
-        const rate = calculateHourlyWage(user, hour.department, hour.isCoCaptain);
+        const rate = calculateHourlyWage(
+          user,
+          hour.department,
+          hour.isCoCaptain
+        );
         hourlyWages += hoursValue * rate;
       }
     }
@@ -550,7 +596,13 @@ export function calculatePayroll(
     const bonuses = bonusTotals.get(user.id) || 0;
 
     // Apply salary rules to get final breakdown
-    const breakdown = applySalaryRules(user, hourlyWages, tips, commission, bonuses);
+    const breakdown = applySalaryRules(
+      user,
+      hourlyWages,
+      tips,
+      commission,
+      bonuses
+    );
 
     // Create payroll calculation
     const payrollCalculation: PayrollCalculation = {
@@ -592,7 +644,10 @@ export function calculateEnhancedPayroll(
   )[0];
 
   // Calculate enhanced breakdowns
-  const departmentBreakdown = calculateEnhancedDepartmentBreakdown(user, approvedLogs);
+  const departmentBreakdown = calculateEnhancedDepartmentBreakdown(
+    user,
+    approvedLogs
+  );
   const dailyBreakdown = calculateEnhancedDailyBreakdown(user, approvedLogs);
   const tipsBreakdown = calculateEnhancedTipsBreakdown(user, approvedLogs);
   const rateSchedule = calculateRateSchedule(user);
@@ -612,8 +667,22 @@ export function calculateEnhancedPayroll(
 function calculateEnhancedDepartmentBreakdown(
   user: User,
   approvedLogs: DailyLog[]
-): { [key in Department]: { hours: number; rate: number; grossPay: number; percentage: number } } {
-  const breakdown: { [key in Department]: { hours: number; rate: number; grossPay: number; percentage: number } } = {
+): {
+  [key in Department]: {
+    hours: number;
+    rate: number;
+    grossPay: number;
+    percentage: number;
+  };
+} {
+  const breakdown: {
+    [key in Department]: {
+      hours: number;
+      rate: number;
+      grossPay: number;
+      percentage: number;
+    };
+  } = {
     junk: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
     move: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
     zigma: { hours: 0, rate: 0, grossPay: 0, percentage: 0 },
@@ -627,8 +696,8 @@ function calculateEnhancedDepartmentBreakdown(
 
   // Calculate hours and pay by department
   for (const log of approvedLogs) {
-    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
-    
+    const userHours = log.hours.filter((hour) => hour.employeeId === user.id);
+
     for (const hour of userHours) {
       const department = hour.department as Department;
       const rate = calculateHourlyWage(user, department, hour.isCoCaptain);
@@ -645,7 +714,8 @@ function calculateEnhancedDepartmentBreakdown(
   // Calculate percentages
   for (const department of Object.keys(breakdown) as Department[]) {
     if (totalHours > 0) {
-      breakdown[department].percentage = (breakdown[department].hours / totalHours) * 100;
+      breakdown[department].percentage =
+        (breakdown[department].hours / totalHours) * 100;
     }
   }
 
@@ -658,16 +728,28 @@ function calculateEnhancedDepartmentBreakdown(
 function calculateEnhancedDailyBreakdown(
   user: User,
   approvedLogs: DailyLog[]
-): { [date: string]: { departments: { [key in Department]: number }; tips: number; totalHours: number } } {
-  const dailyBreakdown: { [date: string]: { departments: { [key in Department]: number }; tips: number; totalHours: number } } = {};
+): {
+  [date: string]: {
+    departments: { [key in Department]: number };
+    tips: number;
+    totalHours: number;
+  };
+} {
+  const dailyBreakdown: {
+    [date: string]: {
+      departments: { [key in Department]: number };
+      tips: number;
+      totalHours: number;
+    };
+  } = {};
 
   for (const log of approvedLogs) {
-    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
-    
+    const userHours = log.hours.filter((hour) => hour.employeeId === user.id);
+
     if (userHours.length === 0) continue;
 
     const dateKey = log.logDate.toISOString().split('T')[0];
-    
+
     if (!dailyBreakdown[dateKey]) {
       dailyBreakdown[dateKey] = {
         departments: {
@@ -710,17 +792,21 @@ function calculateEnhancedTipsBreakdown(
   const tipEntries: TipEntry[] = [];
 
   for (const log of approvedLogs) {
-    const userHours = log.hours.filter(hour => hour.employeeId === user.id);
-    
+    const userHours = log.hours.filter((hour) => hour.employeeId === user.id);
+
     if (userHours.length === 0) continue;
 
     // Process junk jobs
-    const junkHours = userHours.filter(hour => hour.department === 'junk');
+    const junkHours = userHours.filter((hour) => hour.department === 'junk');
     if (junkHours.length > 0) {
-      const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-      const junkTeamSize = [...new Set(log.hours
-        .filter(hour => hour.department === 'junk')
-        .map(hour => hour.employeeId))].length;
+      const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+      const junkTeamSize = [
+        ...new Set(
+          log.hours
+            .filter((hour) => hour.department === 'junk')
+            .map((hour) => hour.employeeId)
+        ),
+      ].length;
 
       for (const job of junkJobs) {
         const jobTips = Number(job.tips);
@@ -740,12 +826,16 @@ function calculateEnhancedTipsBreakdown(
     }
 
     // Process move jobs
-    const moveHours = userHours.filter(hour => hour.department === 'move');
+    const moveHours = userHours.filter((hour) => hour.department === 'move');
     if (moveHours.length > 0) {
-      const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-      const moveTeamSize = [...new Set(log.hours
-        .filter(hour => hour.department === 'move')
-        .map(hour => hour.employeeId))].length;
+      const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
+      const moveTeamSize = [
+        ...new Set(
+          log.hours
+            .filter((hour) => hour.department === 'move')
+            .map((hour) => hour.employeeId)
+        ),
+      ].length;
 
       for (const job of moveJobs) {
         const jobTips = Number(job.tips);
@@ -778,7 +868,15 @@ function calculateRateSchedule(user: User): {
     currentRate: number;
   };
 } {
-  const departments: Department[] = ['junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin'];
+  const departments: Department[] = [
+    'junk',
+    'move',
+    'zigma',
+    'training',
+    'estimating',
+    'warehouse',
+    'admin',
+  ];
   const rateSchedule: {
     [key in Department]: {
       captainRate?: number;
@@ -821,20 +919,24 @@ function calculateRateSchedule(user: User): {
  * Calculate daily tips for a specific user from a log
  */
 function calculateUserDailyTips(userId: string, log: DailyLog): number {
-  const userHours = log.hours.filter(hour => hour.employeeId === userId);
-  
+  const userHours = log.hours.filter((hour) => hour.employeeId === userId);
+
   if (userHours.length === 0) return 0;
 
   let totalTips = 0;
 
   // Calculate tips from junk section
-  const junkHours = userHours.filter(hour => hour.department === 'junk');
+  const junkHours = userHours.filter((hour) => hour.department === 'junk');
   if (junkHours.length > 0) {
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const junkTeamSize = [...new Set(log.hours
-      .filter(hour => hour.department === 'junk')
-      .map(hour => hour.employeeId))].length;
-    
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+    const junkTeamSize = [
+      ...new Set(
+        log.hours
+          .filter((hour) => hour.department === 'junk')
+          .map((hour) => hour.employeeId)
+      ),
+    ].length;
+
     const junkTips = junkJobs.reduce((sum, job) => sum + Number(job.tips), 0);
     if (junkTeamSize > 0) {
       totalTips += junkTips / junkTeamSize;
@@ -842,13 +944,17 @@ function calculateUserDailyTips(userId: string, log: DailyLog): number {
   }
 
   // Calculate tips from move section
-  const moveHours = userHours.filter(hour => hour.department === 'move');
+  const moveHours = userHours.filter((hour) => hour.department === 'move');
   if (moveHours.length > 0) {
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-    const moveTeamSize = [...new Set(log.hours
-      .filter(hour => hour.department === 'move')
-      .map(hour => hour.employeeId))].length;
-    
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
+    const moveTeamSize = [
+      ...new Set(
+        log.hours
+          .filter((hour) => hour.department === 'move')
+          .map((hour) => hour.employeeId)
+      ),
+    ].length;
+
     const moveTips = moveJobs.reduce((sum, job) => sum + Number(job.tips), 0);
     if (moveTeamSize > 0) {
       totalTips += moveTips / moveTeamSize;
@@ -867,19 +973,21 @@ export function calculateCaptainPerformanceMetrics(
   filters?: PerformanceFilters
 ): CaptainPerformanceData {
   // Filter logs for this captain and date range
-  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
-  
+  let captainLogs = approvedLogs.filter((log) => log.captainId === captain.id);
+
   if (filters?.startDate) {
-    captainLogs = captainLogs.filter(log => log.logDate >= filters.startDate!);
+    captainLogs = captainLogs.filter(
+      (log) => log.logDate >= filters.startDate!
+    );
   }
-  
+
   if (filters?.endDate) {
-    captainLogs = captainLogs.filter(log => log.logDate <= filters.endDate!);
+    captainLogs = captainLogs.filter((log) => log.logDate <= filters.endDate!);
   }
 
   // Calculate junk metrics
   const junkMetrics = calculateJunkPerformanceMetrics(captain, captainLogs);
-  
+
   // Calculate move metrics
   const moveMetrics = calculateMovePerformanceMetrics(captain, captainLogs);
 
@@ -904,8 +1012,8 @@ export function calculateJunkPerformanceMetrics(
   let jobCount = 0;
 
   for (const log of captainLogs) {
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const junkHours = log.hours.filter(hour => hour.department === 'junk');
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+    const junkHours = log.hours.filter((hour) => hour.department === 'junk');
 
     // Sum up job metrics
     for (const job of junkJobs) {
@@ -923,7 +1031,8 @@ export function calculateJunkPerformanceMetrics(
 
   const averageJobSize = jobCount > 0 ? totalRevenue / jobCount : 0;
   const laborPercentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
-  const disposalPercentage = totalRevenue > 0 ? totalDisposalCost / totalRevenue : 0;
+  const disposalPercentage =
+    totalRevenue > 0 ? totalDisposalCost / totalRevenue : 0;
 
   return {
     jobCount,
@@ -950,8 +1059,8 @@ export function calculateMovePerformanceMetrics(
   let jobCount = 0;
 
   for (const log of captainLogs) {
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
-    const moveHours = log.hours.filter(hour => hour.department === 'move');
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
+    const moveHours = log.hours.filter((hour) => hour.department === 'move');
 
     // Sum up job metrics
     for (const job of moveJobs) {
@@ -959,9 +1068,10 @@ export function calculateMovePerformanceMetrics(
       const valuationRevenue = Number(job.valuation || 0);
       const junkOnMoveRevenue = Number(job.junkOnMove || 0);
       const materialsRevenue = Number(job.materials || 0);
-      
+
       // Upsell revenue is calculated as total revenue minus base components
-      const baseRevenue = valuationRevenue + junkOnMoveRevenue + materialsRevenue;
+      const baseRevenue =
+        valuationRevenue + junkOnMoveRevenue + materialsRevenue;
       const upsellRevenue = Math.max(0, jobRevenue - baseRevenue);
 
       totalRevenue += jobRevenue;
@@ -981,10 +1091,14 @@ export function calculateMovePerformanceMetrics(
 
   const averageJobSize = jobCount > 0 ? totalRevenue / jobCount : 0;
   const laborPercentage = totalRevenue > 0 ? totalLaborCost / totalRevenue : 0;
-  const upsellPercentage = totalRevenue > 0 ? totalUpsellRevenue / totalRevenue : 0;
-  const valuationPercentage = totalRevenue > 0 ? totalValuationRevenue / totalRevenue : 0;
-  const junkOnMovePercentage = totalRevenue > 0 ? totalJunkOnMoveRevenue / totalRevenue : 0;
-  const materialsPercentage = totalRevenue > 0 ? totalMaterialsRevenue / totalRevenue : 0;
+  const upsellPercentage =
+    totalRevenue > 0 ? totalUpsellRevenue / totalRevenue : 0;
+  const valuationPercentage =
+    totalRevenue > 0 ? totalValuationRevenue / totalRevenue : 0;
+  const junkOnMovePercentage =
+    totalRevenue > 0 ? totalJunkOnMoveRevenue / totalRevenue : 0;
+  const materialsPercentage =
+    totalRevenue > 0 ? totalMaterialsRevenue / totalRevenue : 0;
 
   return {
     jobCount,
@@ -1036,41 +1150,47 @@ export function calculateAllCaptainsPerformance(
   filters?: PerformanceFilters
 ): CaptainPerformanceData[] {
   // Filter to only captains
-  const captains = users.filter(user => user.roles.includes('captain'));
-  
+  const captains = users.filter((user) => user.roles.includes('captain'));
+
   const results: CaptainPerformanceData[] = [];
-  
+
   for (const captain of captains) {
     // Get logs for this captain
-    const captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
-    const logIds = captainLogs.map(log => log.id);
-    
+    const captainLogs = approvedLogs.filter(
+      (log) => log.captainId === captain.id
+    );
+    const logIds = captainLogs.map((log) => log.id);
+
     // Generate cache key
     const cacheKey = generatePerformanceCacheKey(captain.id, logIds, filters);
-    
+
     // Check cache first
     const cached = performanceCache.get(cacheKey);
     if (cached) {
       results.push(cached);
       continue;
     }
-    
+
     // Calculate performance metrics
-    const performance = calculateCaptainPerformanceMetrics(captain, captainLogs, filters);
-    
+    const performance = calculateCaptainPerformanceMetrics(
+      captain,
+      captainLogs,
+      filters
+    );
+
     // Cache the result
     performanceCache.set(cacheKey, performance);
-    
+
     results.push(performance);
   }
-  
+
   // Clean up old cache entries (keep only last 100 entries)
   if (performanceCache.size > 100) {
     const entries = Array.from(performanceCache.entries());
     const toDelete = entries.slice(0, entries.length - 100);
     toDelete.forEach(([key]) => performanceCache.delete(key));
   }
-  
+
   // Sort by total revenue (descending)
   return results.sort((a, b) => {
     const totalA = a.junkMetrics.totalRevenue + a.moveMetrics.totalRevenue;
@@ -1088,14 +1208,14 @@ export function calculateAllCaptainsPerformanceOld(
   filters?: PerformanceFilters
 ): CaptainPerformanceData[] {
   // Filter to only captains
-  const captains = users.filter(user => user.roles.includes('captain'));
-  
+  const captains = users.filter((user) => user.roles.includes('captain'));
+
   // Filter by captain IDs if specified
-  const filteredCaptains = filters?.captainIds 
-    ? captains.filter(captain => filters.captainIds!.includes(captain.id))
+  const filteredCaptains = filters?.captainIds
+    ? captains.filter((captain) => filters.captainIds!.includes(captain.id))
     : captains;
 
-  return filteredCaptains.map(captain => 
+  return filteredCaptains.map((captain) =>
     calculateCaptainPerformanceMetrics(captain, approvedLogs, filters)
   );
 }
@@ -1109,22 +1229,22 @@ export function calculateDisposalPercentage(
   startDate?: Date,
   endDate?: Date
 ): number {
-  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
-  
+  let captainLogs = approvedLogs.filter((log) => log.captainId === captain.id);
+
   if (startDate) {
-    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+    captainLogs = captainLogs.filter((log) => log.logDate >= startDate);
   }
-  
+
   if (endDate) {
-    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+    captainLogs = captainLogs.filter((log) => log.logDate <= endDate);
   }
 
   let totalRevenue = 0;
   let totalDisposalCost = 0;
 
   for (const log of captainLogs) {
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+
     for (const job of junkJobs) {
       totalRevenue += Number(job.revenue);
       totalDisposalCost += Number(job.disposalCost || 0);
@@ -1144,22 +1264,22 @@ export function calculateAverageJobSize(
   startDate?: Date,
   endDate?: Date
 ): number {
-  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
-  
+  let captainLogs = approvedLogs.filter((log) => log.captainId === captain.id);
+
   if (startDate) {
-    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+    captainLogs = captainLogs.filter((log) => log.logDate >= startDate);
   }
-  
+
   if (endDate) {
-    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+    captainLogs = captainLogs.filter((log) => log.logDate <= endDate);
   }
 
   let totalRevenue = 0;
   let jobCount = 0;
 
   for (const log of captainLogs) {
-    const jobs = log.jobs.filter(job => job.jobType === jobType);
-    
+    const jobs = log.jobs.filter((job) => job.jobType === jobType);
+
     for (const job of jobs) {
       totalRevenue += Number(job.revenue);
       jobCount++;
@@ -1179,22 +1299,22 @@ export function calculateCaptainLaborPercentage(
   startDate?: Date,
   endDate?: Date
 ): number {
-  let captainLogs = approvedLogs.filter(log => log.captainId === captain.id);
-  
+  let captainLogs = approvedLogs.filter((log) => log.captainId === captain.id);
+
   if (startDate) {
-    captainLogs = captainLogs.filter(log => log.logDate >= startDate);
+    captainLogs = captainLogs.filter((log) => log.logDate >= startDate);
   }
-  
+
   if (endDate) {
-    captainLogs = captainLogs.filter(log => log.logDate <= endDate);
+    captainLogs = captainLogs.filter((log) => log.logDate <= endDate);
   }
 
   let totalRevenue = 0;
   let totalLaborCost = 0;
 
   for (const log of captainLogs) {
-    const jobs = log.jobs.filter(job => job.jobType === jobType);
-    const hours = log.hours.filter(hour => hour.department === jobType);
+    const jobs = log.jobs.filter((job) => job.jobType === jobType);
+    const hours = log.hours.filter((hour) => hour.department === jobType);
 
     // Sum revenue for this job type
     for (const job of jobs) {
@@ -1203,7 +1323,11 @@ export function calculateCaptainLaborPercentage(
 
     // Sum labor cost for this job type
     for (const hour of hours) {
-      const rate = calculateHourlyWage(hour.employee, jobType, hour.isCoCaptain);
+      const rate = calculateHourlyWage(
+        hour.employee,
+        jobType,
+        hour.isCoCaptain
+      );
       totalLaborCost += Number(hour.hours) * rate;
     }
   }

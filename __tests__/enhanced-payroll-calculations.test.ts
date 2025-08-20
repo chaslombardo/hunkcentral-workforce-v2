@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { 
+import {
   calculateEnhancedPayroll,
-  calculateHourlyWage
+  calculateHourlyWage,
 } from '@/lib/payCalculator';
-import { 
+import {
   getDetailedPayrollBreakdown,
   validateEnhancedPayrollBreakdown,
-  validateEnhancedPayrollBreakdownSync as validatePayrollAction
+  validateEnhancedPayrollBreakdownSync as validatePayrollAction,
 } from '@/lib/actions/payroll';
 import type { User, DailyLog, CommissionEntry, Department } from '@/types';
 
@@ -229,14 +229,18 @@ describe('Enhanced Payroll Calculations', () => {
       );
 
       expect(result.tipsBreakdown).toHaveLength(2);
-      
-      const junkTip = result.tipsBreakdown.find(tip => tip.jobType === 'junk');
+
+      const junkTip = result.tipsBreakdown.find(
+        (tip) => tip.jobType === 'junk'
+      );
       expect(junkTip).toBeDefined();
       expect(junkTip!.totalJobTips).toBe(60);
       expect(junkTip!.teamMembers).toBe(2);
       expect(junkTip!.myShare).toBe(30);
 
-      const moveTip = result.tipsBreakdown.find(tip => tip.jobType === 'move');
+      const moveTip = result.tipsBreakdown.find(
+        (tip) => tip.jobType === 'move'
+      );
       expect(moveTip).toBeDefined();
       expect(moveTip!.totalJobTips).toBe(80);
       expect(moveTip!.teamMembers).toBe(2);
@@ -390,7 +394,9 @@ describe('Enhanced Payroll Calculations', () => {
 
       const validation = validatePayrollAction(mockData);
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Department hours do not match total hours');
+      expect(validation.errors).toContain(
+        'Department hours do not match total hours'
+      );
     });
 
     it('should detect tips breakdown mismatch', () => {
@@ -449,7 +455,9 @@ describe('Enhanced Payroll Calculations', () => {
 
       const validation = validatePayrollAction(mockData);
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('Tips breakdown does not match total tips');
+      expect(validation.errors).toContain(
+        'Tips breakdown does not match total tips'
+      );
     });
   });
 });

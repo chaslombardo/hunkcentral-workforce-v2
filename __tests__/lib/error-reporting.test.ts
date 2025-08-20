@@ -68,7 +68,9 @@ describe('Error Reporting', () => {
       });
 
       expect(report.id).toMatch(/^err_\d+_[a-z0-9]+$/);
-      expect(report.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(report.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+      );
     });
 
     it('should handle non-Error objects', () => {
@@ -166,9 +168,15 @@ describe('Error Reporting', () => {
         component: 'api',
       });
 
-      expect(authMessage).toBe('Authentication failed. Please try logging in again.');
-      expect(dbMessage).toBe('Unable to load data. Please try again in a moment.');
-      expect(networkMessage).toBe('Network connection error. Please check your internet connection.');
+      expect(authMessage).toBe(
+        'Authentication failed. Please try logging in again.'
+      );
+      expect(dbMessage).toBe(
+        'Unable to load data. Please try again in a moment.'
+      );
+      expect(networkMessage).toBe(
+        'Network connection error. Please check your internet connection.'
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -210,7 +218,9 @@ describe('Error Reporting', () => {
         custom: 'data',
       });
 
-      expect(context.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      expect(context.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+      );
     });
   });
 
@@ -244,7 +254,9 @@ describe('Error Reporting', () => {
   describe('Error reporting functions', () => {
     it('should call appropriate loggers for each error type', async () => {
       const { logServerError } = await import('@/lib/errorLogger');
-      const { logClientError, logClientComponentError } = await import('@/lib/client-error-logger');
+      const { logClientError, logClientComponentError } = await import(
+        '@/lib/client-error-logger'
+      );
 
       const error = new Error('Test error');
 

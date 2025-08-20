@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from '@testing-library/react';
 import { MyPayrollView } from '@/components/features/reports/my-payroll-view';
 import { RoleGuard } from '@/components/auth/role-guard';
 import type { SessionUser } from '@/lib/auth';
@@ -146,90 +152,109 @@ global.fetch = vi.fn().mockImplementation((url: string) => {
   if (url.includes('/api/pay-periods')) {
     return Promise.resolve({
       ok: true,
-      json: () => Promise.resolve([
-        {
-          id: 'current',
-          name: 'Current Period',
-          startDate: new Date('2024-01-01'),
-          endDate: new Date('2024-01-15'),
-          status: 'open',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 'previous',
-          name: 'Previous Period',
-          startDate: new Date('2023-12-16'),
-          endDate: new Date('2023-12-31'),
-          status: 'closed',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]),
+      json: () =>
+        Promise.resolve([
+          {
+            id: 'current',
+            name: 'Current Period',
+            startDate: new Date('2024-01-01'),
+            endDate: new Date('2024-01-15'),
+            status: 'open',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: 'previous',
+            name: 'Previous Period',
+            startDate: new Date('2023-12-16'),
+            endDate: new Date('2023-12-31'),
+            status: 'closed',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]),
     });
   }
   return Promise.reject(new Error('Unknown API endpoint'));
 });
 
 // Mock child components
-vi.mock('@/components/features/reports/payroll-breakdown/department-breakdown', () => ({
-  DepartmentBreakdown: ({ departments, user }: any) => (
-    <div data-testid="department-breakdown">
-      <div>Department Breakdown for {user?.fullName}</div>
-      <div>Departments: {departments?.length || 0}</div>
-      {departments?.map((dept: any, index: number) => (
-        <div key={index} data-testid={`department-${dept.department}`}>
-          {dept.department}: {dept.hours}h @ ${dept.rate}/hr = ${dept.grossPay}
+vi.mock(
+  '@/components/features/reports/payroll-breakdown/department-breakdown',
+  () => ({
+    DepartmentBreakdown: ({ departments, user }: any) => (
+      <div data-testid="department-breakdown">
+        <div>Department Breakdown for {user?.fullName}</div>
+        <div>Departments: {departments?.length || 0}</div>
+        {departments?.map((dept: any, index: number) => (
+          <div key={index} data-testid={`department-${dept.department}`}>
+            {dept.department}: {dept.hours}h @ ${dept.rate}/hr = $
+            {dept.grossPay}
+          </div>
+        ))}
+      </div>
+    ),
+  })
+);
+
+vi.mock(
+  '@/components/features/reports/payroll-breakdown/tips-detail-view',
+  () => ({
+    TipsDetailView: ({ tips, totalTips }: any) => (
+      <div data-testid="tips-detail-view">
+        <div>Total Tips: ${totalTips}</div>
+        <div>Tip Entries: {tips?.length || 0}</div>
+        {tips?.map((tip: any, index: number) => (
+          <div key={index} data-testid={`tip-${index}`}>
+            {tip.jobId}: ${tip.amount} ({tip.jobType})
+          </div>
+        ))}
+      </div>
+    ),
+  })
+);
+
+vi.mock(
+  '@/components/features/reports/payroll-breakdown/rate-information-panel',
+  () => ({
+    RateInformationPanel: ({ user, departmentHours }: any) => (
+      <div data-testid="rate-information-panel">
+        <div>Rate Information for {user?.fullName}</div>
+        <div>Role: {user?.roles?.join(', ')}</div>
+        <div>
+          Departments worked: {Object.keys(departmentHours || {}).length}
         </div>
-      ))}
-    </div>
-  ),
-}));
+      </div>
+    ),
+  })
+);
 
-vi.mock('@/components/features/reports/payroll-breakdown/tips-detail-view', () => ({
-  TipsDetailView: ({ tips, totalTips }: any) => (
-    <div data-testid="tips-detail-view">
-      <div>Total Tips: ${totalTips}</div>
-      <div>Tip Entries: {tips?.length || 0}</div>
-      {tips?.map((tip: any, index: number) => (
-        <div key={index} data-testid={`tip-${index}`}>
-          {tip.jobId}: ${tip.amount} ({tip.jobType})
-        </div>
-      ))}
-    </div>
-  ),
-}));
+vi.mock(
+  '@/components/features/reports/payroll-breakdown/daily-work-calendar',
+  () => ({
+    DailyWorkCalendar: ({ workEntries }: any) => (
+      <div data-testid="daily-work-calendar">
+        <div>Work Entries: {workEntries?.length || 0}</div>
+        {workEntries?.map((entry: any, index: number) => (
+          <div key={index} data-testid={`work-entry-${index}`}>
+            {entry.date.toDateString()}: {entry.role} - ${entry.tips} tips
+          </div>
+        ))}
+      </div>
+    ),
+  })
+);
 
-vi.mock('@/components/features/reports/payroll-breakdown/rate-information-panel', () => ({
-  RateInformationPanel: ({ user, departmentHours }: any) => (
-    <div data-testid="rate-information-panel">
-      <div>Rate Information for {user?.fullName}</div>
-      <div>Role: {user?.roles?.join(', ')}</div>
-      <div>Departments worked: {Object.keys(departmentHours || {}).length}</div>
-    </div>
-  ),
-}));
-
-vi.mock('@/components/features/reports/payroll-breakdown/daily-work-calendar', () => ({
-  DailyWorkCalendar: ({ workEntries }: any) => (
-    <div data-testid="daily-work-calendar">
-      <div>Work Entries: {workEntries?.length || 0}</div>
-      {workEntries?.map((entry: any, index: number) => (
-        <div key={index} data-testid={`work-entry-${index}`}>
-          {entry.date.toDateString()}: {entry.role} - ${entry.tips} tips
-        </div>
-      ))}
-    </div>
-  ),
-}));
-
-vi.mock('@/components/features/reports/payroll-breakdown/pay-period-analysis', () => ({
-  PayPeriodAnalysis: ({ userId }: any) => (
-    <div data-testid="pay-period-analysis">
-      Pay Period Analysis for user: {userId}
-    </div>
-  ),
-}));
+vi.mock(
+  '@/components/features/reports/payroll-breakdown/pay-period-analysis',
+  () => ({
+    PayPeriodAnalysis: ({ userId }: any) => (
+      <div data-testid="pay-period-analysis">
+        Pay Period Analysis for user: {userId}
+      </div>
+    ),
+  })
+);
 
 describe('Wingman Payroll Access', () => {
   beforeEach(() => {
@@ -249,13 +274,15 @@ describe('Wingman Payroll Access', () => {
       });
 
       // Verify wingman can see their payroll data
-      expect(screen.getByText('View your compensation details and pay history')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText('View your compensation details and pay history')
+      ).toBeInTheDocument();
+
       // Wait for summary cards to load
       await waitFor(() => {
         expect(screen.getByText('$1,200.00')).toBeInTheDocument(); // Total pay
       });
-      
+
       expect(screen.getByText('80')).toBeInTheDocument(); // Total hours
       expect(screen.getByText('$150.00')).toBeInTheDocument(); // Tips
       expect(screen.getByText('$50.00')).toBeInTheDocument(); // Bonuses
@@ -278,18 +305,25 @@ describe('Wingman Payroll Access', () => {
 
       // Wait for tips tab to be active
       await waitFor(() => {
-        expect(screen.getByRole('tab', { name: /tips/i })).toHaveAttribute('data-state', 'active');
+        expect(screen.getByRole('tab', { name: /tips/i })).toHaveAttribute(
+          'data-state',
+          'active'
+        );
       });
 
       // Verify tips details are shown
       await waitFor(() => {
         expect(screen.getByTestId('tips-detail-view')).toBeInTheDocument();
       });
-      
+
       expect(screen.getByText('Total Tips: $150')).toBeInTheDocument();
       expect(screen.getByText('Tip Entries: 2')).toBeInTheDocument();
-      expect(screen.getByTestId('tip-0')).toHaveTextContent('job-1: $25 (junk)');
-      expect(screen.getByTestId('tip-1')).toHaveTextContent('job-2: $30 (move)');
+      expect(screen.getByTestId('tip-0')).toHaveTextContent(
+        'job-1: $25 (junk)'
+      );
+      expect(screen.getByTestId('tip-1')).toHaveTextContent(
+        'job-2: $30 (move)'
+      );
     });
 
     it('should show time period filtering for wingman', async () => {
@@ -304,7 +338,7 @@ describe('Wingman Payroll Access', () => {
 
       // Verify pay period selector is available
       expect(screen.getByRole('combobox')).toBeInTheDocument();
-      
+
       // Click to open the selector
       await act(async () => {
         fireEvent.click(screen.getByRole('combobox'));
@@ -328,18 +362,28 @@ describe('Wingman Payroll Access', () => {
 
       // Verify breakdown tab shows rate information
       await waitFor(() => {
-        expect(screen.getByTestId('rate-information-panel')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('rate-information-panel')
+        ).toBeInTheDocument();
       });
-      
-      expect(screen.getByText('Rate Information for Test Wingman')).toBeInTheDocument();
+
+      expect(
+        screen.getByText('Rate Information for Test Wingman')
+      ).toBeInTheDocument();
       expect(screen.getByText('Role: wingman')).toBeInTheDocument();
       expect(screen.getByText('Departments worked: 2')).toBeInTheDocument();
 
       // Verify department breakdown shows rates
       expect(screen.getByTestId('department-breakdown')).toBeInTheDocument();
-      expect(screen.getByText('Department Breakdown for Test Wingman')).toBeInTheDocument();
-      expect(screen.getByTestId('department-junk')).toHaveTextContent('junk: 60h @ $12.5/hr = $750');
-      expect(screen.getByTestId('department-move')).toHaveTextContent('move: 20h @ $12.5/hr = $250');
+      expect(
+        screen.getByText('Department Breakdown for Test Wingman')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('department-junk')).toHaveTextContent(
+        'junk: 60h @ $12.5/hr = $750'
+      );
+      expect(screen.getByTestId('department-move')).toHaveTextContent(
+        'move: 20h @ $12.5/hr = $250'
+      );
     });
   });
 
@@ -352,7 +396,7 @@ describe('Wingman Payroll Access', () => {
       );
 
       render(<TestComponent />);
-      
+
       expect(screen.getByTestId('payroll-content')).toBeInTheDocument();
     });
 
@@ -364,9 +408,11 @@ describe('Wingman Payroll Access', () => {
       );
 
       render(<TestComponent />);
-      
+
       expect(screen.queryByTestId('admin-content')).not.toBeInTheDocument();
-      expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You don't have permission to view this content/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -388,17 +434,24 @@ describe('Wingman Payroll Access', () => {
 
       // Wait for daily work tab to be active
       await waitFor(() => {
-        expect(screen.getByRole('tab', { name: /work/i })).toHaveAttribute('data-state', 'active');
+        expect(screen.getByRole('tab', { name: /work/i })).toHaveAttribute(
+          'data-state',
+          'active'
+        );
       });
 
       // Verify daily work calendar is shown
       await waitFor(() => {
         expect(screen.getByTestId('daily-work-calendar')).toBeInTheDocument();
       });
-      
+
       expect(screen.getByText('Work Entries: 2')).toBeInTheDocument();
-      expect(screen.getByTestId('work-entry-0')).toHaveTextContent('wingman - $25 tips');
-      expect(screen.getByTestId('work-entry-1')).toHaveTextContent('wingman - $30 tips');
+      expect(screen.getByTestId('work-entry-0')).toHaveTextContent(
+        'wingman - $25 tips'
+      );
+      expect(screen.getByTestId('work-entry-1')).toHaveTextContent(
+        'wingman - $30 tips'
+      );
     });
   });
 
@@ -430,8 +483,12 @@ describe('Wingman Payroll Access', () => {
 
       // Verify wingman rates are displayed correctly
       await waitFor(() => {
-        expect(screen.getByTestId('department-junk')).toHaveTextContent('$12.5/hr');
-        expect(screen.getByTestId('department-move')).toHaveTextContent('$12.5/hr');
+        expect(screen.getByTestId('department-junk')).toHaveTextContent(
+          '$12.5/hr'
+        );
+        expect(screen.getByTestId('department-move')).toHaveTextContent(
+          '$12.5/hr'
+        );
       });
     });
   });
@@ -449,7 +506,7 @@ describe('Wingman Payroll Access', () => {
 
       // Verify current period is selected by default
       expect(screen.getByRole('combobox')).toBeInTheDocument();
-      
+
       // The current period should be showing in the summary
       expect(screen.getByText('Current Period')).toBeInTheDocument();
     });
@@ -492,15 +549,19 @@ describe('Wingman Payroll Access', () => {
 
       // Wait for history tab to be active
       await waitFor(() => {
-        expect(screen.getByRole('tab', { name: /pay history/i })).toHaveAttribute('data-state', 'active');
+        expect(
+          screen.getByRole('tab', { name: /pay history/i })
+        ).toHaveAttribute('data-state', 'active');
       });
 
       // Verify pay period analysis is shown
       await waitFor(() => {
         expect(screen.getByTestId('pay-period-analysis')).toBeInTheDocument();
       });
-      
-      expect(screen.getByText('Pay Period Analysis for user: wingman-1')).toBeInTheDocument();
+
+      expect(
+        screen.getByText('Pay Period Analysis for user: wingman-1')
+      ).toBeInTheDocument();
     });
   });
 });

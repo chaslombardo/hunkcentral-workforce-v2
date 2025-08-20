@@ -166,8 +166,11 @@ export function PayPeriodAnalysis({
   isLoading = false,
   error,
 }: PayPeriodAnalysisProps) {
-  const [selectedComparePeriod, setSelectedComparePeriod] = React.useState<string>('previous');
-  const [chartView, setChartView] = React.useState<'trends' | 'departments' | 'performance'>('trends');
+  const [selectedComparePeriod, setSelectedComparePeriod] =
+    React.useState<string>('previous');
+  const [chartView, setChartView] = React.useState<
+    'trends' | 'departments' | 'performance'
+  >('trends');
 
   const handleChartViewChange = (value: string) => {
     setChartView(value as 'trends' | 'departments' | 'performance');
@@ -185,7 +188,8 @@ export function PayPeriodAnalysis({
     {
       type: 'neutral',
       title: 'Department Mix Changed',
-      description: 'You worked more junk hours and fewer move hours this period',
+      description:
+        'You worked more junk hours and fewer move hours this period',
       metric: '+2h junk, -2h move',
     },
     {
@@ -198,7 +202,8 @@ export function PayPeriodAnalysis({
     {
       type: 'warning',
       title: 'Approaching Overtime',
-      description: 'You worked 42 hours this period, close to overtime threshold',
+      description:
+        'You worked 42 hours this period, close to overtime threshold',
       metric: '42 hours worked',
       recommendation: 'Monitor hours to optimize pay structure',
     },
@@ -225,21 +230,29 @@ export function PayPeriodAnalysis({
             Compare performance across pay periods and track trends
           </p>
         </div>
-        
+
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Select value={selectedComparePeriod} onValueChange={setSelectedComparePeriod}>
+          <Select
+            value={selectedComparePeriod}
+            onValueChange={setSelectedComparePeriod}
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Compare to..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="previous">Previous Period</SelectItem>
-              <SelectItem value="same-last-month">Same Period Last Month</SelectItem>
+              <SelectItem value="same-last-month">
+                Same Period Last Month
+              </SelectItem>
               <SelectItem value="best-period">Best Period</SelectItem>
               <SelectItem value="average">Period Average</SelectItem>
             </SelectContent>
           </Select>
-          
-          <div className="h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground grid w-full grid-cols-3" role="tablist">
+
+          <div
+            className="h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground grid w-full grid-cols-3"
+            role="tablist"
+          >
             <Button
               variant={chartView === 'trends' ? 'default' : 'ghost'}
               size="sm"
@@ -304,13 +317,14 @@ export function PayPeriodAnalysis({
                 <DollarSign className="h-3 w-3" />
                 Total Pay
               </CardDescription>
-              <CardTitle className="text-xl">
-                {formatCurrency(1020)}
-              </CardTitle>
+              <CardTitle className="text-xl">{formatCurrency(1020)}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp data-testid="trending-up" className="h-3 w-3 text-green-600" />
+                <TrendingUp
+                  data-testid="trending-up"
+                  className="h-3 w-3 text-green-600"
+                />
                 <span className="text-green-600">+6.8%</span>
                 <span className="text-muted-foreground">vs last period</span>
               </div>
@@ -328,7 +342,10 @@ export function PayPeriodAnalysis({
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp data-testid="trending-up" className="h-3 w-3 text-green-600" />
+                <TrendingUp
+                  data-testid="trending-up"
+                  className="h-3 w-3 text-green-600"
+                />
                 <span className="text-green-600">+5.0%</span>
                 <span className="text-muted-foreground">vs last period</span>
               </div>
@@ -342,13 +359,14 @@ export function PayPeriodAnalysis({
                 <Award className="h-3 w-3" />
                 Tips Earned
               </CardDescription>
-              <CardTitle className="text-xl">
-                {formatCurrency(180)}
-              </CardTitle>
+              <CardTitle className="text-xl">{formatCurrency(180)}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp data-testid="trending-up" className="h-3 w-3 text-green-600" />
+                <TrendingUp
+                  data-testid="trending-up"
+                  className="h-3 w-3 text-green-600"
+                />
                 <span className="text-green-600">+20.0%</span>
                 <span className="text-muted-foreground">vs last period</span>
               </div>
@@ -366,7 +384,10 @@ export function PayPeriodAnalysis({
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp data-testid="trending-up" className="h-3 w-3 text-green-600" />
+                <TrendingUp
+                  data-testid="trending-up"
+                  className="h-3 w-3 text-green-600"
+                />
                 <span className="text-green-600">+5.6%</span>
                 <span className="text-muted-foreground">vs target</span>
               </div>
@@ -380,16 +401,21 @@ export function PayPeriodAnalysis({
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             {chartView === 'trends' && <LineChartIcon className="h-5 w-5" />}
-            {chartView === 'departments' && <PieChartIcon className="h-5 w-5" />}
+            {chartView === 'departments' && (
+              <PieChartIcon className="h-5 w-5" />
+            )}
             {chartView === 'performance' && <BarChart3 className="h-5 w-5" />}
             {chartView === 'trends' && 'Pay Trends Over Time'}
             {chartView === 'departments' && 'Department Hour Distribution'}
             {chartView === 'performance' && 'Performance Metrics'}
           </CardTitle>
           <CardDescription>
-            {chartView === 'trends' && 'Track your compensation trends across recent pay periods'}
-            {chartView === 'departments' && 'See how your work hours are distributed across departments'}
-            {chartView === 'performance' && 'Monitor key performance indicators and targets'}
+            {chartView === 'trends' &&
+              'Track your compensation trends across recent pay periods'}
+            {chartView === 'departments' &&
+              'See how your work hours are distributed across departments'}
+            {chartView === 'performance' &&
+              'Monitor key performance indicators and targets'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
@@ -399,8 +425,14 @@ export function PayPeriodAnalysis({
             <div id="chart-content" className="w-full">
               {chartView === 'trends' && (
                 <div className="h-[350px] w-full">
-                  <ChartContainer config={chartConfig} className="h-full w-full">
-                    <LineChart data={mockHistoricalData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-full w-full"
+                  >
+                    <LineChart
+                      data={mockHistoricalData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="period" />
                       <YAxis yAxisId="pay" orientation="left" />
@@ -438,14 +470,28 @@ export function PayPeriodAnalysis({
 
               {chartView === 'departments' && (
                 <div className="h-[350px] w-full">
-                  <ChartContainer config={chartConfig} className="h-full w-full">
-                    <BarChart data={mockDepartmentTrends} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-full w-full"
+                  >
+                    <BarChart
+                      data={mockDepartmentTrends}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="department" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="current" fill="#026937" name="Current Period" />
-                      <Bar dataKey="previous" fill="#ea7200" name="Previous Period" />
+                      <Bar
+                        dataKey="current"
+                        fill="#026937"
+                        name="Current Period"
+                      />
+                      <Bar
+                        dataKey="previous"
+                        fill="#ea7200"
+                        name="Previous Period"
+                      />
                     </BarChart>
                   </ChartContainer>
                 </div>
@@ -453,8 +499,15 @@ export function PayPeriodAnalysis({
 
               {chartView === 'performance' && (
                 <div className="h-[350px] w-full">
-                  <ChartContainer config={chartConfig} className="h-full w-full">
-                    <BarChart data={mockPerformanceMetrics} layout="horizontal" margin={{ top: 20, right: 30, left: 120, bottom: 20 }}>
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-full w-full"
+                  >
+                    <BarChart
+                      data={mockPerformanceMetrics}
+                      layout="horizontal"
+                      margin={{ top: 20, right: 30, left: 120, bottom: 20 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
                       <YAxis dataKey="metric" type="category" width={100} />
@@ -498,15 +551,26 @@ export function PayPeriodAnalysis({
             <div className="space-y-4">
               {mockInsights.map((insight, index) => (
                 <div key={index} className="flex gap-3 p-3 rounded-lg border">
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    insight.type === 'positive' ? 'bg-green-100 text-green-600' :
-                    insight.type === 'negative' ? 'bg-red-100 text-red-600' :
-                    insight.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                    'bg-blue-100 text-blue-600'
-                  }`}>
-                    {insight.type === 'positive' && <TrendingUp className="h-4 w-4" />}
-                    {insight.type === 'negative' && <TrendingDown className="h-4 w-4" />}
-                    {insight.type === 'warning' && <AlertCircle className="h-4 w-4" />}
+                  <div
+                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      insight.type === 'positive'
+                        ? 'bg-green-100 text-green-600'
+                        : insight.type === 'negative'
+                          ? 'bg-red-100 text-red-600'
+                          : insight.type === 'warning'
+                            ? 'bg-yellow-100 text-yellow-600'
+                            : 'bg-blue-100 text-blue-600'
+                    }`}
+                  >
+                    {insight.type === 'positive' && (
+                      <TrendingUp className="h-4 w-4" />
+                    )}
+                    {insight.type === 'negative' && (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                    {insight.type === 'warning' && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
                     {insight.type === 'neutral' && <Info className="h-4 w-4" />}
                   </div>
                   <div className="flex-1">
@@ -562,23 +626,72 @@ export function PayPeriodAnalysis({
                 <div className="text-center">Previous Period</div>
                 <div className="text-center">Change</div>
               </div>
-              
+
               {[
-                { metric: 'Total Pay', current: '$1,020', previous: '$955', change: '+6.8%', positive: true },
-                { metric: 'Total Hours', current: '42h', previous: '40h', change: '+5.0%', positive: true },
-                { metric: 'Tips Earned', current: '$180', previous: '$150', change: '+20.0%', positive: true },
-                { metric: 'Bonuses', current: '$95', previous: '$85', change: '+11.8%', positive: true },
-                { metric: 'Tips per Hour', current: '$4.29', previous: '$3.75', change: '+14.4%', positive: true },
-                { metric: 'Labor Efficiency', current: '95%', previous: '92%', change: '+3.3%', positive: true },
-                { metric: 'Jobs Completed', current: '24', previous: '22', change: '+9.1%', positive: true },
+                {
+                  metric: 'Total Pay',
+                  current: '$1,020',
+                  previous: '$955',
+                  change: '+6.8%',
+                  positive: true,
+                },
+                {
+                  metric: 'Total Hours',
+                  current: '42h',
+                  previous: '40h',
+                  change: '+5.0%',
+                  positive: true,
+                },
+                {
+                  metric: 'Tips Earned',
+                  current: '$180',
+                  previous: '$150',
+                  change: '+20.0%',
+                  positive: true,
+                },
+                {
+                  metric: 'Bonuses',
+                  current: '$95',
+                  previous: '$85',
+                  change: '+11.8%',
+                  positive: true,
+                },
+                {
+                  metric: 'Tips per Hour',
+                  current: '$4.29',
+                  previous: '$3.75',
+                  change: '+14.4%',
+                  positive: true,
+                },
+                {
+                  metric: 'Labor Efficiency',
+                  current: '95%',
+                  previous: '92%',
+                  change: '+3.3%',
+                  positive: true,
+                },
+                {
+                  metric: 'Jobs Completed',
+                  current: '24',
+                  previous: '22',
+                  change: '+9.1%',
+                  positive: true,
+                },
               ].map((row, index) => (
-                <div key={index} className="grid grid-cols-4 gap-4 py-2 text-sm">
+                <div
+                  key={index}
+                  className="grid grid-cols-4 gap-4 py-2 text-sm"
+                >
                   <div className="font-medium">{row.metric}</div>
                   <div className="text-center">{row.current}</div>
-                  <div className="text-center text-muted-foreground">{row.previous}</div>
-                  <div className={`text-center font-medium ${
-                    row.positive ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <div className="text-center text-muted-foreground">
+                    {row.previous}
+                  </div>
+                  <div
+                    className={`text-center font-medium ${
+                      row.positive ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
                     {row.change}
                   </div>
                 </div>

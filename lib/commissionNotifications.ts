@@ -6,7 +6,9 @@ import type { MatchingNotification } from '@/lib/commissionMatchingService';
 /**
  * Display toast notifications for commission matching results
  */
-export function showCommissionMatchingNotifications(notifications: MatchingNotification[]) {
+export function showCommissionMatchingNotifications(
+  notifications: MatchingNotification[]
+) {
   notifications.forEach((notification) => {
     switch (notification.type) {
       case 'success':
@@ -17,7 +19,7 @@ export function showCommissionMatchingNotifications(notifications: MatchingNotif
           className: 'border-hunks-green bg-hunks-green/10',
         });
         break;
-        
+
       case 'conflict':
         toast({
           title: notification.title,
@@ -26,7 +28,7 @@ export function showCommissionMatchingNotifications(notifications: MatchingNotif
           className: 'border-hunks-orange bg-hunks-orange/10',
         });
         break;
-        
+
       case 'error':
         toast({
           title: notification.title,
@@ -86,7 +88,7 @@ export function showCommissionMatchingSummary(
       className: 'border-hunks-green bg-hunks-green/10',
     });
   }
-  
+
   if (conflictCount > 0 && matchCount === 0) {
     toast({
       title: 'Commission Conflicts Detected',

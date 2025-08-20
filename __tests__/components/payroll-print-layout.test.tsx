@@ -1,5 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PayrollPrintLayout, PrintPreviewDialog } from '@/components/features/reports/payroll-print-layout';
+import {
+  PayrollPrintLayout,
+  PrintPreviewDialog,
+} from '@/components/features/reports/payroll-print-layout';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation, TipEntry } from '@/lib/payCalculator';
 import type { DepartmentBreakdownData } from '@/components/features/reports/payroll-breakdown/department-breakdown';
@@ -47,7 +50,15 @@ const mockPayrollData: PayrollCalculation = {
   employeeId: '1',
   employee: mockUser,
   totalHours: 40,
-  hoursByDepartment: { junk: 30, move: 8, zigma: 2, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+  hoursByDepartment: {
+    junk: 30,
+    move: 8,
+    zigma: 2,
+    training: 0,
+    estimating: 0,
+    warehouse: 0,
+    admin: 0,
+  },
   grossWages: 720,
   tips: 150,
   bonuses: 85,
@@ -89,9 +100,7 @@ const mockDailyWorkHistory: DailyWorkEntry[] = [
   {
     date: new Date('2025-01-02'),
     logId: 'log-1',
-    departments: [
-      { department: 'junk', hours: 6, rate: 20, role: 'captain' },
-    ],
+    departments: [{ department: 'junk', hours: 6, rate: 20, role: 'captain' }],
     tips: 45,
     totalHours: 6,
     grossPay: 120,
@@ -100,9 +109,7 @@ const mockDailyWorkHistory: DailyWorkEntry[] = [
   {
     date: new Date('2025-01-03'),
     logId: 'log-2',
-    departments: [
-      { department: 'move', hours: 8, rate: 22, role: 'captain' },
-    ],
+    departments: [{ department: 'move', hours: 8, rate: 22, role: 'captain' }],
     tips: 60,
     totalHours: 8,
     grossPay: 176,
@@ -144,7 +151,7 @@ const defaultProps = {
 describe('PayrollPrintLayout', () => {
   it('renders the basic paystub header', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByTestId('company-name')).toBeInTheDocument();
     expect(screen.getByText('Employee Paystub')).toBeInTheDocument();
     expect(screen.getByText('Official Paystub')).toBeInTheDocument();
@@ -152,7 +159,7 @@ describe('PayrollPrintLayout', () => {
 
   it('displays employee information correctly', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByText('Employee Information')).toBeInTheDocument();
     expect(screen.getByText('John Smith')).toBeInTheDocument();
     expect(screen.getByText('john@example.com')).toBeInTheDocument();
@@ -161,7 +168,7 @@ describe('PayrollPrintLayout', () => {
 
   it('displays pay period details', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByText('Pay Period Details')).toBeInTheDocument();
     expect(screen.getByText('January 2025 - Week 1')).toBeInTheDocument();
     expect(screen.getByText('closed')).toBeInTheDocument();
@@ -169,7 +176,7 @@ describe('PayrollPrintLayout', () => {
 
   it('shows pay summary with correct totals', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByText('Pay Summary')).toBeInTheDocument();
     expect(screen.getByText('40h')).toBeInTheDocument(); // Total hours
     expect(screen.getAllByText('$720.00')[0]).toBeInTheDocument(); // Gross wages
@@ -179,7 +186,7 @@ describe('PayrollPrintLayout', () => {
 
   it('displays detailed pay breakdown', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByText('Regular Wages (40 hours)')).toBeInTheDocument();
     expect(screen.getByText('Tips Earned')).toBeInTheDocument();
     expect(screen.getByTestId('performance-bonuses-label')).toBeInTheDocument();
@@ -189,7 +196,7 @@ describe('PayrollPrintLayout', () => {
 
   it('shows department breakdown when enabled', () => {
     render(<PayrollPrintLayout {...defaultProps} includeBreakdown={true} />);
-    
+
     expect(screen.getByText('Department Breakdown')).toBeInTheDocument();
     expect(screen.getByText('junk')).toBeInTheDocument();
     expect(screen.getByText('move')).toBeInTheDocument();
@@ -200,13 +207,13 @@ describe('PayrollPrintLayout', () => {
 
   it('hides department breakdown when disabled', () => {
     render(<PayrollPrintLayout {...defaultProps} includeBreakdown={false} />);
-    
+
     expect(screen.queryByText('Department Breakdown')).not.toBeInTheDocument();
   });
 
   it('shows daily work history when enabled', () => {
     render(<PayrollPrintLayout {...defaultProps} includeDailyHistory={true} />);
-    
+
     expect(screen.getByText('Daily Work History')).toBeInTheDocument();
     expect(screen.getAllByText(/1\/2\/2025/)[0]).toBeInTheDocument(); // First work day
     // Check for job completion text using regex to handle potential text splitting
@@ -215,14 +222,16 @@ describe('PayrollPrintLayout', () => {
   });
 
   it('hides daily work history when disabled', () => {
-    render(<PayrollPrintLayout {...defaultProps} includeDailyHistory={false} />);
-    
+    render(
+      <PayrollPrintLayout {...defaultProps} includeDailyHistory={false} />
+    );
+
     expect(screen.queryByText('Daily Work History')).not.toBeInTheDocument();
   });
 
   it('displays tips details', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     expect(screen.getByText('Tips Details')).toBeInTheDocument();
     expect(screen.getByText('Smith Residence')).toBeInTheDocument();
     expect(screen.getByText('Johnson Office')).toBeInTheDocument();
@@ -234,27 +243,35 @@ describe('PayrollPrintLayout', () => {
 
   it('shows calculation explanations when enabled', () => {
     render(<PayrollPrintLayout {...defaultProps} includeCalculations={true} />);
-    
+
     expect(screen.getByText('Calculation Explanations')).toBeInTheDocument();
-    expect(screen.getByTestId('regular-pay-calculation-section')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('regular-pay-calculation-section')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('tips-distribution-section')).toBeInTheDocument();
-    expect(screen.getByTestId('performance-bonuses-section')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('performance-bonuses-section')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('department-goals-section')).toBeInTheDocument();
-    expect(screen.getByText('Junk operations target: 14% labor cost')).toBeInTheDocument();
-    expect(screen.getByText('Move operations target: 24% labor cost')).toBeInTheDocument();
+    expect(
+      screen.getByText('Junk operations target: 14% labor cost')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Move operations target: 24% labor cost')
+    ).toBeInTheDocument();
   });
 
   it('displays notes when provided', () => {
     const notes = 'This is a test paystub with additional notes.';
     render(<PayrollPrintLayout {...defaultProps} notes={notes} />);
-    
+
     expect(screen.getByText('Notes')).toBeInTheDocument();
     expect(screen.getByText(notes)).toBeInTheDocument();
   });
 
   it('shows print button', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     const printButton = screen.getByText('Print Paystub');
     expect(printButton).toBeInTheDocument();
     expect(printButton.closest('button')).toBeInTheDocument();
@@ -269,16 +286,16 @@ describe('PayrollPrintLayout', () => {
     });
 
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     const printButton = screen.getByText('Print Paystub');
     fireEvent.click(printButton);
-    
+
     expect(mockPrint).toHaveBeenCalled();
   });
 
   it('includes print-specific CSS classes', () => {
     const { container } = render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     // Check for print-specific classes
     expect(container.querySelector('.print\\:border')).toBeInTheDocument();
     expect(container.querySelector('.print\\:p-4')).toBeInTheDocument();
@@ -293,11 +310,11 @@ describe('PayrollPrintLayout', () => {
         // No optional props provided
       />
     );
-    
+
     // Should still render basic information
     expect(screen.getByText('Pay Summary')).toBeInTheDocument();
     expect(screen.getByText('John Smith')).toBeInTheDocument();
-    
+
     // Should not show optional sections
     expect(screen.queryByText('Department Breakdown')).not.toBeInTheDocument();
     expect(screen.queryByText('Daily Work History')).not.toBeInTheDocument();
@@ -312,7 +329,7 @@ describe('PrintPreviewDialog', () => {
         <button>Show Preview</button>
       </PrintPreviewDialog>
     );
-    
+
     expect(screen.getByText('Show Preview')).toBeInTheDocument();
   });
 
@@ -322,9 +339,9 @@ describe('PrintPreviewDialog', () => {
         <button>Show Preview</button>
       </PrintPreviewDialog>
     );
-    
+
     fireEvent.click(screen.getByText('Show Preview'));
-    
+
     expect(screen.getByText('Print Preview')).toBeInTheDocument();
     expect(screen.getByText('Close')).toBeInTheDocument();
   });
@@ -335,11 +352,11 @@ describe('PrintPreviewDialog', () => {
         <button>Show Preview</button>
       </PrintPreviewDialog>
     );
-    
+
     // Open dialog
     fireEvent.click(screen.getByText('Show Preview'));
     expect(screen.getByText('Print Preview')).toBeInTheDocument();
-    
+
     // Close dialog
     fireEvent.click(screen.getByText('Close'));
     expect(screen.queryByText('Print Preview')).not.toBeInTheDocument();
@@ -351,9 +368,9 @@ describe('PrintPreviewDialog', () => {
         <button>Show Preview</button>
       </PrintPreviewDialog>
     );
-    
+
     fireEvent.click(screen.getByText('Show Preview'));
-    
+
     // Should show payroll content
     expect(screen.getByTestId('company-name')).toBeInTheDocument();
     expect(screen.getByText('Employee Paystub')).toBeInTheDocument();
@@ -364,27 +381,27 @@ describe('PrintPreviewDialog', () => {
 describe('PayrollPrintLayout Requirements Validation', () => {
   it('meets requirement 7.4: Implements print-friendly layouts', () => {
     const { container } = render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     // Should have print-specific styling
     expect(container.querySelector('.print\\:bg-white')).toBeInTheDocument();
     expect(container.querySelector('.print\\:text-black')).toBeInTheDocument();
     expect(container.querySelector('.print\\:border')).toBeInTheDocument();
     expect(container.querySelector('.no-print')).toBeInTheDocument();
-    
+
     // Should have print button
     expect(screen.getByText('Print Paystub')).toBeInTheDocument();
   });
 
   it('meets requirement 7.2: Includes all breakdown information', () => {
     render(
-      <PayrollPrintLayout 
-        {...defaultProps} 
+      <PayrollPrintLayout
+        {...defaultProps}
         includeBreakdown={true}
         includeDailyHistory={true}
         includeCalculations={true}
       />
     );
-    
+
     // Should include comprehensive breakdown
     expect(screen.getByText('Department Breakdown')).toBeInTheDocument();
     expect(screen.getByText('Daily Work History')).toBeInTheDocument();
@@ -394,19 +411,29 @@ describe('PayrollPrintLayout Requirements Validation', () => {
 
   it('meets requirement 7.3: Provides calculation explanations', () => {
     render(<PayrollPrintLayout {...defaultProps} includeCalculations={true} />);
-    
+
     // Should show detailed calculation explanations
-    expect(screen.getByTestId('regular-pay-calculation-section')).toBeInTheDocument();
-    expect(screen.getByText(/Regular pay is calculated by multiplying hours worked/)).toBeInTheDocument();
+    expect(
+      screen.getByTestId('regular-pay-calculation-section')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Regular pay is calculated by multiplying hours worked/)
+    ).toBeInTheDocument();
     expect(screen.getByTestId('tips-distribution-section')).toBeInTheDocument();
-    expect(screen.getByText(/Tips from each job are divided equally/)).toBeInTheDocument();
-    expect(screen.getByTestId('performance-bonuses-section')).toBeInTheDocument();
-    expect(screen.getByText(/Labor efficiency bonuses are earned/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Tips from each job are divided equally/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('performance-bonuses-section')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Labor efficiency bonuses are earned/)
+    ).toBeInTheDocument();
   });
 
   it('meets requirement 7.5: Supports professional paystub format', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     // Should have professional paystub elements
     expect(screen.getByTestId('company-name')).toBeInTheDocument();
     expect(screen.getByText('Employee Paystub')).toBeInTheDocument();
@@ -419,14 +446,14 @@ describe('PayrollPrintLayout Requirements Validation', () => {
 
   it('meets requirement 7.6: Includes comprehensive pay data', () => {
     render(<PayrollPrintLayout {...defaultProps} />);
-    
+
     // Should show all pay components
     expect(screen.getByText('Regular Wages (40 hours)')).toBeInTheDocument();
     expect(screen.getByText('Tips Earned')).toBeInTheDocument();
     expect(screen.getByTestId('performance-bonuses-label')).toBeInTheDocument();
     expect(screen.getByText('Commission')).toBeInTheDocument();
     expect(screen.getByText('Total Gross Pay')).toBeInTheDocument();
-    
+
     // Should show correct amounts
     expect(screen.getAllByText('$720.00')[0]).toBeInTheDocument(); // Gross wages
     expect(screen.getByText('$150.00')).toBeInTheDocument(); // Tips

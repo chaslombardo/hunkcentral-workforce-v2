@@ -12,7 +12,7 @@ export interface PerformanceConfig {
     logInterval: number; // milliseconds
     maxStoredMeasurements: number;
   };
-  
+
   // Warning thresholds
   thresholds: {
     renderTime: number; // milliseconds
@@ -20,7 +20,7 @@ export interface PerformanceConfig {
     reRenderCount: number;
     memoryUsage: number; // MB
   };
-  
+
   // Optimization settings
   optimization: {
     enableMemoization: boolean;
@@ -28,7 +28,7 @@ export interface PerformanceConfig {
     enableTreeShaking: boolean;
     enableCodeSplitting: boolean;
   };
-  
+
   // Component-specific settings
   components: {
     [componentName: string]: {
@@ -49,96 +49,96 @@ export const defaultPerformanceConfig: PerformanceConfig = {
     logInterval: 30000, // 30 seconds
     maxStoredMeasurements: 100,
   },
-  
+
   thresholds: {
     renderTime: 16, // 60fps target
     propSize: 1000, // 1KB
     reRenderCount: 10,
     memoryUsage: 50, // 50MB
   },
-  
+
   optimization: {
     enableMemoization: true,
     enableLazyLoading: true,
     enableTreeShaking: true,
     enableCodeSplitting: true,
   },
-  
+
   components: {
     // High-frequency components that need optimization
-    'MetricCard': {
+    MetricCard: {
       memoize: true,
       lazyLoad: false, // Used frequently
       propSizeThreshold: 500,
       trackPerformance: true,
     },
-    
-    'BrandButton': {
+
+    BrandButton: {
       memoize: true,
       lazyLoad: false, // Used frequently
       propSizeThreshold: 200,
       trackPerformance: true,
     },
-    
-    'StatusIndicator': {
+
+    StatusIndicator: {
       memoize: true,
       lazyLoad: false, // Used frequently
       propSizeThreshold: 200,
       trackPerformance: true,
     },
-    
-    'SmartInput': {
+
+    SmartInput: {
       memoize: true,
       lazyLoad: false, // Used in forms
       propSizeThreshold: 800,
       trackPerformance: true,
     },
-    
-    'FormFeedback': {
+
+    FormFeedback: {
       memoize: true,
       lazyLoad: true, // Only shown on errors/success
       propSizeThreshold: 300,
       trackPerformance: true,
     },
-    
-    'BrandLoading': {
+
+    BrandLoading: {
       memoize: true,
       lazyLoad: false, // Used frequently
       propSizeThreshold: 100,
       trackPerformance: false, // Simple component
     },
-    
+
     // Layout components
-    'SmartBreadcrumbs': {
+    SmartBreadcrumbs: {
       memoize: true,
       lazyLoad: false, // Always visible
       propSizeThreshold: 300,
       trackPerformance: true,
     },
-    
-    'NavigationProvider': {
+
+    NavigationProvider: {
       memoize: true,
       lazyLoad: false, // Core component
       propSizeThreshold: 500,
       trackPerformance: true,
     },
-    
+
     // Feature components that can be lazy loaded
-    'PayrollReport': {
+    PayrollReport: {
       memoize: true,
       lazyLoad: true, // Heavy component
       propSizeThreshold: 2000,
       trackPerformance: true,
     },
-    
-    'LogForm': {
+
+    LogForm: {
       memoize: true,
       lazyLoad: true, // Complex form
       propSizeThreshold: 1500,
       trackPerformance: true,
     },
-    
-    'EmptyStates': {
+
+    EmptyStates: {
       memoize: true,
       lazyLoad: true, // Only shown when needed
       propSizeThreshold: 400,
@@ -165,7 +165,7 @@ const environmentOverrides: Partial<PerformanceConfig> = {
       enableCodeSplitting: true,
     },
   }),
-  
+
   // Test environment
   ...(process.env.NODE_ENV === 'test' && {
     monitoring: {
@@ -204,18 +204,22 @@ export const performanceConfig: PerformanceConfig = {
  * Get performance configuration for a specific component
  */
 export function getComponentConfig(componentName: string) {
-  return performanceConfig.components[componentName] || {
-    memoize: false,
-    lazyLoad: false,
-    propSizeThreshold: performanceConfig.thresholds.propSize,
-    trackPerformance: false,
-  };
+  return (
+    performanceConfig.components[componentName] || {
+      memoize: false,
+      lazyLoad: false,
+      propSizeThreshold: performanceConfig.thresholds.propSize,
+      trackPerformance: false,
+    }
+  );
 }
 
 /**
  * Check if a feature is enabled
  */
-export function isFeatureEnabled(feature: keyof PerformanceConfig['optimization']): boolean {
+export function isFeatureEnabled(
+  feature: keyof PerformanceConfig['optimization']
+): boolean {
   return performanceConfig.optimization[feature];
 }
 
@@ -229,19 +233,25 @@ export function isMonitoringEnabled(): boolean {
 /**
  * Get threshold value
  */
-export function getThreshold(threshold: keyof PerformanceConfig['thresholds']): number {
+export function getThreshold(
+  threshold: keyof PerformanceConfig['thresholds']
+): number {
   return performanceConfig.thresholds[threshold];
 }
 
 /**
  * Update performance configuration at runtime (development only)
  */
-export function updatePerformanceConfig(updates: Partial<PerformanceConfig>): void {
+export function updatePerformanceConfig(
+  updates: Partial<PerformanceConfig>
+): void {
   if (process.env.NODE_ENV !== 'development') {
-    console.warn('Performance configuration can only be updated in development mode');
+    console.warn(
+      'Performance configuration can only be updated in development mode'
+    );
     return;
   }
-  
+
   Object.assign(performanceConfig, updates);
   console.warn('Performance configuration updated:', updates);
 }

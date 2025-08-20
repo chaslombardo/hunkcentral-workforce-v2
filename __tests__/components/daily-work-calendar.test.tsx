@@ -1,6 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import { DailyWorkCalendar, type DailyWorkEntry, type WorkPatternStats } from '@/components/features/reports/payroll-breakdown/daily-work-calendar';
+import {
+  DailyWorkCalendar,
+  type DailyWorkEntry,
+  type WorkPatternStats,
+} from '@/components/features/reports/payroll-breakdown/daily-work-calendar';
 
 // Mock the formatters
 vi.mock('@/lib/formatters', () => ({
@@ -29,9 +33,7 @@ const mockWorkEntries: DailyWorkEntry[] = [
   {
     date: new Date('2025-01-03'),
     logId: 'log-2',
-    departments: [
-      { department: 'junk', hours: 8, rate: 20, role: 'captain' },
-    ],
+    departments: [{ department: 'junk', hours: 8, rate: 20, role: 'captain' }],
     tips: 60,
     totalHours: 8,
     grossPay: 160,
@@ -97,7 +99,7 @@ describe('DailyWorkCalendar', () => {
 
   it('shows daily detail when date is selected', () => {
     const selectedDate = new Date('2025-01-02');
-    
+
     render(
       <DailyWorkCalendar
         workEntries={mockWorkEntries}
@@ -121,7 +123,7 @@ describe('DailyWorkCalendar', () => {
 
   it('shows department breakdown in daily detail', () => {
     const selectedDate = new Date('2025-01-02');
-    
+
     render(
       <DailyWorkCalendar
         workEntries={mockWorkEntries}
@@ -136,11 +138,13 @@ describe('DailyWorkCalendar', () => {
     expect(screen.getByText('Department Breakdown')).toBeInTheDocument();
     expect(screen.getByText('captain')).toBeInTheDocument();
     expect(screen.getByText('wingman')).toBeInTheDocument();
-    
+
     // Check for department badges
     const badges = screen.getAllByRole('generic');
-    const departmentBadges = badges.filter(badge => 
-      badge.textContent?.includes('junk') || badge.textContent?.includes('move')
+    const departmentBadges = badges.filter(
+      (badge) =>
+        badge.textContent?.includes('junk') ||
+        badge.textContent?.includes('move')
     );
     expect(departmentBadges.length).toBeGreaterThan(0);
   });
@@ -157,8 +161,12 @@ describe('DailyWorkCalendar', () => {
     );
 
     expect(screen.getByText('Select a Date')).toBeInTheDocument();
-    expect(screen.getByText('Choose a date from the calendar to view details')).toBeInTheDocument();
-    expect(screen.getByText('Select a date to view work details')).toBeInTheDocument();
+    expect(
+      screen.getByText('Choose a date from the calendar to view details')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Select a date to view work details')
+    ).toBeInTheDocument();
   });
 
   it('handles empty work entries gracefully', () => {
@@ -194,7 +202,9 @@ describe('DailyWorkCalendar', () => {
       {
         date: new Date('2025-01-02'),
         logId: 'log-1',
-        departments: [{ department: 'junk', hours: 8, rate: 20, role: 'captain' }],
+        departments: [
+          { department: 'junk', hours: 8, rate: 20, role: 'captain' },
+        ],
         tips: 100, // High tips (> 42.5 * 1.5 = 63.75)
         totalHours: 8,
         grossPay: 160,
@@ -203,7 +213,9 @@ describe('DailyWorkCalendar', () => {
       {
         date: new Date('2025-01-03'),
         logId: 'log-2',
-        departments: [{ department: 'junk', hours: 12, rate: 20, role: 'captain' }],
+        departments: [
+          { department: 'junk', hours: 12, rate: 20, role: 'captain' },
+        ],
         tips: 30,
         totalHours: 12, // High hours (> 8.2 * 1.2 = 9.84)
         grossPay: 240,

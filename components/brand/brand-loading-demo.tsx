@@ -1,16 +1,25 @@
-"use client"
+'use client';
 
-import { BrandLoading } from "./brand-loading"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { BrandLoading } from './brand-loading';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export function BrandLoadingDemo() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h2 className="text-2xl font-bold text-hunks-green mb-2">Brand Loading Components</h2>
+        <h2 className="text-2xl font-bold text-hunks-green mb-2">
+          Brand Loading Components
+        </h2>
         <p className="text-muted-foreground">
-          Loading indicators using College Hunks brand colors with support for reduced motion preferences.
+          Loading indicators using College Hunks brand colors with support for
+          reduced motion preferences.
         </p>
       </div>
 
@@ -31,9 +40,9 @@ export function BrandLoadingDemo() {
               <BrandLoading variant="spinner" color="muted" />
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Dots</h4>
             <div className="flex items-center gap-4">
@@ -42,9 +51,9 @@ export function BrandLoadingDemo() {
               <BrandLoading variant="dots" color="muted" />
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Pulse</h4>
             <div className="flex items-center gap-4">
@@ -73,9 +82,9 @@ export function BrandLoadingDemo() {
               <BrandLoading variant="pulse" size="sm" color="primary" />
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Medium (md) - Default</h4>
             <div className="flex items-center gap-4">
@@ -84,9 +93,9 @@ export function BrandLoadingDemo() {
               <BrandLoading variant="pulse" size="md" color="primary" />
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Large (lg)</h4>
             <div className="flex items-center gap-4">
@@ -107,9 +116,21 @@ export function BrandLoadingDemo() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <BrandLoading variant="spinner" color="primary" text="Loading dashboard..." />
-          <BrandLoading variant="dots" color="secondary" text="Processing payroll..." />
-          <BrandLoading variant="pulse" color="muted" text="Saving changes..." />
+          <BrandLoading
+            variant="spinner"
+            color="primary"
+            text="Loading dashboard..."
+          />
+          <BrandLoading
+            variant="dots"
+            color="secondary"
+            text="Processing payroll..."
+          />
+          <BrandLoading
+            variant="pulse"
+            color="muted"
+            text="Saving changes..."
+          />
         </CardContent>
       </Card>
 
@@ -135,45 +156,54 @@ export function BrandLoadingDemo() {
       <Card>
         <CardHeader>
           <CardTitle>Common Usage Examples</CardTitle>
-          <CardDescription>
-            Real-world usage scenarios
-          </CardDescription>
+          <CardDescription>Real-world usage scenarios</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
             <h4 className="text-sm font-medium mb-3">Button Loading States</h4>
             <div className="flex gap-2">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-hunks-green text-white rounded-md disabled:opacity-50" disabled>
+              <button
+                className="inline-flex items-center gap-2 px-4 py-2 bg-hunks-green text-white rounded-md disabled:opacity-50"
+                disabled
+              >
                 <BrandLoading variant="spinner" size="sm" color="white" />
                 Submitting...
               </button>
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-hunks-orange text-white rounded-md disabled:opacity-50" disabled>
+              <button
+                className="inline-flex items-center gap-2 px-4 py-2 bg-hunks-orange text-white rounded-md disabled:opacity-50"
+                disabled
+              >
                 <BrandLoading variant="dots" size="sm" color="white" />
                 Processing...
               </button>
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Page Loading</h4>
             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-muted rounded-lg">
-              <BrandLoading variant="spinner" size="lg" color="primary" text="Loading dashboard data..." />
+              <BrandLoading
+                variant="spinner"
+                size="lg"
+                color="primary"
+                text="Loading dashboard data..."
+              />
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div>
             <h4 className="text-sm font-medium mb-3">Inline Loading</h4>
             <div className="space-y-2">
               <p className="flex items-center gap-2">
-                Calculating payroll 
+                Calculating payroll
                 <BrandLoading variant="dots" size="sm" color="primary" />
               </p>
               <p className="flex items-center gap-2">
-                Matching commissions 
+                Matching commissions
                 <BrandLoading variant="pulse" size="sm" color="secondary" />
               </p>
             </div>
@@ -181,5 +211,5 @@ export function BrandLoadingDemo() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

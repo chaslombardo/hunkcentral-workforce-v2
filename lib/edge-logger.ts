@@ -85,7 +85,13 @@ export function edgeLogWarning(
  * Edge-safe auth event logging
  */
 export function edgeLogAuthEvent(
-  event: 'login_attempt' | 'login_success' | 'login_failure' | 'logout' | 'session_expired' | 'permission_denied',
+  event:
+    | 'login_attempt'
+    | 'login_success'
+    | 'login_failure'
+    | 'logout'
+    | 'session_expired'
+    | 'permission_denied',
   context: {
     userId?: string;
     url?: string;
@@ -99,7 +105,7 @@ export function edgeLogAuthEvent(
     action: event,
     ...context,
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -119,8 +125,9 @@ export function edgeLogApiRequest(
   }
 ): void {
   const message = `API ${method} ${endpoint}`;
-  const level = context.statusCode && context.statusCode >= 400 ? 'WARN' : 'INFO';
-  
+  const level =
+    context.statusCode && context.statusCode >= 400 ? 'WARN' : 'INFO';
+
   const logEntry = createEdgeLogEntry(level, message, {
     component: 'api',
     action: `${method.toLowerCase()}_${endpoint.replace(/\//g, '_')}`,
@@ -132,7 +139,7 @@ export function edgeLogApiRequest(
       ...context.metadata,
     },
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -148,16 +155,37 @@ export function createEdgeRequestLogger(context: {
   userAgent?: string;
 }) {
   return {
-    info: (message: string, additionalContext: { component: string; action: string; metadata?: Record<string, unknown> }) =>
-      edgeLogInfo(message, { ...context, ...additionalContext }),
-    
-    warning: (message: string, additionalContext: { component: string; action: string; metadata?: Record<string, unknown> }) =>
-      edgeLogWarning(message, { ...context, ...additionalContext }),
-    
-    authEvent: (event: Parameters<typeof edgeLogAuthEvent>[0], metadata?: Record<string, unknown>) =>
-      edgeLogAuthEvent(event, { ...context, metadata }),
-    
-    apiRequest: (method: string, endpoint: string, additionalContext?: { statusCode?: number; metadata?: Record<string, unknown> }) =>
+    info: (
+      message: string,
+      additionalContext: {
+        component: string;
+        action: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) => edgeLogInfo(message, { ...context, ...additionalContext }),
+
+    warning: (
+      message: string,
+      additionalContext: {
+        component: string;
+        action: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) => edgeLogWarning(message, { ...context, ...additionalContext }),
+
+    authEvent: (
+      event: Parameters<typeof edgeLogAuthEvent>[0],
+      metadata?: Record<string, unknown>
+    ) => edgeLogAuthEvent(event, { ...context, metadata }),
+
+    apiRequest: (
+      method: string,
+      endpoint: string,
+      additionalContext?: {
+        statusCode?: number;
+        metadata?: Record<string, unknown>;
+      }
+    ) =>
       edgeLogApiRequest(method, endpoint, { ...context, ...additionalContext }),
   };
 }

@@ -8,9 +8,9 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: 250.00,
-        tips: 20.00,
-        disposalCost: 50.00,
+        revenue: 250.0,
+        tips: 20.0,
+        disposalCost: 50.0,
       };
 
       const result = LogJobSchema.safeParse(validJunkJob);
@@ -22,11 +22,11 @@ describe('Job Validation Logic', () => {
         jobType: 'move' as const,
         jobId: 'M67890',
         clientName: 'Jane Smith',
-        revenue: 800.00,
-        tips: 50.00,
-        junkOnMove: 150.00,
-        valuation: 100.00,
-        materials: 75.00,
+        revenue: 800.0,
+        tips: 50.0,
+        junkOnMove: 150.0,
+        valuation: 100.0,
+        materials: 75.0,
       };
 
       const result = LogJobSchema.safeParse(validMoveJob);
@@ -38,8 +38,8 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: '',
         clientName: 'John Doe',
-        revenue: 250.00,
-        tips: 20.00,
+        revenue: 250.0,
+        tips: 20.0,
       };
 
       const result = LogJobSchema.safeParse(invalidJob);
@@ -52,8 +52,8 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: '',
-        revenue: 250.00,
-        tips: 20.00,
+        revenue: 250.0,
+        tips: 20.0,
       };
 
       const result = LogJobSchema.safeParse(invalidJob);
@@ -66,13 +66,15 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: -100.00,
-        tips: 20.00,
+        revenue: -100.0,
+        tips: 20.0,
       };
 
       const result = LogJobSchema.safeParse(invalidJob);
       expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toBe('Revenue must be a positive number');
+      expect(result.error?.issues[0].message).toBe(
+        'Revenue must be a positive number'
+      );
     });
 
     it('should require non-negative tips', () => {
@@ -80,13 +82,15 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: 250.00,
-        tips: -10.00,
+        revenue: 250.0,
+        tips: -10.0,
       };
 
       const result = LogJobSchema.safeParse(invalidJob);
       expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toBe('Tips must be a positive number');
+      expect(result.error?.issues[0].message).toBe(
+        'Tips must be a positive number'
+      );
     });
 
     it('should allow zero tips', () => {
@@ -94,8 +98,8 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: 250.00,
-        tips: 0.00,
+        revenue: 250.0,
+        tips: 0.0,
       };
 
       const result = LogJobSchema.safeParse(validJob);
@@ -107,8 +111,8 @@ describe('Job Validation Logic', () => {
         jobType: 'move' as const,
         jobId: 'M67890',
         clientName: 'Jane Smith',
-        revenue: 800.00,
-        tips: 50.00,
+        revenue: 800.0,
+        tips: 50.0,
       };
 
       const result = LogJobSchema.safeParse(moveJobWithoutUpsells);
@@ -120,9 +124,9 @@ describe('Job Validation Logic', () => {
         jobType: 'move' as const,
         jobId: 'M67890',
         clientName: 'Jane Smith',
-        revenue: 800.00,
-        tips: 50.00,
-        junkOnMove: -50.00,
+        revenue: 800.0,
+        tips: 50.0,
+        junkOnMove: -50.0,
       };
 
       const result = LogJobSchema.safeParse(invalidMoveJob);
@@ -134,8 +138,8 @@ describe('Job Validation Logic', () => {
         jobType: 'invalid' as any,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: 250.00,
-        tips: 20.00,
+        revenue: 250.0,
+        tips: 20.0,
       };
 
       const result = LogJobSchema.safeParse(invalidJob);
@@ -158,19 +162,19 @@ describe('Job Validation Logic', () => {
             jobType: 'junk' as const,
             jobId: 'J12345',
             clientName: 'John Doe',
-            revenue: 250.00,
-            tips: 20.00,
+            revenue: 250.0,
+            tips: 20.0,
           },
           {
             jobType: 'move' as const,
             jobId: 'M67890',
             clientName: 'Jane Smith',
-            revenue: 800.00,
-            tips: 50.00,
-            junkOnMove: 150.00,
+            revenue: 800.0,
+            tips: 50.0,
+            junkOnMove: 150.0,
           },
         ],
-        disposalCost: 75.00,
+        disposalCost: 75.0,
         hours: [],
       };
 
@@ -192,8 +196,8 @@ describe('Job Validation Logic', () => {
             jobType: 'junk' as const,
             jobId: 'J12345',
             clientName: 'John Doe',
-            revenue: 250.00,
-            tips: 20.00,
+            revenue: 250.0,
+            tips: 20.0,
           },
         ],
         hours: [],
@@ -217,11 +221,11 @@ describe('Job Validation Logic', () => {
             jobType: 'junk' as const,
             jobId: 'J12345',
             clientName: 'John Doe',
-            revenue: 250.00,
-            tips: 20.00,
+            revenue: 250.0,
+            tips: 20.0,
           },
         ],
-        disposalCost: -25.00,
+        disposalCost: -25.0,
         hours: [],
       };
 
@@ -260,8 +264,8 @@ describe('Job Validation Logic', () => {
             jobType: 'junk' as const,
             jobId: '', // Invalid: empty job ID
             clientName: 'John Doe',
-            revenue: 250.00,
-            tips: 20.00,
+            revenue: 250.0,
+            tips: 20.0,
           },
         ],
         hours: [],
@@ -279,7 +283,7 @@ describe('Job Validation Logic', () => {
         jobId: 'M12345',
         clientName: 'Test Client',
         revenue: 1234.56,
-        tips: 78.90,
+        tips: 78.9,
         junkOnMove: 123.45,
         valuation: 67.89,
         materials: 34.12,
@@ -294,8 +298,8 @@ describe('Job Validation Logic', () => {
         jobType: 'junk' as const,
         jobId: 'J12345',
         clientName: 'John Doe',
-        revenue: 0.00,
-        tips: 20.00,
+        revenue: 0.0,
+        tips: 20.0,
       };
 
       const result = LogJobSchema.safeParse(zeroRevenueJob);
@@ -308,22 +312,22 @@ describe('Job Validation Logic', () => {
           jobType: 'junk' as const,
           jobId: 'J-12345',
           clientName: 'Client 1',
-          revenue: 100.00,
-          tips: 10.00,
+          revenue: 100.0,
+          tips: 10.0,
         },
         {
           jobType: 'move' as const,
           jobId: 'MOVE_67890',
           clientName: 'Client 2',
-          revenue: 200.00,
-          tips: 20.00,
+          revenue: 200.0,
+          tips: 20.0,
         },
         {
           jobType: 'junk' as const,
           jobId: '12345',
           clientName: 'Client 3',
-          revenue: 300.00,
-          tips: 30.00,
+          revenue: 300.0,
+          tips: 30.0,
         },
       ];
 

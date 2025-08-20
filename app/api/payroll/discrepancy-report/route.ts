@@ -13,13 +13,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await submitDiscrepancyReport(employeeId, payPeriodId, reportData);
-    
+    const result = await submitDiscrepancyReport(
+      employeeId,
+      payPeriodId,
+      reportData
+    );
+
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({ reportId: result.reportId });

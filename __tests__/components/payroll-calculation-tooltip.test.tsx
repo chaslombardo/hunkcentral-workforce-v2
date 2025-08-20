@@ -1,6 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CalculationTooltip, QuickCalculationHelp } from '@/components/features/reports/payroll-calculation-tooltip';
+import {
+  CalculationTooltip,
+  QuickCalculationHelp,
+} from '@/components/features/reports/payroll-calculation-tooltip';
 
 import { vi } from 'vitest';
 
@@ -52,16 +55,16 @@ const mockDepartmentRateData = {
 describe('CalculationTooltip', () => {
   it('renders labor cost explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="labor-cost" data={mockLaborCostData}>
         <button>Labor Cost</button>
       </CalculationTooltip>
     );
-    
+
     // Hover over the trigger
     await user.hover(screen.getByText('Labor Cost'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Labor Cost Calculation')).toBeInTheDocument();
       expect(screen.getByText('8h')).toBeInTheDocument();
@@ -74,15 +77,15 @@ describe('CalculationTooltip', () => {
 
   it('renders bonus explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="bonus" data={mockBonusData}>
         <button>Bonus</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Bonus'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Labor Efficiency Bonus')).toBeInTheDocument();
       expect(screen.getAllByText('14.0%')[0]).toBeInTheDocument(); // Goal
@@ -94,73 +97,94 @@ describe('CalculationTooltip', () => {
 
   it('renders tips explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="tips">
         <button>Tips</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Tips'));
-    
+
     await waitFor(() => {
-      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/Tips are divided equally among all team members/)[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Total Tips ÷ Team Members = Your Share')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('tips-distribution-heading')[0]
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText(
+          /Tips are divided equally among all team members/
+        )[0]
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Total Tips ÷ Team Members = Your Share')[0]
+      ).toBeInTheDocument();
     });
   });
 
   it('renders department rate explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="department-rate" data={mockDepartmentRateData}>
         <button>Rate</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Rate'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Department Rate')).toBeInTheDocument();
       expect(screen.getAllByText('$20.00/hr')[0]).toBeInTheDocument(); // Captain rate
       expect(screen.getByText('$16.00/hr')).toBeInTheDocument(); // Wingman rate
-      expect(screen.getByText('Captain rate applies when serving as captain or co-captain')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Captain rate applies when serving as captain or co-captain'
+        )
+      ).toBeInTheDocument();
     });
   });
 
   it('renders efficiency explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="efficiency" data={mockLaborCostData}>
         <button>Efficiency</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Efficiency'));
-    
+
     await waitFor(() => {
-      expect(screen.getAllByTestId('labor-efficiency-heading')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('labor-efficiency-heading')[0]
+      ).toBeInTheDocument();
       expect(screen.getAllByText('16.0%')[0]).toBeInTheDocument(); // Current
       expect(screen.getAllByText('14.0%')[0]).toBeInTheDocument(); // Target
-      expect(screen.getAllByText(/Focus on completing jobs faster/)[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/Focus on completing jobs faster/)[0]
+      ).toBeInTheDocument();
     });
   });
 
   it('renders tip distribution explanation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
-      <CalculationTooltip type="tip-distribution" data={mockTipDistributionData}>
+      <CalculationTooltip
+        type="tip-distribution"
+        data={mockTipDistributionData}
+      >
         <button>Tip Distribution</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Tip Distribution'));
-    
+
     await waitFor(() => {
-      expect(screen.getByTestId('tip-distribution-heading')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('tip-distribution-heading')
+      ).toBeInTheDocument();
       expect(screen.getByText('J2025-001')).toBeInTheDocument();
       expect(screen.getByText('$80.00')).toBeInTheDocument(); // Total tips
       expect(screen.getByText('4')).toBeInTheDocument(); // Team members
@@ -176,17 +200,19 @@ describe('CalculationTooltip', () => {
       ...mockLaborCostData,
       actualPercentage: 12, // Better than 14% goal
     };
-    
+
     render(
       <CalculationTooltip type="efficiency" data={goodEfficiencyData}>
         <button>Efficiency</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Efficiency'));
-    
+
     await waitFor(() => {
-      expect(screen.getAllByText(/Great job! You're operating efficiently/)[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/Great job! You're operating efficiently/)[0]
+      ).toBeInTheDocument();
     });
   });
 
@@ -197,15 +223,15 @@ describe('CalculationTooltip', () => {
       actualPercentage: 16, // Worse than 14% goal
       bonusAmount: 0,
     };
-    
+
     render(
       <CalculationTooltip type="bonus" data={poorBonusData}>
         <button>Bonus</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Bonus'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('-2.0%')).toBeInTheDocument(); // Negative efficiency
       expect(screen.getByText('$0.00')).toBeInTheDocument(); // No bonus
@@ -214,34 +240,38 @@ describe('CalculationTooltip', () => {
 
   it('handles missing data gracefully', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="labor-cost" data={null}>
         <button>Labor Cost</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Labor Cost'));
-    
+
     // Should not crash and should not show content
     await waitFor(() => {
-      expect(screen.queryByText('Labor Cost Calculation')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Labor Cost Calculation')
+      ).not.toBeInTheDocument();
     });
   });
 
   it('uses correct positioning', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="tips" side="right">
         <button>Tips</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Tips'));
-    
+
     await waitFor(() => {
-      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('tips-distribution-heading')[0]
+      ).toBeInTheDocument();
     });
   });
 });
@@ -249,7 +279,7 @@ describe('CalculationTooltip', () => {
 describe('QuickCalculationHelp', () => {
   it('renders help button', () => {
     render(<QuickCalculationHelp type="labor-cost" />);
-    
+
     const helpButton = screen.getByRole('button');
     expect(helpButton).toBeInTheDocument();
     expect(helpButton).toHaveClass('h-6', 'w-6');
@@ -257,14 +287,16 @@ describe('QuickCalculationHelp', () => {
 
   it('shows tooltip on hover', async () => {
     const user = userEvent.setup();
-    
+
     render(<QuickCalculationHelp type="tips" />);
-    
+
     const helpButton = screen.getByRole('button');
     await user.hover(helpButton);
-    
+
     await waitFor(() => {
-      expect(screen.getAllByTestId('tips-distribution-heading')[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('tips-distribution-heading')[0]
+      ).toBeInTheDocument();
     });
   });
 });
@@ -272,15 +304,15 @@ describe('QuickCalculationHelp', () => {
 describe('CalculationTooltip Requirements Validation', () => {
   it('meets requirement 7.3: Creates calculation explanation tooltips', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="labor-cost" data={mockLaborCostData}>
         <button>Labor Cost</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Labor Cost'));
-    
+
     await waitFor(() => {
       // Should show detailed calculation explanation
       expect(screen.getByText('Labor Cost Calculation')).toBeInTheDocument();
@@ -293,49 +325,77 @@ describe('CalculationTooltip Requirements Validation', () => {
 
   it('meets requirement 7.3: Provides help documentation', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <CalculationTooltip type="bonus" data={mockBonusData}>
         <button>Bonus</button>
       </CalculationTooltip>
     );
-    
+
     await user.hover(screen.getByText('Bonus'));
-    
+
     await waitFor(() => {
       // Should show formula and explanation
       expect(screen.getByText('Labor Efficiency Bonus')).toBeInTheDocument();
-      expect(screen.getByText(/Bonus = \(Goal% - Actual%\) × Revenue/)).toBeInTheDocument();
-      expect(screen.getByText(/Only captains earn efficiency bonuses/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Bonus = \(Goal% - Actual%\) × Revenue/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Only captains earn efficiency bonuses/)
+      ).toBeInTheDocument();
     });
   });
 
   it('meets requirement 7.4: Supports different tooltip types', async () => {
     const user = userEvent.setup();
-    
+
     // Test multiple tooltip types
     const tooltipTypes = [
-      { type: 'labor-cost' as const, data: mockLaborCostData, expectedText: 'Labor Cost Calculation' },
-      { type: 'bonus' as const, data: mockBonusData, expectedText: 'Labor Efficiency Bonus' },
+      {
+        type: 'labor-cost' as const,
+        data: mockLaborCostData,
+        expectedText: 'Labor Cost Calculation',
+      },
+      {
+        type: 'bonus' as const,
+        data: mockBonusData,
+        expectedText: 'Labor Efficiency Bonus',
+      },
       { type: 'tips' as const, data: null, expectedText: 'Tips Distribution' },
-      { type: 'department-rate' as const, data: mockDepartmentRateData, expectedText: 'Department Rate' },
-      { type: 'efficiency' as const, data: mockLaborCostData, expectedText: 'Labor Efficiency' },
-      { type: 'tip-distribution' as const, data: mockTipDistributionData, expectedText: 'Tip Distribution' },
+      {
+        type: 'department-rate' as const,
+        data: mockDepartmentRateData,
+        expectedText: 'Department Rate',
+      },
+      {
+        type: 'efficiency' as const,
+        data: mockLaborCostData,
+        expectedText: 'Labor Efficiency',
+      },
+      {
+        type: 'tip-distribution' as const,
+        data: mockTipDistributionData,
+        expectedText: 'Tip Distribution',
+      },
     ];
-    
+
     for (const { type, data, expectedText } of tooltipTypes) {
       const { unmount } = render(
         <CalculationTooltip type={type} data={data}>
           <button>{type}</button>
         </CalculationTooltip>
       );
-      
+
       await user.hover(screen.getByText(type));
-      
+
       await waitFor(() => {
-        expect(screen.getAllByRole('heading', { name: new RegExp(expectedText, 'i') })[0]).toBeInTheDocument();
+        expect(
+          screen.getAllByRole('heading', {
+            name: new RegExp(expectedText, 'i'),
+          })[0]
+        ).toBeInTheDocument();
       });
-      
+
       unmount();
     }
   });

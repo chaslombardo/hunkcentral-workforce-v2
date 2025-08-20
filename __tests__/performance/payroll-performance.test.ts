@@ -46,22 +46,35 @@ const generateMockJob = (logId: string, index: number): LogJob => ({
   updatedAt: new Date(),
 });
 
-const generateMockHour = (logId: string, employeeId: string, index: number): LogHour => ({
+const generateMockHour = (
+  logId: string,
+  employeeId: string,
+  index: number
+): LogHour => ({
   id: `hour-${logId}-${employeeId}-${index}`,
   logId,
   log: {} as DailyLog,
   employeeId,
   employee: generateMockUser(employeeId),
-  department: ['junk', 'move', 'admin', 'warehouse'][Math.floor(Math.random() * 4)] as any,
+  department: ['junk', 'move', 'admin', 'warehouse'][
+    Math.floor(Math.random() * 4)
+  ] as any,
   hours: 4 + Math.random() * 8,
   isCoCaptain: Math.random() > 0.8,
   createdAt: new Date(),
   updatedAt: new Date(),
 });
 
-const generateMockLog = (id: string, captainId: string, jobCount: number, employeeCount: number): DailyLog => {
-  const jobs = Array.from({ length: jobCount }, (_, i) => generateMockJob(id, i));
-  const hours = Array.from({ length: employeeCount }, (_, i) => 
+const generateMockLog = (
+  id: string,
+  captainId: string,
+  jobCount: number,
+  employeeCount: number
+): DailyLog => {
+  const jobs = Array.from({ length: jobCount }, (_, i) =>
+    generateMockJob(id, i)
+  );
+  const hours = Array.from({ length: employeeCount }, (_, i) =>
     generateMockHour(id, `emp-${i}`, 0)
   );
 
@@ -85,7 +98,10 @@ const generateMockLog = (id: string, captainId: string, jobCount: number, employ
   };
 };
 
-const generateMockCommission = (id: string, salesId: string): CommissionEntry => ({
+const generateMockCommission = (
+  id: string,
+  salesId: string
+): CommissionEntry => ({
   id,
   salesId,
   sales: generateMockUser(salesId),
@@ -107,17 +123,19 @@ describe('Payroll Performance Tests', () => {
   describe('Large Dataset Performance', () => {
     it('should calculate payroll for 100 employees in under 1 second', () => {
       const startTime = Date.now();
-      
+
       // Generate 100 users
-      const users = Array.from({ length: 100 }, (_, i) => generateMockUser(`user-${i}`));
-      
+      const users = Array.from({ length: 100 }, (_, i) =>
+        generateMockUser(`user-${i}`)
+      );
+
       // Generate 50 logs with varying complexity
-      const logs = Array.from({ length: 50 }, (_, i) => 
+      const logs = Array.from({ length: 50 }, (_, i) =>
         generateMockLog(`log-${i}`, `user-${i % 20}`, 3, 5)
       );
-      
+
       // Generate 200 commission entries
-      const commissions = Array.from({ length: 200 }, (_, i) => 
+      const commissions = Array.from({ length: 200 }, (_, i) =>
         generateMockCommission(`comm-${i}`, `user-${i % 10}`)
       );
 
@@ -142,33 +160,37 @@ describe('Payroll Performance Tests', () => {
 
     it('should handle 500 employees with complex compensation models', () => {
       const startTime = Date.now();
-      
+
       // Generate 500 users with mixed compensation models
       const users = Array.from({ length: 500 }, (_, i) => {
         const user = generateMockUser(`user-${i}`);
-        
+
         // Add salary for some users
         if (i % 3 === 0) {
           user.salaryAmount = 800 + Math.random() * 400;
-          user.salaryFrequency = ['weekly', 'bi-weekly', 'monthly'][Math.floor(Math.random() * 3)] as any;
-          user.salaryType = ['base', 'guaranteed', 'supplemental'][Math.floor(Math.random() * 3)] as any;
+          user.salaryFrequency = ['weekly', 'bi-weekly', 'monthly'][
+            Math.floor(Math.random() * 3)
+          ] as any;
+          user.salaryType = ['base', 'guaranteed', 'supplemental'][
+            Math.floor(Math.random() * 3)
+          ] as any;
         }
-        
+
         // Add commission for some users
         if (i % 4 === 0) {
           user.commissionRate = 3 + Math.random() * 7;
         }
-        
+
         return user;
       });
-      
+
       // Generate 200 logs
-      const logs = Array.from({ length: 200 }, (_, i) => 
+      const logs = Array.from({ length: 200 }, (_, i) =>
         generateMockLog(`log-${i}`, `user-${i % 50}`, 2, 8)
       );
-      
+
       // Generate 1000 commission entries
-      const commissions = Array.from({ length: 1000 }, (_, i) => 
+      const commissions = Array.from({ length: 1000 }, (_, i) =>
         generateMockCommission(`comm-${i}`, `user-${i % 100}`)
       );
 
@@ -189,12 +211,16 @@ describe('Payroll Performance Tests', () => {
 
       expect(payrollCalculations).toHaveLength(500);
       expect(executionTime).toBeLessThan(5000); // Under 5 seconds for 500 employees
-      
+
       // Verify some calculations are correct
-      const employeeWithSalary = payrollCalculations.find(p => p.breakdown.salaryAmount > 0);
-      const employeeWithCommission = payrollCalculations.find(p => p.commission > 0);
-      const employeeWithBonus = payrollCalculations.find(p => p.bonuses > 0);
-      
+      const employeeWithSalary = payrollCalculations.find(
+        (p) => p.breakdown.salaryAmount > 0
+      );
+      const employeeWithCommission = payrollCalculations.find(
+        (p) => p.commission > 0
+      );
+      const employeeWithBonus = payrollCalculations.find((p) => p.bonuses > 0);
+
       expect(employeeWithSalary).toBeDefined();
       expect(employeeWithCommission).toBeDefined();
       // Bonus might not always be present depending on random data
@@ -202,18 +228,18 @@ describe('Payroll Performance Tests', () => {
 
     it('should maintain accuracy with large tip distributions', () => {
       const startTime = Date.now();
-      
+
       // Create a log with many employees and large tip amounts
       const employeeCount = 50;
       const totalTips = 10000; // $10,000 in tips
-      
-      const users = Array.from({ length: employeeCount }, (_, i) => 
+
+      const users = Array.from({ length: employeeCount }, (_, i) =>
         generateMockUser(`tip-user-${i}`)
       );
-      
+
       const log = generateMockLog('tip-log', 'captain-1', 1, employeeCount);
       log.jobs[0].tips = totalTips;
-      
+
       const payrollCalculations = calculatePayroll(
         users,
         [log],
@@ -226,9 +252,12 @@ describe('Payroll Performance Tests', () => {
       const executionTime = endTime - startTime;
 
       // Verify tip distribution accuracy
-      const totalDistributedTips = payrollCalculations.reduce((sum, p) => sum + p.tips, 0);
+      const totalDistributedTips = payrollCalculations.reduce(
+        (sum, p) => sum + p.tips,
+        0
+      );
       expect(totalDistributedTips).toBeCloseTo(totalTips, 2);
-      
+
       expect(executionTime).toBeLessThan(500); // Should be very fast
     });
   });
@@ -236,20 +265,20 @@ describe('Payroll Performance Tests', () => {
   describe('Commission Matching Performance', () => {
     it('should match 1000 commission entries efficiently', () => {
       const startTime = Date.now();
-      
+
       // Generate log with 100 jobs
       const log = generateMockLog('perf-log', 'captain-1', 100, 10);
-      
+
       // Generate 1000 commission entries, some matching
       const commissions = Array.from({ length: 1000 }, (_, i) => {
         const commission = generateMockCommission(`perf-comm-${i}`, 'sales-1');
-        
+
         // Make some commissions match log jobs
         if (i < 50) {
           commission.jobId = log.jobs[i % log.jobs.length].jobId;
           commission.status = 'pending';
         }
-        
+
         return commission;
       });
 
@@ -265,24 +294,27 @@ describe('Payroll Performance Tests', () => {
 
     it('should handle duplicate job IDs efficiently', () => {
       const startTime = Date.now();
-      
+
       // Create log with duplicate job IDs (edge case)
       const log = generateMockLog('dup-log', 'captain-1', 10, 5);
       const duplicateJobId = 'DUPLICATE-JOB-123';
-      
+
       // Set multiple jobs to same ID
       log.jobs[0].jobId = duplicateJobId;
       log.jobs[1].jobId = duplicateJobId;
-      
+
       // Create multiple commission entries for the same job ID
       const commissions = Array.from({ length: 100 }, (_, i) => {
-        const commission = generateMockCommission(`dup-comm-${i}`, `sales-${i % 10}`);
-        
+        const commission = generateMockCommission(
+          `dup-comm-${i}`,
+          `sales-${i % 10}`
+        );
+
         if (i < 20) {
           commission.jobId = duplicateJobId;
           commission.status = 'pending';
         }
-        
+
         return commission;
       });
 
@@ -301,12 +333,16 @@ describe('Payroll Performance Tests', () => {
   describe('Memory Usage Tests', () => {
     it('should not cause memory leaks with repeated calculations', () => {
       const initialMemory = process.memoryUsage().heapUsed;
-      
+
       // Perform 100 payroll calculations
       for (let i = 0; i < 100; i++) {
-        const users = Array.from({ length: 10 }, (_, j) => generateMockUser(`mem-user-${j}`));
-        const logs = Array.from({ length: 5 }, (_, j) => generateMockLog(`mem-log-${j}`, 'captain-1', 2, 3));
-        
+        const users = Array.from({ length: 10 }, (_, j) =>
+          generateMockUser(`mem-user-${j}`)
+        );
+        const logs = Array.from({ length: 5 }, (_, j) =>
+          generateMockLog(`mem-log-${j}`, 'captain-1', 2, 3)
+        );
+
         calculatePayroll(
           users,
           logs,
@@ -315,28 +351,30 @@ describe('Payroll Performance Tests', () => {
           new Date('2024-01-31')
         );
       }
-      
+
       // Force garbage collection if available
       if (global.gc) {
         global.gc();
       }
-      
+
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
       const memoryIncreaseMB = memoryIncrease / (1024 * 1024);
-      
+
       // Memory increase should be reasonable (less than 50MB)
       expect(memoryIncreaseMB).toBeLessThan(50);
     });
 
     it('should handle very large individual logs efficiently', () => {
       const startTime = Date.now();
-      
+
       // Create a single log with many jobs and hours
       const largeLog = generateMockLog('large-log', 'captain-1', 500, 100);
-      
-      const users = Array.from({ length: 100 }, (_, i) => generateMockUser(`large-user-${i}`));
-      
+
+      const users = Array.from({ length: 100 }, (_, i) =>
+        generateMockUser(`large-user-${i}`)
+      );
+
       const payrollCalculations = calculatePayroll(
         users,
         [largeLog],
@@ -356,13 +394,17 @@ describe('Payroll Performance Tests', () => {
   describe('Concurrent Processing Tests', () => {
     it('should handle concurrent payroll calculations', async () => {
       const startTime = Date.now();
-      
+
       // Create multiple payroll calculation promises
       const promises = Array.from({ length: 10 }, (_, i) => {
         return new Promise<number>((resolve) => {
-          const users = Array.from({ length: 20 }, (_, j) => generateMockUser(`conc-user-${i}-${j}`));
-          const logs = Array.from({ length: 10 }, (_, j) => generateMockLog(`conc-log-${i}-${j}`, 'captain-1', 2, 4));
-          
+          const users = Array.from({ length: 20 }, (_, j) =>
+            generateMockUser(`conc-user-${i}-${j}`)
+          );
+          const logs = Array.from({ length: 10 }, (_, j) =>
+            generateMockLog(`conc-log-${i}-${j}`, 'captain-1', 2, 4)
+          );
+
           const calculations = calculatePayroll(
             users,
             logs,
@@ -370,18 +412,18 @@ describe('Payroll Performance Tests', () => {
             new Date('2024-01-01'),
             new Date('2024-01-31')
           );
-          
+
           resolve(calculations.length);
         });
       });
-      
+
       const results = await Promise.all(promises);
-      
+
       const endTime = Date.now();
       const executionTime = endTime - startTime;
-      
+
       expect(results).toHaveLength(10);
-      expect(results.every(count => count === 20)).toBe(true);
+      expect(results.every((count) => count === 20)).toBe(true);
       expect(executionTime).toBeLessThan(3000); // Under 3 seconds for concurrent processing
     });
   });
@@ -389,7 +431,7 @@ describe('Payroll Performance Tests', () => {
   describe('Edge Case Performance', () => {
     it('should handle zero-data scenarios efficiently', () => {
       const startTime = Date.now();
-      
+
       // Empty datasets
       const payrollCalculations = calculatePayroll(
         [],
@@ -408,7 +450,7 @@ describe('Payroll Performance Tests', () => {
 
     it('should handle extreme values without performance degradation', () => {
       const startTime = Date.now();
-      
+
       // Create users with extreme values
       const users = Array.from({ length: 10 }, (_, i) => {
         const user = generateMockUser(`extreme-user-${i}`);
@@ -417,16 +459,19 @@ describe('Payroll Performance Tests', () => {
         user.commissionRate = 50; // Very high commission
         return user;
       });
-      
+
       // Create log with extreme values
       const log = generateMockLog('extreme-log', 'captain-1', 5, 10);
-      log.jobs.forEach(job => {
+      log.jobs.forEach((job) => {
         job.revenue = 1000000; // $1M revenue
         job.tips = 50000; // $50K tips
       });
-      
+
       const commissions = Array.from({ length: 50 }, (_, i) => {
-        const commission = generateMockCommission(`extreme-comm-${i}`, `extreme-user-${i % 10}`);
+        const commission = generateMockCommission(
+          `extreme-comm-${i}`,
+          `extreme-user-${i % 10}`
+        );
         commission.actualRevenue = 1000000;
         commission.commissionAmount = 500000; // $500K commission
         return commission;
@@ -445,9 +490,12 @@ describe('Payroll Performance Tests', () => {
 
       expect(payrollCalculations).toHaveLength(10);
       expect(executionTime).toBeLessThan(1000); // Should still be fast
-      
+
       // Verify calculations are still accurate with extreme values
-      const totalPay = payrollCalculations.reduce((sum, p) => sum + p.totalPay, 0);
+      const totalPay = payrollCalculations.reduce(
+        (sum, p) => sum + p.totalPay,
+        0
+      );
       expect(totalPay).toBeGreaterThan(0);
       expect(isFinite(totalPay)).toBe(true); // No infinity or NaN
     });

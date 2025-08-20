@@ -1,113 +1,117 @@
-"use client"
+'use client';
 
-import { ProtectedRoute } from '@/components/auth/protected-route'
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
-export const dynamic = 'force-dynamic'
-import { useSession } from '@/hooks/useSession'
-import { useDashboardData } from '@/hooks/useDashboardData'
-import { MetricCard } from '@/components/brand/metric-card'
-import { EmptyState } from '@/components/ui/empty-state'
-import { 
+export const dynamic = 'force-dynamic';
+import { useSession } from '@/hooks/useSession';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { MetricCard } from '@/components/brand/metric-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { BrandButton } from '@/components/brand/brand-button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  ClipboardList, 
-  DollarSign, 
-  BarChart3, 
+} from '@/components/ui/card';
+import { BrandButton } from '@/components/brand/brand-button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  ClipboardList,
+  DollarSign,
+  BarChart3,
   Users,
   Calendar,
   AlertCircle,
   Clock,
-  RefreshCw
-} from 'lucide-react'
-import Link from 'next/link'
-import { formatDateDisplay } from '@/lib/formatters'
+  RefreshCw,
+} from 'lucide-react';
+import Link from 'next/link';
+import { formatDateDisplay } from '@/lib/formatters';
 
 export default function DashboardPage() {
-  const { user } = useSession()
-  const { metrics, roleMetrics, loading, error, refetch } = useDashboardData(user?.roles)
+  const { user } = useSession();
+  const { metrics, roleMetrics, loading, error, refetch } = useDashboardData(
+    user?.roles
+  );
 
   const getQuickActions = () => {
-    const actions = []
-    
+    const actions = [];
+
     if (user?.roles?.includes('captain') || user?.roles?.includes('admin')) {
       actions.push({
-        title: "Create Daily Log",
+        title: 'Create Daily Log',
         description: "Record today's jobs and team hours",
-        href: "/logs/create",
+        href: '/logs/create',
         icon: ClipboardList,
-        color: "bg-hunks-green hover:bg-hunks-green/90",
-      })
+        color: 'bg-hunks-green hover:bg-hunks-green/90',
+      });
     }
 
     if (user?.roles?.includes('sales') || user?.roles?.includes('admin')) {
       actions.push({
-        title: "Add Commission",
-        description: "Track new job bookings",
-        href: "/commission/create",
+        title: 'Add Commission',
+        description: 'Track new job bookings',
+        href: '/commission/create',
         icon: DollarSign,
-        color: "bg-hunks-orange hover:bg-hunks-orange/90",
-      })
+        color: 'bg-hunks-orange hover:bg-hunks-orange/90',
+      });
     }
 
     if (user?.roles?.includes('manager') || user?.roles?.includes('admin')) {
       actions.push({
-        title: "Review Logs",
-        description: "Approve pending daily logs",
-        href: "/logs/review",
+        title: 'Review Logs',
+        description: 'Approve pending daily logs',
+        href: '/logs/review',
         icon: BarChart3,
-        color: "bg-blue-600 hover:bg-blue-700",
-      })
+        color: 'bg-blue-600 hover:bg-blue-700',
+      });
     }
 
     if (user?.roles?.includes('admin')) {
       actions.push({
-        title: "Manage Users",
-        description: "Add and configure employees",
-        href: "/admin/users",
+        title: 'Manage Users',
+        description: 'Add and configure employees',
+        href: '/admin/users',
         icon: Users,
-        color: "bg-purple-600 hover:bg-purple-700",
-      })
+        color: 'bg-purple-600 hover:bg-purple-700',
+      });
     }
 
-    return actions
-  }
+    return actions;
+  };
 
-  const quickActions = getQuickActions()
+  const quickActions = getQuickActions();
 
   // Format pay period status for display
   const formatPayPeriodStatus = (status: string) => {
     switch (status) {
       case 'open':
-        return 'Open'
+        return 'Open';
       case 'locked':
-        return 'Locked'
+        return 'Locked';
       case 'closed':
-        return 'Closed'
+        return 'Closed';
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   // Format time ago for recent activity
   const formatTimeAgo = (date: Date) => {
-    const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${diffInHours}h ago`
-    
-    const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays}d ago`
-    
-    return formatDateDisplay(date)
-  }
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+
+    return formatDateDisplay(date);
+  };
 
   return (
     <ProtectedRoute>
@@ -153,10 +157,10 @@ export default function DashboardPage() {
             change={metrics?.pendingLogs.change}
             footer={{
               primary: `${metrics?.pendingLogs.count ?? 0} logs need attention`,
-              secondary: "Manager review required"
+              secondary: 'Manager review required',
             }}
           />
-          
+
           <MetricCard
             title="Commission Entries"
             description="This week"
@@ -167,10 +171,10 @@ export default function DashboardPage() {
             change={metrics?.commissionEntries.change}
             footer={{
               primary: `${metrics?.commissionEntries.count ?? 0} new entries`,
-              secondary: "Sales activity tracking"
+              secondary: 'Sales activity tracking',
             }}
           />
-          
+
           <MetricCard
             title="Active Users"
             description="System users"
@@ -181,25 +185,31 @@ export default function DashboardPage() {
             change={metrics?.activeUsers.change}
             footer={{
               primary: `${metrics?.activeUsers.count ?? 0} total users`,
-              secondary: "Workforce management"
+              secondary: 'Workforce management',
             }}
           />
-          
+
           <MetricCard
             title="Current Pay Period"
-            description={metrics?.currentPayPeriod.name || "Pay period status"}
-            value={formatPayPeriodStatus(metrics?.currentPayPeriod.status || 'Unknown')}
+            description={metrics?.currentPayPeriod.name || 'Pay period status'}
+            value={formatPayPeriodStatus(
+              metrics?.currentPayPeriod.status || 'Unknown'
+            )}
             icon={Calendar}
             color={
-              metrics?.currentPayPeriod.status === 'open' ? 'green' :
-              metrics?.currentPayPeriod.status === 'locked' ? 'orange' : 'neutral'
+              metrics?.currentPayPeriod.status === 'open'
+                ? 'green'
+                : metrics?.currentPayPeriod.status === 'locked'
+                  ? 'orange'
+                  : 'neutral'
             }
             loading={loading}
             footer={{
-              primary: metrics?.currentPayPeriod.daysRemaining 
+              primary: metrics?.currentPayPeriod.daysRemaining
                 ? `${metrics.currentPayPeriod.daysRemaining} days remaining`
                 : 'No active period',
-              secondary: metrics?.currentPayPeriod.name || 'Pay period tracking'
+              secondary:
+                metrics?.currentPayPeriod.name || 'Pay period tracking',
             }}
           />
         </div>
@@ -218,7 +228,7 @@ export default function DashboardPage() {
                   color="green"
                   footer={{
                     primary: `${roleMetrics.captain.currentPayPeriodHours}h worked`,
-                    secondary: "Revenue generated"
+                    secondary: 'Revenue generated',
                   }}
                 />
                 <MetricCard
@@ -228,8 +238,8 @@ export default function DashboardPage() {
                   icon={DollarSign}
                   color="green"
                   footer={{
-                    primary: "Team tip earnings",
-                    secondary: "Shared with crew"
+                    primary: 'Team tip earnings',
+                    secondary: 'Shared with crew',
                   }}
                 />
                 <MetricCard
@@ -237,10 +247,15 @@ export default function DashboardPage() {
                   description="Weekly average"
                   value={`$${roleMetrics.captain.junkLaborBonus.toLocaleString()}`}
                   icon={BarChart3}
-                  color={roleMetrics.captain.junkLaborBonus > 0 ? "green" : "neutral"}
+                  color={
+                    roleMetrics.captain.junkLaborBonus > 0 ? 'green' : 'neutral'
+                  }
                   footer={{
-                    primary: roleMetrics.captain.junkLaborBonus > 0 ? "Efficiency bonus earned" : "No bonus earned",
-                    secondary: "Based on labor cost %"
+                    primary:
+                      roleMetrics.captain.junkLaborBonus > 0
+                        ? 'Efficiency bonus earned'
+                        : 'No bonus earned',
+                    secondary: 'Based on labor cost %',
                   }}
                 />
                 <MetricCard
@@ -248,10 +263,15 @@ export default function DashboardPage() {
                   description="Weekly average"
                   value={`$${roleMetrics.captain.moveLaborBonus.toLocaleString()}`}
                   icon={BarChart3}
-                  color={roleMetrics.captain.moveLaborBonus > 0 ? "green" : "neutral"}
+                  color={
+                    roleMetrics.captain.moveLaborBonus > 0 ? 'green' : 'neutral'
+                  }
                   footer={{
-                    primary: roleMetrics.captain.moveLaborBonus > 0 ? "Efficiency bonus earned" : "No bonus earned",
-                    secondary: "Based on labor cost %"
+                    primary:
+                      roleMetrics.captain.moveLaborBonus > 0
+                        ? 'Efficiency bonus earned'
+                        : 'No bonus earned',
+                    secondary: 'Based on labor cost %',
                   }}
                 />
                 <MetricCard
@@ -261,8 +281,8 @@ export default function DashboardPage() {
                   icon={Clock}
                   color="blue"
                   footer={{
-                    primary: "Wages + tips + bonuses",
-                    secondary: "Per hour worked"
+                    primary: 'Wages + tips + bonuses',
+                    secondary: 'Per hour worked',
                   }}
                 />
                 <MetricCard
@@ -272,8 +292,8 @@ export default function DashboardPage() {
                   icon={ClipboardList}
                   color="neutral"
                   footer={{
-                    primary: "Complete and submit",
-                    secondary: "Draft logs need attention"
+                    primary: 'Complete and submit',
+                    secondary: 'Draft logs need attention',
                   }}
                 />
                 <MetricCard
@@ -283,8 +303,8 @@ export default function DashboardPage() {
                   icon={Clock}
                   color="orange"
                   footer={{
-                    primary: "Under manager review",
-                    secondary: "Pending approval"
+                    primary: 'Under manager review',
+                    secondary: 'Pending approval',
                   }}
                 />
               </>
@@ -300,8 +320,8 @@ export default function DashboardPage() {
                   icon={DollarSign}
                   color="orange"
                   footer={{
-                    primary: "Waiting for job logs",
-                    secondary: "Commission tracking"
+                    primary: 'Waiting for job logs',
+                    secondary: 'Commission tracking',
                   }}
                 />
                 <MetricCard
@@ -311,8 +331,8 @@ export default function DashboardPage() {
                   icon={DollarSign}
                   color="green"
                   footer={{
-                    primary: "Successfully matched",
-                    secondary: "Commission earned"
+                    primary: 'Successfully matched',
+                    secondary: 'Commission earned',
                   }}
                 />
               </>
@@ -328,8 +348,8 @@ export default function DashboardPage() {
                   icon={BarChart3}
                   color="orange"
                   footer={{
-                    primary: "Action required",
-                    secondary: "Manager review needed"
+                    primary: 'Action required',
+                    secondary: 'Manager review needed',
                   }}
                 />
                 <MetricCard
@@ -339,8 +359,8 @@ export default function DashboardPage() {
                   icon={BarChart3}
                   color="green"
                   footer={{
-                    primary: "Logs processed",
-                    secondary: "Your recent activity"
+                    primary: 'Logs processed',
+                    secondary: 'Your recent activity',
                   }}
                 />
               </>
@@ -359,13 +379,22 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {quickActions.map((action) => (
-                  <BrandButton 
-                    key={action.title} 
-                    asChild 
-                    variant={action.color.includes('hunks-green') ? 'primary' : action.color.includes('hunks-orange') ? 'secondary' : 'outline'}
+                  <BrandButton
+                    key={action.title}
+                    asChild
+                    variant={
+                      action.color.includes('hunks-green')
+                        ? 'primary'
+                        : action.color.includes('hunks-orange')
+                          ? 'secondary'
+                          : 'outline'
+                    }
                     className="w-full justify-start"
                   >
-                    <Link href={action.href} className="flex items-center gap-2">
+                    <Link
+                      href={action.href}
+                      className="flex items-center gap-2"
+                    >
                       <action.icon className="h-4 w-4" />
                       {action.title}
                     </Link>
@@ -388,13 +417,19 @@ export default function DashboardPage() {
                   <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
                   <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
                 </div>
-              ) : metrics?.recentActivity && metrics.recentActivity.length > 0 ? (
+              ) : metrics?.recentActivity &&
+                metrics.recentActivity.length > 0 ? (
                 <div className="space-y-3">
                   {metrics.recentActivity.slice(0, 5).map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 text-sm">
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 text-sm"
+                    >
                       <div className="flex-shrink-0 w-2 h-2 bg-hunks-green rounded-full mt-2" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-foreground">{activity.description}</p>
+                        <p className="text-foreground">
+                          {activity.description}
+                        </p>
                         <p className="text-muted-foreground text-xs">
                           {formatTimeAgo(activity.timestamp)} • {activity.user}
                         </p>
@@ -420,5 +455,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

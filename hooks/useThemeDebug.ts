@@ -1,88 +1,99 @@
-"use client"
+'use client';
 
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 export function useThemeDebug() {
-  const { theme, resolvedTheme, systemTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { theme, resolvedTheme, systemTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [debugInfo, setDebugInfo] = useState<{
-    storedTheme: string | null
-    documentClass: string
-    systemPreference: string
+    storedTheme: string | null;
+    documentClass: string;
+    systemPreference: string;
   }>({
     storedTheme: null,
     documentClass: '',
-    systemPreference: ''
-  })
+    systemPreference: '',
+  });
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return
+    if (!mounted || typeof window === 'undefined') return;
 
     const updateDebugInfo = () => {
-      const storedTheme = localStorage.getItem('hunkcentral-theme')
-      const documentClass = document.documentElement.className
-      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      const storedTheme = localStorage.getItem('hunkcentral-theme');
+      const documentClass = document.documentElement.className;
+      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light';
 
       setDebugInfo({
         storedTheme,
         documentClass,
-        systemPreference
-      })
-    }
+        systemPreference,
+      });
+    };
 
-    updateDebugInfo()
+    updateDebugInfo();
 
     // Listen for theme changes
-    const observer = new MutationObserver(updateDebugInfo)
+    const observer = new MutationObserver(updateDebugInfo);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class']
-    })
+      attributeFilter: ['class'],
+    });
 
     // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', updateDebugInfo)
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', updateDebugInfo);
 
     return () => {
-      observer.disconnect()
-      mediaQuery.removeEventListener('change', updateDebugInfo)
-    }
-  }, [mounted])
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', updateDebugInfo);
+    };
+  }, [mounted]);
 
   const validateThemeConsistency = () => {
-    if (!mounted) return { isConsistent: true, issues: [] }
+    if (!mounted) return { isConsistent: true, issues: [] };
 
-    const issues: string[] = []
-    const { storedTheme, documentClass, systemPreference } = debugInfo
+    const issues: string[] = [];
+    const { storedTheme, documentClass, systemPreference } = debugInfo;
 
     // Check if stored theme matches current theme
     if (storedTheme && storedTheme !== theme) {
-      issues.push(`Stored theme (${storedTheme}) doesn't match current theme (${theme})`)
+      issues.push(
+        `Stored theme (${storedTheme}) doesn't match current theme (${theme})`
+      );
     }
 
     // Check if document class reflects the resolved theme
-    const expectedClass = resolvedTheme === 'dark' ? 'dark' : ''
-    const hasCorrectClass = expectedClass ? documentClass.includes('dark') : !documentClass.includes('dark')
-    
+    const expectedClass = resolvedTheme === 'dark' ? 'dark' : '';
+    const hasCorrectClass = expectedClass
+      ? documentClass.includes('dark')
+      : !documentClass.includes('dark');
+
     if (!hasCorrectClass) {
-      issues.push(`Document class (${documentClass}) doesn't reflect resolved theme (${resolvedTheme})`)
+      issues.push(
+        `Document class (${documentClass}) doesn't reflect resolved theme (${resolvedTheme})`
+      );
     }
 
     // Check system theme consistency
     if (theme === 'system' && systemTheme !== systemPreference) {
-      issues.push(`System theme mismatch: detected (${systemTheme}) vs actual (${systemPreference})`)
+      issues.push(
+        `System theme mismatch: detected (${systemTheme}) vs actual (${systemPreference})`
+      );
     }
 
     return {
       isConsistent: issues.length === 0,
-      issues
-    }
-  }
+      issues,
+    };
+  };
 
   return {
     mounted,
@@ -97,10 +108,10 @@ export function useThemeDebug() {
         const event = new StorageEvent('storage', {
           key: 'hunkcentral-theme',
           newValue: localStorage.getItem('hunkcentral-theme'),
-          storageArea: localStorage
-        })
-        window.dispatchEvent(event)
+          storageArea: localStorage,
+        });
+        window.dispatchEvent(event);
       }
-    }
-  }
+    },
+  };
 }

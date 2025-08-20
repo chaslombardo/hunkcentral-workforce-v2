@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import React, { useCallback } from 'react'
+import React, { useCallback } from 'react';
 
 // Types of haptic feedback available on mobile devices
-export type HapticFeedbackType = 
-  | 'light'      // Light tap feedback
-  | 'medium'     // Medium tap feedback  
-  | 'heavy'      // Heavy tap feedback
-  | 'selection'  // Selection change feedback
-  | 'impact'     // Impact feedback
-  | 'notification' // Notification feedback
+export type HapticFeedbackType =
+  | 'light' // Light tap feedback
+  | 'medium' // Medium tap feedback
+  | 'heavy' // Heavy tap feedback
+  | 'selection' // Selection change feedback
+  | 'impact' // Impact feedback
+  | 'notification'; // Notification feedback
 
 /**
  * Hook for providing haptic feedback on mobile devices
@@ -18,7 +18,7 @@ export type HapticFeedbackType =
 export function useHapticFeedback() {
   const triggerHaptic = useCallback((type: HapticFeedbackType = 'light') => {
     // Check if we're in a browser environment
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
     // Check if the device supports haptic feedback
     if ('vibrate' in navigator) {
@@ -29,20 +29,20 @@ export function useHapticFeedback() {
         heavy: 50,
         selection: [10, 10],
         impact: [20, 10, 20],
-        notification: [50, 50, 50]
-      }
+        notification: [50, 50, 50],
+      };
 
-      const pattern = vibrationPatterns[type]
-      
+      const pattern = vibrationPatterns[type];
+
       try {
         if (Array.isArray(pattern)) {
-          navigator.vibrate(pattern)
+          navigator.vibrate(pattern);
         } else {
-          navigator.vibrate(pattern)
+          navigator.vibrate(pattern);
         }
       } catch (error) {
         // Silently fail if vibration is not supported or blocked
-        console.debug('Haptic feedback not available:', error)
+        console.debug('Haptic feedback not available:', error);
       }
     }
 
@@ -52,35 +52,47 @@ export function useHapticFeedback() {
       try {
         const hapticMap: Record<HapticFeedbackType, string> = {
           light: 'light',
-          medium: 'medium', 
+          medium: 'medium',
           heavy: 'heavy',
           selection: 'selection',
           impact: 'impact',
-          notification: 'notification'
-        }
-        
-        const hapticType = hapticMap[type] || 'light'
-        ;(window as any).HapticFeedback.impact(hapticType)
+          notification: 'notification',
+        };
+
+        const hapticType = hapticMap[type] || 'light';
+        (window as any).HapticFeedback.impact(hapticType);
       } catch (error) {
         // Silently fail if not supported
-        console.debug('iOS Haptic feedback not available:', error)
+        console.debug('iOS Haptic feedback not available:', error);
       }
     }
-  }, [])
+  }, []);
 
   // Convenience methods for common haptic patterns
-  const tapFeedback = useCallback(() => triggerHaptic('light'), [triggerHaptic])
-  const selectionFeedback = useCallback(() => triggerHaptic('selection'), [triggerHaptic])
-  const impactFeedback = useCallback(() => triggerHaptic('impact'), [triggerHaptic])
-  const notificationFeedback = useCallback(() => triggerHaptic('notification'), [triggerHaptic])
+  const tapFeedback = useCallback(
+    () => triggerHaptic('light'),
+    [triggerHaptic]
+  );
+  const selectionFeedback = useCallback(
+    () => triggerHaptic('selection'),
+    [triggerHaptic]
+  );
+  const impactFeedback = useCallback(
+    () => triggerHaptic('impact'),
+    [triggerHaptic]
+  );
+  const notificationFeedback = useCallback(
+    () => triggerHaptic('notification'),
+    [triggerHaptic]
+  );
 
   return {
     triggerHaptic,
     tapFeedback,
     selectionFeedback,
     impactFeedback,
-    notificationFeedback
-  }
+    notificationFeedback,
+  };
 }
 
 /**
@@ -91,13 +103,13 @@ export function withHapticFeedback<T extends { onClick?: () => void }>(
   hapticType: HapticFeedbackType = 'light'
 ): React.ComponentType<T> {
   return function HapticComponent(props: T) {
-    const { triggerHaptic } = useHapticFeedback()
-    
-    const handleClick = useCallback(() => {
-      triggerHaptic(hapticType)
-      props.onClick?.()
-    }, [props.onClick, triggerHaptic])
+    const { triggerHaptic } = useHapticFeedback();
 
-    return React.createElement(Component, { ...props, onClick: handleClick })
-  }
+    const handleClick = useCallback(() => {
+      triggerHaptic(hapticType);
+      props.onClick?.();
+    }, [props.onClick, triggerHaptic]);
+
+    return React.createElement(Component, { ...props, onClick: handleClick });
+  };
 }

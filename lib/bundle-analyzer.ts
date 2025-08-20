@@ -31,8 +31,8 @@ class BundleAnalyzer {
    * Track component usage for bundle optimization
    */
   trackComponentUsage(
-    componentName: string, 
-    variant?: string, 
+    componentName: string,
+    variant?: string,
     props?: Record<string, unknown>
   ): void {
     if (!this.isEnabled) return;
@@ -53,7 +53,7 @@ class BundleAnalyzer {
         renderCount: 1,
         lastUsed: new Date(),
         variants: variant ? [variant] : [],
-        unusedVariants: []
+        unusedVariants: [],
       });
     }
   }
@@ -75,7 +75,7 @@ class BundleAnalyzer {
    */
   private estimateSize(props?: Record<string, unknown>): number {
     if (!props) return 0;
-    
+
     try {
       return JSON.stringify(props).length;
     } catch {
@@ -105,8 +105,9 @@ class BundleAnalyzer {
         recommendations.push({
           component: componentName,
           issue: `Large props (${(stats.estimatedSize / 1024).toFixed(2)}KB)`,
-          recommendation: 'Consider memoizing props or breaking into smaller components',
-          priority: 'high'
+          recommendation:
+            'Consider memoizing props or breaking into smaller components',
+          priority: 'high',
         });
       }
 
@@ -116,18 +117,19 @@ class BundleAnalyzer {
           component: componentName,
           issue: `Unused variants: ${stats.unusedVariants.join(', ')}`,
           recommendation: 'Remove unused variants to improve tree-shaking',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
       // Rarely used components
-      const daysSinceLastUsed = (Date.now() - stats.lastUsed.getTime()) / (1000 * 60 * 60 * 24);
+      const daysSinceLastUsed =
+        (Date.now() - stats.lastUsed.getTime()) / (1000 * 60 * 60 * 24);
       if (daysSinceLastUsed > 7 && stats.renderCount < 5) {
         recommendations.push({
           component: componentName,
           issue: 'Rarely used component',
           recommendation: 'Consider lazy loading or removing if not needed',
-          priority: 'low'
+          priority: 'low',
         });
       }
     }
@@ -145,19 +147,22 @@ class BundleAnalyzer {
     if (!this.isEnabled) return;
 
     const recommendations = this.getOptimizationRecommendations();
-    
+
     if (recommendations.length === 0) {
       console.warn('📦 Bundle Analysis: No optimization opportunities found');
       return;
     }
 
     console.warn('📦 Bundle Optimization Recommendations');
-    
-    recommendations.forEach(({ component, issue, recommendation, priority }) => {
-      const emoji = priority === 'high' ? '🔴' : priority === 'medium' ? '🟡' : '🟢';
-      console.warn(`${emoji} ${component}: ${issue}`);
-      console.warn(`   💡 ${recommendation}`);
-    });
+
+    recommendations.forEach(
+      ({ component, issue, recommendation, priority }) => {
+        const emoji =
+          priority === 'high' ? '🔴' : priority === 'medium' ? '🟡' : '🟢';
+        console.warn(`${emoji} ${component}: ${issue}`);
+        console.warn(`   💡 ${recommendation}`);
+      }
+    );
   }
 
   /**
@@ -182,8 +187,8 @@ export const bundleAnalyzer = BundleAnalyzer.getInstance();
  * Hook for tracking component bundle impact
  */
 export function useBundleTracking(
-  componentName: string, 
-  variant?: string, 
+  componentName: string,
+  variant?: string,
   props?: Record<string, unknown>
 ) {
   React.useEffect(() => {
@@ -198,10 +203,16 @@ export const treeShaking = {
   /**
    * Mark component variants for potential removal
    */
-  markUnusedVariants: (componentName: string, allVariants: string[], usedVariants: string[]) => {
-    const unusedVariants = allVariants.filter(variant => !usedVariants.includes(variant));
+  markUnusedVariants: (
+    componentName: string,
+    allVariants: string[],
+    usedVariants: string[]
+  ) => {
+    const unusedVariants = allVariants.filter(
+      (variant) => !usedVariants.includes(variant)
+    );
     bundleAnalyzer.markUnusedVariants(componentName, unusedVariants);
-    
+
     if (process.env.NODE_ENV === 'development' && unusedVariants.length > 0) {
       console.warn(
         `🌳 ${componentName}: ${unusedVariants.length} unused variants detected: ${unusedVariants.join(', ')}`
@@ -212,22 +223,25 @@ export const treeShaking = {
   /**
    * Analyze component variant usage
    */
-  analyzeVariantUsage: (componentName: string, variants: Record<string, boolean>) => {
+  analyzeVariantUsage: (
+    componentName: string,
+    variants: Record<string, boolean>
+  ) => {
     const usedVariants = Object.entries(variants)
       .filter(([, isUsed]) => isUsed)
       .map(([variant]) => variant);
-    
+
     const allVariants = Object.keys(variants);
     const usagePercentage = (usedVariants.length / allVariants.length) * 100;
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.warn(
         `📊 ${componentName} variant usage: ${usagePercentage.toFixed(1)}% (${usedVariants.length}/${allVariants.length})`
       );
     }
-    
+
     treeShaking.markUnusedVariants(componentName, allVariants, usedVariants);
-  }
+  },
 };
 
 /**
@@ -246,7 +260,7 @@ export const codeSplitting = {
             // Ignore preload failures
           });
         }, 100);
-      }
+      },
     };
   },
 
@@ -254,12 +268,15 @@ export const codeSplitting = {
    * Preload component chunks on route change
    */
   preloadOnRoute: (route: string, importFn: () => Promise<unknown>) => {
-    if (typeof window !== 'undefined' && window.location.pathname.includes(route)) {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname.includes(route)
+    ) {
       importFn().catch(() => {
         // Ignore preload failures
       });
     }
-  }
+  },
 };
 
 // Development-only bundle analysis logging
@@ -270,7 +287,8 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   }, 60000);
 
   // Add to window for manual inspection
-  (window as unknown as Record<string, unknown>).__bundleAnalyzer = bundleAnalyzer;
+  (window as unknown as Record<string, unknown>).__bundleAnalyzer =
+    bundleAnalyzer;
 }
 
 export default bundleAnalyzer;

@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { BrandButton } from "./brand-button"
-import { User, Settings, Download, Plus, Trash2, Edit } from "lucide-react"
+import { BrandButton } from './brand-button';
+import { User, Settings, Download, Plus, Trash2, Edit } from 'lucide-react';
 
 export function BrandButtonDemo() {
   return (
@@ -21,7 +21,9 @@ export function BrandButtonDemo() {
         <h3 className="text-lg font-semibold mb-4">Outline Variants</h3>
         <div className="flex flex-wrap gap-4">
           <BrandButton variant="outline-primary">Outline Primary</BrandButton>
-          <BrandButton variant="outline-secondary">Outline Secondary</BrandButton>
+          <BrandButton variant="outline-secondary">
+            Outline Secondary
+          </BrandButton>
           <BrandButton variant="outline">Outline</BrandButton>
         </div>
       </div>
@@ -52,10 +54,18 @@ export function BrandButtonDemo() {
         <h3 className="text-lg font-semibold mb-4">With Icons</h3>
         <div className="flex flex-wrap gap-4">
           <BrandButton icon={User}>User Profile</BrandButton>
-          <BrandButton variant="secondary" icon={Download}>Download</BrandButton>
-          <BrandButton variant="outline-primary" icon={Plus}>Add Item</BrandButton>
-          <BrandButton variant="ghost-secondary" icon={Edit}>Edit</BrandButton>
-          <BrandButton variant="destructive" icon={Trash2}>Delete</BrandButton>
+          <BrandButton variant="secondary" icon={Download}>
+            Download
+          </BrandButton>
+          <BrandButton variant="outline-primary" icon={Plus}>
+            Add Item
+          </BrandButton>
+          <BrandButton variant="ghost-secondary" icon={Edit}>
+            Edit
+          </BrandButton>
+          <BrandButton variant="destructive" icon={Trash2}>
+            Delete
+          </BrandButton>
         </div>
       </div>
 
@@ -63,8 +73,12 @@ export function BrandButtonDemo() {
         <h3 className="text-lg font-semibold mb-4">Loading States</h3>
         <div className="flex flex-wrap gap-4">
           <BrandButton loading>Loading Primary</BrandButton>
-          <BrandButton variant="secondary" loading>Loading Secondary</BrandButton>
-          <BrandButton variant="outline-primary" loading>Loading Outline</BrandButton>
+          <BrandButton variant="secondary" loading>
+            Loading Secondary
+          </BrandButton>
+          <BrandButton variant="outline-primary" loading>
+            Loading Outline
+          </BrandButton>
         </div>
       </div>
 
@@ -72,8 +86,12 @@ export function BrandButtonDemo() {
         <h3 className="text-lg font-semibold mb-4">Disabled States</h3>
         <div className="flex flex-wrap gap-4">
           <BrandButton disabled>Disabled Primary</BrandButton>
-          <BrandButton variant="secondary" disabled>Disabled Secondary</BrandButton>
-          <BrandButton variant="outline-primary" disabled>Disabled Outline</BrandButton>
+          <BrandButton variant="secondary" disabled>
+            Disabled Secondary
+          </BrandButton>
+          <BrandButton variant="outline-primary" disabled>
+            Disabled Outline
+          </BrandButton>
         </div>
       </div>
 
@@ -89,5 +107,5 @@ export function BrandButtonDemo() {
         </div>
       </div>
     </div>
-  )
+  );
 }

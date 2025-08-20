@@ -2,57 +2,91 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input';
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
 import { FormFeedback } from '@/components/forms/form-feedback';
-import { MobileFormValidation, ValidationError } from '@/components/forms/mobile-form-validation';
+import {
+  MobileFormValidation,
+  ValidationError,
+} from '@/components/forms/mobile-form-validation';
 
 // Mock Lucide icons with consistent test IDs
 vi.mock('lucide-react', () => ({
   CheckCircle2: ({ className }: { className?: string }) => (
-    <div data-testid="check-icon" className={className}>✓</div>
+    <div data-testid="check-icon" className={className}>
+      ✓
+    </div>
   ),
   AlertCircle: ({ className }: { className?: string }) => (
-    <div data-testid="alert-icon" className={className}>!</div>
+    <div data-testid="alert-icon" className={className}>
+      !
+    </div>
   ),
   AlertTriangle: ({ className }: { className?: string }) => (
-    <div data-testid="warning-icon" className={className}>⚠</div>
+    <div data-testid="warning-icon" className={className}>
+      ⚠
+    </div>
   ),
   Info: ({ className }: { className?: string }) => (
-    <div data-testid="info-icon" className={className}>ℹ</div>
+    <div data-testid="info-icon" className={className}>
+      ℹ
+    </div>
   ),
   Eye: ({ className }: { className?: string }) => (
-    <div data-testid="eye-icon" className={className}>👁</div>
+    <div data-testid="eye-icon" className={className}>
+      👁
+    </div>
   ),
   EyeOff: ({ className }: { className?: string }) => (
-    <div data-testid="eye-off-icon" className={className}>👁‍🗨</div>
+    <div data-testid="eye-off-icon" className={className}>
+      👁‍🗨
+    </div>
   ),
   Loader2: ({ className }: { className?: string }) => (
-    <div data-testid="loader-icon" className={className}>⟳</div>
+    <div data-testid="loader-icon" className={className}>
+      ⟳
+    </div>
   ),
   RefreshCw: ({ className }: { className?: string }) => (
-    <div data-testid="refresh-icon" className={className}>↻</div>
+    <div data-testid="refresh-icon" className={className}>
+      ↻
+    </div>
   ),
   ExternalLink: ({ className }: { className?: string }) => (
-    <div data-testid="external-link-icon" className={className}>↗</div>
+    <div data-testid="external-link-icon" className={className}>
+      ↗
+    </div>
   ),
   Lightbulb: ({ className }: { className?: string }) => (
-    <div data-testid="lightbulb-icon" className={className}>💡</div>
+    <div data-testid="lightbulb-icon" className={className}>
+      💡
+    </div>
   ),
   X: ({ className }: { className?: string }) => (
-    <div data-testid="x-icon" className={className}>×</div>
+    <div data-testid="x-icon" className={className}>
+      ×
+    </div>
   ),
   ChevronDown: ({ className }: { className?: string }) => (
-    <div data-testid="chevron-down-icon" className={className}>▼</div>
+    <div data-testid="chevron-down-icon" className={className}>
+      ▼
+    </div>
   ),
   ChevronUp: ({ className }: { className?: string }) => (
-    <div data-testid="chevron-up-icon" className={className}>▲</div>
+    <div data-testid="chevron-up-icon" className={className}>
+      ▲
+    </div>
   ),
 }));
 
 // Mock InlineSuccessCheck component
 vi.mock('@/components/forms/success-animation', () => ({
   InlineSuccessCheck: ({ className }: { className?: string }) => (
-    <div data-testid="success-animation" className={className}>✨</div>
+    <div data-testid="success-animation" className={className}>
+      ✨
+    </div>
   ),
 }));
 
@@ -100,9 +134,14 @@ describe('Form Validation Visual Regression Tests', () => {
       const errorMessage = screen.getByText('This field has an error');
 
       // Check error styling classes
-      expect(input).toHaveClass('border-destructive', 'focus-visible:ring-destructive/20');
+      expect(input).toHaveClass(
+        'border-destructive',
+        'focus-visible:ring-destructive/20'
+      );
       expect(errorIcon).toHaveClass('text-destructive');
-      expect(errorMessage.closest('[role="alert"]')).toHaveClass('border-destructive/20');
+      expect(errorMessage.closest('[role="alert"]')).toHaveClass(
+        'border-destructive/20'
+      );
 
       expect(container.firstChild).toMatchSnapshot('smart-input-error-state');
     });
@@ -121,20 +160,21 @@ describe('Form Validation Visual Regression Tests', () => {
       const successMessage = screen.getByText('This field is valid');
 
       // Check success styling classes
-      expect(input).toHaveClass('border-hunks-green', 'focus-visible:ring-hunks-green/20');
+      expect(input).toHaveClass(
+        'border-hunks-green',
+        'focus-visible:ring-hunks-green/20'
+      );
       expect(successIcon).toHaveClass('text-hunks-green');
-      expect(successMessage.closest('[role="alert"]')).toHaveClass('border-hunks-green/20');
+      expect(successMessage.closest('[role="alert"]')).toHaveClass(
+        'border-hunks-green/20'
+      );
 
       expect(container.firstChild).toMatchSnapshot('smart-input-success-state');
     });
 
     it('renders loading state with consistent styling', () => {
       const { container } = render(
-        <SmartInput
-          label="Loading Input"
-          loading={true}
-          value="checking..."
-        />
+        <SmartInput label="Loading Input" loading={true} value="checking..." />
       );
 
       const loadingIcon = screen.getByTestId('loader-icon');
@@ -163,10 +203,14 @@ describe('Form Validation Visual Regression Tests', () => {
 
       await waitFor(() => {
         const warningIcon = screen.getByTestId('info-icon');
-        const warningMessage = screen.getByText('Consider using a longer value');
+        const warningMessage = screen.getByText(
+          'Consider using a longer value'
+        );
 
         expect(warningIcon).toHaveClass('text-hunks-orange');
-        expect(warningMessage.closest('[role="alert"]')).toHaveClass('border-hunks-orange/20');
+        expect(warningMessage.closest('[role="alert"]')).toHaveClass(
+          'border-hunks-orange/20'
+        );
       });
 
       expect(container.firstChild).toMatchSnapshot('smart-input-warning-state');
@@ -190,7 +234,9 @@ describe('Form Validation Visual Regression Tests', () => {
       expect(toggleButton).toBeInTheDocument();
       expect(eyeIcon).toBeInTheDocument();
 
-      expect(container.firstChild).toMatchSnapshot('smart-input-password-state');
+      expect(container.firstChild).toMatchSnapshot(
+        'smart-input-password-state'
+      );
     });
 
     it('renders mobile-optimized input consistently', () => {
@@ -220,7 +266,9 @@ describe('Form Validation Visual Regression Tests', () => {
       );
 
       // Initial state - no validation shown
-      expect(container.firstChild).toMatchSnapshot('smart-input-progressive-initial');
+      expect(container.firstChild).toMatchSnapshot(
+        'smart-input-progressive-initial'
+      );
 
       // After focus and input
       rerender(
@@ -233,7 +281,9 @@ describe('Form Validation Visual Regression Tests', () => {
         />
       );
 
-      expect(container.firstChild).toMatchSnapshot('smart-input-progressive-typing');
+      expect(container.firstChild).toMatchSnapshot(
+        'smart-input-progressive-typing'
+      );
 
       // After clearing input (should show validation)
       rerender(
@@ -247,10 +297,14 @@ describe('Form Validation Visual Regression Tests', () => {
       );
 
       await waitFor(() => {
-        expect(screen.queryByText('This field is required')).toBeInTheDocument();
+        expect(
+          screen.queryByText('This field is required')
+        ).toBeInTheDocument();
       });
 
-      expect(container.firstChild).toMatchSnapshot('smart-input-progressive-error');
+      expect(container.firstChild).toMatchSnapshot(
+        'smart-input-progressive-error'
+      );
     });
   });
 
@@ -281,7 +335,7 @@ describe('Form Validation Visual Regression Tests', () => {
           message="Please fix the errors below and try again."
           suggestions={['Check required fields', 'Verify email format']}
           actions={[
-            { label: 'Fix Errors', onClick: vi.fn(), variant: 'outline' }
+            { label: 'Fix Errors', onClick: vi.fn(), variant: 'outline' },
           ]}
           onRetry={vi.fn()}
           helpLink={{ text: 'Get Help', url: 'https://help.example.com' }}
@@ -296,7 +350,9 @@ describe('Form Validation Visual Regression Tests', () => {
       expect(alert).toHaveClass('border-destructive/20', 'bg-destructive/5');
       expect(lightbulbIcon).toBeInTheDocument();
 
-      expect(container.firstChild).toMatchSnapshot('form-feedback-error-with-actions');
+      expect(container.firstChild).toMatchSnapshot(
+        'form-feedback-error-with-actions'
+      );
     });
 
     it('renders warning feedback consistently', () => {
@@ -349,15 +405,32 @@ describe('Form Validation Visual Regression Tests', () => {
       const dismissButton = screen.getByRole('button', { name: 'Dismiss' });
       expect(dismissButton).toHaveClass('absolute', 'top-2', 'right-2');
 
-      expect(container.firstChild).toMatchSnapshot('form-feedback-with-dismiss');
+      expect(container.firstChild).toMatchSnapshot(
+        'form-feedback-with-dismiss'
+      );
     });
   });
 
   describe('MobileFormValidation Visual States', () => {
     const mockErrors: ValidationError[] = [
-      { field: 'email', message: 'Invalid email format', type: 'error', severity: 'high' },
-      { field: 'password', message: 'Password too weak', type: 'warning', severity: 'medium' },
-      { field: 'username', message: 'Username available', type: 'info', severity: 'low' },
+      {
+        field: 'email',
+        message: 'Invalid email format',
+        type: 'error',
+        severity: 'high',
+      },
+      {
+        field: 'password',
+        message: 'Password too weak',
+        type: 'warning',
+        severity: 'medium',
+      },
+      {
+        field: 'username',
+        message: 'Username available',
+        type: 'info',
+        severity: 'low',
+      },
     ];
 
     it('renders error summary consistently', () => {
@@ -370,42 +443,61 @@ describe('Form Validation Visual Regression Tests', () => {
       const infoBadge = screen.getByText('1 info');
 
       expect(errorBadge).toHaveClass('text-xs');
-      expect(warningBadge).toHaveClass('bg-hunks-orange/10', 'text-hunks-orange');
+      expect(warningBadge).toHaveClass(
+        'bg-hunks-orange/10',
+        'text-hunks-orange'
+      );
       expect(infoBadge).toHaveClass('bg-blue-100', 'text-blue-700');
 
-      expect(container.firstChild).toMatchSnapshot('mobile-form-validation-summary');
+      expect(container.firstChild).toMatchSnapshot(
+        'mobile-form-validation-summary'
+      );
     });
 
     it('renders individual error items consistently', () => {
       const { container } = render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={mockErrors}
           onErrorClick={vi.fn()}
           onDismiss={vi.fn()}
         />
       );
 
-      const errorAlert = screen.getByText('Invalid email format').closest('[role="alert"]');
-      const warningAlert = screen.getByText('Password too weak').closest('[role="alert"]');
-      const infoAlert = screen.getByText('Username available').closest('[role="alert"]');
+      const errorAlert = screen
+        .getByText('Invalid email format')
+        .closest('[role="alert"]');
+      const warningAlert = screen
+        .getByText('Password too weak')
+        .closest('[role="alert"]');
+      const infoAlert = screen
+        .getByText('Username available')
+        .closest('[role="alert"]');
 
       expect(errorAlert).toHaveClass('min-h-[48px]', 'touch-manipulation');
-      expect(warningAlert).toHaveClass('border-hunks-orange/20', 'bg-hunks-orange/5');
+      expect(warningAlert).toHaveClass(
+        'border-hunks-orange/20',
+        'bg-hunks-orange/5'
+      );
       expect(infoAlert).toHaveClass('border-blue-200', 'bg-blue-50');
 
-      expect(container.firstChild).toMatchSnapshot('mobile-form-validation-items');
+      expect(container.firstChild).toMatchSnapshot(
+        'mobile-form-validation-items'
+      );
     });
 
     it('renders collapsible state consistently', () => {
-      const manyErrors: ValidationError[] = Array.from({ length: 5 }, (_, i) => ({
-        field: `field${i}`,
-        message: `Error message ${i}`,
-        type: 'error' as const,
-        severity: 'medium' as const,
-      }));
+      const manyErrors: ValidationError[] = Array.from(
+        { length: 5 },
+        (_, i) => ({
+          field: `field${i}`,
+          message: `Error message ${i}`,
+          type: 'error' as const,
+          severity: 'medium' as const,
+        })
+      );
 
       const { container } = render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={manyErrors}
           collapsible={true}
           maxVisible={3}
@@ -415,13 +507,13 @@ describe('Form Validation Visual Regression Tests', () => {
       const expandButton = screen.getByText('Show All (5)');
       expect(expandButton).toHaveClass('w-full', 'h-12', 'touch-manipulation');
 
-      expect(container.firstChild).toMatchSnapshot('mobile-form-validation-collapsible');
+      expect(container.firstChild).toMatchSnapshot(
+        'mobile-form-validation-collapsible'
+      );
     });
 
     it('renders empty state consistently', () => {
-      const { container } = render(
-        <MobileFormValidation errors={[]} />
-      );
+      const { container } = render(<MobileFormValidation errors={[]} />);
 
       // Should render nothing for empty errors
       expect(container.firstChild).toBeNull();
@@ -460,21 +552,35 @@ describe('Form Validation Visual Regression Tests', () => {
         </div>
       );
 
-      expect(container.firstChild).toMatchSnapshot('complex-form-validation-states');
+      expect(container.firstChild).toMatchSnapshot(
+        'complex-form-validation-states'
+      );
     });
 
     it('renders mobile form validation with mixed error types', () => {
       const mixedErrors: ValidationError[] = [
-        { field: 'firstName', message: 'First name is required', type: 'error' },
+        {
+          field: 'firstName',
+          message: 'First name is required',
+          type: 'error',
+        },
         { field: 'lastName', message: 'Last name is required', type: 'error' },
         { field: 'email', message: 'Email format is invalid', type: 'error' },
-        { field: 'phone', message: 'Phone number format could be improved', type: 'warning' },
-        { field: 'bio', message: 'Bio is optional but recommended', type: 'info' },
+        {
+          field: 'phone',
+          message: 'Phone number format could be improved',
+          type: 'warning',
+        },
+        {
+          field: 'bio',
+          message: 'Bio is optional but recommended',
+          type: 'info',
+        },
       ];
 
       const { container } = render(
         <div className="space-y-4">
-          <MobileFormValidation 
+          <MobileFormValidation
             errors={mixedErrors}
             onErrorClick={vi.fn()}
             onDismiss={vi.fn()}
@@ -490,7 +596,9 @@ describe('Form Validation Visual Regression Tests', () => {
         </div>
       );
 
-      expect(container.firstChild).toMatchSnapshot('mobile-form-mixed-validation-states');
+      expect(container.firstChild).toMatchSnapshot(
+        'mobile-form-mixed-validation-states'
+      );
     });
   });
 
@@ -505,31 +613,27 @@ describe('Form Validation Visual Regression Tests', () => {
           />
           <SmartInput
             label="Warning Field"
-            validationRules={[{
-              test: () => false,
-              message: 'Warning message',
-              type: 'warning',
-              priority: 1,
-            }]}
+            validationRules={[
+              {
+                test: () => false,
+                message: 'Warning message',
+                type: 'warning',
+                priority: 1,
+              },
+            ]}
             validateOnChange={true}
             progressiveValidation={false}
             value="test"
           />
-          <FormFeedback
-            type="success"
-            message="Success with brand colors"
-          />
-          <FormFeedback
-            type="warning"
-            message="Warning with brand colors"
-          />
+          <FormFeedback type="success" message="Success with brand colors" />
+          <FormFeedback type="warning" message="Warning with brand colors" />
         </div>
       );
 
       // Check that brand colors are applied
       const successIcon = screen.getByTestId('check-icon');
       const warningIcon = screen.getAllByTestId('info-icon')[0]; // First one is from SmartInput
-      
+
       expect(successIcon).toHaveClass('text-hunks-green');
       expect(warningIcon).toHaveClass('text-hunks-orange');
 
@@ -554,9 +658,13 @@ describe('Form Validation Visual Regression Tests', () => {
             mobileOptimized={true}
             placeholder="Enter phone number"
           />
-          <MobileFormValidation 
+          <MobileFormValidation
             errors={[
-              { field: 'phone', message: 'Invalid phone format', type: 'error' }
+              {
+                field: 'phone',
+                message: 'Invalid phone format',
+                type: 'error',
+              },
             ]}
             onErrorClick={vi.fn()}
           />
@@ -576,14 +684,8 @@ describe('Form Validation Visual Regression Tests', () => {
 
       const { container } = render(
         <div className="grid grid-cols-2 gap-4">
-          <SmartInput
-            label="Desktop Input 1"
-            hint="This is a desktop hint"
-          />
-          <SmartInput
-            label="Desktop Input 2"
-            error="Desktop error message"
-          />
+          <SmartInput label="Desktop Input 1" hint="This is a desktop hint" />
+          <SmartInput label="Desktop Input 2" error="Desktop error message" />
         </div>
       );
 

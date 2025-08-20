@@ -33,7 +33,11 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import type { PayrollValidationResult, ValidationError, AuditTrailEntry } from '@/lib/payrollValidation';
+import type {
+  PayrollValidationResult,
+  ValidationError,
+  AuditTrailEntry,
+} from '@/lib/payrollValidation';
 
 interface PayrollValidationPanelProps {
   validationResult: PayrollValidationResult;
@@ -113,9 +117,7 @@ export function PayrollValidationPanel({
             </div>
           </div>
           <div className="text-right">
-            <div className={`font-semibold ${status.color}`}>
-              {status.text}
-            </div>
+            <div className={`font-semibold ${status.color}`}>{status.text}</div>
             <div className="text-sm text-muted-foreground">
               {validationResult.calculationAccuracy.toFixed(1)}% accurate
             </div>
@@ -127,14 +129,20 @@ export function PayrollValidationPanel({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Calculation Accuracy</span>
-            <span className="font-mono">{validationResult.calculationAccuracy.toFixed(1)}%</span>
+            <span className="font-mono">
+              {validationResult.calculationAccuracy.toFixed(1)}%
+            </span>
           </div>
-          <Progress 
-            value={validationResult.calculationAccuracy} 
+          <Progress
+            value={validationResult.calculationAccuracy}
             className="h-2"
           />
           <div className="text-xs text-muted-foreground">
-            Based on {validationResult.errors.length + validationResult.warnings.length + validationResult.info.length} validation checks
+            Based on{' '}
+            {validationResult.errors.length +
+              validationResult.warnings.length +
+              validationResult.info.length}{' '}
+            validation checks
           </div>
         </div>
 
@@ -166,24 +174,41 @@ export function PayrollValidationPanel({
         {validationResult.errors.length > 0 && (
           <Collapsible open={showErrors} onOpenChange={setShowErrors}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-0 h-auto"
+              >
                 <div className="flex items-center gap-2">
-                  {showErrors ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {showErrors ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                   <AlertCircle className="h-4 w-4 text-red-500" />
-                  <span className="font-medium">Errors ({validationResult.errors.length})</span>
+                  <span className="font-medium">
+                    Errors ({validationResult.errors.length})
+                  </span>
                 </div>
-                <Badge variant="destructive">{validationResult.errors.length}</Badge>
+                <Badge variant="destructive">
+                  {validationResult.errors.length}
+                </Badge>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-3">
               {validationResult.errors.map((error, index) => (
-                <Card key={index} className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+                <Card
+                  key={index}
+                  className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
+                >
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
                       {getErrorIcon(error.type)}
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant={getErrorBadgeVariant(error.type)} className="text-xs">
+                          <Badge
+                            variant={getErrorBadgeVariant(error.type)}
+                            className="text-xs"
+                          >
                             {error.code}
                           </Badge>
                           {error.logId && (
@@ -193,7 +218,8 @@ export function PayrollValidationPanel({
                           )}
                         </div>
                         <p className="text-sm">{error.message}</p>
-                        {(error.value !== undefined || error.expectedValue !== undefined) && (
+                        {(error.value !== undefined ||
+                          error.expectedValue !== undefined) && (
                           <div className="text-xs text-muted-foreground space-y-1">
                             {error.value !== undefined && (
                               <div>Current: {String(error.value)}</div>
@@ -209,9 +235,9 @@ export function PayrollValidationPanel({
                 </Card>
               ))}
               {onReportDiscrepancy && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => onReportDiscrepancy(validationResult.errors)}
                   className="w-full mt-2"
                 >
@@ -227,24 +253,41 @@ export function PayrollValidationPanel({
         {validationResult.warnings.length > 0 && (
           <Collapsible open={showWarnings} onOpenChange={setShowWarnings}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-0 h-auto"
+              >
                 <div className="flex items-center gap-2">
-                  {showWarnings ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {showWarnings ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                   <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                  <span className="font-medium">Warnings ({validationResult.warnings.length})</span>
+                  <span className="font-medium">
+                    Warnings ({validationResult.warnings.length})
+                  </span>
                 </div>
-                <Badge variant="secondary">{validationResult.warnings.length}</Badge>
+                <Badge variant="secondary">
+                  {validationResult.warnings.length}
+                </Badge>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-3">
               {validationResult.warnings.map((warning, index) => (
-                <Card key={index} className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
+                <Card
+                  key={index}
+                  className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950"
+                >
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
                       {getErrorIcon(warning.type)}
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant={getErrorBadgeVariant(warning.type)} className="text-xs">
+                          <Badge
+                            variant={getErrorBadgeVariant(warning.type)}
+                            className="text-xs"
+                          >
                             {warning.code}
                           </Badge>
                           {warning.logId && (
@@ -254,13 +297,16 @@ export function PayrollValidationPanel({
                           )}
                         </div>
                         <p className="text-sm">{warning.message}</p>
-                        {(warning.value !== undefined || warning.expectedValue !== undefined) && (
+                        {(warning.value !== undefined ||
+                          warning.expectedValue !== undefined) && (
                           <div className="text-xs text-muted-foreground space-y-1">
                             {warning.value !== undefined && (
                               <div>Current: {String(warning.value)}</div>
                             )}
                             {warning.expectedValue !== undefined && (
-                              <div>Expected: {String(warning.expectedValue)}</div>
+                              <div>
+                                Expected: {String(warning.expectedValue)}
+                              </div>
                             )}
                           </div>
                         )}
@@ -277,24 +323,39 @@ export function PayrollValidationPanel({
         {validationResult.info.length > 0 && (
           <Collapsible open={showInfo} onOpenChange={setShowInfo}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-0 h-auto"
+              >
                 <div className="flex items-center gap-2">
-                  {showInfo ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {showInfo ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                   <Info className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">Information ({validationResult.info.length})</span>
+                  <span className="font-medium">
+                    Information ({validationResult.info.length})
+                  </span>
                 </div>
                 <Badge variant="outline">{validationResult.info.length}</Badge>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 mt-3">
               {validationResult.info.map((info, index) => (
-                <Card key={index} className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+                <Card
+                  key={index}
+                  className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950"
+                >
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
                       {getErrorIcon(info.type)}
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant={getErrorBadgeVariant(info.type)} className="text-xs">
+                          <Badge
+                            variant={getErrorBadgeVariant(info.type)}
+                            className="text-xs"
+                          >
                             {info.code}
                           </Badge>
                           {info.logId && (
@@ -316,24 +377,41 @@ export function PayrollValidationPanel({
         {/* Audit Trail Section */}
         <Collapsible open={showAuditTrail} onOpenChange={setShowAuditTrail}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-0 h-auto"
+            >
               <div className="flex items-center gap-2">
-                {showAuditTrail ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                {showAuditTrail ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
                 <Shield className="h-4 w-4 text-green-500" />
-                <span className="font-medium">Audit Trail ({validationResult.auditTrail.length})</span>
+                <span className="font-medium">
+                  Audit Trail ({validationResult.auditTrail.length})
+                </span>
               </div>
-              <Badge variant="outline">{validationResult.auditTrail.length}</Badge>
+              <Badge variant="outline">
+                {validationResult.auditTrail.length}
+              </Badge>
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 mt-3">
             <div className="max-h-64 overflow-y-auto space-y-2">
               {validationResult.auditTrail.map((entry, index) => (
-                <Card key={index} className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                <Card
+                  key={index}
+                  className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950"
+                >
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs capitalize">
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
                             {entry.department}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
@@ -342,15 +420,17 @@ export function PayrollValidationPanel({
                         </div>
                         <div className="text-sm">
                           Gross Pay: {formatCurrency(entry.grossPay)}
-                          {entry.tips > 0 && ` • Tips: ${formatCurrency(entry.tips)}`}
+                          {entry.tips > 0 &&
+                            ` • Tips: ${formatCurrency(entry.tips)}`}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Log: {entry.logId.slice(0, 8)} • {formatDate(entry.calculationDate)}
+                          Log: {entry.logId.slice(0, 8)} •{' '}
+                          {formatDate(entry.calculationDate)}
                         </div>
                       </div>
                       {onViewAuditTrail && (
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => onViewAuditTrail(entry)}
                         >
@@ -370,7 +450,9 @@ export function PayrollValidationPanel({
           <div className="flex items-center gap-2">
             {getValidationIcon()}
             <span className="font-medium">
-              {validationResult.isValid ? 'Payroll data validated successfully' : 'Issues require attention'}
+              {validationResult.isValid
+                ? 'Payroll data validated successfully'
+                : 'Issues require attention'}
             </span>
           </div>
           <HoverCard>
@@ -383,8 +465,9 @@ export function PayrollValidationPanel({
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold">Validation Details</h4>
                 <p className="text-sm text-muted-foreground">
-                  This validation checks payroll calculations for accuracy, consistency, and data integrity. 
-                  Errors indicate calculation problems that need immediate attention. Warnings suggest 
+                  This validation checks payroll calculations for accuracy,
+                  consistency, and data integrity. Errors indicate calculation
+                  problems that need immediate attention. Warnings suggest
                   potential issues that should be reviewed.
                 </p>
                 <div className="text-xs text-muted-foreground">

@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { Button } from '@/components/ui/button';
@@ -22,7 +28,10 @@ interface UserActivityMonitorProps {
   userName: string;
 }
 
-export function UserActivityMonitor({ userId, userName }: UserActivityMonitorProps) {
+export function UserActivityMonitor({
+  userId,
+  userName,
+}: UserActivityMonitorProps) {
   const [activityData, setActivityData] = useState<{
     totalActions: number;
     actionBreakdown: Record<string, number>;
@@ -100,9 +109,10 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
   };
 
   const formatEntityType = (entityType: string) => {
-    return entityType.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    return entityType
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   if (loading) {
@@ -135,7 +145,11 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
         <CardContent>
           <div className="text-center py-4">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()} variant="outline" size="sm">
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              size="sm"
+            >
               Try Again
             </Button>
           </div>
@@ -163,12 +177,12 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
+                    'justify-start text-left font-normal',
+                    !startDate && 'text-muted-foreground'
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : "Start date"}
+                  {startDate ? format(startDate, 'PPP') : 'Start date'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -186,12 +200,12 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
+                    'justify-start text-left font-normal',
+                    !endDate && 'text-muted-foreground'
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : "End date"}
+                  {endDate ? format(endDate, 'PPP') : 'End date'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -204,9 +218,7 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
               </PopoverContent>
             </Popover>
 
-            <Button onClick={fetchActivityData}>
-              Refresh
-            </Button>
+            <Button onClick={fetchActivityData}>Refresh</Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -218,7 +230,9 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{activityData.totalActions}</div>
+                <div className="text-3xl font-bold">
+                  {activityData.totalActions}
+                </div>
               </CardContent>
             </Card>
 
@@ -228,15 +242,22 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {Object.entries(activityData.actionBreakdown).map(([action, count]) => (
-                    <div key={action} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${getActionColor(action)}`} />
-                        <span className="text-sm capitalize">{action}</span>
+                  {Object.entries(activityData.actionBreakdown).map(
+                    ([action, count]) => (
+                      <div
+                        key={action}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-full ${getActionColor(action)}`}
+                          />
+                          <span className="text-sm capitalize">{action}</span>
+                        </div>
+                        <Badge variant="outline">{count}</Badge>
                       </div>
-                      <Badge variant="outline">{count}</Badge>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -247,17 +268,22 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {Object.entries(activityData.entityBreakdown).map(([entityType, count]) => (
-                    <div key={entityType} className="flex items-center justify-between">
-                      <Badge 
-                        variant="outline" 
-                        className={getEntityTypeColor(entityType)}
+                  {Object.entries(activityData.entityBreakdown).map(
+                    ([entityType, count]) => (
+                      <div
+                        key={entityType}
+                        className="flex items-center justify-between"
                       >
-                        {formatEntityType(entityType)}
-                      </Badge>
-                      <Badge variant="outline">{count}</Badge>
-                    </div>
-                  ))}
+                        <Badge
+                          variant="outline"
+                          className={getEntityTypeColor(entityType)}
+                        >
+                          {formatEntityType(entityType)}
+                        </Badge>
+                        <Badge variant="outline">{count}</Badge>
+                      </div>
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -280,25 +306,38 @@ export function UserActivityMonitor({ userId, userName }: UserActivityMonitorPro
           ) : (
             <div className="space-y-4">
               {activityData.recentActivity.map((log) => (
-                <div key={log.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                  <div className={`w-2 h-2 rounded-full ${getActionColor(log.action)}`} />
+                <div
+                  key={log.id}
+                  className="flex items-center gap-3 p-3 border rounded-lg"
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full ${getActionColor(log.action)}`}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline">
-                        {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
+                        {log.action.charAt(0).toUpperCase() +
+                          log.action.slice(1)}
                       </Badge>
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={getEntityTypeColor(log.entityType)}
                       >
                         {formatEntityType(log.entityType)}
                       </Badge>
                       <span className="text-xs text-muted-foreground font-mono">
-                        {log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'}
+                        {log.entityId
+                          ? `${log.entityId.slice(0, 8)}...`
+                          : 'N/A'}
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
+                      {log.createdAt
+                        ? format(
+                            new Date(log.createdAt),
+                            'MMM dd, yyyy HH:mm:ss'
+                          )
+                        : 'N/A'}
                     </div>
                   </div>
                 </div>

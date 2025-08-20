@@ -10,12 +10,12 @@ vi.mock('@/lib/errorLogger');
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
-      findUnique: vi.fn()
-    }
-  }
+      findUnique: vi.fn(),
+    },
+  },
 }));
 vi.mock('next-auth/next', () => ({
-  getServerSession: vi.fn()
+  getServerSession: vi.fn(),
 }));
 
 const mockLogAuthError = vi.mocked(logAuthError);
@@ -28,8 +28,10 @@ describe('Authentication Error Handling', () => {
   describe('requireAuth', () => {
     it('should throw error and log when user is null', async () => {
       const context = { url: '/test', action: 'test-action' };
-      
-      expect(() => requireAuth(null, context)).toThrow('Authentication required');
+
+      expect(() => requireAuth(null, context)).toThrow(
+        'Authentication required'
+      );
       expect(mockLogAuthError).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({
@@ -37,8 +39,8 @@ describe('Authentication Error Handling', () => {
           url: '/test',
           additionalData: expect.objectContaining({
             check: 'requireAuth',
-            action: 'test-action'
-          })
+            action: 'test-action',
+          }),
         })
       );
     });
@@ -48,7 +50,7 @@ describe('Authentication Error Handling', () => {
         id: '1',
         email: 'test@example.com',
         fullName: 'Test User',
-        roles: ['captain']
+        roles: ['captain'],
       };
 
       expect(() => requireAuth(user)).not.toThrow();
@@ -61,13 +63,15 @@ describe('Authentication Error Handling', () => {
       id: '1',
       email: 'test@example.com',
       fullName: 'Test User',
-      roles: ['captain']
+      roles: ['captain'],
     };
 
     it('should throw error and log when user lacks required role', () => {
       const context = { url: '/admin', action: 'admin-access' };
-      
-      expect(() => requireRole(user, 'admin', context)).toThrow("Role 'admin' required");
+
+      expect(() => requireRole(user, 'admin', context)).toThrow(
+        "Role 'admin' required"
+      );
       expect(mockLogAuthError).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({
@@ -78,8 +82,8 @@ describe('Authentication Error Handling', () => {
             check: 'requireRole',
             requiredRole: 'admin',
             userRoles: ['captain'],
-            action: 'admin-access'
-          })
+            action: 'admin-access',
+          }),
         })
       );
     });
@@ -104,16 +108,16 @@ describe('Authentication Error Handling', () => {
         id: '1',
         email: 'test@example.com',
         fullName: 'Test User',
-        roles: ['wingman']
+        roles: ['wingman'],
       };
 
       const context = {
         url: '/reports/payroll',
-        action: 'view-payroll'
+        action: 'view-payroll',
       };
 
       expect(() => requireRole(user, 'manager', context)).toThrow();
-      
+
       expect(mockLogAuthError).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({
@@ -124,8 +128,8 @@ describe('Authentication Error Handling', () => {
             check: 'requireRole',
             requiredRole: 'manager',
             userRoles: ['wingman'],
-            action: 'view-payroll'
-          })
+            action: 'view-payroll',
+          }),
         })
       );
     });
@@ -144,13 +148,13 @@ describe('Server Authentication Error Handling', () => {
 
       const result = await validateServerSession(undefined, {
         requireAuth: true,
-        redirectOnFailure: false
+        redirectOnFailure: false,
       });
 
       expect(result).toEqual({
         user: null,
         isValid: false,
-        error: 'No valid session found'
+        error: 'No valid session found',
       });
     });
 
@@ -161,13 +165,13 @@ describe('Server Authentication Error Handling', () => {
       const mockRequest = {
         url: 'http://localhost:3000/admin/users',
         headers: {
-          get: vi.fn().mockReturnValue('test-user-agent')
-        }
+          get: vi.fn().mockReturnValue('test-user-agent'),
+        },
       } as any;
 
       const result = await validateServerSession(mockRequest, {
         requireAuth: true,
-        redirectOnFailure: true
+        redirectOnFailure: true,
       });
 
       expect(result).toEqual({
@@ -175,7 +179,7 @@ describe('Server Authentication Error Handling', () => {
         isValid: false,
         error: 'No valid session found',
         shouldRedirect: true,
-        redirectUrl: '/auth/login?callbackUrl=%2Fadmin%2Fusers'
+        redirectUrl: '/auth/login?callbackUrl=%2Fadmin%2Fusers',
       });
     });
 
@@ -185,8 +189,8 @@ describe('Server Authentication Error Handling', () => {
           id: '1',
           email: 'test@example.com',
           fullName: 'Test User',
-          roles: ['captain']
-        }
+          roles: ['captain'],
+        },
       };
 
       const { getServerSession } = await import('next-auth/next');
@@ -197,21 +201,21 @@ describe('Server Authentication Error Handling', () => {
         id: '1',
         email: 'test@example.com',
         fullName: 'Test User',
-        roles: ['captain']
+        roles: ['captain'],
       } as any);
 
       const result = await validateServerSession(undefined, {
         requireAuth: true,
-        requiredRoles: ['admin' as UserRole]
+        requiredRoles: ['admin' as UserRole],
       });
 
       expect(result).toEqual({
         user: expect.objectContaining({
           id: '1',
-          roles: ['captain']
+          roles: ['captain'],
         }),
         isValid: false,
-        error: 'Required roles: admin'
+        error: 'Required roles: admin',
       });
     });
   });

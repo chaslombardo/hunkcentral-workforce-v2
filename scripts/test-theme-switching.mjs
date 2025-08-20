@@ -17,11 +17,11 @@ const themeFiles = [
   'components/theme-provider.tsx',
   'components/theme-switcher.tsx',
   'hooks/useThemeDebug.ts',
-  'components/theme-debug.tsx'
+  'components/theme-debug.tsx',
 ];
 
 let allFilesExist = true;
-themeFiles.forEach(file => {
+themeFiles.forEach((file) => {
   if (fs.existsSync(file)) {
     process.stdout.write(`   ✅ ${file} exists\n`);
   } else {
@@ -45,8 +45,8 @@ if (fs.existsSync(providersFile)) {
   } else {
     process.stdout.write('   ⚠️  Custom storage key not found\n');
   }
-  
-  if (content.includes('themes={[\'light\', \'dark\', \'system\']}')) {
+
+  if (content.includes("themes={['light', 'dark', 'system']}")) {
     process.stdout.write('   ✅ Theme options configured\n');
   } else {
     process.stdout.write('   ⚠️  Theme options not explicitly configured\n');
@@ -72,7 +72,7 @@ if (fs.existsSync(globalsCss)) {
 const tailwindConfig = 'tailwind.config.ts';
 if (fs.existsSync(tailwindConfig)) {
   const content = fs.readFileSync(tailwindConfig, 'utf8');
-  if (content.includes('darkMode: [\'class\']')) {
+  if (content.includes("darkMode: ['class']")) {
     process.stdout.write('   ✅ Tailwind dark mode configured\n');
   } else {
     process.stdout.write('   ❌ Tailwind dark mode not configured\n');
@@ -99,9 +99,13 @@ const mobileNav = 'components/layout/unified-mobile-navigation.tsx';
 if (fs.existsSync(mobileNav)) {
   const content = fs.readFileSync(mobileNav, 'utf8');
   if (content.includes('ThemeSwitcher')) {
-    process.stdout.write('   ✅ Theme switcher included in mobile navigation\n');
+    process.stdout.write(
+      '   ✅ Theme switcher included in mobile navigation\n'
+    );
   } else {
-    process.stdout.write('   ❌ Theme switcher not found in mobile navigation\n');
+    process.stdout.write(
+      '   ❌ Theme switcher not found in mobile navigation\n'
+    );
   }
 } else {
   process.stdout.write('   ❌ Mobile navigation not found\n');
@@ -114,7 +118,9 @@ try {
   process.stdout.write('   ✅ TypeScript check passed\n');
 } catch (error) {
   process.stdout.write('   ❌ TypeScript errors found\n');
-  process.stdout.write('   Error: ' + (error.stdout?.toString() || error.message) + '\n');
+  process.stdout.write(
+    '   Error: ' + (error.stdout?.toString() || error.message) + '\n'
+  );
 }
 
 // Test 6: Run linting
@@ -129,8 +135,12 @@ try {
 process.stdout.write('\n🎉 Theme switching functionality test completed!\n');
 process.stdout.write('\nTo manually test:\n');
 process.stdout.write('1. Run `npm run dev`\n');
-process.stdout.write('2. Navigate to http://localhost:3000/dashboard/theme-test\n');
+process.stdout.write(
+  '2. Navigate to http://localhost:3000/dashboard/theme-test\n'
+);
 process.stdout.write('3. Click the theme switcher button in the header\n');
-process.stdout.write('4. Test switching between Light, Dark, and System themes\n');
+process.stdout.write(
+  '4. Test switching between Light, Dark, and System themes\n'
+);
 process.stdout.write('5. Refresh the page to verify theme persistence\n');
 process.stdout.write('6. Navigate to different pages to ensure consistency\n');

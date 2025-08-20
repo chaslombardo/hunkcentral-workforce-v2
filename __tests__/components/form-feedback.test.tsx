@@ -2,18 +2,37 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { FormFeedback, useFormFeedback } from '@/components/forms/form-feedback';
+import {
+  FormFeedback,
+  useFormFeedback,
+} from '@/components/forms/form-feedback';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
 }));
 
 describe('FormFeedback', () => {
@@ -30,16 +49,18 @@ describe('FormFeedback', () => {
       );
 
       expect(screen.getByText('Success!')).toBeInTheDocument();
-      expect(screen.getByText('Your form has been submitted successfully.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Your form has been submitted successfully.')
+      ).toBeInTheDocument();
       expect(screen.getByTestId('check-icon')).toBeInTheDocument();
-      
+
       const container = screen.getByRole('alert');
       expect(container).toHaveClass('border-hunks-green');
     });
 
     it('renders success feedback with action button', async () => {
       const handleAction = vi.fn();
-      
+
       render(
         <FormFeedback
           type="success"
@@ -52,14 +73,14 @@ describe('FormFeedback', () => {
 
       const actionButton = screen.getByText('View Results');
       expect(actionButton).toBeInTheDocument();
-      
+
       await user.click(actionButton);
       expect(handleAction).toHaveBeenCalledTimes(1);
     });
 
     it('auto-dismisses success feedback after timeout', async () => {
       const handleDismiss = vi.fn();
-      
+
       render(
         <FormFeedback
           type="success"
@@ -73,9 +94,12 @@ describe('FormFeedback', () => {
 
       expect(screen.getByText('Success!')).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(handleDismiss).toHaveBeenCalledTimes(1);
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          expect(handleDismiss).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 200 }
+      );
     });
   });
 
@@ -92,7 +116,7 @@ describe('FormFeedback', () => {
       expect(screen.getByText('Error!')).toBeInTheDocument();
       expect(screen.getByText('Something went wrong.')).toBeInTheDocument();
       expect(screen.getByTestId('alert-icon')).toBeInTheDocument();
-      
+
       const container = screen.getByRole('alert');
       expect(container).toHaveClass('border-destructive');
     });
@@ -106,19 +130,23 @@ describe('FormFeedback', () => {
           suggestions={[
             'Check all required fields',
             'Ensure email format is correct',
-            'Password must be at least 8 characters'
+            'Password must be at least 8 characters',
           ]}
         />
       );
 
       expect(screen.getByText('Check all required fields')).toBeInTheDocument();
-      expect(screen.getByText('Ensure email format is correct')).toBeInTheDocument();
-      expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Ensure email format is correct')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Password must be at least 8 characters')
+      ).toBeInTheDocument();
     });
 
     it('renders error feedback with retry functionality', async () => {
       const handleRetry = vi.fn();
-      
+
       render(
         <FormFeedback
           type="error"
@@ -130,7 +158,7 @@ describe('FormFeedback', () => {
 
       const retryButton = screen.getByText('Try Again');
       expect(retryButton).toBeInTheDocument();
-      
+
       await user.click(retryButton);
       expect(handleRetry).toHaveBeenCalledTimes(1);
     });
@@ -149,7 +177,7 @@ describe('FormFeedback', () => {
       expect(screen.getByText('Warning')).toBeInTheDocument();
       expect(screen.getByText('Please review your input.')).toBeInTheDocument();
       expect(screen.getByTestId('warning-icon')).toBeInTheDocument();
-      
+
       const container = screen.getByRole('alert');
       expect(container).toHaveClass('border-hunks-orange');
     });
@@ -166,9 +194,11 @@ describe('FormFeedback', () => {
       );
 
       expect(screen.getByText('Information')).toBeInTheDocument();
-      expect(screen.getByText('Here\'s some helpful information.')).toBeInTheDocument();
+      expect(
+        screen.getByText("Here's some helpful information.")
+      ).toBeInTheDocument();
       expect(screen.getByTestId('info-icon')).toBeInTheDocument();
-      
+
       const container = screen.getByRole('alert');
       expect(container).toHaveClass('border-blue-200');
     });
@@ -177,7 +207,7 @@ describe('FormFeedback', () => {
   describe('Dismissible Feedback', () => {
     it('can be dismissed manually', async () => {
       const handleDismiss = vi.fn();
-      
+
       render(
         <FormFeedback
           type="success"
@@ -190,7 +220,7 @@ describe('FormFeedback', () => {
 
       const dismissButton = screen.getByLabelText('Dismiss');
       expect(dismissButton).toBeInTheDocument();
-      
+
       await user.click(dismissButton);
       expect(handleDismiss).toHaveBeenCalledTimes(1);
     });
@@ -230,11 +260,7 @@ describe('FormFeedback', () => {
   describe('Accessibility', () => {
     it('has proper ARIA attributes', () => {
       render(
-        <FormFeedback
-          type="error"
-          title="Error"
-          message="Test error message"
-        />
+        <FormFeedback type="error" title="Error" message="Test error message" />
       );
 
       const container = screen.getByRole('alert');
@@ -244,21 +270,13 @@ describe('FormFeedback', () => {
 
     it('has proper role for different feedback types', () => {
       const { rerender } = render(
-        <FormFeedback
-          type="error"
-          title="Error"
-          message="Error message"
-        />
+        <FormFeedback type="error" title="Error" message="Error message" />
       );
 
       expect(screen.getByRole('alert')).toBeInTheDocument();
 
       rerender(
-        <FormFeedback
-          type="info"
-          title="Info"
-          message="Info message"
-        />
+        <FormFeedback type="info" title="Info" message="Info message" />
       );
 
       expect(screen.getByRole('status')).toBeInTheDocument();
@@ -268,11 +286,7 @@ describe('FormFeedback', () => {
   describe('Brand Consistency', () => {
     it('uses brand colors for success state', () => {
       render(
-        <FormFeedback
-          type="success"
-          title="Success"
-          message="Test message"
-        />
+        <FormFeedback type="success" title="Success" message="Test message" />
       );
 
       const container = screen.getByRole('alert');
@@ -282,11 +296,7 @@ describe('FormFeedback', () => {
 
     it('uses brand colors for warning state', () => {
       render(
-        <FormFeedback
-          type="warning"
-          title="Warning"
-          message="Test message"
-        />
+        <FormFeedback type="warning" title="Warning" message="Test message" />
       );
 
       const container = screen.getByRole('alert');
@@ -298,20 +308,41 @@ describe('FormFeedback', () => {
 
 describe('useFormFeedback Hook', () => {
   function TestComponent() {
-    const { feedback, showSuccess, showError, showWarning, showInfo, clearFeedback } = useFormFeedback();
+    const {
+      feedback,
+      showSuccess,
+      showError,
+      showWarning,
+      showInfo,
+      clearFeedback,
+    } = useFormFeedback();
 
     return (
       <div>
-        <button onClick={() => showSuccess({ title: 'Success', message: 'Success message' })}>
+        <button
+          onClick={() =>
+            showSuccess({ title: 'Success', message: 'Success message' })
+          }
+        >
           Show Success
         </button>
-        <button onClick={() => showError({ title: 'Error', message: 'Error message' })}>
+        <button
+          onClick={() =>
+            showError({ title: 'Error', message: 'Error message' })
+          }
+        >
           Show Error
         </button>
-        <button onClick={() => showWarning({ title: 'Warning', message: 'Warning message' })}>
+        <button
+          onClick={() =>
+            showWarning({ title: 'Warning', message: 'Warning message' })
+          }
+        >
           Show Warning
         </button>
-        <button onClick={() => showInfo({ title: 'Info', message: 'Info message' })}>
+        <button
+          onClick={() => showInfo({ title: 'Info', message: 'Info message' })}
+        >
           Show Info
         </button>
         <button onClick={clearFeedback}>Clear</button>
@@ -352,13 +383,15 @@ describe('useFormFeedback Hook', () => {
 
       return (
         <div>
-          <button 
-            onClick={() => showSuccess({ 
-              title: 'Auto Dismiss', 
-              message: 'This will auto dismiss',
-              autoDismiss: true,
-              dismissAfter: 100
-            })}
+          <button
+            onClick={() =>
+              showSuccess({
+                title: 'Auto Dismiss',
+                message: 'This will auto dismiss',
+                autoDismiss: true,
+                dismissAfter: 100,
+              })
+            }
           >
             Show Auto Dismiss
           </button>
@@ -373,8 +406,11 @@ describe('useFormFeedback Hook', () => {
     expect(screen.getByText('Auto Dismiss')).toBeInTheDocument();
 
     // Should auto-dismiss after timeout
-    await waitFor(() => {
-      expect(screen.queryByText('Auto Dismiss')).not.toBeInTheDocument();
-    }, { timeout: 200 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Auto Dismiss')).not.toBeInTheDocument();
+      },
+      { timeout: 200 }
+    );
   });
 });

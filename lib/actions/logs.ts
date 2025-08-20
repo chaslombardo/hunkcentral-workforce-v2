@@ -18,7 +18,7 @@ export type LogActionResult = {
 // Enhanced error handling for database operations
 function handleDatabaseError(error: unknown, operation: string): string {
   console.error(`Database error in ${operation}:`, error);
-  
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2002':
@@ -28,7 +28,10 @@ function handleDatabaseError(error: unknown, operation: string): string {
         if (error.message.includes('employeeId_fkey')) {
           return 'One or more selected employees are invalid. Please refresh the page and select valid employees.';
         }
-        if (error.message.includes('captainId') || error.message.includes('captain')) {
+        if (
+          error.message.includes('captainId') ||
+          error.message.includes('captain')
+        ) {
           return 'Selected captain is invalid. Please refresh the page and select a valid captain.';
         }
         return 'Referenced record does not exist. Please refresh and try again';
@@ -46,27 +49,27 @@ function handleDatabaseError(error: unknown, operation: string): string {
         return `Database constraint error: ${error.message}`;
     }
   }
-  
+
   if (error instanceof Prisma.PrismaClientUnknownRequestError) {
     return 'Unknown database error occurred';
   }
-  
+
   if (error instanceof Prisma.PrismaClientRustPanicError) {
     return 'Database connection error';
   }
-  
+
   if (error instanceof Prisma.PrismaClientInitializationError) {
     return 'Database initialization error';
   }
-  
+
   if (error instanceof Prisma.PrismaClientValidationError) {
     return 'Invalid data format provided';
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   return `Failed to ${operation}`;
 }
 
@@ -86,7 +89,7 @@ async function validateUserExists(userId: string): Promise<boolean> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true }
+      select: { id: true },
     });
     return !!user;
   } catch (error) {
@@ -96,25 +99,27 @@ async function validateUserExists(userId: string): Promise<boolean> {
 }
 
 // Validate multiple employee IDs exist
-async function validateEmployeeIds(employeeIds: string[]): Promise<{ valid: boolean; invalidIds: string[] }> {
+async function validateEmployeeIds(
+  employeeIds: string[]
+): Promise<{ valid: boolean; invalidIds: string[] }> {
   try {
     if (employeeIds.length === 0) {
       return { valid: true, invalidIds: [] };
     }
 
     const users = await prisma.user.findMany({
-      where: { 
-        id: { in: employeeIds }
+      where: {
+        id: { in: employeeIds },
       },
-      select: { id: true }
+      select: { id: true },
     });
 
-    const foundIds = users.map(user => user.id);
-    const invalidIds = employeeIds.filter(id => !foundIds.includes(id));
+    const foundIds = users.map((user) => user.id);
+    const invalidIds = employeeIds.filter((id) => !foundIds.includes(id));
 
     return {
       valid: invalidIds.length === 0,
-      invalidIds
+      invalidIds,
     };
   } catch (error) {
     console.error('Employee IDs validation failed:', error);
@@ -127,9 +132,9 @@ async function validateCaptainId(captainId: string): Promise<boolean> {
   try {
     const captain = await prisma.user.findUnique({
       where: { id: captainId },
-      select: { id: true, roles: true }
+      select: { id: true, roles: true },
     });
-    
+
     // Check if user exists and has captain role
     return !!captain && captain.roles.includes('captain');
   } catch (error) {
@@ -157,36 +162,41 @@ export async function saveDraftLog(
     // Check if data can be modified for this date
     const canModify = await canModifyDataForDate(validatedData.logDate);
     if (!canModify) {
-      return { 
-        success: false, 
-        error: 'Cannot modify data for this date - pay period is locked or closed' 
+      return {
+        success: false,
+        error:
+          'Cannot modify data for this date - pay period is locked or closed',
       };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate captain ID exists
     const captainValid = await validateCaptainId(validatedData.captainId);
     if (!captainValid) {
-      return { 
-        success: false, 
-        error: 'Selected captain is not valid. Please refresh the page and select a valid captain.' 
+      return {
+        success: false,
+        error:
+          'Selected captain is not valid. Please refresh the page and select a valid captain.',
       };
     }
 
     // Validate employee IDs exist (if there are hours to save)
     if (validatedData.hours.length > 0) {
-      const employeeIds = validatedData.hours.map(hour => hour.employeeId);
+      const employeeIds = validatedData.hours.map((hour) => hour.employeeId);
       const employeeValidation = await validateEmployeeIds(employeeIds);
-      
+
       if (!employeeValidation.valid) {
-        return { 
-          success: false, 
-          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.` 
+        return {
+          success: false,
+          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.`,
         };
       }
     }
@@ -202,14 +212,14 @@ export async function saveDraftLog(
     let savedLog;
 
     let existingLog = null;
-    
+
     if (logId) {
       // Get existing log for audit trail
       existingLog = await prisma.dailyLog.findUnique({
         where: { id: logId },
         include: { jobs: true, hours: true },
       });
-      
+
       // Update existing draft
       savedLog = await prisma.dailyLog.update({
         where: { id: logId },
@@ -269,24 +279,24 @@ export async function saveDraftLog(
       logId ? 'update' : 'create',
       savedLog.id,
       session.user.id,
-      existingLog ? existingLog as Record<string, unknown> : undefined,
+      existingLog ? (existingLog as Record<string, unknown>) : undefined,
       savedLog as Record<string, unknown>,
       { formData: validatedData }
     );
 
-    return { 
-      success: true, 
-      data: { 
+    return {
+      success: true,
+      data: {
         id: savedLog.id,
         status: savedLog.status,
         updatedAt: savedLog.updatedAt,
-      } 
+      },
     };
   } catch (error) {
     // Error saving draft log
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to save draft' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to save draft',
     };
   }
 }
@@ -309,36 +319,41 @@ export async function submitLog(
 
     // Additional validation for submission
     if (validatedData.jobs.length === 0 && validatedData.hours.length === 0) {
-      return { 
-        success: false, 
-        error: 'Cannot submit empty log. Please add at least one job or hour entry.' 
+      return {
+        success: false,
+        error:
+          'Cannot submit empty log. Please add at least one job or hour entry.',
       };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate captain ID exists
     const captainValid = await validateCaptainId(validatedData.captainId);
     if (!captainValid) {
-      return { 
-        success: false, 
-        error: 'Selected captain is not valid. Please refresh the page and select a valid captain.' 
+      return {
+        success: false,
+        error:
+          'Selected captain is not valid. Please refresh the page and select a valid captain.',
       };
     }
 
     // Validate employee IDs exist (if there are hours to submit)
     if (validatedData.hours.length > 0) {
-      const employeeIds = validatedData.hours.map(hour => hour.employeeId);
+      const employeeIds = validatedData.hours.map((hour) => hour.employeeId);
       const employeeValidation = await validateEmployeeIds(employeeIds);
-      
+
       if (!employeeValidation.valid) {
-        return { 
-          success: false, 
-          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.` 
+        return {
+          success: false,
+          error: `Invalid employees selected: ${employeeValidation.invalidIds.join(', ')}. Please refresh the page and select valid employees.`,
         };
       }
     }
@@ -379,34 +394,37 @@ export async function submitLog(
       revalidatePath('/logs');
       revalidatePath('/dashboard');
 
-      return { 
-        success: true, 
-        data: { 
+      return {
+        success: true,
+        data: {
           id: submittedLog.id,
           status: submittedLog.status,
           submittedAt: submittedLog.submittedAt || undefined,
-        }
+        },
       };
     } else {
-      return { 
-        success: false, 
-        error: 'Failed to get log ID for submission' 
+      return {
+        success: false,
+        error: 'Failed to get log ID for submission',
       };
     }
   } catch (error) {
     console.error('Error in submitLog:', error);
-    
+
     // Provide more specific error messages
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return { 
-        success: false, 
-        error: handleDatabaseError(error, 'submitLog')
+      return {
+        success: false,
+        error: handleDatabaseError(error, 'submitLog'),
       };
     }
-    
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to submit log due to an unexpected error' 
+
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit log due to an unexpected error',
     };
   }
 }
@@ -429,20 +447,26 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate user exists
     const userExists = await validateUserExists(session.user.id);
     if (!userExists) {
-      return { success: false, error: 'User session invalid. Please log in again.' };
+      return {
+        success: false,
+        error: 'User session invalid. Please log in again.',
+      };
     }
 
     const log = await prisma.dailyLog.findUnique({
       where: { id: logId },
       include: {
         jobs: {
-          orderBy: { createdAt: 'asc' }
+          orderBy: { createdAt: 'asc' },
         },
         hours: {
           include: {
@@ -453,7 +477,7 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
               },
             },
           },
-          orderBy: { createdAt: 'asc' }
+          orderBy: { createdAt: 'asc' },
         },
         captain: {
           select: {
@@ -480,8 +504,8 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
     }
 
     // Check if user has permission to view this log
-    const canView = 
-      log.createdById === session.user.id || 
+    const canView =
+      log.createdById === session.user.id ||
       log.captainId === session.user.id ||
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
@@ -491,7 +515,7 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
     }
 
     // Validate and clean data
-    const cleanedJobs = log.jobs.map(job => ({
+    const cleanedJobs = log.jobs.map((job) => ({
       ...job,
       revenue: Number(job.revenue),
       tips: Number(job.tips),
@@ -501,14 +525,17 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
       disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
     }));
 
-    const cleanedHours = log.hours.map(hour => ({
+    const cleanedHours = log.hours.map((hour) => ({
       ...hour,
       hours: Number(hour.hours),
-      employee: hour.employee || { id: hour.employeeId, fullName: 'Unknown Employee' }
+      employee: hour.employee || {
+        id: hour.employeeId,
+        fullName: 'Unknown Employee',
+      },
     }));
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: {
         id: log.id,
         captainId: log.captainId,
@@ -522,12 +549,12 @@ export async function loadLog(logId: string): Promise<LogActionResult> {
         approvedBy: log.approvedBy?.fullName || undefined,
         createdAt: log.createdAt,
         updatedAt: log.updatedAt,
-      }
+      },
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'load log')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'load log'),
     };
   }
 }
@@ -543,27 +570,36 @@ export async function getLogsForReview(): Promise<LogActionResult> {
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       return { success: false, error: 'Manager access required' };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate user exists
     const userExists = await validateUserExists(session.user.id);
     if (!userExists) {
-      return { success: false, error: 'User session invalid. Please log in again.' };
+      return {
+        success: false,
+        error: 'User session invalid. Please log in again.',
+      };
     }
 
     const logs = await prisma.dailyLog.findMany({
       where: {
         status: {
-          in: ['submitted', 'approved']
-        }
+          in: ['submitted', 'approved'],
+        },
       },
       include: {
         captain: {
@@ -590,16 +626,13 @@ export async function getLogsForReview(): Promise<LogActionResult> {
           },
         },
       },
-      orderBy: [
-        { submittedAt: 'desc' },
-        { createdAt: 'desc' }
-      ],
+      orderBy: [{ submittedAt: 'desc' }, { createdAt: 'desc' }],
     });
 
     // Validate and clean data
     const reviewData = logs
-      .filter(log => log.captain) // Filter out logs with missing captain data
-      .map(log => {
+      .filter((log) => log.captain) // Filter out logs with missing captain data
+      .map((log) => {
         try {
           const totalRevenue = log.jobs.reduce((sum, job) => {
             const revenue = Number(job.revenue);
@@ -641,14 +674,14 @@ export async function getLogsForReview(): Promise<LogActionResult> {
         }
       });
 
-    return { 
-      success: true, 
-      data: reviewData
+    return {
+      success: true,
+      data: reviewData,
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'get logs for review')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'get logs for review'),
     };
   }
 }
@@ -656,7 +689,10 @@ export async function getLogsForReview(): Promise<LogActionResult> {
 /**
  * Approve a daily log
  */
-export async function approveLog(logId: string, comments?: string): Promise<LogActionResult> {
+export async function approveLog(
+  logId: string,
+  comments?: string
+): Promise<LogActionResult> {
   try {
     // Validate input
     if (!logId || typeof logId !== 'string') {
@@ -669,20 +705,29 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       return { success: false, error: 'Manager access required' };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate user exists
     const userExists = await validateUserExists(session.user.id);
     if (!userExists) {
-      return { success: false, error: 'User session invalid. Please log in again.' };
+      return {
+        success: false,
+        error: 'User session invalid. Please log in again.',
+      };
     }
 
     const log = await prisma.dailyLog.findUnique({
@@ -745,13 +790,27 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
     // Auto-match commission entries (outside transaction to avoid blocking)
     let matchingResult: {
       success: boolean;
-      notifications: Array<{ type: string; title: string; message: string; data?: Record<string, unknown> }>;
+      notifications: Array<{
+        type: string;
+        title: string;
+        message: string;
+        data?: Record<string, unknown>;
+      }>;
       matchResult?: { matches: Array<unknown>; conflicts: Array<unknown> };
-    } = { success: true, notifications: [], matchResult: { matches: [], conflicts: [] } };
-    
+    } = {
+      success: true,
+      notifications: [],
+      matchResult: { matches: [], conflicts: [] },
+    };
+
     try {
-      const { handleLogApprovalCommissionMatching } = await import('@/lib/commissionMatchingService');
-      matchingResult = await handleLogApprovalCommissionMatching(logId, session.user.id);
+      const { handleLogApprovalCommissionMatching } = await import(
+        '@/lib/commissionMatchingService'
+      );
+      matchingResult = await handleLogApprovalCommissionMatching(
+        logId,
+        session.user.id
+      );
     } catch (matchingError) {
       console.error('Commission matching failed:', matchingError);
       // Don't fail the approval for commission matching errors
@@ -763,9 +822,9 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
     revalidatePath('/logs/review');
     revalidatePath('/dashboard');
 
-    return { 
-      success: true, 
-      data: { 
+    return {
+      success: true,
+      data: {
         id: result.id,
         status: result.status,
         approvedAt: result.approvedAt || undefined,
@@ -775,12 +834,12 @@ export async function approveLog(logId: string, comments?: string): Promise<LogA
           matchCount: matchingResult.matchResult?.matches.length || 0,
           conflictCount: matchingResult.matchResult?.conflicts.length || 0,
         },
-      }
+      },
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'approve log')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'approve log'),
     };
   }
 }
@@ -802,19 +861,28 @@ export async function deleteLog(logId: string): Promise<LogActionResult> {
 
     // Check if user has admin role (only system admins can delete)
     if (!session.user.roles?.includes('admin')) {
-      return { success: false, error: 'System administrator access required to delete logs' };
+      return {
+        success: false,
+        error: 'System administrator access required to delete logs',
+      };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Validate user exists
     const userExists = await validateUserExists(session.user.id);
     if (!userExists) {
-      return { success: false, error: 'User session invalid. Please log in again.' };
+      return {
+        success: false,
+        error: 'User session invalid. Please log in again.',
+      };
     }
 
     const log = await prisma.dailyLog.findUnique({
@@ -837,7 +905,10 @@ export async function deleteLog(logId: string): Promise<LogActionResult> {
 
     // Only allow deletion of draft or submitted logs, not approved ones
     if (log.status === 'approved') {
-      return { success: false, error: 'Cannot delete approved logs. Please contact an administrator.' };
+      return {
+        success: false,
+        error: 'Cannot delete approved logs. Please contact an administrator.',
+      };
     }
 
     // Validate captain exists
@@ -886,17 +957,17 @@ export async function deleteLog(logId: string): Promise<LogActionResult> {
     revalidatePath('/logs');
     revalidatePath('/dashboard');
 
-    return { 
-      success: true, 
-      data: { 
+    return {
+      success: true,
+      data: {
         id: logId,
         deleted: true,
-      }
+      },
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'delete log')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'delete log'),
     };
   }
 }
@@ -904,7 +975,10 @@ export async function deleteLog(logId: string): Promise<LogActionResult> {
 /**
  * Bulk approve multiple logs
  */
-export async function bulkApproveLogs(logIds: string[], comments?: string): Promise<LogActionResult> {
+export async function bulkApproveLogs(
+  logIds: string[],
+  comments?: string
+): Promise<LogActionResult> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -912,7 +986,10 @@ export async function bulkApproveLogs(logIds: string[], comments?: string): Prom
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       return { success: false, error: 'Manager access required' };
     }
 
@@ -922,22 +999,23 @@ export async function bulkApproveLogs(logIds: string[], comments?: string): Prom
       results.push({ logId, ...result });
     }
 
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
-    return { 
-      success: failureCount === 0, 
+    return {
+      success: failureCount === 0,
       data: {
         successCount,
         failureCount,
         results,
-      }
+      },
     };
   } catch (error) {
     // Error bulk approving logs
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to bulk approve logs' 
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to bulk approve logs',
     };
   }
 }
@@ -945,7 +1023,9 @@ export async function bulkApproveLogs(logIds: string[], comments?: string): Prom
 /**
  * Bulk delete multiple logs
  */
-export async function bulkDeleteLogs(logIds: string[]): Promise<LogActionResult> {
+export async function bulkDeleteLogs(
+  logIds: string[]
+): Promise<LogActionResult> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -954,7 +1034,10 @@ export async function bulkDeleteLogs(logIds: string[]): Promise<LogActionResult>
 
     // Check if user has admin role (only system admins can delete)
     if (!session.user.roles?.includes('admin')) {
-      return { success: false, error: 'System administrator access required to delete logs' };
+      return {
+        success: false,
+        error: 'System administrator access required to delete logs',
+      };
     }
 
     const results = [];
@@ -963,21 +1046,21 @@ export async function bulkDeleteLogs(logIds: string[]): Promise<LogActionResult>
       results.push({ logId, ...result });
     }
 
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
-    return { 
-      success: failureCount === 0, 
+    return {
+      success: failureCount === 0,
       data: {
         successCount,
         failureCount,
         results,
-      }
+      },
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'bulk delete logs')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'bulk delete logs'),
     };
   }
 }
@@ -998,14 +1081,23 @@ export async function unapproveLog(logId: string): Promise<LogActionResult> {
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
-      return { success: false, error: 'Manager access required to unapprove logs' };
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
+      return {
+        success: false,
+        error: 'Manager access required to unapprove logs',
+      };
     }
 
     // Validate database connection
     const dbConnected = await validateDatabaseConnection();
     if (!dbConnected) {
-      return { success: false, error: 'Database connection unavailable. Please try again later.' };
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
     }
 
     // Get the current log to validate it exists and check status
@@ -1032,9 +1124,9 @@ export async function unapproveLog(logId: string): Promise<LogActionResult> {
     // Check if data can be modified for this date (pay period must be open)
     const canModify = await canModifyDataForDate(log.logDate);
     if (!canModify) {
-      return { 
-        success: false, 
-        error: 'Cannot unapprove log - pay period is locked or closed' 
+      return {
+        success: false,
+        error: 'Cannot unapprove log - pay period is locked or closed',
       };
     }
 
@@ -1067,16 +1159,16 @@ export async function unapproveLog(logId: string): Promise<LogActionResult> {
     revalidatePath('/logs/review');
     revalidatePath(`/logs/${logId}`);
 
-    return { 
-      success: true, 
-      data: { 
-        message: 'Log successfully unapproved and returned to submitted status' 
-      } 
+    return {
+      success: true,
+      data: {
+        message: 'Log successfully unapproved and returned to submitted status',
+      },
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: handleDatabaseError(error, 'unapprove log')
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'unapprove log'),
     };
   }
 }

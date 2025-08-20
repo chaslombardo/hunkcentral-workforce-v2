@@ -5,12 +5,7 @@ import { IconCopy } from '@tabler/icons-react';
 import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogClose,
@@ -63,10 +58,10 @@ interface CopySettingsDialogProps {
   onSuccess?: () => void;
 }
 
-export function CopySettingsDialog({ 
-  sourceUser, 
-  trigger, 
-  onSuccess 
+export function CopySettingsDialog({
+  sourceUser,
+  trigger,
+  onSuccess,
 }: CopySettingsDialogProps) {
   const [open, setOpen] = useState(false);
   const [targetUserId, setTargetUserId] = useState<string>('');
@@ -82,7 +77,7 @@ export function CopySettingsDialog({
         if (result.success && result.data) {
           // Filter out the source user and convert decimal fields
           const filteredUsers = result.data.users
-            .filter(u => u.id !== sourceUser.id)
+            .filter((u) => u.id !== sourceUser.id)
             .map(convertUserDecimalFields);
           setAvailableUsers(filteredUsers);
         }
@@ -139,15 +134,14 @@ export function CopySettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Copy User Settings</DialogTitle>
           <DialogDescription>
-            Copy compensation settings from {sourceUser.fullName} to another user.
-            This will overwrite the target user&apos;s rates, salary, commission, and bonus settings.
+            Copy compensation settings from {sourceUser.fullName} to another
+            user. This will overwrite the target user&apos;s rates, salary,
+            commission, and bonus settings.
           </DialogDescription>
         </DialogHeader>
 
@@ -163,7 +157,9 @@ export function CopySettingsDialog({
                   <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">
                       <span>{user.fullName}</span>
-                      <span className="text-muted-foreground text-sm">({user.email})</span>
+                      <span className="text-muted-foreground text-sm">
+                        ({user.email})
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -190,7 +186,10 @@ export function CopySettingsDialog({
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={handleCopySettings} disabled={isSubmitting || !targetUserId}>
+          <Button
+            onClick={handleCopySettings}
+            disabled={isSubmitting || !targetUserId}
+          >
             {isSubmitting ? 'Copying...' : 'Copy Settings'}
           </Button>
         </DialogFooter>

@@ -2,32 +2,35 @@
 
 import * as React from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Clock, 
-  DollarSign, 
-  Users, 
-  TrendingUp, 
+import {
+  Clock,
+  DollarSign,
+  Users,
+  TrendingUp,
   Calendar as CalendarIcon,
   MapPin,
-  Award
+  Award,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
-import type { DailyWorkEntry, WorkPatternStats } from '@/lib/actions/daily-work';
+import type {
+  DailyWorkEntry,
+  WorkPatternStats,
+} from '@/lib/actions/daily-work';
 
 // Types are now imported from the action file
 
@@ -48,7 +51,6 @@ export function DailyWorkCalendar({
   payPeriodStart,
   payPeriodEnd,
 }: DailyWorkCalendarProps) {
-  
   // Handle undefined work pattern stats
   const safeWorkPatternStats = workPatternStats || {
     totalDaysWorked: 0,
@@ -60,14 +62,14 @@ export function DailyWorkCalendar({
     highestTipDay: new Date(),
     highestPayDay: new Date(),
   };
-  
+
   // Create lookup map for work entries by date
   const workEntryMap = React.useMemo(() => {
     if (!workEntries || !Array.isArray(workEntries)) {
       return new Map<string, DailyWorkEntry>();
     }
     const map = new Map<string, DailyWorkEntry>();
-    workEntries.forEach(entry => {
+    workEntries.forEach((entry) => {
       const dateKey = entry.date.toDateString();
       map.set(dateKey, entry);
     });
@@ -89,12 +91,20 @@ export function DailyWorkCalendar({
   }
 
   // Get work entry for selected date
-  const selectedEntry = selectedDate ? workEntryMap.get(selectedDate.toDateString()) : null;
+  const selectedEntry = selectedDate
+    ? workEntryMap.get(selectedDate.toDateString())
+    : null;
 
   // Calculate modifiers for calendar styling
-  const workDays = workEntries.map(entry => entry.date);
-  const highTipDays = workEntries.filter(entry => entry.tips > safeWorkPatternStats.avgTipsPerDay * 1.5).map(entry => entry.date);
-  const highHourDays = workEntries.filter(entry => entry.totalHours > safeWorkPatternStats.avgHoursPerDay * 1.2).map(entry => entry.date);
+  const workDays = workEntries.map((entry) => entry.date);
+  const highTipDays = workEntries
+    .filter((entry) => entry.tips > safeWorkPatternStats.avgTipsPerDay * 1.5)
+    .map((entry) => entry.date);
+  const highHourDays = workEntries
+    .filter(
+      (entry) => entry.totalHours > safeWorkPatternStats.avgHoursPerDay * 1.2
+    )
+    .map((entry) => entry.date);
 
   return (
     <div className="space-y-6">
@@ -168,25 +178,25 @@ export function DailyWorkCalendar({
                 highHours: highHourDays,
               }}
               modifiersStyles={{
-                workDay: { 
-                  backgroundColor: 'var(--primary)', 
+                workDay: {
+                  backgroundColor: 'var(--primary)',
                   color: 'var(--primary-foreground)',
-                  fontWeight: '600'
+                  fontWeight: '600',
                 },
-                highTips: { 
-                  backgroundColor: '#ea7200', 
+                highTips: {
+                  backgroundColor: '#ea7200',
                   color: 'white',
-                  fontWeight: '600'
+                  fontWeight: '600',
                 },
-                highHours: { 
-                  backgroundColor: '#026937', 
+                highHours: {
+                  backgroundColor: '#026937',
                   color: 'white',
-                  fontWeight: '600'
+                  fontWeight: '600',
                 },
               }}
               className="rounded-lg border shadow-sm"
             />
-            
+
             {/* Legend */}
             <div className="mt-4 space-y-2">
               <div className="text-sm font-medium">Legend:</div>
@@ -216,7 +226,9 @@ export function DailyWorkCalendar({
               {selectedDate ? formatDate(selectedDate) : 'Select a Date'}
             </CardTitle>
             <CardDescription>
-              {selectedEntry ? 'Detailed work breakdown for this day' : 'Choose a date from the calendar to view details'}
+              {selectedEntry
+                ? 'Detailed work breakdown for this day'
+                : 'Choose a date from the calendar to view details'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -247,9 +259,7 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center">
-          <div className="font-bold text-2xl">
-            {entry.totalHours}h
-          </div>
+          <div className="font-bold text-2xl">{entry.totalHours}h</div>
           <div className="text-sm text-muted-foreground">Total Hours</div>
         </div>
         <div className="text-center">
@@ -259,15 +269,11 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
           <div className="text-sm text-muted-foreground">Gross Pay</div>
         </div>
         <div className="text-center">
-          <div className="font-bold text-2xl">
-            {formatCurrency(entry.tips)}
-          </div>
+          <div className="font-bold text-2xl">{formatCurrency(entry.tips)}</div>
           <div className="text-sm text-muted-foreground">Tips Earned</div>
         </div>
         <div className="text-center">
-          <div className="font-bold text-2xl">
-            {entry.jobsCompleted}
-          </div>
+          <div className="font-bold text-2xl">{entry.jobsCompleted}</div>
           <div className="text-sm text-muted-foreground">Jobs Done</div>
         </div>
       </div>
@@ -281,15 +287,21 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
           <div key={index} className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Badge 
+                <Badge
                   variant={dept.role === 'captain' ? 'default' : 'secondary'}
                   className={cn(
-                    dept.role === 'captain' && 'bg-[#026937] hover:bg-[#026937]/80',
-                    dept.role === 'co-captain' && 'bg-[#ea7200] hover:bg-[#ea7200]/80'
+                    dept.role === 'captain' &&
+                      'bg-[#026937] hover:bg-[#026937]/80',
+                    dept.role === 'co-captain' &&
+                      'bg-[#ea7200] hover:bg-[#ea7200]/80'
                   )}
                 >
-                  {dept.role === 'captain' && <Award className="h-3 w-3 mr-1" />}
-                  {dept.role === 'co-captain' && <Users className="h-3 w-3 mr-1" />}
+                  {dept.role === 'captain' && (
+                    <Award className="h-3 w-3 mr-1" />
+                  )}
+                  {dept.role === 'co-captain' && (
+                    <Users className="h-3 w-3 mr-1" />
+                  )}
                   <span className="capitalize">{dept.department}</span>
                 </Badge>
                 <span className="text-sm text-muted-foreground capitalize">
@@ -305,8 +317,8 @@ function DailyWorkDetail({ entry }: DailyWorkDetailProps) {
                 </div>
               </div>
             </div>
-            <Progress 
-              value={(dept.hours / entry.totalHours) * 100} 
+            <Progress
+              value={(dept.hours / entry.totalHours) * 100}
               className="h-2"
             />
           </div>

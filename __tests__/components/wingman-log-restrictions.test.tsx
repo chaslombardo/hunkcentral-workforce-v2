@@ -50,17 +50,21 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       render(<LogCreationComponent />);
-      
+
       // Wingman should not see the log creation form
       expect(screen.queryByTestId('log-creation-form')).not.toBeInTheDocument();
-      expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
-      expect(screen.getByText(/Required roles: captain or manager or admin/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You don't have permission to view this content/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Required roles: captain or manager or admin/)
+      ).toBeInTheDocument();
     });
 
     it('should allow captain access to log creation', () => {
       // Switch to captain user
       currentMockUser = mockCaptainUser;
-      
+
       const LogCreationComponent = () => (
         <RoleGuard requiredRoles={['captain', 'manager', 'admin']}>
           <div data-testid="log-creation-form">
@@ -73,11 +77,13 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       render(<LogCreationComponent />);
-      
+
       // Captain should see the log creation form
       expect(screen.getByTestId('log-creation-form')).toBeInTheDocument();
       expect(screen.getByText('Create Daily Log')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Submit Log' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Submit Log' })
+      ).toBeInTheDocument();
     });
   });
 
@@ -95,16 +101,18 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       render(<LogEditComponent />);
-      
+
       // Wingman should not see the log edit form
       expect(screen.queryByTestId('log-edit-form')).not.toBeInTheDocument();
-      expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You don't have permission to view this content/)
+      ).toBeInTheDocument();
     });
 
     it('should allow captain access to log editing', () => {
       // Switch to captain user
       currentMockUser = mockCaptainUser;
-      
+
       const LogEditComponent = () => (
         <RoleGuard requiredRoles={['captain', 'manager', 'admin']}>
           <div data-testid="log-edit-form">
@@ -117,11 +125,13 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       render(<LogEditComponent />);
-      
+
       // Captain should see the log edit form
       expect(screen.getByTestId('log-edit-form')).toBeInTheDocument();
       expect(screen.getByText('Edit Daily Log')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Update Log' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Update Log' })
+      ).toBeInTheDocument();
     });
   });
 
@@ -138,7 +148,7 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       const { rerender } = render(<PayrollComponent />);
-      
+
       // Wingman should see payroll
       expect(screen.getByTestId('payroll-access')).toBeInTheDocument();
       expect(screen.getByText('My Payroll')).toBeInTheDocument();
@@ -154,10 +164,12 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       rerender(<LogCreationComponent />);
-      
+
       // Wingman should not see log creation
       expect(screen.queryByTestId('log-creation')).not.toBeInTheDocument();
-      expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/You don't have permission to view this content/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -167,31 +179,39 @@ describe('Wingman Log Submission Restrictions', () => {
         <nav data-testid="navigation">
           {/* Always visible items */}
           <RoleGuard requiredRoles={['wingman', 'captain', 'manager', 'admin']}>
-            <a href="/reports/my-payroll" data-testid="payroll-link">My Payroll</a>
+            <a href="/reports/my-payroll" data-testid="payroll-link">
+              My Payroll
+            </a>
           </RoleGuard>
-          
+
           {/* Captain/Manager/Admin only items */}
           <RoleGuard requiredRoles={['captain', 'manager', 'admin']}>
-            <a href="/logs/create" data-testid="create-log-link">Create Log</a>
+            <a href="/logs/create" data-testid="create-log-link">
+              Create Log
+            </a>
           </RoleGuard>
-          
+
           {/* Manager/Admin only items */}
           <RoleGuard requiredRoles={['manager', 'admin']}>
-            <a href="/logs/review" data-testid="review-logs-link">Review Logs</a>
+            <a href="/logs/review" data-testid="review-logs-link">
+              Review Logs
+            </a>
           </RoleGuard>
-          
+
           {/* Admin only items */}
           <RoleGuard requiredRoles={['admin']}>
-            <a href="/admin/users" data-testid="manage-users-link">Manage Users</a>
+            <a href="/admin/users" data-testid="manage-users-link">
+              Manage Users
+            </a>
           </RoleGuard>
         </nav>
       );
 
       render(<NavigationComponent />);
-      
+
       // Wingman should see payroll link
       expect(screen.getByTestId('payroll-link')).toBeInTheDocument();
-      
+
       // Wingman should not see captain/manager/admin links
       expect(screen.queryByTestId('create-log-link')).not.toBeInTheDocument();
       expect(screen.queryByTestId('review-logs-link')).not.toBeInTheDocument();
@@ -201,37 +221,45 @@ describe('Wingman Log Submission Restrictions', () => {
     it('should show different navigation items for captain', () => {
       // Switch to captain user
       currentMockUser = mockCaptainUser;
-      
+
       const NavigationComponent = () => (
         <nav data-testid="navigation">
           {/* Always visible items */}
           <RoleGuard requiredRoles={['wingman', 'captain', 'manager', 'admin']}>
-            <a href="/reports/my-payroll" data-testid="payroll-link">My Payroll</a>
+            <a href="/reports/my-payroll" data-testid="payroll-link">
+              My Payroll
+            </a>
           </RoleGuard>
-          
+
           {/* Captain/Manager/Admin only items */}
           <RoleGuard requiredRoles={['captain', 'manager', 'admin']}>
-            <a href="/logs/create" data-testid="create-log-link">Create Log</a>
+            <a href="/logs/create" data-testid="create-log-link">
+              Create Log
+            </a>
           </RoleGuard>
-          
+
           {/* Manager/Admin only items */}
           <RoleGuard requiredRoles={['manager', 'admin']}>
-            <a href="/logs/review" data-testid="review-logs-link">Review Logs</a>
+            <a href="/logs/review" data-testid="review-logs-link">
+              Review Logs
+            </a>
           </RoleGuard>
-          
+
           {/* Admin only items */}
           <RoleGuard requiredRoles={['admin']}>
-            <a href="/admin/users" data-testid="manage-users-link">Manage Users</a>
+            <a href="/admin/users" data-testid="manage-users-link">
+              Manage Users
+            </a>
           </RoleGuard>
         </nav>
       );
 
       render(<NavigationComponent />);
-      
+
       // Captain should see payroll and create log links
       expect(screen.getByTestId('payroll-link')).toBeInTheDocument();
       expect(screen.getByTestId('create-log-link')).toBeInTheDocument();
-      
+
       // Captain should not see manager/admin only links
       expect(screen.queryByTestId('review-logs-link')).not.toBeInTheDocument();
       expect(screen.queryByTestId('manage-users-link')).not.toBeInTheDocument();
@@ -257,10 +285,14 @@ describe('Wingman Log Submission Restrictions', () => {
       };
 
       render(<LogSubmissionComponent />);
-      
+
       // Wingman should not see the form
-      expect(screen.queryByTestId('log-submission-form')).not.toBeInTheDocument();
-      expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('log-submission-form')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText(/You don't have permission to view this content/)
+      ).toBeInTheDocument();
     });
 
     it('should verify wingman can access payroll endpoints', () => {
@@ -274,41 +306,52 @@ describe('Wingman Log Submission Restrictions', () => {
       );
 
       render(<PayrollDataComponent />);
-      
+
       // Wingman should see payroll data
       expect(screen.getByTestId('payroll-data')).toBeInTheDocument();
-      expect(screen.getByText('Payroll data would be loaded here')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Refresh Payroll Data' })).toBeInTheDocument();
+      expect(
+        screen.getByText('Payroll data would be loaded here')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Refresh Payroll Data' })
+      ).toBeInTheDocument();
     });
   });
 
   describe('Error handling for unauthorized access', () => {
     it('should show appropriate error message when wingman tries to access restricted content', () => {
       const RestrictedComponent = () => (
-        <RoleGuard 
+        <RoleGuard
           requiredRoles={['captain', 'manager', 'admin']}
           fallback={
             <div data-testid="custom-error">
               <h2>Access Denied</h2>
-              <p>Wingmen cannot submit logs. Please contact your captain or manager.</p>
+              <p>
+                Wingmen cannot submit logs. Please contact your captain or
+                manager.
+              </p>
             </div>
           }
         >
-          <div data-testid="restricted-content">
-            This content is restricted
-          </div>
+          <div data-testid="restricted-content">This content is restricted</div>
         </RoleGuard>
       );
 
       render(<RestrictedComponent />);
-      
+
       // Should show custom error message
       expect(screen.getByTestId('custom-error')).toBeInTheDocument();
       expect(screen.getByText('Access Denied')).toBeInTheDocument();
-      expect(screen.getByText('Wingmen cannot submit logs. Please contact your captain or manager.')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText(
+          'Wingmen cannot submit logs. Please contact your captain or manager.'
+        )
+      ).toBeInTheDocument();
+
       // Should not show restricted content
-      expect(screen.queryByTestId('restricted-content')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('restricted-content')
+      ).not.toBeInTheDocument();
     });
   });
 });

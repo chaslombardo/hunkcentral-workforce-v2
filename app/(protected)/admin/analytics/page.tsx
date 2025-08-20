@@ -1,37 +1,62 @@
-import { Suspense } from "react";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PerformanceMonitor } from "@/components/performance-monitor";
-import { BarChart3, MessageSquare, TestTube, TrendingUp, Users, Clock } from "lucide-react";
+import { Suspense } from 'react';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PerformanceMonitor } from '@/components/performance-monitor';
+import {
+  BarChart3,
+  MessageSquare,
+  TestTube,
+  TrendingUp,
+  Users,
+  Clock,
+} from 'lucide-react';
 import dynamicImport from 'next/dynamic';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 // Lazy load heavy dashboard components
-const AnalyticsDashboard = dynamicImport(() => import('@/components/features/admin/analytics-dashboard').then(mod => ({ default: mod.AnalyticsDashboard })));
+const AnalyticsDashboard = dynamicImport(() =>
+  import('@/components/features/admin/analytics-dashboard').then((mod) => ({
+    default: mod.AnalyticsDashboard,
+  }))
+);
 
-const FeedbackManager = dynamicImport(() => import('@/components/features/admin/feedback-manager').then(mod => ({ default: mod.FeedbackManager })));
+const FeedbackManager = dynamicImport(() =>
+  import('@/components/features/admin/feedback-manager').then((mod) => ({
+    default: mod.FeedbackManager,
+  }))
+);
 
-const ABTestManager = dynamicImport(() => import('@/components/features/admin/ab-test-manager').then(mod => ({ default: mod.ABTestManager })));
+const ABTestManager = dynamicImport(() =>
+  import('@/components/features/admin/ab-test-manager').then((mod) => ({
+    default: mod.ABTestManager,
+  }))
+);
 
 export default async function AnalyticsPage() {
   const session = await auth();
-  
+
   if (!session?.user || !session.user.roles?.includes('admin')) {
     redirect('/dashboard');
   }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <PerformanceMonitor pageName="/admin/analytics" userId={session.user.id} />
-      
+      <PerformanceMonitor
+        pageName="/admin/analytics"
+        userId={session.user.id}
+      />
+
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics & Feedback</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Analytics & Feedback
+          </h1>
           <p className="text-muted-foreground">
-            Monitor user behavior, performance metrics, and feedback to improve HUNKCentral
+            Monitor user behavior, performance metrics, and feedback to improve
+            HUNKCentral
           </p>
         </div>
       </div>
@@ -49,7 +74,7 @@ export default async function AnalyticsPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Page Views</CardTitle>
@@ -57,12 +82,10 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">45,231</div>
-            <p className="text-xs text-muted-foreground">
-              +8% from last week
-            </p>
+            <p className="text-xs text-muted-foreground">+8% from last week</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg Load Time</CardTitle>
@@ -75,7 +98,7 @@ export default async function AnalyticsPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Open Feedback</CardTitle>
@@ -83,9 +106,7 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">23</div>
-            <p className="text-xs text-muted-foreground">
-              5 high priority
-            </p>
+            <p className="text-xs text-muted-foreground">5 high priority</p>
           </CardContent>
         </Card>
       </div>

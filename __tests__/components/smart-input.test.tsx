@@ -2,16 +2,31 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input';
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
 }));
 
 describe('SmartInput', () => {
@@ -36,49 +51,29 @@ describe('SmartInput', () => {
   });
 
   it('shows error state when error prop is provided', () => {
-    render(
-      <SmartInput
-        label="Test Input"
-        error="This field has an error"
-      />
-    );
+    render(<SmartInput label="Test Input" error="This field has an error" />);
 
     expect(screen.getByText('This field has an error')).toBeInTheDocument();
     expect(screen.getByTestId('alert-icon')).toBeInTheDocument();
   });
 
   it('shows success state when success prop is provided', () => {
-    render(
-      <SmartInput
-        label="Test Input"
-        success="This field is valid"
-      />
-    );
+    render(<SmartInput label="Test Input" success="This field is valid" />);
 
     expect(screen.getByText('This field is valid')).toBeInTheDocument();
     expect(screen.getByTestId('check-icon')).toBeInTheDocument();
   });
 
   it('shows loading state when loading prop is true', () => {
-    render(
-      <SmartInput
-        label="Test Input"
-        loading={true}
-      />
-    );
+    render(<SmartInput label="Test Input" loading={true} />);
 
     expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
   });
 
   it('calls onValueChange when input value changes', async () => {
     const onValueChange = vi.fn();
-    
-    render(
-      <SmartInput
-        label="Test Input"
-        onValueChange={onValueChange}
-      />
-    );
+
+    render(<SmartInput label="Test Input" onValueChange={onValueChange} />);
 
     const input = screen.getByLabelText('Test Input');
     await user.type(input, 'test value');
@@ -88,7 +83,7 @@ describe('SmartInput', () => {
 
   it('validates required field', async () => {
     const onValidationChange = vi.fn();
-    
+
     render(
       <SmartInput
         label="Required Field"
@@ -99,13 +94,15 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Required Field');
-    
+
     // Focus and blur without entering text
     await user.click(input);
     await user.tab();
 
     await waitFor(() => {
-      expect(onValidationChange).toHaveBeenCalledWith(false, ['This field is required']);
+      expect(onValidationChange).toHaveBeenCalledWith(false, [
+        'This field is required',
+      ]);
     });
 
     expect(screen.getByText('This field is required')).toBeInTheDocument();
@@ -113,7 +110,7 @@ describe('SmartInput', () => {
 
   it('validates email format', async () => {
     const onValidationChange = vi.fn();
-    
+
     render(
       <SmartInput
         label="Email Field"
@@ -125,18 +122,20 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Email Field');
-    
+
     // Enter invalid email
     await user.type(input, 'invalid-email');
-    
+
     await waitFor(() => {
-      expect(onValidationChange).toHaveBeenCalledWith(false, ['Please enter a valid email address']);
+      expect(onValidationChange).toHaveBeenCalledWith(false, [
+        'Please enter a valid email address',
+      ]);
     });
 
     // Clear and enter valid email
     await user.clear(input);
     await user.type(input, 'test@example.com');
-    
+
     await waitFor(() => {
       expect(onValidationChange).toHaveBeenCalledWith(true, []);
     });
@@ -157,14 +156,14 @@ describe('SmartInput', () => {
 
     // Click to show password
     await user.click(toggleButton);
-    
+
     expect(screen.getByLabelText('Hide password')).toBeInTheDocument();
     expect(screen.getByTestId('eye-off-icon')).toBeInTheDocument();
   });
 
   it('validates with multiple rules in priority order', async () => {
     const onValidationChange = vi.fn();
-    
+
     render(
       <SmartInput
         label="Multi-Rule Field"
@@ -179,13 +178,15 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Multi-Rule Field');
-    
+
     // Test empty field (should show required error first)
     await user.click(input);
     await user.tab();
 
     await waitFor(() => {
-      expect(onValidationChange).toHaveBeenCalledWith(false, ['This field is required']);
+      expect(onValidationChange).toHaveBeenCalledWith(false, [
+        'This field is required',
+      ]);
     });
 
     // Test short input (should show minLength error)
@@ -194,7 +195,9 @@ describe('SmartInput', () => {
     await user.tab();
 
     await waitFor(() => {
-      expect(onValidationChange).toHaveBeenCalledWith(false, ['Must be at least 5 characters']);
+      expect(onValidationChange).toHaveBeenCalledWith(false, [
+        'Must be at least 5 characters',
+      ]);
     });
   });
 
@@ -209,20 +212,24 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Progressive Field');
-    
+
     // Initially, no validation should be shown
-    expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
-    
+    expect(
+      screen.queryByText('This field is required')
+    ).not.toBeInTheDocument();
+
     // Focus the input
     await user.click(input);
-    
+
     // Still no validation shown
-    expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
-    
+    expect(
+      screen.queryByText('This field is required')
+    ).not.toBeInTheDocument();
+
     // Type and delete to trigger validation
     await user.type(input, 'a');
     await user.clear(input);
-    
+
     // Now validation should be shown
     await waitFor(() => {
       expect(screen.getByText('This field is required')).toBeInTheDocument();
@@ -247,19 +254,22 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Debounced Field');
-    
+
     // Focus first to enable validation
     await user.click(input);
     await user.tab();
-    
+
     // Type multiple characters quickly
     await user.click(input);
     await user.type(input, 'abc', { delay: 10 });
 
     // Wait for debounce
-    await waitFor(() => {
-      expect(mockValidationRule.test).toHaveBeenCalledWith('abc');
-    }, { timeout: 200 });
+    await waitFor(
+      () => {
+        expect(mockValidationRule.test).toHaveBeenCalledWith('abc');
+      },
+      { timeout: 200 }
+    );
 
     // Should only be called once due to debouncing
     expect(mockValidationRule.test).toHaveBeenCalledTimes(1);
@@ -268,7 +278,7 @@ describe('SmartInput', () => {
   it('handles async validation rules', async () => {
     const asyncRule = {
       test: vi.fn().mockImplementation(async (value: string) => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
         return value === 'valid';
       }),
       message: 'Async validation failed',
@@ -288,7 +298,7 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Async Field');
-    
+
     await user.type(input, 'invalid');
     await user.tab();
 
@@ -297,7 +307,9 @@ describe('SmartInput', () => {
 
     // Wait for async validation to complete
     await waitFor(() => {
-      expect(onValidationChange).toHaveBeenCalledWith(false, ['Async validation failed']);
+      expect(onValidationChange).toHaveBeenCalledWith(false, [
+        'Async validation failed',
+      ]);
     });
 
     expect(screen.getByText('Async validation failed')).toBeInTheDocument();
@@ -313,10 +325,10 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Accessible Field');
-    
+
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute('aria-describedby');
-    
+
     const describedBy = input.getAttribute('aria-describedby');
     expect(describedBy).toContain('hint');
     expect(describedBy).toContain('error');
@@ -347,7 +359,7 @@ describe('SmartInput', () => {
     );
 
     const input = screen.getByLabelText('Custom Rules Field');
-    
+
     await user.type(input, 'short');
     await user.tab();
 

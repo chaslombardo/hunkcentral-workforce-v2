@@ -33,10 +33,10 @@ const mockEmployees = [
 ];
 
 // Test wrapper component that provides form context
-function TestWrapper({ 
-  children, 
-  initialHours = [] 
-}: { 
+function TestWrapper({
+  children,
+  initialHours = [],
+}: {
   children: React.ReactNode;
   initialHours?: any[];
 }) {
@@ -76,9 +76,15 @@ describe('TeamHoursSection', () => {
     );
 
     expect(screen.getByText('Other Hours')).toBeInTheDocument();
-    expect(screen.getByText('Record training, administrative, and other non-job hours for team members.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Record training, administrative, and other non-job hours for team members.'
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText('No team members added yet.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add hunk/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /add hunk/i })
+    ).toBeInTheDocument();
   });
 
   it('should add a new team member when Add HUNK button is clicked', () => {
@@ -155,7 +161,9 @@ describe('TeamHoursSection', () => {
     expect(screen.getByText('Department')).toBeInTheDocument();
     expect(screen.getByText('Hours Worked')).toBeInTheDocument();
     expect(screen.getByText('Co-Captain')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /remove team member/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /remove team member/i })
+    ).toBeInTheDocument();
   });
 
   it('should have proper department options', () => {

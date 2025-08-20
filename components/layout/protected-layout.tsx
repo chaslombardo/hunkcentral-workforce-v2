@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { AppSidebar } from "@/components/layout/app-sidebar"
+import * as React from 'react';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,23 +9,26 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar';
 
 interface ProtectedLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
   breadcrumbs?: {
-    label: string
-    href?: string
-  }[]
+    label: string;
+    href?: string;
+  }[];
 }
 
-export function ProtectedLayout({ children, breadcrumbs = [] }: ProtectedLayoutProps) {
+export function ProtectedLayout({
+  children,
+  breadcrumbs = [],
+}: ProtectedLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -42,7 +45,9 @@ export function ProtectedLayout({ children, breadcrumbs = [] }: ProtectedLayoutP
                 <BreadcrumbList>
                   {breadcrumbs.map((breadcrumb, index) => (
                     <React.Fragment key={index}>
-                      <BreadcrumbItem className={index === 0 ? "hidden md:block" : ""}>
+                      <BreadcrumbItem
+                        className={index === 0 ? 'hidden md:block' : ''}
+                      >
                         {breadcrumb.href ? (
                           <BreadcrumbLink href={breadcrumb.href}>
                             {breadcrumb.label}
@@ -61,10 +66,8 @@ export function ProtectedLayout({ children, breadcrumbs = [] }: ProtectedLayoutP
             )}
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

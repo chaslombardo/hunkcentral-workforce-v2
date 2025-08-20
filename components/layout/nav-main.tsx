@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { ChevronRight, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -18,32 +18,32 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { NavigationItemWithBadge } from "@/components/layout/navigation-badge"
-import { useNavigation } from "@/contexts/navigation-context"
+} from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
+import { NavigationItemWithBadge } from '@/components/layout/navigation-badge';
+import { useNavigation } from '@/contexts/navigation-context';
 
 export function NavMain({
   title,
   items,
 }: {
-  title: string
+  title: string;
   items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
     items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+      title: string;
+      url: string;
+    }[];
+  }[];
 }) {
-  const pathname = usePathname()
-  const { state, isActiveRoute } = useNavigation()
+  const pathname = usePathname();
+  const { state, isActiveRoute } = useNavigation();
 
   if (items.length === 0) {
-    return null
+    return null;
   }
 
   // Helper function to get badge info for navigation items
@@ -55,16 +55,16 @@ export function NavMain({
       '/logs/create': 'logs-draft',
       '/commission': 'commission-pending',
       '/commission/list': 'commission-pending',
-    }
+    };
 
-    const badgeId = badgeMap[url]
+    const badgeId = badgeMap[url];
     if (!badgeId || !state.badges[badgeId]) {
-      return { count: 0, type: 'pending' as const }
+      return { count: 0, type: 'pending' as const };
     }
 
-    const badge = state.badges[badgeId]
-    return { count: badge.count, type: badge.type }
-  }
+    const badge = state.badges[badgeId];
+    return { count: badge.count, type: badge.type };
+  };
 
   return (
     <>
@@ -74,9 +74,9 @@ export function NavMain({
         </SidebarGroupLabel>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = isActiveRoute(item.url)
-            const hasSubItems = item.items && item.items.length > 0
-            const badgeInfo = getBadgeInfo(item.url)
+            const isActive = isActiveRoute(item.url);
+            const hasSubItems = item.items && item.items.length > 0;
+            const badgeInfo = getBadgeInfo(item.url);
 
             return (
               <Collapsible
@@ -87,33 +87,37 @@ export function NavMain({
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton 
+                    <SidebarMenuButton
                       tooltip={item.title}
                       isActive={isActive}
                       asChild={!hasSubItems}
                       className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
                     >
                       {hasSubItems ? (
-                        <NavigationItemWithBadge 
-                          badgeCount={badgeInfo.count} 
+                        <NavigationItemWithBadge
+                          badgeCount={badgeInfo.count}
                           badgeType={badgeInfo.type}
                           className="w-full"
                         >
                           <div className="flex items-center w-full">
-                            {item.icon && <item.icon className="text-hunks-green" />}
+                            {item.icon && (
+                              <item.icon className="text-hunks-green" />
+                            )}
                             <span>{item.title}</span>
                             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-hunks-green" />
                           </div>
                         </NavigationItemWithBadge>
                       ) : (
                         <Link href={item.url} className="w-full">
-                          <NavigationItemWithBadge 
-                            badgeCount={badgeInfo.count} 
+                          <NavigationItemWithBadge
+                            badgeCount={badgeInfo.count}
                             badgeType={badgeInfo.type}
                             className="w-full"
                           >
                             <div className="flex items-center w-full">
-                              {item.icon && <item.icon className="text-hunks-green" />}
+                              {item.icon && (
+                                <item.icon className="text-hunks-green" />
+                              )}
                               <span>{item.title}</span>
                             </div>
                           </NavigationItemWithBadge>
@@ -125,19 +129,19 @@ export function NavMain({
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {item.items?.map((subItem) => {
-                          const isSubActive = pathname === subItem.url
-                          const subBadgeInfo = getBadgeInfo(subItem.url)
-                          
+                          const isSubActive = pathname === subItem.url;
+                          const subBadgeInfo = getBadgeInfo(subItem.url);
+
                           return (
                             <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton 
-                                asChild 
+                              <SidebarMenuSubButton
+                                asChild
                                 isActive={isSubActive}
                                 className="hover:bg-hunks-green/10 data-[active=true]:bg-hunks-green/15 data-[active=true]:text-hunks-green data-[active=true]:font-medium"
                               >
                                 <Link href={subItem.url} className="w-full">
-                                  <NavigationItemWithBadge 
-                                    badgeCount={subBadgeInfo.count} 
+                                  <NavigationItemWithBadge
+                                    badgeCount={subBadgeInfo.count}
                                     badgeType={subBadgeInfo.type}
                                     className="w-full"
                                   >
@@ -146,18 +150,18 @@ export function NavMain({
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
-                          )
+                          );
                         })}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   )}
                 </SidebarMenuItem>
               </Collapsible>
-            )
+            );
           })}
         </SidebarMenu>
       </SidebarGroup>
       <Separator className="bg-hunks-green/20" />
     </>
-  )
+  );
 }

@@ -5,24 +5,28 @@ This guide helps you migrate existing HUNKCentral code to use the new theme and 
 ## 🚀 Quick Migration Checklist
 
 ### Phase 1: Button Migration
+
 - [ ] Replace generic `Button` components with `BrandButton`
 - [ ] Update button variants to use brand colors
 - [ ] Add loading states where appropriate
 - [ ] Ensure accessibility attributes are present
 
 ### Phase 2: Form Migration
+
 - [ ] Replace `Input` components with `SmartInput`
 - [ ] Add validation rules and progressive validation
 - [ ] Update mobile keyboard types
 - [ ] Implement proper error handling
 
 ### Phase 3: Dashboard Migration
+
 - [ ] Replace generic cards with `MetricCard` components
 - [ ] Update loading states with `BrandLoading`
 - [ ] Implement `StatusIndicator` for consistent status display
 - [ ] Add proper empty states
 
 ### Phase 4: Navigation Migration
+
 - [ ] Implement `SmartBreadcrumbs` for navigation
 - [ ] Update mobile navigation patterns
 - [ ] Add role-based navigation filtering
@@ -32,6 +36,7 @@ This guide helps you migrate existing HUNKCentral code to use the new theme and 
 ### Button Migration
 
 #### Before (Generic Button)
+
 ```tsx
 import { Button } from '@/components/ui/button'
 
@@ -50,6 +55,7 @@ import { Button } from '@/components/ui/button'
 ```
 
 #### After (BrandButton)
+
 ```tsx
 import { BrandButton } from '@/components/brand/brand-button'
 
@@ -62,7 +68,7 @@ import { BrandButton } from '@/components/brand/brand-button'
   Cancel
 </BrandButton>
 
-<BrandButton 
+<BrandButton
   variant="primary"
   loading={isLoading}
   loadingText="Submitting your request"
@@ -72,16 +78,19 @@ import { BrandButton } from '@/components/brand/brand-button'
 ```
 
 #### Migration Steps
+
 1. **Import the new component**:
+
    ```tsx
    // Replace this
-   import { Button } from '@/components/ui/button'
-   
+   import { Button } from '@/components/ui/button';
+
    // With this
-   import { BrandButton } from '@/components/brand/brand-button'
+   import { BrandButton } from '@/components/brand/brand-button';
    ```
 
 2. **Update component usage**:
+
    ```tsx
    // Find and replace patterns
    <Button className="bg-green-600" → <BrandButton variant="primary"
@@ -90,14 +99,15 @@ import { BrandButton } from '@/components/brand/brand-button'
    ```
 
 3. **Add loading states**:
+
    ```tsx
    // Before
    <Button disabled={isLoading}>
      {isLoading ? 'Loading...' : 'Save'}
    </Button>
-   
+
    // After
-   <BrandButton 
+   <BrandButton
      loading={isLoading}
      loadingText="Saving your changes"
    >
@@ -108,28 +118,31 @@ import { BrandButton } from '@/components/brand/brand-button'
 ### Input Migration
 
 #### Before (Generic Input)
+
 ```tsx
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // Old implementation
 <div className="space-y-2">
   <Label htmlFor="email">Email Address</Label>
-  <Input 
+  <Input
     id="email"
     type="email"
     placeholder="Enter your email"
     className={errors.email ? 'border-red-500' : ''}
   />
-  {errors.email && (
-    <p className="text-red-500 text-sm">{errors.email}</p>
-  )}
-</div>
+  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+</div>;
 ```
 
 #### After (SmartInput)
+
 ```tsx
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input'
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
 
 // New implementation
 <SmartInput
@@ -138,56 +151,60 @@ import { SmartInput, commonValidationRules } from '@/components/forms/smart-inpu
   placeholder="Enter your email"
   validationRules={[
     commonValidationRules.required(),
-    commonValidationRules.email()
+    commonValidationRules.email(),
   ]}
   progressiveValidation
   error={errors.email}
-/>
+/>;
 ```
 
 #### Migration Steps
+
 1. **Replace Input + Label combinations**:
+
    ```tsx
    // Before
    <div className="space-y-2">
      <Label htmlFor="field">Field Label</Label>
      <Input id="field" />
    </div>
-   
+
    // After
    <SmartInput label="Field Label" />
    ```
 
 2. **Add validation rules**:
+
    ```tsx
    // Before: Manual validation
-   const [email, setEmail] = useState('')
-   const [emailError, setEmailError] = useState('')
-   
+   const [email, setEmail] = useState('');
+   const [emailError, setEmailError] = useState('');
+
    const validateEmail = (value: string) => {
      if (!value) {
-       setEmailError('Email is required')
+       setEmailError('Email is required');
      } else if (!/\S+@\S+\.\S+/.test(value)) {
-       setEmailError('Please enter a valid email')
+       setEmailError('Please enter a valid email');
      } else {
-       setEmailError('')
+       setEmailError('');
      }
-   }
-   
+   };
+
    // After: Built-in validation
    <SmartInput
      label="Email"
      validationRules={[
        commonValidationRules.required(),
-       commonValidationRules.email()
+       commonValidationRules.email(),
      ]}
      onValidationChange={(isValid, errors) => {
        // Handle validation state
      }}
-   />
+   />;
    ```
 
 3. **Update mobile optimization**:
+
    ```tsx
    // Add mobile-specific props
    <SmartInput
@@ -195,7 +212,7 @@ import { SmartInput, commonValidationRules } from '@/components/forms/smart-inpu
      keyboardType="tel"
      mobileOptimized
    />
-   
+
    <SmartInput
      label="Email"
      keyboardType="email"
@@ -206,8 +223,9 @@ import { SmartInput, commonValidationRules } from '@/components/forms/smart-inpu
 ### Card Migration
 
 #### Before (Generic Card)
+
 ```tsx
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 // Old implementation
 <Card>
@@ -218,13 +236,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
     <div className="text-2xl font-bold">$12,450</div>
     <p className="text-green-600">+12.5% from last month</p>
   </CardContent>
-</Card>
+</Card>;
 ```
 
 #### After (MetricCard)
+
 ```tsx
-import { MetricCard } from '@/components/brand/metric-card'
-import { DollarSign } from 'lucide-react'
+import { MetricCard } from '@/components/brand/metric-card';
+import { DollarSign } from 'lucide-react';
 
 // New implementation
 <MetricCard
@@ -233,11 +252,13 @@ import { DollarSign } from 'lucide-react'
   change={{ value: 12.5, type: 'increase', period: 'last month' }}
   color="green"
   icon={DollarSign}
-/>
+/>;
 ```
 
 #### Migration Steps
+
 1. **Identify metric cards**:
+
    ```tsx
    // Look for cards that display:
    // - Numeric values
@@ -247,6 +268,7 @@ import { DollarSign } from 'lucide-react'
    ```
 
 2. **Extract data structure**:
+
    ```tsx
    // Before: Inline content
    <Card>
@@ -256,7 +278,7 @@ import { DollarSign } from 'lucide-react'
        <span className="text-green-600">+8 this week</span>
      </CardContent>
    </Card>
-   
+
    // After: Structured props
    <MetricCard
      title="Active Jobs"
@@ -279,6 +301,7 @@ import { DollarSign } from 'lucide-react'
 ### Loading State Migration
 
 #### Before (Generic Loading)
+
 ```tsx
 // Old implementations
 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -290,13 +313,14 @@ import { DollarSign } from 'lucide-react'
 ```
 
 #### After (BrandLoading)
+
 ```tsx
 import { BrandLoading } from '@/components/brand/brand-loading'
 
 // New implementations
 <BrandLoading variant="spinner" size="md" />
 
-<BrandButton 
+<BrandButton
   variant="primary"
   loading={isLoading}
   loadingText="Processing your request"
@@ -308,6 +332,7 @@ import { BrandLoading } from '@/components/brand/brand-loading'
 ## 📱 Mobile Migration
 
 ### Touch Target Updates
+
 ```tsx
 // Before: Small touch targets
 <Button size="sm" className="h-8 px-2">
@@ -315,7 +340,7 @@ import { BrandLoading } from '@/components/brand/brand-loading'
 </Button>
 
 // After: Mobile-friendly sizing
-<BrandButton 
+<BrandButton
   size="sm"
   className="min-h-[44px] md:h-8"
 >
@@ -324,6 +349,7 @@ import { BrandLoading } from '@/components/brand/brand-loading'
 ```
 
 ### Keyboard Type Updates
+
 ```tsx
 // Before: Generic input types
 <Input type="email" />
@@ -331,21 +357,21 @@ import { BrandLoading } from '@/components/brand/brand-loading'
 <Input type="number" />
 
 // After: Mobile-optimized keyboards
-<SmartInput 
+<SmartInput
   label="Email"
   type="email"
   keyboardType="email"
   mobileOptimized
 />
 
-<SmartInput 
+<SmartInput
   label="Phone"
   type="tel"
   keyboardType="tel"
   mobileOptimized
 />
 
-<SmartInput 
+<SmartInput
   label="Amount"
   type="number"
   keyboardType="numeric"
@@ -356,24 +382,26 @@ import { BrandLoading } from '@/components/brand/brand-loading'
 ## 🎨 Styling Migration
 
 ### Color Class Updates
+
 ```tsx
 // Before: Custom green/orange classes
-className="bg-green-600 hover:bg-green-700"
-className="text-green-600 border-green-600"
-className="bg-orange-500 hover:bg-orange-600"
+className = 'bg-green-600 hover:bg-green-700';
+className = 'text-green-600 border-green-600';
+className = 'bg-orange-500 hover:bg-orange-600';
 
 // After: Brand color classes
-className="bg-hunks-green hover:bg-hunks-green-700"
-className="text-hunks-green border-hunks-green"
-className="bg-hunks-orange hover:bg-hunks-orange-600"
+className = 'bg-hunks-green hover:bg-hunks-green-700';
+className = 'text-hunks-green border-hunks-green';
+className = 'bg-hunks-orange hover:bg-hunks-orange-600';
 ```
 
 ### CSS Custom Property Updates
+
 ```css
 /* Before: Hardcoded colors */
 .custom-component {
   background-color: #10b981; /* Generic green */
-  border-color: #f59e0b;     /* Generic orange */
+  border-color: #f59e0b; /* Generic orange */
 }
 
 /* After: Brand variables */
@@ -386,6 +414,7 @@ className="bg-hunks-orange hover:bg-hunks-orange-600"
 ## ♿ Accessibility Migration
 
 ### ARIA Label Updates
+
 ```tsx
 // Before: Missing accessibility
 <Button onClick={handleDelete}>
@@ -393,7 +422,7 @@ className="bg-hunks-orange hover:bg-hunks-orange-600"
 </Button>
 
 // After: Proper accessibility
-<BrandButton 
+<BrandButton
   variant="destructive"
   onClick={handleDelete}
   aria-label="Delete item"
@@ -403,11 +432,12 @@ className="bg-hunks-orange hover:bg-hunks-orange-600"
 ```
 
 ### Form Accessibility
+
 ```tsx
 // Before: Manual ARIA setup
 <div>
   <Label htmlFor="password">Password</Label>
-  <Input 
+  <Input
     id="password"
     type="password"
     aria-describedby="password-error"
@@ -431,33 +461,35 @@ className="bg-hunks-orange hover:bg-hunks-orange-600"
 ## 🧪 Testing Migration
 
 ### Update Test Selectors
+
 ```tsx
 // Before: Generic selectors
-const button = screen.getByRole('button', { name: /save/i })
-const input = screen.getByLabelText(/email/i)
+const button = screen.getByRole('button', { name: /save/i });
+const input = screen.getByLabelText(/email/i);
 
 // After: Component-specific testing
-import { render, screen } from '@testing-library/react'
-import { BrandButton } from '@/components/brand/brand-button'
+import { render, screen } from '@testing-library/react';
+import { BrandButton } from '@/components/brand/brand-button';
 
 // Test brand button variants
-const primaryButton = screen.getByRole('button', { name: /save/i })
-expect(primaryButton).toHaveClass('bg-hunks-green')
+const primaryButton = screen.getByRole('button', { name: /save/i });
+expect(primaryButton).toHaveClass('bg-hunks-green');
 
 // Test smart input validation
-const emailInput = screen.getByLabelText(/email/i)
-await userEvent.type(emailInput, 'invalid-email')
-fireEvent.blur(emailInput)
-expect(screen.getByText(/valid email/i)).toBeInTheDocument()
+const emailInput = screen.getByLabelText(/email/i);
+await userEvent.type(emailInput, 'invalid-email');
+fireEvent.blur(emailInput);
+expect(screen.getByText(/valid email/i)).toBeInTheDocument();
 ```
 
 ### Update Accessibility Tests
+
 ```tsx
 // Before: Manual accessibility checks
 it('should have proper ARIA attributes', () => {
-  render(<Button aria-label="Close dialog">×</Button>)
-  expect(screen.getByLabelText(/close dialog/i)).toBeInTheDocument()
-})
+  render(<Button aria-label="Close dialog">×</Button>);
+  expect(screen.getByLabelText(/close dialog/i)).toBeInTheDocument();
+});
 
 // After: Component accessibility testing
 it('should meet accessibility standards', async () => {
@@ -465,61 +497,59 @@ it('should meet accessibility standards', async () => {
     <BrandButton variant="primary" aria-label="Save changes">
       Save
     </BrandButton>
-  )
-  
-  const results = await axe(container)
-  expect(results).toHaveNoViolations()
-})
+  );
+
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
 ```
 
 ## 📊 Performance Migration
 
 ### Bundle Size Optimization
+
 ```tsx
 // Before: Large imports
-import * as Icons from 'lucide-react'
-import { Button, Input, Card, Badge } from '@/components/ui'
+import * as Icons from 'lucide-react';
+import { Button, Input, Card, Badge } from '@/components/ui';
 
 // After: Specific imports
-import { Save, Edit, Trash2 } from 'lucide-react'
-import { BrandButton } from '@/components/brand/brand-button'
-import { SmartInput } from '@/components/forms/smart-input'
-import { MetricCard } from '@/components/brand/metric-card'
+import { Save, Edit, Trash2 } from 'lucide-react';
+import { BrandButton } from '@/components/brand/brand-button';
+import { SmartInput } from '@/components/forms/smart-input';
+import { MetricCard } from '@/components/brand/metric-card';
 ```
 
 ### Component Memoization
+
 ```tsx
 // Before: No optimization
 function Dashboard({ metrics }) {
   return (
     <div>
-      {metrics.map(metric => (
-        <Card key={metric.id}>
-          {/* Card content */}
-        </Card>
+      {metrics.map((metric) => (
+        <Card key={metric.id}>{/* Card content */}</Card>
       ))}
     </div>
-  )
+  );
 }
 
 // After: Optimized rendering
 const Dashboard = React.memo(function Dashboard({ metrics }) {
   return (
     <div>
-      {metrics.map(metric => (
-        <MetricCard 
-          key={metric.id}
-          {...metric}
-        />
+      {metrics.map((metric) => (
+        <MetricCard key={metric.id} {...metric} />
       ))}
     </div>
-  )
-})
+  );
+});
 ```
 
 ## 🔧 Configuration Migration
 
 ### Tailwind Config Updates
+
 ```js
 // Before: Custom color definitions
 module.exports = {
@@ -527,11 +557,11 @@ module.exports = {
     extend: {
       colors: {
         'custom-green': '#10b981',
-        'custom-orange': '#f59e0b'
-      }
-    }
-  }
-}
+        'custom-orange': '#f59e0b',
+      },
+    },
+  },
+};
 
 // After: Brand color integration
 module.exports = {
@@ -547,14 +577,15 @@ module.exports = {
           DEFAULT: '#ea7200',
           50: '#fef7ed',
           // ... full color scale
-        }
-      }
-    }
-  }
-}
+        },
+      },
+    },
+  },
+};
 ```
 
 ### CSS Variable Updates
+
 ```css
 /* Before: Custom variables */
 :root {
@@ -574,6 +605,7 @@ module.exports = {
 ## 📋 Migration Automation
 
 ### Find and Replace Patterns
+
 ```bash
 # Button migrations
 find . -name "*.tsx" -exec sed -i 's/<Button className="bg-green-600"/<BrandButton variant="primary"/g' {} \;
@@ -586,35 +618,37 @@ find . -name "*.tsx" -exec sed -i 's/bg-orange-500/bg-hunks-orange/g' {} \;
 ```
 
 ### Migration Script
+
 ```tsx
 // migration-helper.ts
 export function migrateButtonProps(oldProps: any) {
-  const newProps: any = { ...oldProps }
-  
+  const newProps: any = { ...oldProps };
+
   // Migrate className to variant
   if (oldProps.className?.includes('bg-green-600')) {
-    newProps.variant = 'primary'
-    newProps.className = oldProps.className.replace('bg-green-600', '')
+    newProps.variant = 'primary';
+    newProps.className = oldProps.className.replace('bg-green-600', '');
   }
-  
+
   if (oldProps.className?.includes('bg-orange-500')) {
-    newProps.variant = 'secondary'
-    newProps.className = oldProps.className.replace('bg-orange-500', '')
+    newProps.variant = 'secondary';
+    newProps.className = oldProps.className.replace('bg-orange-500', '');
   }
-  
+
   // Migrate loading state
   if (oldProps.disabled && oldProps.children?.includes('Loading')) {
-    newProps.loading = true
-    newProps.loadingText = 'Processing request'
+    newProps.loading = true;
+    newProps.loadingText = 'Processing request';
   }
-  
-  return newProps
+
+  return newProps;
 }
 ```
 
 ## ✅ Migration Validation
 
 ### Checklist for Each Component
+
 ```tsx
 // Validation checklist
 const MigrationChecklist = {
@@ -623,49 +657,53 @@ const MigrationChecklist = {
     '✅ Has appropriate variant (primary/secondary/outline/ghost)',
     '✅ Includes loading states where needed',
     '✅ Has proper ARIA labels',
-    '✅ Meets touch target requirements (44px minimum)'
+    '✅ Meets touch target requirements (44px minimum)',
   ],
-  
+
   inputs: [
     '✅ Uses SmartInput component',
     '✅ Has validation rules defined',
     '✅ Uses progressive validation appropriately',
     '✅ Has mobile keyboard types set',
-    '✅ Includes proper error handling'
+    '✅ Includes proper error handling',
   ],
-  
+
   cards: [
     '✅ Uses MetricCard for dashboard metrics',
     '✅ Has appropriate color coding',
     '✅ Includes loading states',
     '✅ Shows trend indicators where relevant',
-    '✅ Has proper accessibility labels'
-  ]
-}
+    '✅ Has proper accessibility labels',
+  ],
+};
 ```
 
 ### Testing Migration Success
+
 ```tsx
 // Test that migration is complete
 describe('Migration Validation', () => {
   it('should use brand components', () => {
     // Ensure no old Button components remain
-    const { container } = render(<YourComponent />)
-    expect(container.querySelector('.bg-green-600')).toBeNull()
-    expect(container.querySelector('[class*="bg-hunks-green"]')).toBeInTheDocument()
-  })
-  
+    const { container } = render(<YourComponent />);
+    expect(container.querySelector('.bg-green-600')).toBeNull();
+    expect(
+      container.querySelector('[class*="bg-hunks-green"]')
+    ).toBeInTheDocument();
+  });
+
   it('should have proper accessibility', async () => {
-    const { container } = render(<YourComponent />)
-    const results = await axe(container)
-    expect(results).toHaveNoViolations()
-  })
-})
+    const { container } = render(<YourComponent />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});
 ```
 
 ## 🚨 Common Migration Issues
 
 ### Issue 1: Missing Loading States
+
 ```tsx
 // Problem: Button doesn't show loading state
 <BrandButton variant="primary" disabled={isLoading}>
@@ -673,7 +711,7 @@ describe('Migration Validation', () => {
 </BrandButton>
 
 // Solution: Use built-in loading prop
-<BrandButton 
+<BrandButton
   variant="primary"
   loading={isLoading}
   loadingText="Saving your changes"
@@ -683,6 +721,7 @@ describe('Migration Validation', () => {
 ```
 
 ### Issue 2: Incorrect Color Usage
+
 ```tsx
 // Problem: Using wrong brand colors
 <BrandButton className="bg-green-500">Save</BrandButton>
@@ -692,12 +731,13 @@ describe('Migration Validation', () => {
 ```
 
 ### Issue 3: Missing Mobile Optimization
+
 ```tsx
 // Problem: Small touch targets on mobile
 <BrandButton size="sm">Action</BrandButton>
 
 // Solution: Responsive sizing
-<BrandButton 
+<BrandButton
   size="sm"
   className="min-h-[44px] md:h-auto"
 >

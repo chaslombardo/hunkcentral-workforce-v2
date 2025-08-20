@@ -1,11 +1,11 @@
 /**
  * Motion Preferences System
- * 
+ *
  * Comprehensive system for handling user motion preferences and providing
  * alternative static states for users who prefer reduced motion.
  */
 
-import { type ClassValue, clsx } from "clsx";
+import { type ClassValue, clsx } from 'clsx';
 
 /**
  * Motion preference types
@@ -59,7 +59,7 @@ export const ANIMATION_PRESETS: Record<string, BaseAnimationPreset> = {
     duration: 300,
     easing: 'cubic-bezier(0.4, 0, 0.2, 1)', // ease-out
   },
-  
+
   // Loading states
   spinner: {
     duration: 1000,
@@ -77,7 +77,7 @@ export const ANIMATION_PRESETS: Record<string, BaseAnimationPreset> = {
     easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', // bounce
     iterations: 2,
   },
-  
+
   // Transitions
   slideIn: {
     duration: 250,
@@ -95,7 +95,7 @@ export const ANIMATION_PRESETS: Record<string, BaseAnimationPreset> = {
     duration: 150,
     easing: 'ease-in',
   },
-  
+
   // Success animations
   success: {
     duration: 500,
@@ -132,7 +132,7 @@ export class MotionPreferenceManager {
   private initializePreference(): void {
     this.mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.preference = this.mediaQuery.matches ? 'reduce' : 'no-preference';
-    
+
     // Listen for changes
     this.mediaQuery.addEventListener('change', this.handlePreferenceChange);
   }
@@ -143,7 +143,7 @@ export class MotionPreferenceManager {
   };
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener(this.preference));
+    this.listeners.forEach((listener) => listener(this.preference));
   }
 
   /**
@@ -175,7 +175,10 @@ export class MotionPreferenceManager {
    */
   destroy(): void {
     if (this.mediaQuery) {
-      this.mediaQuery.removeEventListener('change', this.handlePreferenceChange);
+      this.mediaQuery.removeEventListener(
+        'change',
+        this.handlePreferenceChange
+      );
     }
     this.listeners.clear();
   }
@@ -214,7 +217,9 @@ export const motionUtils = {
    * Get conditional animation duration
    */
   getDuration(normalDuration: number, reducedDuration: number = 0): number {
-    return motionManager.prefersReducedMotion() ? reducedDuration : normalDuration;
+    return motionManager.prefersReducedMotion()
+      ? reducedDuration
+      : normalDuration;
   },
 
   /**
@@ -229,7 +234,7 @@ export const motionUtils = {
    */
   createMotionProperties(config: BaseAnimationPreset): Record<string, string> {
     const reduced = motionManager.prefersReducedMotion();
-    
+
     return {
       '--motion-duration': reduced ? '0ms' : `${config.duration}ms`,
       '--motion-easing': reduced ? 'linear' : config.easing,
@@ -246,7 +251,7 @@ export const motionUtils = {
   getTailwindClasses(preset: keyof typeof ANIMATION_PRESETS): string {
     const config = ANIMATION_PRESETS[preset];
     const reduced = motionManager.prefersReducedMotion();
-    
+
     if (reduced) {
       return 'motion-reduce:transition-none motion-reduce:animate-none';
     }
@@ -282,7 +287,7 @@ export const motionUtils = {
   getInlineStyles(preset: keyof typeof ANIMATION_PRESETS): React.CSSProperties {
     const config = ANIMATION_PRESETS[preset];
     const reduced = motionManager.prefersReducedMotion();
-    
+
     if (reduced) {
       return {
         animationDuration: '0ms',
@@ -305,7 +310,7 @@ export const motionUtils = {
  * React hook for motion preferences
  */
 export function useMotionPreference() {
-  const [preference, setPreference] = React.useState<MotionPreference>(() => 
+  const [preference, setPreference] = React.useState<MotionPreference>(() =>
     motionManager.getPreference()
   );
 
@@ -335,10 +340,10 @@ export function useMotionAwareAnimation(
 ) {
   const { respectPreference = true, fallbackDuration = 0 } = options;
   const { prefersReducedMotion } = useMotionPreference();
-  
+
   const config = React.useMemo(() => {
     const baseConfig = ANIMATION_PRESETS[preset];
-    
+
     if (respectPreference && prefersReducedMotion) {
       return {
         ...baseConfig,
@@ -346,17 +351,17 @@ export function useMotionAwareAnimation(
         iterations: 1,
       };
     }
-    
+
     return baseConfig;
   }, [preset, respectPreference, prefersReducedMotion, fallbackDuration]);
 
-  const classes = React.useMemo(() => 
-    motionUtils.getTailwindClasses(preset),
+  const classes = React.useMemo(
+    () => motionUtils.getTailwindClasses(preset),
     [preset]
   );
 
-  const styles = React.useMemo(() => 
-    motionUtils.getInlineStyles(preset),
+  const styles = React.useMemo(
+    () => motionUtils.getInlineStyles(preset),
     [preset]
   );
 
@@ -376,7 +381,7 @@ export function withMotionPreference<P extends object>(
 ): React.ComponentType<P> {
   const MotionAwareComponent = (props: P) => {
     const motionPreference = useMotionPreference();
-    
+
     return React.createElement(Component, {
       ...props,
       motionPreference,
@@ -384,7 +389,7 @@ export function withMotionPreference<P extends object>(
   };
 
   MotionAwareComponent.displayName = `withMotionPreference(${Component.displayName || Component.name})`;
-  
+
   return MotionAwareComponent;
 }
 
@@ -406,7 +411,8 @@ export const microInteractions = {
    * Button hover effect
    */
   buttonHover: {
-    animated: 'transition-all duration-150 ease-out hover:scale-105 hover:shadow-md',
+    animated:
+      'transition-all duration-150 ease-out hover:scale-105 hover:shadow-md',
     static: 'hover:opacity-90',
   },
 
@@ -414,7 +420,8 @@ export const microInteractions = {
    * Card hover effect
    */
   cardHover: {
-    animated: 'transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-1',
+    animated:
+      'transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-1',
     static: 'hover:shadow-md',
   },
 
@@ -422,7 +429,8 @@ export const microInteractions = {
    * Input focus effect
    */
   inputFocus: {
-    animated: 'transition-all duration-150 ease-out focus:ring-2 focus:ring-offset-2',
+    animated:
+      'transition-all duration-150 ease-out focus:ring-2 focus:ring-offset-2',
     static: 'focus:ring-2 focus:ring-offset-1',
   },
 

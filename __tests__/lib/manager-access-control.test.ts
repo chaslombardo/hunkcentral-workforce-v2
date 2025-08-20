@@ -1,8 +1,8 @@
-import { 
-  canManagerAccessUser, 
-  getManagerAccessibleRoles, 
+import {
+  canManagerAccessUser,
+  getManagerAccessibleRoles,
   shouldFilterUsersForManager,
-  canUserAccessUserData 
+  canUserAccessUserData,
 } from '@/lib/auth';
 import type { User, UserRole } from '@/types';
 
@@ -80,7 +80,10 @@ describe('Manager Access Control', () => {
     });
 
     it('should return false for admin-manager users', () => {
-      const adminManagerUser = createMockUser('adminmanager1', ['admin', 'manager']);
+      const adminManagerUser = createMockUser('adminmanager1', [
+        'admin',
+        'manager',
+      ]);
       expect(shouldFilterUsersForManager(adminManagerUser)).toBe(false);
     });
 

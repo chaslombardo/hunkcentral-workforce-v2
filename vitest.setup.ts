@@ -39,18 +39,20 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Ensure window.matchMedia always returns a valid object
-global.matchMedia = global.matchMedia || function (query) {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
+global.matchMedia =
+  global.matchMedia ||
+  function (query) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    };
   };
-};
 
 // Mock navigator.onLine
 Object.defineProperty(navigator, 'onLine', {
@@ -116,7 +118,7 @@ vi.mock('@/hooks/useOfflineDetection', () => ({
 // Mock fetch for offline detection and API calls
 global.fetch = vi.fn((url: string | URL | Request) => {
   const urlString = typeof url === 'string' ? url : url.toString();
-  
+
   // Handle health check endpoint specifically
   if (urlString.includes('/api/health')) {
     return Promise.resolve({
@@ -128,7 +130,7 @@ global.fetch = vi.fn((url: string | URL | Request) => {
       text: () => Promise.resolve('OK'),
     } as Response);
   }
-  
+
   // Default mock for other requests
   return Promise.resolve({
     ok: true,
@@ -142,17 +144,21 @@ global.fetch = vi.fn((url: string | URL | Request) => {
 
 // Mock payroll validation functions to prevent async calls
 vi.mock('@/lib/actions/payroll-validation', () => ({
-  validateEmployeePayroll: vi.fn(() => Promise.resolve({
-    success: true,
-    data: {
-      isValid: true,
-      errors: [],
-      warnings: [],
-      auditTrail: [],
-    }
-  })),
-  submitDiscrepancyReport: vi.fn(() => Promise.resolve({
-    success: true,
-    data: { id: 'report-1' }
-  })),
+  validateEmployeePayroll: vi.fn(() =>
+    Promise.resolve({
+      success: true,
+      data: {
+        isValid: true,
+        errors: [],
+        warnings: [],
+        auditTrail: [],
+      },
+    })
+  ),
+  submitDiscrepancyReport: vi.fn(() =>
+    Promise.resolve({
+      success: true,
+      data: { id: 'report-1' },
+    })
+  ),
 }));

@@ -1,20 +1,22 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { SmartBreadcrumbs } from "@/components/layout/smart-breadcrumbs"
-import { Separator } from "@/components/ui/separator"
+import * as React from 'react';
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { SmartBreadcrumbs } from '@/components/layout/smart-breadcrumbs';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { OfflineIndicator, ConnectionQualityIndicator } from "@/components/ui/offline-indicator"
-import { ThemeSwitcher } from "@/components/theme-switcher"
-
+} from '@/components/ui/sidebar';
+import {
+  OfflineIndicator,
+  ConnectionQualityIndicator,
+} from '@/components/ui/offline-indicator';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 interface MainLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
@@ -42,5 +44,5 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

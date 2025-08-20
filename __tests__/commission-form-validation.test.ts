@@ -10,19 +10,19 @@ describe('Commission Entry Validation', () => {
         'JUNK_789',
         'ABC123DEF',
         '12345',
-        'TEST-JOB-001'
+        'TEST-JOB-001',
       ];
 
-      validJobIds.forEach(jobId => {
+      validJobIds.forEach((jobId) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId,
           clientName: 'Test Client',
           jobType: 'junk',
           targetDate: new Date(),
-          estimatedRevenue: 100.00
+          estimatedRevenue: 100.0,
         });
-        
+
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.jobId).toBe(jobId.toUpperCase());
@@ -40,16 +40,16 @@ describe('Commission Entry Validation', () => {
         'lowercase', // should be transformed to uppercase
       ];
 
-      invalidJobIds.forEach(jobId => {
+      invalidJobIds.forEach((jobId) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId,
           clientName: 'Test Client',
           jobType: 'junk',
           targetDate: new Date(),
-          estimatedRevenue: 100.00
+          estimatedRevenue: 100.0,
         });
-        
+
         if (jobId === 'lowercase') {
           // This should succeed but be transformed
           expect(result.success).toBe(true);
@@ -69,7 +69,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'Test Client',
         jobType: 'junk',
         targetDate: new Date(),
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(true);
@@ -87,14 +87,18 @@ describe('Commission Entry Validation', () => {
         clientName: 'Test Client',
         jobType: 'junk',
         targetDate: new Date(),
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some(issue => 
-          issue.path.includes('salesId') && issue.message.includes('required')
-        )).toBe(true);
+        expect(
+          result.error.issues.some(
+            (issue) =>
+              issue.path.includes('salesId') &&
+              issue.message.includes('required')
+          )
+        ).toBe(true);
       }
     });
   });
@@ -107,14 +111,18 @@ describe('Commission Entry Validation', () => {
         clientName: '',
         jobType: 'junk',
         targetDate: new Date(),
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some(issue => 
-          issue.path.includes('clientName') && issue.message.includes('required')
-        )).toBe(true);
+        expect(
+          result.error.issues.some(
+            (issue) =>
+              issue.path.includes('clientName') &&
+              issue.message.includes('required')
+          )
+        ).toBe(true);
       }
     });
 
@@ -125,14 +133,18 @@ describe('Commission Entry Validation', () => {
         clientName: 'a'.repeat(101),
         jobType: 'junk',
         targetDate: new Date(),
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.some(issue => 
-          issue.path.includes('clientName') && issue.message.includes('100 characters')
-        )).toBe(true);
+        expect(
+          result.error.issues.some(
+            (issue) =>
+              issue.path.includes('clientName') &&
+              issue.message.includes('100 characters')
+          )
+        ).toBe(true);
       }
     });
   });
@@ -141,14 +153,14 @@ describe('Commission Entry Validation', () => {
     it('should accept valid job types', () => {
       const validTypes = ['junk', 'move'] as const;
 
-      validTypes.forEach(jobType => {
+      validTypes.forEach((jobType) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId: 'JOB123',
           clientName: 'Test Client',
           jobType,
           targetDate: new Date(),
-          estimatedRevenue: 100.00
+          estimatedRevenue: 100.0,
         });
 
         expect(result.success).toBe(true);
@@ -162,7 +174,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'Test Client',
         jobType: 'invalid' as any,
         targetDate: new Date(),
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(false);
@@ -173,37 +185,40 @@ describe('Commission Entry Validation', () => {
     it('should require positive revenue', () => {
       const invalidRevenues = [0, -1, -100];
 
-      invalidRevenues.forEach(estimatedRevenue => {
+      invalidRevenues.forEach((estimatedRevenue) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId: 'JOB123',
           clientName: 'Test Client',
           jobType: 'junk',
           targetDate: new Date(),
-          estimatedRevenue
+          estimatedRevenue,
         });
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.issues.some(issue => 
-            issue.path.includes('estimatedRevenue') && 
-            issue.message.includes('greater than $0.00')
-          )).toBe(true);
+          expect(
+            result.error.issues.some(
+              (issue) =>
+                issue.path.includes('estimatedRevenue') &&
+                issue.message.includes('greater than $0.00')
+            )
+          ).toBe(true);
         }
       });
     });
 
     it('should accept valid revenue amounts', () => {
-      const validRevenues = [0.01, 1, 100, 1000.50, 9999.99];
+      const validRevenues = [0.01, 1, 100, 1000.5, 9999.99];
 
-      validRevenues.forEach(estimatedRevenue => {
+      validRevenues.forEach((estimatedRevenue) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId: 'JOB123',
           clientName: 'Test Client',
           jobType: 'junk',
           targetDate: new Date(),
-          estimatedRevenue
+          estimatedRevenue,
         });
 
         expect(result.success).toBe(true);
@@ -219,7 +234,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'Test Client',
         jobType: 'junk',
         targetDate: 'invalid-date' as any,
-        estimatedRevenue: 100.00
+        estimatedRevenue: 100.0,
       });
 
       expect(result.success).toBe(false);
@@ -229,17 +244,17 @@ describe('Commission Entry Validation', () => {
       const validDates = [
         new Date(),
         new Date('2024-12-31'),
-        new Date(Date.now() + 86400000) // tomorrow
+        new Date(Date.now() + 86400000), // tomorrow
       ];
 
-      validDates.forEach(targetDate => {
+      validDates.forEach((targetDate) => {
         const result = CommissionEntrySchema.safeParse({
           salesId: 'user-123',
           jobId: 'JOB123',
           clientName: 'Test Client',
           jobType: 'junk',
           targetDate,
-          estimatedRevenue: 100.00
+          estimatedRevenue: 100.0,
         });
 
         expect(result.success).toBe(true);
@@ -255,7 +270,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 250.00
+        estimatedRevenue: 250.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -266,7 +281,7 @@ describe('Commission Entry Validation', () => {
         expect(result.data.jobId).toBe('JOB123');
         expect(result.data.clientName).toBe('John Doe');
         expect(result.data.jobType).toBe('junk');
-        expect(result.data.estimatedRevenue).toBe(250.00);
+        expect(result.data.estimatedRevenue).toBe(250.0);
       }
     });
   });

@@ -123,7 +123,7 @@ export function useConnectivityActions() {
     } else if (offlineState.wasOffline && offlineState.isOnline) {
       // Just came back online
       setShowOfflineNotice(false);
-      
+
       // Optionally trigger a data refresh
       // This could be handled by the consuming component
     }

@@ -27,25 +27,29 @@ export async function validateServerSession(
     redirectOnFailure?: boolean;
   }
 ): Promise<AuthValidationResult> {
-  const { requireAuth = false, requiredRoles = [], redirectOnFailure = false } = options || {};
-  
+  const {
+    requireAuth = false,
+    requiredRoles = [],
+    redirectOnFailure = false,
+  } = options || {};
+
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       const error = 'No valid session found';
-      
+
       if (request) {
         await logAuthError(new Error(error), {
           action: 'session_validation',
           url: request.url || '/unknown',
           userAgent: request.headers.get('user-agent') || undefined,
-          additionalData: { requireAuth, requiredRoles }
+          additionalData: { requireAuth, requiredRoles },
         });
       }
 
       if (requireAuth && redirectOnFailure) {
-        const loginUrl = request 
+        const loginUrl = request
           ? `/auth/login?callbackUrl=${encodeURIComponent(new URL(request.url).pathname)}`
           : '/auth/login';
         return {
@@ -53,7 +57,7 @@ export async function validateServerSession(
           isValid: false,
           error,
           shouldRedirect: true,
-          redirectUrl: loginUrl
+          redirectUrl: loginUrl,
         };
       }
 
@@ -66,19 +70,19 @@ export async function validateServerSession(
     try {
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { id: true, email: true, fullName: true, roles: true }
+        select: { id: true, email: true, fullName: true, roles: true },
       });
 
       if (!dbUser) {
         const error = 'User no longer exists in database';
-        
+
         if (request) {
           await logAuthError(new Error(error), {
             action: 'session_validation',
             userId: user.id,
             url: request.url || '/unknown',
             userAgent: request.headers.get('user-agent') || undefined,
-            additionalData: { sessionEmail: user.email }
+            additionalData: { sessionEmail: user.email },
           });
         }
 
@@ -88,7 +92,7 @@ export async function validateServerSession(
             isValid: false,
             error,
             shouldRedirect: true,
-            redirectUrl: '/auth/login?error=invalid_session'
+            redirectUrl: '/auth/login?error=invalid_session',
           };
         }
 
@@ -100,26 +104,28 @@ export async function validateServerSession(
         id: dbUser.id,
         email: dbUser.email,
         fullName: dbUser.fullName,
-        roles: dbUser.roles as UserRole[]
+        roles: dbUser.roles as UserRole[],
       };
 
       // Check role requirements
       if (requiredRoles.length > 0) {
-        const hasRequiredRole = requiredRoles.some(role => validatedUser.roles.includes(role));
-        
+        const hasRequiredRole = requiredRoles.some((role) =>
+          validatedUser.roles.includes(role)
+        );
+
         if (!hasRequiredRole) {
           const error = `Required roles: ${requiredRoles.join(', ')}`;
-          
+
           if (request) {
             await logAuthError(new Error(error), {
               action: 'permission_check',
               userId: validatedUser.id,
               url: request.url || '/unknown',
               userAgent: request.headers.get('user-agent') || undefined,
-              additionalData: { 
-                requiredRoles, 
-                userRoles: validatedUser.roles 
-              }
+              additionalData: {
+                requiredRoles,
+                userRoles: validatedUser.roles,
+              },
             });
           }
 
@@ -129,7 +135,7 @@ export async function validateServerSession(
               isValid: false,
               error,
               shouldRedirect: true,
-              redirectUrl: '/dashboard?error=access_denied'
+              redirectUrl: '/dashboard?error=access_denied',
             };
           }
 
@@ -138,7 +144,6 @@ export async function validateServerSession(
       }
 
       return { user: validatedUser, isValid: true };
-
     } catch (dbError) {
       if (request) {
         await logAuthError(dbError, {
@@ -146,23 +151,22 @@ export async function validateServerSession(
           userId: user.id,
           url: request.url || '/unknown',
           userAgent: request.headers.get('user-agent') || undefined,
-          additionalData: { error: 'database_check_failed' }
+          additionalData: { error: 'database_check_failed' },
         });
       }
 
       // Return session user if database validation fails (graceful degradation)
       return { user, isValid: true };
     }
-
   } catch (error) {
     const errorMessage = 'Session validation failed';
-    
+
     if (request) {
       await logAuthError(error, {
         action: 'session_validation',
         url: request.url || '/unknown',
         userAgent: request.headers.get('user-agent') || undefined,
-        additionalData: { function: 'validateServerSession' }
+        additionalData: { function: 'validateServerSession' },
       });
     }
 
@@ -172,7 +176,7 @@ export async function validateServerSession(
         isValid: false,
         error: errorMessage,
         shouldRedirect: true,
-        redirectUrl: '/auth/login?error=session_error'
+        redirectUrl: '/auth/login?error=session_error',
       };
     }
 
@@ -192,7 +196,7 @@ export async function requireServerAuth(
 ): Promise<SessionUser> {
   const result = await validateServerSession(request, {
     requireAuth: true,
-    ...options
+    ...options,
   });
 
   if (!result.isValid || !result.user) {
@@ -218,18 +222,18 @@ export async function withApiAuth<T>(
     try {
       const result = await validateServerSession(request, {
         requireAuth: true,
-        requiredRoles: options?.requiredRoles
+        requiredRoles: options?.requiredRoles,
       });
 
       if (!result.isValid || !result.user) {
         return new Response(
           JSON.stringify({
             error: 'authentication_required',
-            message: result.error || 'Authentication required'
+            message: result.error || 'Authentication required',
           }),
           {
             status: 401,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
           }
         );
       }
@@ -239,17 +243,17 @@ export async function withApiAuth<T>(
       await logAuthError(error, {
         action: 'api_auth',
         url: request.url,
-        userAgent: request.headers.get('user-agent') || undefined
+        userAgent: request.headers.get('user-agent') || undefined,
       });
 
       return new Response(
         JSON.stringify({
           error: 'server_error',
-          message: 'An unexpected error occurred'
+          message: 'An unexpected error occurred',
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -270,7 +274,7 @@ export async function withPageAuth<T extends Record<string, unknown>>(
       const result = await validateServerSession(undefined, {
         requireAuth: true,
         requiredRoles: options?.requiredRoles,
-        redirectOnFailure: true
+        redirectOnFailure: true,
       });
 
       if (result.shouldRedirect && result.redirectUrl) {
@@ -285,7 +289,7 @@ export async function withPageAuth<T extends Record<string, unknown>>(
     } catch (error) {
       await logAuthError(error, {
         action: 'page_auth',
-        url: '/page-component'
+        url: '/page-component',
       });
       redirect('/auth/login?error=server_error');
     }

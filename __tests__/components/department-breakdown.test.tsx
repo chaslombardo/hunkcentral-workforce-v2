@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { DepartmentBreakdown, type DepartmentBreakdownData } from '@/components/features/reports/payroll-breakdown/department-breakdown';
+import {
+  DepartmentBreakdown,
+  type DepartmentBreakdownData,
+} from '@/components/features/reports/payroll-breakdown/department-breakdown';
 import type { User } from '@/types';
 
 const mockUser: User = {
@@ -86,7 +89,9 @@ describe('DepartmentBreakdown', () => {
       />
     );
 
-    expect(screen.getByText('No department hours recorded for this period')).toBeInTheDocument();
+    expect(
+      screen.getByText('No department hours recorded for this period')
+    ).toBeInTheDocument();
   });
 
   it('calculates percentages correctly', () => {

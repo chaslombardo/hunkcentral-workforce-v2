@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
@@ -17,10 +23,10 @@ interface EntityAuditHistoryProps {
   title?: string;
 }
 
-export function EntityAuditHistory({ 
-  entityType, 
-  entityId, 
-  title = 'Change History' 
+export function EntityAuditHistory({
+  entityType,
+  entityId,
+  title = 'Change History',
 }: EntityAuditHistoryProps) {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,9 +85,15 @@ export function EntityAuditHistory({
         {Object.entries(changes).map(([key, value]: [string, unknown]) => (
           <div key={key} className="space-y-1">
             <div className="font-medium text-muted-foreground capitalize">
-              {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+              {key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, (str) => str.toUpperCase())}
+              :
             </div>
-            {typeof value === 'object' && value !== null && 'from' in value && 'to' in value ? (
+            {typeof value === 'object' &&
+            value !== null &&
+            'from' in value &&
+            'to' in value ? (
               <div className="pl-2 space-y-1">
                 <div className="text-red-600 dark:text-red-400 text-xs">
                   From: {String((value as { from: unknown }).from)}
@@ -96,7 +108,9 @@ export function EntityAuditHistory({
                   Added: {String((value as { to: unknown }).to)}
                 </div>
               </div>
-            ) : typeof value === 'object' && value !== null && 'from' in value ? (
+            ) : typeof value === 'object' &&
+              value !== null &&
+              'from' in value ? (
               <div className="pl-2">
                 <div className="text-red-600 dark:text-red-400 text-xs">
                   Removed: {String((value as { from: unknown }).from)}
@@ -141,7 +155,11 @@ export function EntityAuditHistory({
         <CardContent>
           <div className="text-center py-4">
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()} variant="outline" size="sm">
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              size="sm"
+            >
               Try Again
             </Button>
           </div>
@@ -173,21 +191,37 @@ export function EntityAuditHistory({
                 <div className="flex items-start gap-3">
                   <Avatar className="h-8 w-8 mt-1">
                     <AvatarFallback className="text-xs">
-                      {log.user?.fullName ? log.user.fullName.split(' ').map(n => n[0]).join('') : 'U'}
+                      {log.user?.fullName
+                        ? log.user.fullName
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                        : 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm">{log.user?.fullName || 'Unknown User'}</span>
-                      <Badge variant={getActionBadgeVariant(log.action)} className="text-xs">
-                        {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
+                      <span className="font-medium text-sm">
+                        {log.user?.fullName || 'Unknown User'}
+                      </span>
+                      <Badge
+                        variant={getActionBadgeVariant(log.action)}
+                        className="text-xs"
+                      >
+                        {log.action.charAt(0).toUpperCase() +
+                          log.action.slice(1)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
+                        {log.createdAt
+                          ? format(
+                              new Date(log.createdAt),
+                              'MMM dd, yyyy HH:mm:ss'
+                            )
+                          : 'N/A'}
                       </span>
                     </div>
-                    
+
                     {log.changes && (
                       <div className="bg-muted/50 rounded-md p-3">
                         {renderChanges(log.changes)}
@@ -195,10 +229,8 @@ export function EntityAuditHistory({
                     )}
                   </div>
                 </div>
-                
-                {index < auditLogs.length - 1 && (
-                  <Separator className="my-4" />
-                )}
+
+                {index < auditLogs.length - 1 && <Separator className="my-4" />}
               </div>
             ))}
           </div>

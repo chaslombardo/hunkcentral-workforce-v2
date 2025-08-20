@@ -43,7 +43,10 @@ export const formatPercentage = (value: number): string => {
 /**
  * Calculate labor cost percentage with proper rounding
  */
-export const calculateLaborPercentage = (laborCost: number, revenue: number): number => {
+export const calculateLaborPercentage = (
+  laborCost: number,
+  revenue: number
+): number => {
   if (revenue === 0) return 0;
   return Math.round((laborCost / revenue) * 100 * 100) / 100; // Round to 2 decimal places
 };
@@ -51,7 +54,10 @@ export const calculateLaborPercentage = (laborCost: number, revenue: number): nu
 /**
  * Calculate trend percentage between current and previous values
  */
-export const calculateTrend = (current: number, previous: number): { percentage: number; isPositive: boolean } => {
+export const calculateTrend = (
+  current: number,
+  previous: number
+): { percentage: number; isPositive: boolean } => {
   if (previous === 0) return { percentage: 0, isPositive: false };
   const change = ((current - previous) / previous) * 100;
   return {
@@ -87,7 +93,7 @@ export const formatDateTime = (date: unknown): string => {
 export const formatDateForInput = (date: unknown): string => {
   const safeDate = toSafeDate(date);
   if (!safeDate) return '';
-  
+
   try {
     return safeDate.toISOString().split('T')[0];
   } catch {

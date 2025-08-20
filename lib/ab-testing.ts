@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { prisma } from "@/lib/prisma";
-import { analytics } from "@/lib/analytics";
+import { useState, useEffect, useCallback } from 'react';
+import { prisma } from '@/lib/prisma';
+import { analytics } from '@/lib/analytics';
 
 export interface ABTestVariant {
   name: string;
@@ -53,7 +53,7 @@ class ABTestingService {
     // Validate variants weights sum to 100
     const totalWeight = config.variants.reduce((sum, v) => sum + v.weight, 0);
     if (Math.abs(totalWeight - 100) > 0.01) {
-      throw new Error("Variant weights must sum to 100");
+      throw new Error('Variant weights must sum to 100');
     }
 
     const experiment = await prisma.aBTestExperiment.create({
@@ -64,7 +64,7 @@ class ABTestingService {
         targetMetric: config.targetMetric,
         startDate: config.startDate,
         endDate: config.endDate,
-        status: "draft",
+        status: 'draft',
       },
     });
 
@@ -76,7 +76,7 @@ class ABTestingService {
     const experiment = await prisma.aBTestExperiment.update({
       where: { name: experimentName },
       data: {
-        status: "active",
+        status: 'active',
         startDate: new Date(),
       },
     });
@@ -92,7 +92,7 @@ class ABTestingService {
     const experiment = await prisma.aBTestExperiment.update({
       where: { name: experimentName },
       data: {
-        status: "completed",
+        status: 'completed',
         endDate: new Date(),
       },
     });
@@ -110,7 +110,7 @@ class ABTestingService {
     sessionId?: string
   ): Promise<ABTestResult | null> {
     if (!userId && !sessionId) {
-      throw new Error("Either userId or sessionId must be provided");
+      throw new Error('Either userId or sessionId must be provided');
     }
 
     // Check cache first
@@ -121,7 +121,7 @@ class ABTestingService {
 
     // Get experiment
     const experiment = await this.getExperiment(experimentName);
-    if (!experiment || experiment.status !== "active") {
+    if (!experiment || experiment.status !== 'active') {
       return null;
     }
 
@@ -135,7 +135,9 @@ class ABTestingService {
 
     // If no assignment exists, create one
     if (!assignment) {
-      const variant = this.selectVariant(experiment.variants as ABTestVariant[]);
+      const variant = this.selectVariant(
+        experiment.variants as ABTestVariant[]
+      );
       assignment = await prisma.aBTestAssignment.create({
         data: {
           experimentId: experiment.id,
@@ -147,7 +149,7 @@ class ABTestingService {
     }
 
     const selectedVariant = (experiment.variants as ABTestVariant[]).find(
-      v => v.name === assignment!.variant
+      (v) => v.name === assignment!.variant
     );
 
     if (!selectedVariant) {
@@ -157,7 +159,7 @@ class ABTestingService {
     const result: ABTestResult = {
       variant: selectedVariant.name,
       config: selectedVariant.config,
-      isControl: selectedVariant.name === "control",
+      isControl: selectedVariant.name === 'control',
     };
 
     // Cache the result
@@ -177,7 +179,7 @@ class ABTestingService {
     metadata?: Record<string, unknown>
   ) {
     const experiment = await this.getExperiment(experimentName);
-    if (!experiment || experiment.status !== "active") {
+    if (!experiment || experiment.status !== 'active') {
       return;
     }
 
@@ -225,7 +227,7 @@ class ABTestingService {
   async getResults(experimentName: string) {
     const experiment = await this.getExperiment(experimentName);
     if (!experiment) {
-      throw new Error("Experiment not found");
+      throw new Error('Experiment not found');
     }
 
     // Get all events for this experiment
@@ -241,18 +243,27 @@ class ABTestingService {
     });
 
     // Calculate metrics by variant
-    const results = assignments.map(assignment => {
-      const variantEvents = events.filter(e => e.variant === assignment.variant);
-      const conversions = variantEvents.filter(e => e.eventType === 'conversion');
-      const interactions = variantEvents.filter(e => e.eventType === 'interaction');
-      
-      const conversionRate = assignment._count.variant > 0 
-        ? conversions.length / assignment._count.variant 
-        : 0;
-      
-      const avgValue = conversions.length > 0
-        ? conversions.reduce((sum, e) => sum + (e.value || 0), 0) / conversions.length
-        : 0;
+    const results = assignments.map((assignment) => {
+      const variantEvents = events.filter(
+        (e) => e.variant === assignment.variant
+      );
+      const conversions = variantEvents.filter(
+        (e) => e.eventType === 'conversion'
+      );
+      const interactions = variantEvents.filter(
+        (e) => e.eventType === 'interaction'
+      );
+
+      const conversionRate =
+        assignment._count.variant > 0
+          ? conversions.length / assignment._count.variant
+          : 0;
+
+      const avgValue =
+        conversions.length > 0
+          ? conversions.reduce((sum, e) => sum + (e.value || 0), 0) /
+            conversions.length
+          : 0;
 
       return {
         variant: assignment.variant,
@@ -275,7 +286,10 @@ class ABTestingService {
         targetMetric: experiment.targetMetric,
       },
       results,
-      totalParticipants: assignments.reduce((sum, a) => sum + a._count.variant, 0),
+      totalParticipants: assignments.reduce(
+        (sum, a) => sum + a._count.variant,
+        0
+      ),
       totalEvents: events.length,
     };
   }
@@ -331,7 +345,7 @@ class ABTestingService {
         keysToDelete.push(key);
       }
     }
-    keysToDelete.forEach(key => {
+    keysToDelete.forEach((key) => {
       this.cache.delete(key);
       this.cacheExpiry.delete(key);
     });
@@ -350,7 +364,11 @@ export function useABTest(experimentName: string, userId?: string) {
       try {
         // Generate session ID if no user ID
         const sessionId = userId ? undefined : generateSessionId();
-        const result = await abTesting.getVariant(experimentName, userId, sessionId);
+        const result = await abTesting.getVariant(
+          experimentName,
+          userId,
+          sessionId
+        );
         setVariant(result);
       } catch (error) {
         console.error('Error getting A/B test variant:', error);
@@ -367,7 +385,14 @@ export function useABTest(experimentName: string, userId?: string) {
     (eventType: string, value?: number, metadata?: Record<string, unknown>) => {
       if (variant) {
         const sessionId = userId ? undefined : generateSessionId();
-        abTesting.trackEvent(experimentName, eventType, userId, sessionId, value, metadata);
+        abTesting.trackEvent(
+          experimentName,
+          eventType,
+          userId,
+          sessionId,
+          value,
+          metadata
+        );
       }
     },
     [experimentName, userId, variant]
@@ -387,8 +412,9 @@ function generateSessionId(): string {
   if (typeof window !== 'undefined') {
     let sessionId = sessionStorage.getItem('ab_session_id');
     if (!sessionId) {
-      sessionId = Math.random().toString(36).substring(2, 15) + 
-                  Math.random().toString(36).substring(2, 15);
+      sessionId =
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
       sessionStorage.setItem('ab_session_id', sessionId);
     }
     return sessionId;

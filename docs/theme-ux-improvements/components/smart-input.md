@@ -5,6 +5,7 @@ The `SmartInput` component provides progressive validation with real-time feedba
 ## Overview
 
 The SmartInput enhances the standard input functionality with:
+
 - **Progressive validation** that shows feedback as users interact
 - **Real-time validation** with debounced async support
 - **Accessibility enhancements** with ARIA labels and descriptions
@@ -17,32 +18,33 @@ The SmartInput enhances the standard input functionality with:
 ### Props
 
 ```tsx
-interface SmartInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
+interface SmartInputProps
+  extends Omit<React.ComponentProps<'input'>, 'onChange'> {
   // Required
-  label: string
-  
+  label: string;
+
   // Validation
-  error?: string
-  success?: string
-  hint?: string
-  validateOnBlur?: boolean
-  validateOnChange?: boolean
-  showValidation?: boolean
-  progressiveValidation?: boolean
-  validationRules?: ValidationRule[]
-  
+  error?: string;
+  success?: string;
+  hint?: string;
+  validateOnBlur?: boolean;
+  validateOnChange?: boolean;
+  showValidation?: boolean;
+  progressiveValidation?: boolean;
+  validationRules?: ValidationRule[];
+
   // Callbacks
-  onValueChange?: (value: string) => void
-  onValidationChange?: (isValid: boolean, errors: string[]) => void
-  
+  onValueChange?: (value: string) => void;
+  onValidationChange?: (isValid: boolean, errors: string[]) => void;
+
   // Features
-  showPasswordToggle?: boolean
-  loading?: boolean
-  debounceMs?: number
-  
+  showPasswordToggle?: boolean;
+  loading?: boolean;
+  debounceMs?: number;
+
   // Mobile
-  mobileOptimized?: boolean
-  keyboardType?: 'default' | 'email' | 'numeric' | 'tel' | 'url' | 'search'
+  mobileOptimized?: boolean;
+  keyboardType?: 'default' | 'email' | 'numeric' | 'tel' | 'url' | 'search';
 }
 ```
 
@@ -50,10 +52,10 @@ interface SmartInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'
 
 ```tsx
 interface ValidationRule {
-  test: (value: string) => boolean | Promise<boolean>
-  message: string
-  type: 'error' | 'warning' | 'info'
-  priority: number // Lower numbers have higher priority
+  test: (value: string) => boolean | Promise<boolean>;
+  message: string;
+  type: 'error' | 'warning' | 'info';
+  priority: number; // Lower numbers have higher priority
 }
 ```
 
@@ -62,30 +64,33 @@ interface ValidationRule {
 ### Basic Usage
 
 ```tsx
-import { SmartInput } from '@/components/forms/smart-input'
+import { SmartInput } from '@/components/forms/smart-input';
 
 <SmartInput
   label="Full Name"
   placeholder="Enter your full name"
   hint="This will be displayed on your profile"
-/>
+/>;
 ```
 
 ### With Validation Rules
 
 ```tsx
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input'
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
 
 <SmartInput
   label="Email Address"
   type="email"
   validationRules={[
     commonValidationRules.required(),
-    commonValidationRules.email()
+    commonValidationRules.email(),
   ]}
   progressiveValidation
   validateOnChange
-/>
+/>;
 ```
 
 ### Password Input
@@ -98,7 +103,7 @@ import { SmartInput, commonValidationRules } from '@/components/forms/smart-inpu
   validationRules={[
     commonValidationRules.required(),
     commonValidationRules.strongPassword(),
-    commonValidationRules.passwordStrengthWarning()
+    commonValidationRules.passwordStrengthWarning(),
   ]}
   progressiveValidation
 />
@@ -133,20 +138,24 @@ import { SmartInput, commonValidationRules } from '@/components/forms/smart-inpu
 ### Form Integration
 
 ```tsx
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
-})
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
 function LoginForm() {
-  const { control, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(schema)
-  })
-  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Controller
@@ -159,14 +168,14 @@ function LoginForm() {
             error={errors.email?.message}
             validationRules={[
               commonValidationRules.required(),
-              commonValidationRules.email()
+              commonValidationRules.email(),
             ]}
             progressiveValidation
             {...field}
           />
         )}
       />
-      
+
       <Controller
         name="password"
         control={control}
@@ -178,19 +187,19 @@ function LoginForm() {
             error={errors.password?.message}
             validationRules={[
               commonValidationRules.required(),
-              commonValidationRules.minLength(8)
+              commonValidationRules.minLength(8),
             ]}
             progressiveValidation
             {...field}
           />
         )}
       />
-      
+
       <BrandButton type="submit" variant="primary">
         Sign In
       </BrandButton>
     </form>
-  )
+  );
 }
 ```
 
@@ -201,7 +210,7 @@ function LoginForm() {
 const checkUsernameAvailability: ValidationRule = {
   test: async (value) => {
     if (value.length < 3) return true // Don't check short usernames
-    
+
     const response = await fetch(`/api/check-username?username=${value}`)
     const { available } = await response.json()
     return available
@@ -228,33 +237,38 @@ const checkUsernameAvailability: ValidationRule = {
 The component includes pre-built validation rules:
 
 ### Required Field
+
 ```tsx
-commonValidationRules.required('This field is required')
+commonValidationRules.required('This field is required');
 ```
 
 ### Length Validation
+
 ```tsx
-commonValidationRules.minLength(8, 'Must be at least 8 characters')
-commonValidationRules.maxLength(50, 'Must be no more than 50 characters')
+commonValidationRules.minLength(8, 'Must be at least 8 characters');
+commonValidationRules.maxLength(50, 'Must be no more than 50 characters');
 ```
 
 ### Format Validation
+
 ```tsx
-commonValidationRules.email('Please enter a valid email address')
-commonValidationRules.phone('Please enter a valid phone number')
-commonValidationRules.numeric('Please enter a valid number')
-commonValidationRules.positiveNumber('Please enter a positive number')
+commonValidationRules.email('Please enter a valid email address');
+commonValidationRules.phone('Please enter a valid phone number');
+commonValidationRules.numeric('Please enter a valid number');
+commonValidationRules.positiveNumber('Please enter a positive number');
 ```
 
 ### Password Validation
+
 ```tsx
-commonValidationRules.strongPassword()
-commonValidationRules.passwordStrengthWarning() // Shows as warning, not error
+commonValidationRules.strongPassword();
+commonValidationRules.passwordStrengthWarning(); // Shows as warning, not error
 ```
 
 ### Informational Rules
+
 ```tsx
-commonValidationRules.characterCount(100) // Shows "45/100 characters"
+commonValidationRules.characterCount(100); // Shows "45/100 characters"
 ```
 
 ## Progressive Validation
@@ -262,28 +276,31 @@ commonValidationRules.characterCount(100) // Shows "45/100 characters"
 The component supports progressive disclosure of validation feedback:
 
 ### Validation Timing
+
 - **On focus**: No validation shown initially
 - **On input**: Validation shown after user has interacted
 - **On blur**: Full validation performed
 - **Real-time**: Debounced validation during typing (optional)
 
 ### Example Behavior
+
 ```tsx
 <SmartInput
   label="Email"
   validationRules={[
     commonValidationRules.required(),
-    commonValidationRules.email()
+    commonValidationRules.email(),
   ]}
-  progressiveValidation={true}  // Default behavior
-  validateOnChange={true}       // Real-time validation
-  debounceMs={300}             // Wait 300ms after typing stops
+  progressiveValidation={true} // Default behavior
+  validateOnChange={true} // Real-time validation
+  debounceMs={300} // Wait 300ms after typing stops
 />
 ```
 
 ## Accessibility Features
 
 ### ARIA Support
+
 ```tsx
 <SmartInput
   label="Email Address"
@@ -295,6 +312,7 @@ The component supports progressive disclosure of validation feedback:
 ```
 
 ### Screen Reader Announcements
+
 ```tsx
 // Validation messages are announced automatically
 <SmartInput
@@ -304,13 +322,14 @@ The component supports progressive disclosure of validation feedback:
       test: (value) => value.length >= 8,
       message: 'Password must be at least 8 characters',
       type: 'error',
-      priority: 1
-    }
+      priority: 1,
+    },
   ]}
 />
 ```
 
 ### Keyboard Navigation
+
 - **Tab**: Moves focus to the input
 - **Shift+Tab**: Moves focus away from the input
 - **Enter**: Submits the form (if in a form)
@@ -319,6 +338,7 @@ The component supports progressive disclosure of validation feedback:
 ## Mobile Optimization
 
 ### Keyboard Types
+
 ```tsx
 // Email keyboard with @ symbol
 <SmartInput keyboardType="email" />
@@ -337,11 +357,13 @@ The component supports progressive disclosure of validation feedback:
 ```
 
 ### Touch Targets
+
 - **Input height**: Minimum 44px for easy tapping
 - **Font size**: 16px minimum to prevent zoom on iOS
 - **Spacing**: Adequate spacing between form fields
 
 ### Mobile-Specific Features
+
 ```tsx
 <SmartInput
   label="Phone Number"
@@ -354,6 +376,7 @@ The component supports progressive disclosure of validation feedback:
 ## Styling and Customization
 
 ### CSS Classes
+
 ```css
 /* Base input styles */
 .smart-input-container {
@@ -376,7 +399,7 @@ The component supports progressive disclosure of validation feedback:
 }
 
 /* State styles */
-.smart-input-input[aria-invalid="true"] {
+.smart-input-input[aria-invalid='true'] {
   border-color: hsl(var(--destructive));
 }
 
@@ -387,6 +410,7 @@ The component supports progressive disclosure of validation feedback:
 ```
 
 ### Custom Styling
+
 ```tsx
 <SmartInput
   label="Custom Styled Input"
@@ -398,6 +422,7 @@ The component supports progressive disclosure of validation feedback:
 ## Performance Considerations
 
 ### Debounced Validation
+
 ```tsx
 <SmartInput
   label="Search Query"
@@ -408,28 +433,31 @@ The component supports progressive disclosure of validation feedback:
 ```
 
 ### Memoization
+
 The component uses React.memo and memoized calculations:
+
 ```tsx
 const SmartInput = React.memo(function SmartInput(props) {
   // Memoized validation state
   const shouldShowValidation = React.useMemo(() => {
     // Calculation logic
-  }, [dependencies])
-  
+  }, [dependencies]);
+
   // Memoized ARIA attributes
   const accessibilityProps = React.useMemo(() => {
     // ARIA attribute calculation
-  }, [dependencies])
-})
+  }, [dependencies]);
+});
 ```
 
 ## Testing
 
 ### Unit Tests
+
 ```tsx
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { SmartInput, commonValidationRules } from './smart-input'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { SmartInput, commonValidationRules } from './smart-input';
 
 describe('SmartInput', () => {
   it('shows validation error after blur', async () => {
@@ -438,17 +466,17 @@ describe('SmartInput', () => {
         label="Email"
         validationRules={[commonValidationRules.email()]}
       />
-    )
-    
-    const input = screen.getByLabelText(/email/i)
-    await userEvent.type(input, 'invalid-email')
-    fireEvent.blur(input)
-    
+    );
+
+    const input = screen.getByLabelText(/email/i);
+    await userEvent.type(input, 'invalid-email');
+    fireEvent.blur(input);
+
     await waitFor(() => {
-      expect(screen.getByText(/valid email/i)).toBeInTheDocument()
-    })
-  })
-  
+      expect(screen.getByText(/valid email/i)).toBeInTheDocument();
+    });
+  });
+
   it('shows success state for valid input', async () => {
     render(
       <SmartInput
@@ -456,24 +484,25 @@ describe('SmartInput', () => {
         validationRules={[commonValidationRules.email()]}
         progressiveValidation
       />
-    )
-    
-    const input = screen.getByLabelText(/email/i)
-    await userEvent.type(input, 'valid@example.com')
-    fireEvent.blur(input)
-    
+    );
+
+    const input = screen.getByLabelText(/email/i);
+    await userEvent.type(input, 'valid@example.com');
+    fireEvent.blur(input);
+
     await waitFor(() => {
-      expect(screen.getByRole('img', { name: /success/i })).toBeInTheDocument()
-    })
-  })
-})
+      expect(screen.getByRole('img', { name: /success/i })).toBeInTheDocument();
+    });
+  });
+});
 ```
 
 ### Accessibility Tests
-```tsx
-import { axe, toHaveNoViolations } from 'jest-axe'
 
-expect.extend(toHaveNoViolations)
+```tsx
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
 
 it('should not have accessibility violations', async () => {
   const { container } = render(
@@ -482,16 +511,17 @@ it('should not have accessibility violations', async () => {
       hint="This is a hint"
       error="This is an error"
     />
-  )
-  
-  const results = await axe(container)
-  expect(results).toHaveNoViolations()
-})
+  );
+
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
 ```
 
 ## Best Practices
 
 ### Validation Timing
+
 ```tsx
 // Good: Progressive validation for better UX
 <SmartInput
@@ -512,25 +542,27 @@ it('should not have accessibility violations', async () => {
 ```
 
 ### Error Messages
+
 ```tsx
 // Good: Specific, actionable error messages
 const customEmailRule: ValidationRule = {
   test: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
   message: 'Please enter a valid email address (e.g., user@example.com)',
   type: 'error',
-  priority: 1
-}
+  priority: 1,
+};
 
 // Avoid: Generic error messages
 const genericRule: ValidationRule = {
   test: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
   message: 'Invalid input',
   type: 'error',
-  priority: 1
-}
+  priority: 1,
+};
 ```
 
 ### Mobile Optimization
+
 ```tsx
 // Good: Appropriate keyboard type
 <SmartInput
@@ -549,6 +581,7 @@ const genericRule: ValidationRule = {
 ```
 
 ### Form Integration
+
 ```tsx
 // Good: Consistent validation with form library
 const schema = z.object({

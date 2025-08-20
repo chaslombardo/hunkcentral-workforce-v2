@@ -39,12 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 
@@ -81,19 +76,60 @@ interface UserDetailViewProps {
   user: User;
 }
 
-const USER_ROLES: { value: string; label: string; color: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'admin', label: 'Admin', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', icon: IconShield },
-  { value: 'manager', label: 'Manager', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', icon: IconBriefcase },
-  { value: 'captain', label: 'Captain', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: IconUser },
-  { value: 'sales', label: 'Sales', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: IconCurrencyDollar },
-  { value: 'wingman', label: 'Wingman', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200', icon: IconUser },
+const USER_ROLES: {
+  value: string;
+  label: string;
+  color: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  {
+    value: 'admin',
+    label: 'Admin',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    icon: IconShield,
+  },
+  {
+    value: 'manager',
+    label: 'Manager',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    icon: IconBriefcase,
+  },
+  {
+    value: 'captain',
+    label: 'Captain',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    icon: IconUser,
+  },
+  {
+    value: 'sales',
+    label: 'Sales',
+    color:
+      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    icon: IconCurrencyDollar,
+  },
+  {
+    value: 'wingman',
+    label: 'Wingman',
+    color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+    icon: IconUser,
+  },
 ];
 
-const SALARY_TYPES: { [key: string]: { label: string; description: string } } = {
-  base: { label: 'Base Salary', description: 'Replaces hourly wages entirely' },
-  guaranteed: { label: 'Guaranteed Salary', description: 'Minimum guarantee (whichever is higher)' },
-  supplemental: { label: 'Supplemental Salary', description: 'Added on top of other earnings' },
-};
+const SALARY_TYPES: { [key: string]: { label: string; description: string } } =
+  {
+    base: {
+      label: 'Base Salary',
+      description: 'Replaces hourly wages entirely',
+    },
+    guaranteed: {
+      label: 'Guaranteed Salary',
+      description: 'Minimum guarantee (whichever is higher)',
+    },
+    supplemental: {
+      label: 'Supplemental Salary',
+      description: 'Added on top of other earnings',
+    },
+  };
 
 const SALARY_FREQUENCIES: { [key: string]: string } = {
   weekly: 'Weekly',
@@ -120,12 +156,14 @@ export function UserDetailView({ user }: UserDetailViewProps) {
   };
 
   const getRoleInfo = (role: string) => {
-    return USER_ROLES.find(r => r.value === role) || {
-      value: role,
-      label: role,
-      color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-      icon: IconUser,
-    };
+    return (
+      USER_ROLES.find((r) => r.value === role) || {
+        value: role,
+        label: role,
+        color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+        icon: IconUser,
+      }
+    );
   };
 
   const handleDeleteUser = async () => {
@@ -157,10 +195,26 @@ export function UserDetailView({ user }: UserDetailViewProps) {
   };
 
   const hourlyRates = [
-    { label: 'Junk Captain', value: user.rateJunkCaptain, key: 'rateJunkCaptain' },
-    { label: 'Junk Wingman', value: user.rateJunkWingman, key: 'rateJunkWingman' },
-    { label: 'Move Captain', value: user.rateMoveCaptain, key: 'rateMoveCaptain' },
-    { label: 'Move Wingman', value: user.rateMoveWingman, key: 'rateMoveWingman' },
+    {
+      label: 'Junk Captain',
+      value: user.rateJunkCaptain,
+      key: 'rateJunkCaptain',
+    },
+    {
+      label: 'Junk Wingman',
+      value: user.rateJunkWingman,
+      key: 'rateJunkWingman',
+    },
+    {
+      label: 'Move Captain',
+      value: user.rateMoveCaptain,
+      key: 'rateMoveCaptain',
+    },
+    {
+      label: 'Move Wingman',
+      value: user.rateMoveWingman,
+      key: 'rateMoveWingman',
+    },
     { label: 'Zigma', value: user.rateZigma, key: 'rateZigma' },
     { label: 'Training', value: user.rateTraining, key: 'rateTraining' },
     { label: 'Estimating', value: user.rateEstimating, key: 'rateEstimating' },
@@ -168,7 +222,9 @@ export function UserDetailView({ user }: UserDetailViewProps) {
     { label: 'Admin', value: user.rateAdmin, key: 'rateAdmin' },
   ];
 
-  const hasAnyRates = hourlyRates.some(rate => rate.value && Number(rate.value) > 0);
+  const hasAnyRates = hourlyRates.some(
+    (rate) => rate.value && Number(rate.value) > 0
+  );
   const hasSalary = user.salaryAmount && Number(user.salaryAmount) > 0;
   const hasCommission = user.commissionRate && Number(user.commissionRate) > 0;
 
@@ -177,16 +233,14 @@ export function UserDetailView({ user }: UserDetailViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
-          >
+          <Button variant="outline" size="sm" onClick={() => router.back()}>
             <IconArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <div>
-            <h1 className="text-lg font-semibold md:text-2xl">{user.fullName}</h1>
+            <h1 className="text-lg font-semibold md:text-2xl">
+              {user.fullName}
+            </h1>
             <p className="text-muted-foreground flex items-center gap-2">
               <IconMail className="h-4 w-4" />
               {user.email}
@@ -226,9 +280,9 @@ export function UserDetailView({ user }: UserDetailViewProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete User</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete {user.fullName}? 
-                  This action cannot be undone and will fail if the user 
-                  has existing logs, hours, or commission entries.
+                  Are you sure you want to delete {user.fullName}? This action
+                  cannot be undone and will fail if the user has existing logs,
+                  hours, or commission entries.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -283,8 +337,10 @@ export function UserDetailView({ user }: UserDetailViewProps) {
             </div>
             {hasSalary && (
               <p className="text-xs text-muted-foreground">
-                {user.salaryFrequency ? SALARY_FREQUENCIES[user.salaryFrequency] : ''} •{' '}
-                {user.salaryType ? SALARY_TYPES[user.salaryType]?.label : ''}
+                {user.salaryFrequency
+                  ? SALARY_FREQUENCIES[user.salaryFrequency]
+                  : ''}{' '}
+                • {user.salaryType ? SALARY_TYPES[user.salaryType]?.label : ''}
               </p>
             )}
           </CardContent>
@@ -348,22 +404,32 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                   <>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Amount:</span>
-                      <span className="text-lg font-semibold">{formatCurrency(user.salaryAmount)}</span>
+                      <span className="text-lg font-semibold">
+                        {formatCurrency(user.salaryAmount)}
+                      </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Frequency:</span>
-                      <span>{user.salaryFrequency ? SALARY_FREQUENCIES[user.salaryFrequency] : '-'}</span>
+                      <span>
+                        {user.salaryFrequency
+                          ? SALARY_FREQUENCIES[user.salaryFrequency]
+                          : '-'}
+                      </span>
                     </div>
                     <Separator />
                     <div className="space-y-2">
                       <span className="text-sm font-medium">Type:</span>
                       <div>
                         <div className="font-medium">
-                          {user.salaryType ? SALARY_TYPES[user.salaryType]?.label : '-'}
+                          {user.salaryType
+                            ? SALARY_TYPES[user.salaryType]?.label
+                            : '-'}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {user.salaryType ? SALARY_TYPES[user.salaryType]?.description : ''}
+                          {user.salaryType
+                            ? SALARY_TYPES[user.salaryType]?.description
+                            : ''}
                         </div>
                       </div>
                     </div>
@@ -393,8 +459,12 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                 {hasCommission ? (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Commission Rate:</span>
-                      <span className="text-lg font-semibold">{formatPercentage(user.commissionRate)}</span>
+                      <span className="text-sm font-medium">
+                        Commission Rate:
+                      </span>
+                      <span className="text-lg font-semibold">
+                        {formatPercentage(user.commissionRate)}
+                      </span>
                     </div>
                     <Separator />
                     <div className="text-sm text-muted-foreground">
@@ -405,7 +475,9 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                   <div className="text-center py-8 text-muted-foreground">
                     <IconPercentage className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>No commission configured</p>
-                    <p className="text-sm">This user does not earn commission</p>
+                    <p className="text-sm">
+                      This user does not earn commission
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -427,20 +499,27 @@ export function UserDetailView({ user }: UserDetailViewProps) {
             <CardContent>
               {hasAnyRates ? (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {hourlyRates.map((rate) => (
+                  {hourlyRates.map((rate) =>
                     rate.value && Number(rate.value) > 0 ? (
-                      <div key={rate.key} className="flex justify-between items-center p-3 rounded-lg border">
+                      <div
+                        key={rate.key}
+                        className="flex justify-between items-center p-3 rounded-lg border"
+                      >
                         <span className="font-medium">{rate.label}:</span>
-                        <span className="text-lg font-semibold">{formatCurrency(rate.value)}</span>
+                        <span className="text-lg font-semibold">
+                          {formatCurrency(rate.value)}
+                        </span>
                       </div>
                     ) : null
-                  ))}
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <IconClock className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p>No hourly rates configured</p>
-                  <p className="text-sm">Set up department-specific hourly rates</p>
+                  <p className="text-sm">
+                    Set up department-specific hourly rates
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -508,15 +587,17 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                 <div>
                   <h4 className="font-medium mb-2">Junk Operations:</h4>
                   <p className="text-sm text-muted-foreground">
-                    If actual labor cost is below {formatPercentage(user.junkBonusGoal)}, 
-                    captain earns bonus on the difference
+                    If actual labor cost is below{' '}
+                    {formatPercentage(user.junkBonusGoal)}, captain earns bonus
+                    on the difference
                   </p>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Move Operations:</h4>
                   <p className="text-sm text-muted-foreground">
-                    If actual labor cost is below {formatPercentage(user.moveBonusGoal)}, 
-                    captain earns bonus on the difference
+                    If actual labor cost is below{' '}
+                    {formatPercentage(user.moveBonusGoal)}, captain earns bonus
+                    on the difference
                   </p>
                 </div>
               </div>

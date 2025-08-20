@@ -60,7 +60,7 @@ export function ProductionProtectedRoute({
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [accessError, setAccessError] = useState<AccessError | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
@@ -68,60 +68,63 @@ export function ProductionProtectedRoute({
   const parseUrlError = useCallback((): AccessError | null => {
     const urlError = searchParams.get('error');
     const reason = searchParams.get('reason');
-    
+
     if (!urlError) return null;
 
     const errorMappings: Record<string, AccessError> = {
-      'access_denied': {
+      access_denied: {
         type: 'role',
-        message: reason === 'admin_required' 
-          ? 'Administrator access required for this page.'
-          : reason === 'manager_required'
-          ? 'Manager access required for this page.'
-          : reason === 'sales_required'
-          ? 'Sales access required for this page.'
-          : 'Access denied for this page.',
+        message:
+          reason === 'admin_required'
+            ? 'Administrator access required for this page.'
+            : reason === 'manager_required'
+              ? 'Manager access required for this page.'
+              : reason === 'sales_required'
+                ? 'Sales access required for this page.'
+                : 'Access denied for this page.',
         code: 'ACCESS_DENIED',
         canRecover: false,
-        suggestedAction: 'Contact your administrator for access.'
+        suggestedAction: 'Contact your administrator for access.',
       },
-      'session_required': {
+      session_required: {
         type: 'auth',
         message: 'Please sign in to access this page.',
         code: 'SESSION_REQUIRED',
         canRecover: true,
-        suggestedAction: 'Sign in to continue.'
+        suggestedAction: 'Sign in to continue.',
       },
-      'invalid_session': {
+      invalid_session: {
         type: 'auth',
         message: 'Your session has expired or is invalid.',
         code: 'INVALID_SESSION',
         canRecover: true,
-        suggestedAction: 'Please sign in again.'
+        suggestedAction: 'Please sign in again.',
       },
-      'middleware_error': {
+      middleware_error: {
         type: 'system',
         message: 'A system error occurred during authentication.',
         code: 'MIDDLEWARE_ERROR',
         canRecover: true,
-        suggestedAction: 'Please try again or contact support.'
+        suggestedAction: 'Please try again or contact support.',
       },
-      'session_recovery_failed': {
+      session_recovery_failed: {
         type: 'auth',
         message: 'Unable to recover your session.',
         code: 'RECOVERY_FAILED',
         canRecover: false,
-        suggestedAction: 'Please sign in again.'
-      }
+        suggestedAction: 'Please sign in again.',
+      },
     };
 
-    return errorMappings[urlError] || {
-      type: 'system',
-      message: 'An unexpected error occurred.',
-      code: 'UNKNOWN_ERROR',
-      canRecover: true,
-      suggestedAction: 'Please try again.'
-    };
+    return (
+      errorMappings[urlError] || {
+        type: 'system',
+        message: 'An unexpected error occurred.',
+        code: 'UNKNOWN_ERROR',
+        canRecover: true,
+        suggestedAction: 'Please try again.',
+      }
+    );
   }, [searchParams]);
 
   // Validate access permissions
@@ -136,7 +139,8 @@ export function ProductionProtectedRoute({
           message: `This page requires one of the following roles: ${requiredRoles.join(', ')}`,
           code: 'INSUFFICIENT_ROLES',
           canRecover: false,
-          suggestedAction: 'Contact your administrator for the required permissions.'
+          suggestedAction:
+            'Contact your administrator for the required permissions.',
         };
       }
     }
@@ -145,10 +149,10 @@ export function ProductionProtectedRoute({
     if (currentRoute && !hasRouteAccess(currentRoute, user.roles)) {
       return {
         type: 'route',
-        message: 'You don\'t have permission to access this page.',
+        message: "You don't have permission to access this page.",
         code: 'ROUTE_ACCESS_DENIED',
         canRecover: false,
-        suggestedAction: 'Navigate to a page you have access to.'
+        suggestedAction: 'Navigate to a page you have access to.',
       };
     }
 
@@ -174,7 +178,7 @@ export function ProductionProtectedRoute({
         message: 'Authentication required to access this page.',
         code: 'AUTH_REQUIRED',
         canRecover: true,
-        suggestedAction: 'Please sign in to continue.'
+        suggestedAction: 'Please sign in to continue.',
       });
     }
   }, [parseUrlError, validateAccess, isAuthenticated, user, isLoading, error]);
@@ -182,7 +186,10 @@ export function ProductionProtectedRoute({
   // Auto-recovery for certain error types
   useEffect(() => {
     if (enableAutoRecovery && error && !isRecovering) {
-      const recoverableErrors = ['INVALID_SESSION_STRUCTURE', 'VALIDATION_FAILED'];
+      const recoverableErrors = [
+        'INVALID_SESSION_STRUCTURE',
+        'VALIDATION_FAILED',
+      ];
       if (errorCode && recoverableErrors.includes(errorCode)) {
         const timeout = setTimeout(() => {
           recoverSession();
@@ -196,13 +203,13 @@ export function ProductionProtectedRoute({
   const handleRetry = useCallback(async () => {
     setIsValidating(true);
     setAccessError(null);
-    
+
     try {
       const isValid = await validateSession();
       if (!isValid) {
         await recoverSession();
       }
-      
+
       // Clear URL error parameters
       const url = new URL(window.location.href);
       url.searchParams.delete('error');
@@ -218,7 +225,7 @@ export function ProductionProtectedRoute({
   // Handle recovery action
   const handleRecover = useCallback(async () => {
     setIsValidating(true);
-    
+
     try {
       const recovered = await recoverSession();
       if (recovered) {
@@ -256,10 +263,14 @@ export function ProductionProtectedRoute({
       type: 'auth',
       message: error,
       code: errorCode || 'AUTH_ERROR',
-      canRecover: ['INVALID_SESSION_STRUCTURE', 'VALIDATION_FAILED', 'REFRESH_FAILED'].includes(errorCode || ''),
-      suggestedAction: 'Please try again or sign in.'
+      canRecover: [
+        'INVALID_SESSION_STRUCTURE',
+        'VALIDATION_FAILED',
+        'REFRESH_FAILED',
+      ].includes(errorCode || ''),
+      suggestedAction: 'Please try again or sign in.',
     };
-    
+
     if (FallbackComponent) {
       return (
         <FallbackComponent
@@ -271,7 +282,14 @@ export function ProductionProtectedRoute({
       );
     }
 
-    return <ErrorDisplay error={authError} onRetry={handleRetry} onRecover={handleRecover} onSignOut={signOutSafely} />;
+    return (
+      <ErrorDisplay
+        error={authError}
+        onRetry={handleRetry}
+        onRecover={handleRecover}
+        onSignOut={signOutSafely}
+      />
+    );
   }
 
   // Render access error
@@ -287,15 +305,19 @@ export function ProductionProtectedRoute({
       );
     }
 
-    return <ErrorDisplay error={accessError} onRetry={handleRetry} onRecover={handleRecover} onSignOut={signOutSafely} />;
+    return (
+      <ErrorDisplay
+        error={accessError}
+        onRetry={handleRetry}
+        onRecover={handleRecover}
+        onSignOut={signOutSafely}
+      />
+    );
   }
 
   // Render protected content
   return (
-    <AuthErrorBoundary 
-      enableAutoRecovery={enableAutoRecovery}
-      maxRetries={3}
-    >
+    <AuthErrorBoundary enableAutoRecovery={enableAutoRecovery} maxRetries={3}>
       {children}
     </AuthErrorBoundary>
   );
@@ -309,7 +331,12 @@ interface ErrorDisplayProps {
   onSignOut: () => void;
 }
 
-function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProps) {
+function ErrorDisplay({
+  error,
+  onRetry,
+  onRecover,
+  onSignOut,
+}: ErrorDisplayProps) {
   const getErrorIcon = () => {
     switch (error.type) {
       case 'role':
@@ -341,7 +368,7 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
     // Retry action for recoverable errors
     if (error.canRecover) {
       actions.push(
-        <BrandButton 
+        <BrandButton
           key="retry"
           onClick={onRetry}
           variant="primary"
@@ -355,7 +382,7 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
       // Recovery action for auth errors
       if (error.type === 'auth') {
         actions.push(
-          <BrandButton 
+          <BrandButton
             key="recover"
             onClick={onRecover}
             variant="outline"
@@ -370,7 +397,12 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
     // Navigation actions
     if (error.type === 'role' || error.type === 'route') {
       actions.push(
-        <BrandButton key="dashboard" asChild variant="outline" className="w-full">
+        <BrandButton
+          key="dashboard"
+          asChild
+          variant="outline"
+          className="w-full"
+        >
           <Link href="/dashboard">
             <Home className="mr-2 h-4 w-4" />
             Return to Dashboard
@@ -381,7 +413,7 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
 
     // Sign out action
     actions.push(
-      <BrandButton 
+      <BrandButton
         key="signout"
         onClick={onSignOut}
         variant="ghost"
@@ -399,15 +431,11 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
       <div className="max-w-md w-full space-y-4">
         <div className="text-center">
           {getErrorIcon()}
-          <h1 className="mt-4 text-2xl font-bold">
-            {getErrorTitle()}
-          </h1>
+          <h1 className="mt-4 text-2xl font-bold">{getErrorTitle()}</h1>
         </div>
 
         <Alert variant="destructive">
-          <AlertDescription>
-            {error.message}
-          </AlertDescription>
+          <AlertDescription>{error.message}</AlertDescription>
         </Alert>
 
         {error.suggestedAction && (
@@ -428,9 +456,7 @@ function ErrorDisplay({ error, onRetry, onRecover, onSignOut }: ErrorDisplayProp
           </Alert>
         )}
 
-        <div className="flex flex-col space-y-2">
-          {getActions()}
-        </div>
+        <div className="flex flex-col space-y-2">{getActions()}</div>
       </div>
     </div>
   );

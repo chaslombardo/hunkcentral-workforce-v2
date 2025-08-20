@@ -22,7 +22,7 @@
     --accent: 28 100% 46%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
-    
+
     /* Brand color mappings */
     --brand-primary: 152 95% 15%; /* hunks-green-600 in HSL */
     --brand-primary-foreground: 210 20% 98%;
@@ -71,7 +71,7 @@
     --accent: 28 100% 46%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    
+
     /* Brand color mappings - Dark mode */
     --brand-primary: 152 95% 20%; /* Lighter in dark mode */
     --brand-primary-foreground: 224 71.4% 4.1%;

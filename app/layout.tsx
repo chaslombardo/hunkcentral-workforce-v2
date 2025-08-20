@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: '#026937',
-}
+};
 
 export const metadata: Metadata = {
   title: 'HUNKCentral - Workforce Management',

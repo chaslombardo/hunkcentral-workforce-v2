@@ -5,7 +5,13 @@ import { format } from 'date-fns';
 import { AlertTriangle, Check, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -33,13 +39,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { getCommissionConflicts, resolveCommissionConflict } from '@/lib/commissionMatchingService';
+import {
+  getCommissionConflicts,
+  resolveCommissionConflict,
+} from '@/lib/commissionMatchingService';
 import type { CommissionConflict } from '@/lib/commissionMatcher';
 
 export function CommissionConflicts() {
   const [conflicts, setConflicts] = useState<CommissionConflict[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedConflict, setSelectedConflict] = useState<CommissionConflict | null>(null);
+  const [selectedConflict, setSelectedConflict] =
+    useState<CommissionConflict | null>(null);
   const [resolving, setResolving] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string>('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -85,12 +95,15 @@ export function CommissionConflicts() {
       );
 
       if (result.success) {
-        result.notifications.forEach(notification => {
+        result.notifications.forEach((notification) => {
           toast({
             title: notification.title,
             description: notification.message,
             variant: notification.type === 'error' ? 'destructive' : 'default',
-            className: notification.type === 'success' ? 'border-[#026937] bg-[#026937]/10' : undefined,
+            className:
+              notification.type === 'success'
+                ? 'border-[#026937] bg-[#026937]/10'
+                : undefined,
           });
         });
 
@@ -160,7 +173,9 @@ export function CommissionConflicts() {
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Check className="h-12 w-12 mx-auto mb-4 text-[#026937]" />
-            <p>All commission entries are properly matched to completed jobs.</p>
+            <p>
+              All commission entries are properly matched to completed jobs.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -176,7 +191,8 @@ export function CommissionConflicts() {
             Commission Conflicts ({conflicts.length})
           </CardTitle>
           <CardDescription>
-            These jobs have multiple commission entries that need manual resolution.
+            These jobs have multiple commission entries that need manual
+            resolution.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,21 +211,35 @@ export function CommissionConflicts() {
               <TableBody>
                 {conflicts.map((conflict) => (
                   <TableRow key={conflict.jobId}>
-                    <TableCell className="font-medium">{conflict.jobId}</TableCell>
-                    <TableCell>{formatCurrency(Number(conflict.logJob.revenue))}</TableCell>
+                    <TableCell className="font-medium">
+                      {conflict.jobId}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(Number(conflict.logJob.revenue))}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {conflict.commissionEntries.map((entry) => (
-                          <Badge key={entry.id} variant="outline" className="text-xs">
-                            {entry.sales.fullName} ({formatCurrency(entry.estimatedRevenue)})
+                          <Badge
+                            key={entry.id}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {entry.sales.fullName} (
+                            {formatCurrency(entry.estimatedRevenue)})
                           </Badge>
                         ))}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(conflict.logJob.log.logDate), 'MMM d, yyyy')}
+                      {format(
+                        new Date(conflict.logJob.log.logDate),
+                        'MMM d, yyyy'
+                      )}
                     </TableCell>
-                    <TableCell>{conflict.logJob.log.captain.fullName}</TableCell>
+                    <TableCell>
+                      {conflict.logJob.log.captain.fullName}
+                    </TableCell>
                     <TableCell>
                       <Button
                         variant="outline"
@@ -230,12 +260,16 @@ export function CommissionConflicts() {
       </Card>
 
       {/* Conflict Resolution Dialog */}
-      <Dialog open={!!selectedConflict} onOpenChange={() => setSelectedConflict(null)}>
+      <Dialog
+        open={!!selectedConflict}
+        onOpenChange={() => setSelectedConflict(null)}
+      >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Resolve Commission Conflict</DialogTitle>
             <DialogDescription>
-              Job {selectedConflict?.jobId} has multiple commission entries. Select the correct sales person to receive the commission.
+              Job {selectedConflict?.jobId} has multiple commission entries.
+              Select the correct sales person to receive the commission.
             </DialogDescription>
           </DialogHeader>
 
@@ -244,12 +278,19 @@ export function CommissionConflicts() {
               <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
                 <div>
                   <p className="text-sm font-medium">Job Details</p>
-                  <p className="text-sm text-muted-foreground">Job ID: {selectedConflict.jobId}</p>
                   <p className="text-sm text-muted-foreground">
-                    Actual Revenue: {formatCurrency(Number(selectedConflict.logJob.revenue))}
+                    Job ID: {selectedConflict.jobId}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Log Date: {format(new Date(selectedConflict.logJob.log.logDate), 'MMM d, yyyy')}
+                    Actual Revenue:{' '}
+                    {formatCurrency(Number(selectedConflict.logJob.revenue))}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Log Date:{' '}
+                    {format(
+                      new Date(selectedConflict.logJob.log.logDate),
+                      'MMM d, yyyy'
+                    )}
                   </p>
                 </div>
                 <div>
@@ -261,15 +302,32 @@ export function CommissionConflicts() {
               </div>
 
               <div>
-                <p className="text-sm font-medium mb-3">Select the correct sales person:</p>
+                <p className="text-sm font-medium mb-3">
+                  Select the correct sales person:
+                </p>
                 <div className="space-y-2">
                   {selectedConflict.commissionEntries.map((entry) => {
-                    const commissionRate = Number(entry.sales.commissionRate || 0);
-                    const potentialCommission = Number(selectedConflict.logJob.revenue) * (commissionRate / 100);
-                    const accuracy = entry.estimatedRevenue > 0 
-                      ? Math.min((Math.min(entry.estimatedRevenue, Number(selectedConflict.logJob.revenue)) / 
-                          Math.max(entry.estimatedRevenue, Number(selectedConflict.logJob.revenue))) * 100, 100)
-                      : 0;
+                    const commissionRate = Number(
+                      entry.sales.commissionRate || 0
+                    );
+                    const potentialCommission =
+                      Number(selectedConflict.logJob.revenue) *
+                      (commissionRate / 100);
+                    const accuracy =
+                      entry.estimatedRevenue > 0
+                        ? Math.min(
+                            (Math.min(
+                              entry.estimatedRevenue,
+                              Number(selectedConflict.logJob.revenue)
+                            ) /
+                              Math.max(
+                                entry.estimatedRevenue,
+                                Number(selectedConflict.logJob.revenue)
+                              )) *
+                              100,
+                            100
+                          )
+                        : 0;
 
                     return (
                       <div
@@ -283,14 +341,21 @@ export function CommissionConflicts() {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium">{entry.sales.fullName}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Estimated: {formatCurrency(entry.estimatedRevenue)} | 
-                              Target: {format(new Date(entry.targetDate), 'MMM d, yyyy')}
+                            <p className="font-medium">
+                              {entry.sales.fullName}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Accuracy: {accuracy.toFixed(1)}% | 
-                              Commission: {formatCurrency(potentialCommission)} ({commissionRate}%)
+                              Estimated:{' '}
+                              {formatCurrency(entry.estimatedRevenue)} | Target:{' '}
+                              {format(
+                                new Date(entry.targetDate),
+                                'MMM d, yyyy'
+                              )}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Accuracy: {accuracy.toFixed(1)}% | Commission:{' '}
+                              {formatCurrency(potentialCommission)} (
+                              {commissionRate}%)
                             </p>
                           </div>
                           <div className="flex items-center">
@@ -334,7 +399,9 @@ export function CommissionConflicts() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Resolution</AlertDialogTitle>
             <AlertDialogDescription>
-              This will assign the commission for job {selectedConflict?.jobId} to the selected sales person and remove all other competing entries. This action cannot be undone.
+              This will assign the commission for job {selectedConflict?.jobId}{' '}
+              to the selected sales person and remove all other competing
+              entries. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

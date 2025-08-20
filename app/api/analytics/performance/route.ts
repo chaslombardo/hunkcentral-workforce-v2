@@ -3,18 +3,21 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { calculateAllCaptainsPerformance } from '@/lib/payCalculator';
 import { convertUserDecimalFields } from '@/lib/decimal-utils';
-import type { 
-  User, 
-  DailyLog, 
+import type {
+  User,
+  DailyLog,
   LogJob,
   Department,
   PerformanceFilters,
-  PerformanceRankingsResponse 
+  PerformanceRankingsResponse,
 } from '@/types';
 
 // Cache configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-const performanceCache = new Map<string, { data: PerformanceRankingsResponse; timestamp: number }>();
+const performanceCache = new Map<
+  string,
+  { data: PerformanceRankingsResponse; timestamp: number }
+>();
 
 // Helper function to generate cache key
 function generateCacheKey(filters: PerformanceFilters): string {
@@ -35,9 +38,12 @@ function isCacheValid(timestamp: number): boolean {
 export async function GET(request: Request) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
     }
 
     // Parse query parameters for filters
@@ -83,7 +89,7 @@ export async function GET(request: Request) {
     if (!skipCache) {
       const cacheKey = generateCacheKey(filters);
       const cachedResult = performanceCache.get(cacheKey);
-      
+
       if (cachedResult && isCacheValid(cachedResult.timestamp)) {
         // Add cache headers
         const response = NextResponse.json(cachedResult.data);
@@ -293,7 +299,7 @@ export async function GET(request: Request) {
     });
 
     // Convert Decimal fields to numbers for calculation functions
-    const usersForCalculation: User[] = users.map(user => ({
+    const usersForCalculation: User[] = users.map((user) => ({
       ...convertUserDecimalFields(user),
       roles: user.roles as User['roles'],
       salaryFrequency: user.salaryFrequency as User['salaryFrequency'],
@@ -303,7 +309,7 @@ export async function GET(request: Request) {
     }));
 
     // Convert Prisma data to proper types for calculations
-    const logsForCalculation: DailyLog[] = approvedLogs.map(log => ({
+    const logsForCalculation: DailyLog[] = approvedLogs.map((log) => ({
       ...log,
       status: log.status as DailyLog['status'],
       submittedAt: log.submittedAt || undefined,
@@ -321,28 +327,35 @@ export async function GET(request: Request) {
       createdBy: {
         ...convertUserDecimalFields(log.createdBy),
         roles: log.createdBy.roles as User['roles'],
-        salaryFrequency: log.createdBy.salaryFrequency as User['salaryFrequency'],
+        salaryFrequency: log.createdBy
+          .salaryFrequency as User['salaryFrequency'],
         salaryType: log.createdBy.salaryType as User['salaryType'],
         junkBonusGoal: Number(log.createdBy.junkBonusGoal),
         moveBonusGoal: Number(log.createdBy.moveBonusGoal),
       },
-      approvedBy: log.approvedBy ? {
-        ...convertUserDecimalFields(log.approvedBy),
-        roles: log.approvedBy.roles as User['roles'],
-        salaryFrequency: log.approvedBy.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.approvedBy.salaryType as User['salaryType'],
-        junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
-        moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
-      } : undefined,
-      lastEditedBy: log.lastEditedBy ? {
-        ...convertUserDecimalFields(log.lastEditedBy),
-        roles: log.lastEditedBy.roles as User['roles'],
-        salaryFrequency: log.lastEditedBy.salaryFrequency as User['salaryFrequency'],
-        salaryType: log.lastEditedBy.salaryType as User['salaryType'],
-        junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
-        moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
-      } : undefined,
-      hours: log.hours.map(hour => ({
+      approvedBy: log.approvedBy
+        ? {
+            ...convertUserDecimalFields(log.approvedBy),
+            roles: log.approvedBy.roles as User['roles'],
+            salaryFrequency: log.approvedBy
+              .salaryFrequency as User['salaryFrequency'],
+            salaryType: log.approvedBy.salaryType as User['salaryType'],
+            junkBonusGoal: Number(log.approvedBy.junkBonusGoal),
+            moveBonusGoal: Number(log.approvedBy.moveBonusGoal),
+          }
+        : undefined,
+      lastEditedBy: log.lastEditedBy
+        ? {
+            ...convertUserDecimalFields(log.lastEditedBy),
+            roles: log.lastEditedBy.roles as User['roles'],
+            salaryFrequency: log.lastEditedBy
+              .salaryFrequency as User['salaryFrequency'],
+            salaryType: log.lastEditedBy.salaryType as User['salaryType'],
+            junkBonusGoal: Number(log.lastEditedBy.junkBonusGoal),
+            moveBonusGoal: Number(log.lastEditedBy.moveBonusGoal),
+          }
+        : undefined,
+      hours: log.hours.map((hour) => ({
         ...hour,
         log: {} as DailyLog, // Circular reference - will be set by parent
         department: hour.department as Department,
@@ -350,13 +363,14 @@ export async function GET(request: Request) {
         employee: {
           ...convertUserDecimalFields(hour.employee),
           roles: hour.employee.roles as User['roles'],
-          salaryFrequency: hour.employee.salaryFrequency as User['salaryFrequency'],
+          salaryFrequency: hour.employee
+            .salaryFrequency as User['salaryFrequency'],
           salaryType: hour.employee.salaryType as User['salaryType'],
           junkBonusGoal: Number(hour.employee.junkBonusGoal),
           moveBonusGoal: Number(hour.employee.moveBonusGoal),
         },
       })),
-      jobs: log.jobs.map(job => ({
+      jobs: log.jobs.map((job) => ({
         ...job,
         jobType: job.jobType as LogJob['jobType'],
         revenue: Number(job.revenue),
@@ -379,8 +393,10 @@ export async function GET(request: Request) {
     );
 
     // Filter captains if specific IDs were requested
-    const filteredCaptains = filters.captainIds 
-      ? captainPerformanceData.filter(captain => filters.captainIds!.includes(captain.captainId))
+    const filteredCaptains = filters.captainIds
+      ? captainPerformanceData.filter((captain) =>
+          filters.captainIds!.includes(captain.captainId)
+        )
       : captainPerformanceData;
 
     // Build response

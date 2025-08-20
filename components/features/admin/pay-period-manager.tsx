@@ -1,13 +1,20 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { format } from "date-fns"
-import { CalendarIcon, Plus, MoreHorizontal, Lock, Unlock, Archive } from "lucide-react"
-import { toast } from "sonner"
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import {
+  CalendarIcon,
+  Plus,
+  MoreHorizontal,
+  Lock,
+  Unlock,
+  Archive,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,19 +34,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 import {
   createPayPeriod,
@@ -48,108 +59,112 @@ import {
   deletePayPeriod,
   type PayPeriod,
   type CreatePayPeriodInput,
-} from "@/lib/actions/pay-periods"
+} from '@/lib/actions/pay-periods';
 
 export function PayPeriodManager() {
-  const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([])
-  const [loading, setLoading] = useState(true)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Load pay periods
   useEffect(() => {
-    loadPayPeriods()
-  }, [])
+    loadPayPeriods();
+  }, []);
 
   const loadPayPeriods = async () => {
     try {
-      const result = await getPayPeriods()
+      const result = await getPayPeriods();
       if (result.success && result.data) {
         // Sort pay periods chronologically by start date (most recent first)
-        const sortedPeriods = result.data.sort((a, b) => 
-          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-        )
-        setPayPeriods(sortedPeriods)
+        const sortedPeriods = result.data.sort(
+          (a, b) =>
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+        setPayPeriods(sortedPeriods);
       } else {
-        toast.error(result.error || "Failed to load pay periods")
+        toast.error(result.error || 'Failed to load pay periods');
       }
     } catch {
-      toast.error("Failed to load pay periods")
+      toast.error('Failed to load pay periods');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreatePayPeriod = async (data: CreatePayPeriodInput) => {
     try {
-      const result = await createPayPeriod(data)
+      const result = await createPayPeriod(data);
       if (result.success) {
-        toast.success("Pay period created successfully")
-        setCreateDialogOpen(false)
-        loadPayPeriods()
+        toast.success('Pay period created successfully');
+        setCreateDialogOpen(false);
+        loadPayPeriods();
       } else {
-        toast.error(result.error)
+        toast.error(result.error);
       }
     } catch {
-      toast.error("Failed to create pay period")
+      toast.error('Failed to create pay period');
     }
-  }
+  };
 
-  const handleStatusChange = async (id: string, status: "open" | "locked" | "closed") => {
+  const handleStatusChange = async (
+    id: string,
+    status: 'open' | 'locked' | 'closed'
+  ) => {
     try {
-      const result = await updatePayPeriodStatus({ id, status })
+      const result = await updatePayPeriodStatus({ id, status });
       if (result.success) {
-        toast.success(`Pay period ${status} successfully`)
-        loadPayPeriods()
+        toast.success(`Pay period ${status} successfully`);
+        loadPayPeriods();
       } else {
-        toast.error(result.error)
+        toast.error(result.error);
       }
     } catch {
-      toast.error("Failed to update pay period status")
+      toast.error('Failed to update pay period status');
     }
-  }
+  };
 
   const handleDeletePayPeriod = async (id: string) => {
     try {
-      const result = await deletePayPeriod(id)
+      const result = await deletePayPeriod(id);
       if (result.success) {
-        toast.success("Pay period deleted successfully")
-        loadPayPeriods()
+        toast.success('Pay period deleted successfully');
+        loadPayPeriods();
       } else {
-        toast.error(result.error)
+        toast.error(result.error);
       }
     } catch {
-      toast.error("Failed to delete pay period")
+      toast.error('Failed to delete pay period');
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "locked":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-      case "closed":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+      case 'open':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'locked':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      case 'closed':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "open":
-        return <Unlock className="h-3 w-3" />
-      case "locked":
-        return <Lock className="h-3 w-3" />
-      case "closed":
-        return <Archive className="h-3 w-3" />
+      case 'open':
+        return <Unlock className="h-3 w-3" />;
+      case 'locked':
+        return <Lock className="h-3 w-3" />;
+      case 'closed':
+        return <Archive className="h-3 w-3" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -187,10 +202,12 @@ export function PayPeriodManager() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {period.status === "open" && (
+                    {period.status === 'open' && (
                       <>
                         <DropdownMenuItem
-                          onClick={() => handleStatusChange(period.id, "locked")}
+                          onClick={() =>
+                            handleStatusChange(period.id, 'locked')
+                          }
                         >
                           <Lock className="mr-2 h-4 w-4" />
                           Lock Period
@@ -207,9 +224,12 @@ export function PayPeriodManager() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Pay Period</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Pay Period
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this pay period? This action cannot be undone.
+                                Are you sure you want to delete this pay period?
+                                This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -225,9 +245,9 @@ export function PayPeriodManager() {
                         </AlertDialog>
                       </>
                     )}
-                    {period.status === "locked" && (
+                    {period.status === 'locked' && (
                       <DropdownMenuItem
-                        onClick={() => handleStatusChange(period.id, "closed")}
+                        onClick={() => handleStatusChange(period.id, 'closed')}
                       >
                         <Archive className="mr-2 h-4 w-4" />
                         Close Period
@@ -236,7 +256,7 @@ export function PayPeriodManager() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Badge className={cn("w-fit", getStatusColor(period.status))}>
+              <Badge className={cn('w-fit', getStatusColor(period.status))}>
                 {getStatusIcon(period.status)}
                 <span className="ml-1 capitalize">{period.status}</span>
               </Badge>
@@ -245,19 +265,24 @@ export function PayPeriodManager() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Start Date:</span>
-                  <span>{format(new Date(period.startDate), "MMM dd, yyyy")}</span>
+                  <span>
+                    {format(new Date(period.startDate), 'MMM dd, yyyy')}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">End Date:</span>
-                  <span>{format(new Date(period.endDate), "MMM dd, yyyy")}</span>
+                  <span>
+                    {format(new Date(period.endDate), 'MMM dd, yyyy')}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Duration:</span>
                   <span>
                     {Math.ceil(
-                      (new Date(period.endDate).getTime() - new Date(period.startDate).getTime()) /
+                      (new Date(period.endDate).getTime() -
+                        new Date(period.startDate).getTime()) /
                         (1000 * 60 * 60 * 24)
-                    )}{" "}
+                    )}{' '}
                     days
                   </span>
                 </div>
@@ -283,37 +308,41 @@ export function PayPeriodManager() {
         </Card>
       )}
     </div>
-  )
+  );
 }
 
-function CreatePayPeriodDialog({ onSubmit }: { onSubmit: (data: CreatePayPeriodInput) => void }) {
-  const [name, setName] = useState("")
-  const [startDate, setStartDate] = useState<Date>()
-  const [endDate, setEndDate] = useState<Date>()
-  const [submitting, setSubmitting] = useState(false)
+function CreatePayPeriodDialog({
+  onSubmit,
+}: {
+  onSubmit: (data: CreatePayPeriodInput) => void;
+}) {
+  const [name, setName] = useState('');
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!name || !startDate || !endDate) {
-      toast.error("Please fill in all fields")
-      return
+      toast.error('Please fill in all fields');
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
       await onSubmit({
         name,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-      })
+      });
       // Reset form
-      setName("")
-      setStartDate(undefined)
-      setEndDate(undefined)
+      setName('');
+      setStartDate(undefined);
+      setEndDate(undefined);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <DialogContent className="sm:max-w-[425px]">
@@ -342,12 +371,12 @@ function CreatePayPeriodDialog({ onSubmit }: { onSubmit: (data: CreatePayPeriodI
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
+                    'justify-start text-left font-normal',
+                    !startDate && 'text-muted-foreground'
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : "Pick a date"}
+                  {startDate ? format(startDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -367,12 +396,12 @@ function CreatePayPeriodDialog({ onSubmit }: { onSubmit: (data: CreatePayPeriodI
                 <Button
                   variant="outline"
                   className={cn(
-                    "justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
+                    'justify-start text-left font-normal',
+                    !endDate && 'text-muted-foreground'
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : "Pick a date"}
+                  {endDate ? format(endDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -381,7 +410,7 @@ function CreatePayPeriodDialog({ onSubmit }: { onSubmit: (data: CreatePayPeriodI
                   selected={endDate}
                   onSelect={setEndDate}
                   initialFocus
-                  disabled={(date) => startDate ? date <= startDate : false}
+                  disabled={(date) => (startDate ? date <= startDate : false)}
                 />
               </PopoverContent>
             </Popover>
@@ -389,10 +418,10 @@ function CreatePayPeriodDialog({ onSubmit }: { onSubmit: (data: CreatePayPeriodI
         </div>
         <DialogFooter>
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Creating..." : "Create Pay Period"}
+            {submitting ? 'Creating...' : 'Create Pay Period'}
           </Button>
         </DialogFooter>
       </form>
     </DialogContent>
-  )
+  );
 }

@@ -25,28 +25,35 @@ import { cn } from '@/lib/utils';
 export function AuditFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const [entityType, setEntityType] = useState(searchParams.get('entityType') || 'all');
+
+  const [entityType, setEntityType] = useState(
+    searchParams.get('entityType') || 'all'
+  );
   const [action, setAction] = useState(searchParams.get('action') || 'all');
   const [userId, setUserId] = useState(searchParams.get('userId') || '');
   const [entityId, setEntityId] = useState(searchParams.get('entityId') || '');
   const [startDate, setStartDate] = useState<Date | undefined>(
-    searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined
+    searchParams.get('startDate')
+      ? new Date(searchParams.get('startDate')!)
+      : undefined
   );
   const [endDate, setEndDate] = useState<Date | undefined>(
-    searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
+    searchParams.get('endDate')
+      ? new Date(searchParams.get('endDate')!)
+      : undefined
   );
 
   const applyFilters = () => {
     const params = new URLSearchParams();
-    
-    if (entityType && entityType !== 'all') params.set('entityType', entityType);
+
+    if (entityType && entityType !== 'all')
+      params.set('entityType', entityType);
     if (action && action !== 'all') params.set('action', action);
     if (userId) params.set('userId', userId);
     if (entityId) params.set('entityId', entityId);
     if (startDate) params.set('startDate', startDate.toISOString());
     if (endDate) params.set('endDate', endDate.toISOString());
-    
+
     router.push(`/admin/audit?${params.toString()}`);
   };
 
@@ -124,12 +131,12 @@ export function AuditFilters() {
             <Button
               variant="outline"
               className={cn(
-                "w-full justify-start text-left font-normal",
-                !startDate && "text-muted-foreground"
+                'w-full justify-start text-left font-normal',
+                !startDate && 'text-muted-foreground'
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {startDate ? format(startDate, "PPP") : "Pick a date"}
+              {startDate ? format(startDate, 'PPP') : 'Pick a date'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
@@ -150,12 +157,12 @@ export function AuditFilters() {
             <Button
               variant="outline"
               className={cn(
-                "w-full justify-start text-left font-normal",
-                !endDate && "text-muted-foreground"
+                'w-full justify-start text-left font-normal',
+                !endDate && 'text-muted-foreground'
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {endDate ? format(endDate, "PPP") : "Pick a date"}
+              {endDate ? format(endDate, 'PPP') : 'Pick a date'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">

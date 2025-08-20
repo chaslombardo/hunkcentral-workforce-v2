@@ -5,7 +5,9 @@ This document outlines the accessibility standards and best practices implemente
 ## 🎯 Accessibility Standards
 
 ### WCAG 2.1 AA Compliance
+
 All components are designed and tested to meet:
+
 - **Level A**: Basic accessibility features
 - **Level AA**: Enhanced accessibility (our target)
 - **Level AAA**: Highest level (implemented where practical)
@@ -13,24 +15,28 @@ All components are designed and tested to meet:
 ### Core Principles
 
 #### 1. Perceivable
+
 - **Color contrast**: 4.5:1 minimum for normal text, 3:1 for large text
 - **Alternative text**: All images and icons have descriptive alt text
 - **Scalable text**: Text can be resized up to 200% without loss of functionality
 - **Color independence**: Information is not conveyed by color alone
 
 #### 2. Operable
+
 - **Keyboard navigation**: All interactive elements are keyboard accessible
 - **Focus indicators**: Clear, high-contrast focus indicators on all elements
 - **No seizure triggers**: No content flashes more than 3 times per second
 - **Sufficient time**: Users have adequate time to read and interact with content
 
 #### 3. Understandable
+
 - **Clear language**: Simple, concise language throughout the interface
 - **Consistent navigation**: Navigation patterns are consistent across pages
 - **Error identification**: Clear error messages with suggestions for correction
 - **Help and documentation**: Context-sensitive help is available
 
 #### 4. Robust
+
 - **Valid markup**: All HTML is valid and semantic
 - **Assistive technology**: Compatible with screen readers and other AT
 - **Future-proof**: Uses standard web technologies and practices
@@ -40,11 +46,13 @@ All components are designed and tested to meet:
 ### Brand Color Accessibility
 
 #### College Hunks Green (#026937)
+
 - **On white background**: 7.2:1 contrast ratio ✅ AAA
 - **On light backgrounds**: 4.8:1+ contrast ratio ✅ AA
 - **Usage**: Safe for all text sizes and UI elements
 
 #### College Hunks Orange (#ea7200)
+
 - **On white background**: 4.6:1 contrast ratio ✅ AA
 - **On light backgrounds**: 3.2:1+ contrast ratio ✅ AA (large text)
 - **Usage**: Safe for buttons and large text, use with caution for small text
@@ -52,6 +60,7 @@ All components are designed and tested to meet:
 ### Color Combinations
 
 #### Approved Combinations
+
 ```css
 /* High contrast - AAA compliant */
 .text-hunks-green.bg-white          /* 7.2:1 */
@@ -65,6 +74,7 @@ All components are designed and tested to meet:
 ```
 
 #### Avoid These Combinations
+
 ```css
 /* Insufficient contrast */
 .text-hunks-orange.bg-hunks-green   /* 1.6:1 - Too low */
@@ -73,14 +83,15 @@ All components are designed and tested to meet:
 ```
 
 ### Testing Color Contrast
+
 ```tsx
-import { checkContrast } from '@/lib/brand-colors'
+import { checkContrast } from '@/lib/brand-colors';
 
 // Check contrast programmatically
-const contrastResult = checkContrast('#026937', '#ffffff')
-console.log(`Contrast ratio: ${contrastResult.ratio}:1`)
-console.log(`AA compliant: ${contrastResult.aa}`)
-console.log(`AAA compliant: ${contrastResult.aaa}`)
+const contrastResult = checkContrast('#026937', '#ffffff');
+console.log(`Contrast ratio: ${contrastResult.ratio}:1`);
+console.log(`AA compliant: ${contrastResult.aa}`);
+console.log(`AAA compliant: ${contrastResult.aaa}`);
 ```
 
 ## ⌨️ Keyboard Navigation
@@ -88,7 +99,9 @@ console.log(`AAA compliant: ${contrastResult.aaa}`)
 ### Focus Management
 
 #### Focus Indicators
+
 All interactive elements have visible focus indicators:
+
 ```css
 .focus-visible:outline-none
 .focus-visible:ring-2
@@ -97,6 +110,7 @@ All interactive elements have visible focus indicators:
 ```
 
 #### Focus Order
+
 - **Logical sequence**: Tab order follows visual layout
 - **Skip links**: Skip navigation links for screen reader users
 - **Focus trapping**: Modal dialogs trap focus within them
@@ -105,12 +119,14 @@ All interactive elements have visible focus indicators:
 ### Keyboard Shortcuts
 
 #### Global Shortcuts
+
 - **Alt + M**: Skip to main content
 - **Alt + N**: Skip to navigation
 - **Escape**: Close modal dialogs and dropdowns
 - **Enter/Space**: Activate buttons and links
 
 #### Component-Specific Shortcuts
+
 ```tsx
 // BrandButton with custom shortcut
 <BrandButton shortcut="s" variant="primary">
@@ -129,23 +145,24 @@ All interactive elements have visible focus indicators:
 ```
 
 ### Implementation Example
+
 ```tsx
-import { keyboardUtils } from '@/lib/accessibility-utils'
+import { keyboardUtils } from '@/lib/accessibility-utils';
 
 function AccessibleComponent() {
   const handleKeyDown = (event: React.KeyboardEvent) => {
     // Check if it's an activation key (Enter or Space)
     if (keyboardUtils.isActivationKey(event)) {
-      event.preventDefault()
-      handleClick()
+      event.preventDefault();
+      handleClick();
     }
-    
+
     // Handle arrow key navigation
     if (keyboardUtils.isArrowKey(event)) {
-      handleArrowNavigation(event.key)
+      handleArrowNavigation(event.key);
     }
-  }
-  
+  };
+
   return (
     <div
       role="button"
@@ -155,7 +172,7 @@ function AccessibleComponent() {
     >
       Accessible Interactive Element
     </div>
-  )
+  );
 }
 ```
 
@@ -164,6 +181,7 @@ function AccessibleComponent() {
 ### ARIA Labels and Descriptions
 
 #### Proper Labeling
+
 ```tsx
 // Form inputs
 <SmartInput
@@ -192,6 +210,7 @@ function AccessibleComponent() {
 ```
 
 #### Live Regions
+
 ```tsx
 // Announce dynamic content changes
 <div aria-live="polite" aria-atomic="true">
@@ -219,6 +238,7 @@ function AccessibleComponent() {
 ### Semantic HTML
 
 #### Proper Structure
+
 ```tsx
 // Use semantic elements
 <main>
@@ -228,12 +248,12 @@ function AccessibleComponent() {
       {/* Navigation items */}
     </nav>
   </header>
-  
+
   <section aria-labelledby="dashboard-heading">
     <h2 id="dashboard-heading">Dashboard</h2>
     {/* Dashboard content */}
   </section>
-  
+
   <aside aria-label="Quick actions">
     {/* Sidebar content */}
   </aside>
@@ -246,7 +266,7 @@ function AccessibleComponent() {
     <SmartInput label="First Name" />
     <SmartInput label="Last Name" />
   </fieldset>
-  
+
   <fieldset>
     <legend>Contact Information</legend>
     <SmartInput label="Email" type="email" />
@@ -258,12 +278,14 @@ function AccessibleComponent() {
 ### Screen Reader Testing
 
 #### Testing Tools
+
 - **NVDA** (Windows) - Free screen reader
 - **JAWS** (Windows) - Professional screen reader
 - **VoiceOver** (macOS/iOS) - Built-in screen reader
 - **TalkBack** (Android) - Built-in screen reader
 
 #### Testing Checklist
+
 ```tsx
 // Test with screen reader
 const AccessibilityTest = () => {
@@ -271,21 +293,18 @@ const AccessibilityTest = () => {
     <div>
       {/* ✅ All images have alt text */}
       <img src="chart.png" alt="Revenue increased 15% this month" />
-      
       {/* ✅ Form labels are properly associated */}
       <label htmlFor="email">Email Address</label>
       <input id="email" type="email" />
-      
       {/* ✅ Buttons have descriptive text */}
       <button>Save Changes</button> {/* Not just "Save" */}
-      
       {/* ✅ Status is announced */}
       <div role="status" aria-live="polite">
         Form saved successfully
       </div>
     </div>
-  )
-}
+  );
+};
 ```
 
 ## 📱 Mobile Accessibility
@@ -293,6 +312,7 @@ const AccessibilityTest = () => {
 ### Touch Targets
 
 #### Minimum Sizes
+
 - **iOS**: 44px × 44px minimum
 - **Android**: 48px × 48px minimum
 - **Spacing**: 8px minimum between targets
@@ -316,6 +336,7 @@ const AccessibilityTest = () => {
 ### Mobile Screen Readers
 
 #### iOS VoiceOver
+
 ```tsx
 // Proper heading structure for VoiceOver navigation
 <h1>Main Page Title</h1>
@@ -333,6 +354,7 @@ const AccessibilityTest = () => {
 ```
 
 #### Android TalkBack
+
 ```tsx
 // Content descriptions for TalkBack
 <MetricCard
@@ -348,13 +370,14 @@ const AccessibilityTest = () => {
 ### Reduced Motion Support
 
 #### Respecting User Preferences
+
 ```css
 /* CSS approach */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin {
     animation: none;
   }
-  
+
   .transition-all {
     transition: none;
   }
@@ -363,11 +386,11 @@ const AccessibilityTest = () => {
 
 ```tsx
 // React approach
-import { useMotionPreference } from '@/lib/motion-preferences'
+import { useMotionPreference } from '@/lib/motion-preferences';
 
 function AnimatedComponent() {
-  const { prefersReducedMotion } = useMotionPreference()
-  
+  const { prefersReducedMotion } = useMotionPreference();
+
   return (
     <div
       className={cn(
@@ -377,11 +400,12 @@ function AnimatedComponent() {
     >
       Content
     </div>
-  )
+  );
 }
 ```
 
 #### Component Implementation
+
 ```tsx
 // BrandButton respects motion preferences
 <BrandButton
@@ -409,48 +433,51 @@ function AnimatedComponent() {
 ### Automated Testing
 
 #### axe-core Integration
-```tsx
-import { axe, toHaveNoViolations } from 'jest-axe'
 
-expect.extend(toHaveNoViolations)
+```tsx
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
 
 describe('Accessibility Tests', () => {
   it('should not have accessibility violations', async () => {
-    const { container } = render(<MyComponent />)
-    const results = await axe(container)
-    expect(results).toHaveNoViolations()
-  })
-})
+    const { container } = render(<MyComponent />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+});
 ```
 
 #### Custom Accessibility Tests
+
 ```tsx
-import { render, screen } from '@testing-library/react'
-import { checkAccessibility } from '@/lib/accessibility-utils'
+import { render, screen } from '@testing-library/react';
+import { checkAccessibility } from '@/lib/accessibility-utils';
 
 describe('Component Accessibility', () => {
   it('has proper ARIA labels', () => {
-    render(<BrandButton variant="primary">Save</BrandButton>)
-    const button = screen.getByRole('button', { name: /save/i })
-    expect(button).toHaveAttribute('aria-label')
-  })
-  
+    render(<BrandButton variant="primary">Save</BrandButton>);
+    const button = screen.getByRole('button', { name: /save/i });
+    expect(button).toHaveAttribute('aria-label');
+  });
+
   it('supports keyboard navigation', () => {
-    render(<SmartInput label="Email" />)
-    const input = screen.getByLabelText(/email/i)
-    
-    input.focus()
-    expect(input).toHaveFocus()
-    
-    fireEvent.keyDown(input, { key: 'Tab' })
-    expect(input).not.toHaveFocus()
-  })
-})
+    render(<SmartInput label="Email" />);
+    const input = screen.getByLabelText(/email/i);
+
+    input.focus();
+    expect(input).toHaveFocus();
+
+    fireEvent.keyDown(input, { key: 'Tab' });
+    expect(input).not.toHaveFocus();
+  });
+});
 ```
 
 ### Manual Testing Checklist
 
 #### Keyboard Testing
+
 - [ ] All interactive elements are reachable via keyboard
 - [ ] Tab order is logical and follows visual layout
 - [ ] Focus indicators are visible and high contrast
@@ -458,6 +485,7 @@ describe('Component Accessibility', () => {
 - [ ] Escape key closes modals and dropdowns
 
 #### Screen Reader Testing
+
 - [ ] All content is announced properly
 - [ ] Form labels are associated with inputs
 - [ ] Error messages are announced
@@ -465,12 +493,14 @@ describe('Component Accessibility', () => {
 - [ ] Headings create proper document outline
 
 #### Color and Contrast Testing
+
 - [ ] All text meets minimum contrast ratios
 - [ ] Information is not conveyed by color alone
 - [ ] Focus indicators are visible in high contrast mode
 - [ ] Components work with Windows High Contrast mode
 
 #### Mobile Testing
+
 - [ ] Touch targets are minimum 44px × 44px
 - [ ] Content is readable at 200% zoom
 - [ ] Screen reader navigation works on mobile
@@ -479,6 +509,7 @@ describe('Component Accessibility', () => {
 ## 📚 Resources and Tools
 
 ### Testing Tools
+
 - **axe DevTools** - Browser extension for accessibility testing
 - **WAVE** - Web accessibility evaluation tool
 - **Lighthouse** - Built-in Chrome accessibility audit
@@ -486,18 +517,21 @@ describe('Component Accessibility', () => {
 - **Stark** - Design tool accessibility plugin
 
 ### Screen Readers
+
 - **NVDA** - Free Windows screen reader
 - **JAWS** - Professional Windows screen reader
 - **VoiceOver** - Built-in macOS/iOS screen reader
 - **TalkBack** - Built-in Android screen reader
 
 ### Guidelines and Standards
+
 - **WCAG 2.1** - Web Content Accessibility Guidelines
 - **Section 508** - US federal accessibility requirements
 - **ADA** - Americans with Disabilities Act
 - **EN 301 549** - European accessibility standard
 
 ### Development Resources
+
 ```tsx
 // Accessibility utility functions
 import {
@@ -505,14 +539,14 @@ import {
   keyboardUtils,
   generateAccessibilityId,
   announceToScreenReader,
-  checkContrast
-} from '@/lib/accessibility-utils'
+  checkContrast,
+} from '@/lib/accessibility-utils';
 
 // Motion preference detection
-import { useMotionPreference } from '@/lib/motion-preferences'
+import { useMotionPreference } from '@/lib/motion-preferences';
 
 // Color contrast checking
-import { checkContrast } from '@/lib/brand-colors'
+import { checkContrast } from '@/lib/brand-colors';
 ```
 
 ## 🎯 Implementation Guidelines
@@ -520,6 +554,7 @@ import { checkContrast } from '@/lib/brand-colors'
 ### For Developers
 
 #### Code Review Checklist
+
 - [ ] All interactive elements have proper ARIA labels
 - [ ] Color contrast meets WCAG AA standards
 - [ ] Keyboard navigation is fully functional
@@ -528,6 +563,7 @@ import { checkContrast } from '@/lib/brand-colors'
 - [ ] Motion preferences are respected
 
 #### Component Development
+
 ```tsx
 // Template for accessible component
 function AccessibleComponent({
@@ -535,9 +571,9 @@ function AccessibleComponent({
   'aria-describedby': ariaDescribedBy,
   ...props
 }) {
-  const id = useId()
-  const descriptionId = `${id}-description`
-  
+  const id = useId();
+  const descriptionId = `${id}-description`;
+
   return (
     <div
       role="button"
@@ -554,13 +590,14 @@ function AccessibleComponent({
         Additional description for screen readers
       </div>
     </div>
-  )
+  );
 }
 ```
 
 ### For Designers
 
 #### Design Checklist
+
 - [ ] Color combinations meet contrast requirements
 - [ ] Focus states are designed for all interactive elements
 - [ ] Touch targets are appropriately sized
@@ -568,6 +605,7 @@ function AccessibleComponent({
 - [ ] Information hierarchy is clear without color
 
 #### Accessibility Annotations
+
 ```tsx
 // Include accessibility notes in design specs
 const DesignSpec = {
@@ -576,9 +614,9 @@ const DesignSpec = {
     colorContrast: '7.2:1 (AAA compliant)',
     focusIndicator: '2px ring with 2px offset',
     touchTarget: '44px minimum height',
-    screenReader: 'Button text is descriptive and actionable'
-  }
-}
+    screenReader: 'Button text is descriptive and actionable',
+  },
+};
 ```
 
 This accessibility guide ensures that all HUNKCentral interfaces are usable by everyone, regardless of their abilities or the assistive technologies they use.

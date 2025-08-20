@@ -105,24 +105,32 @@ export function AuditTrailLink({
           <div className="space-y-2">
             <Separator />
             <div className="text-sm">
-              <span className="text-muted-foreground">Additional Compensation:</span>
+              <span className="text-muted-foreground">
+                Additional Compensation:
+              </span>
               <div className="space-y-1 mt-1">
                 {entry.tips > 0 && (
                   <div className="flex justify-between">
                     <span>Tips:</span>
-                    <span className="font-mono">{formatCurrency(entry.tips)}</span>
+                    <span className="font-mono">
+                      {formatCurrency(entry.tips)}
+                    </span>
                   </div>
                 )}
                 {entry.bonuses > 0 && (
                   <div className="flex justify-between">
                     <span>Bonuses:</span>
-                    <span className="font-mono">{formatCurrency(entry.bonuses)}</span>
+                    <span className="font-mono">
+                      {formatCurrency(entry.bonuses)}
+                    </span>
                   </div>
                 )}
                 {entry.commission > 0 && (
                   <div className="flex justify-between">
                     <span>Commission:</span>
-                    <span className="font-mono">{formatCurrency(entry.commission)}</span>
+                    <span className="font-mono">
+                      {formatCurrency(entry.commission)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -168,7 +176,9 @@ export function AuditTrailLink({
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/audit?entityId=${entry.logId}&entityType=daily_log`}>
+          <Link
+            href={`/admin/audit?entityId=${entry.logId}&entityType=daily_log`}
+          >
             <History className="mr-1 h-3 w-3" />
             Full Audit
           </Link>
@@ -180,9 +190,7 @@ export function AuditTrailLink({
   if (showDetails) {
     return (
       <Popover open={showPopover} onOpenChange={setShowPopover}>
-        <PopoverTrigger asChild>
-          {renderTrigger()}
-        </PopoverTrigger>
+        <PopoverTrigger asChild>{renderTrigger()}</PopoverTrigger>
         <PopoverContent className="w-auto p-4" align="start">
           {auditContent}
         </PopoverContent>
@@ -192,9 +200,7 @@ export function AuditTrailLink({
 
   return (
     <HoverCard>
-      <HoverCardTrigger asChild>
-        {renderTrigger()}
-      </HoverCardTrigger>
+      <HoverCardTrigger asChild>{renderTrigger()}</HoverCardTrigger>
       <HoverCardContent className="w-auto p-4" align="start">
         {auditContent}
       </HoverCardContent>
@@ -216,10 +222,13 @@ export function AuditTrailSummary({
   const totalGrossPay = entries.reduce((sum, entry) => sum + entry.grossPay, 0);
   const totalTips = entries.reduce((sum, entry) => sum + entry.tips, 0);
   const totalBonuses = entries.reduce((sum, entry) => sum + entry.bonuses, 0);
-  const totalCommission = entries.reduce((sum, entry) => sum + entry.commission, 0);
+  const totalCommission = entries.reduce(
+    (sum, entry) => sum + entry.commission,
+    0
+  );
 
-  const uniqueLogs = [...new Set(entries.map(entry => entry.logId))];
-  const departments = [...new Set(entries.map(entry => entry.department))];
+  const uniqueLogs = [...new Set(entries.map((entry) => entry.logId))];
+  const departments = [...new Set(entries.map((entry) => entry.department))];
 
   return (
     <div className="space-y-4">
@@ -229,7 +238,9 @@ export function AuditTrailSummary({
           Audit Trail Summary
         </h3>
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/audit?entityType=daily_log&employeeId=${employeeId}`}>
+          <Link
+            href={`/admin/audit?entityType=daily_log&employeeId=${employeeId}`}
+          >
             <History className="mr-1 h-4 w-4" />
             Full Audit History
           </Link>
@@ -250,7 +261,11 @@ export function AuditTrailSummary({
           <div className="text-sm text-muted-foreground">Total Hours</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold">{formatCurrency(totalGrossPay + totalTips + totalBonuses + totalCommission)}</div>
+          <div className="text-2xl font-bold">
+            {formatCurrency(
+              totalGrossPay + totalTips + totalBonuses + totalCommission
+            )}
+          </div>
           <div className="text-sm text-muted-foreground">Total Pay</div>
         </div>
       </div>
@@ -259,7 +274,10 @@ export function AuditTrailSummary({
         <h4 className="font-medium">Recent Entries</h4>
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {entries.slice(0, 5).map((entry, index) => (
-            <div key={index} className="flex items-center justify-between p-2 border rounded">
+            <div
+              key={index}
+              className="flex items-center justify-between p-2 border rounded"
+            >
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs capitalize">
                   {entry.department}

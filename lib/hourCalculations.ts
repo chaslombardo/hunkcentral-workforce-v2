@@ -28,8 +28,8 @@ export function calculateSectionHours(
   section?: 'junk' | 'move' | 'other'
 ): HourCalculationResult {
   // Filter hours by section if specified
-  const sectionHours = section 
-    ? hours.filter(h => {
+  const sectionHours = section
+    ? hours.filter((h) => {
         if (section === 'other') {
           return !['junk', 'move'].includes(h.department);
         }
@@ -38,22 +38,25 @@ export function calculateSectionHours(
     : hours;
 
   const employeeMap = new Map<string, User>();
-  employees.forEach(emp => employeeMap.set(emp.id, emp));
+  employees.forEach((emp) => employeeMap.set(emp.id, emp));
 
-  const employeeSummaryMap = new Map<string, {
-    employeeId: string;
-    employeeName: string;
-    totalHours: number;
-    laborCost: number;
-    isCoCaptain: boolean;
-    departments: Map<string, number>;
-  }>();
+  const employeeSummaryMap = new Map<
+    string,
+    {
+      employeeId: string;
+      employeeName: string;
+      totalHours: number;
+      laborCost: number;
+      isCoCaptain: boolean;
+      departments: Map<string, number>;
+    }
+  >();
 
   let totalHours = 0;
   let totalLaborCost = 0;
 
   // Process each hour entry
-  sectionHours.forEach(hourEntry => {
+  sectionHours.forEach((hourEntry) => {
     const employee = employeeMap.get(hourEntry.employeeId);
     if (!employee) return;
 
@@ -61,7 +64,11 @@ export function calculateSectionHours(
     totalHours += hours;
 
     // Calculate labor cost based on department and co-captain status
-    const rate = getHourlyRate(employee, hourEntry.department, hourEntry.isCoCaptain);
+    const rate = getHourlyRate(
+      employee,
+      hourEntry.department,
+      hourEntry.isCoCaptain
+    );
     const laborCost = hours * rate;
     totalLaborCost += laborCost;
 
@@ -78,7 +85,7 @@ export function calculateSectionHours(
     } else {
       const departments = new Map<string, number>();
       departments.set(hourEntry.department, hours);
-      
+
       employeeSummaryMap.set(hourEntry.employeeId, {
         employeeId: hourEntry.employeeId,
         employeeName: employee.fullName,
@@ -91,13 +98,17 @@ export function calculateSectionHours(
   });
 
   // Convert employee summary to array
-  const employeeSummary = Array.from(employeeSummaryMap.values()).map(emp => ({
-    ...emp,
-    departments: Array.from(emp.departments.entries()).map(([department, hours]) => ({
-      department,
-      hours,
-    })),
-  }));
+  const employeeSummary = Array.from(employeeSummaryMap.values()).map(
+    (emp) => ({
+      ...emp,
+      departments: Array.from(emp.departments.entries()).map(
+        ([department, hours]) => ({
+          department,
+          hours,
+        })
+      ),
+    })
+  );
 
   return {
     totalHours,
@@ -118,42 +129,42 @@ export function getHourlyRate(
   if (isCoCaptain) {
     switch (department) {
       case 'junk':
-        return employee.rateJunkCaptain || 20.00;
+        return employee.rateJunkCaptain || 20.0;
       case 'move':
-        return employee.rateMoveCaptain || 22.00;
+        return employee.rateMoveCaptain || 22.0;
       case 'zigma':
-        return employee.rateZigma || 18.00;
+        return employee.rateZigma || 18.0;
       case 'training':
-        return employee.rateTraining || 16.00;
+        return employee.rateTraining || 16.0;
       case 'estimating':
-        return employee.rateEstimating || 25.00;
+        return employee.rateEstimating || 25.0;
       case 'warehouse':
-        return employee.rateWarehouse || 14.00;
+        return employee.rateWarehouse || 14.0;
       case 'admin':
-        return employee.rateAdmin || 20.00;
+        return employee.rateAdmin || 20.0;
       default:
-        return employee.rateJunkCaptain || 20.00;
+        return employee.rateJunkCaptain || 20.0;
     }
   }
 
   // Use regular rates based on department
   switch (department) {
     case 'junk':
-      return employee.rateJunkWingman || 15.00;
+      return employee.rateJunkWingman || 15.0;
     case 'move':
-      return employee.rateMoveWingman || 17.00;
+      return employee.rateMoveWingman || 17.0;
     case 'zigma':
-      return employee.rateZigma || 18.00;
+      return employee.rateZigma || 18.0;
     case 'training':
-      return employee.rateTraining || 16.00;
+      return employee.rateTraining || 16.0;
     case 'estimating':
-      return employee.rateEstimating || 25.00;
+      return employee.rateEstimating || 25.0;
     case 'warehouse':
-      return employee.rateWarehouse || 14.00;
+      return employee.rateWarehouse || 14.0;
     case 'admin':
-      return employee.rateAdmin || 20.00;
+      return employee.rateAdmin || 20.0;
     default:
-      return employee.rateJunkWingman || 15.00;
+      return employee.rateJunkWingman || 15.0;
   }
 }
 
@@ -164,9 +175,9 @@ export function calculateTipsPerHunk(
   totalTips: number,
   hours: LogHourFormData[]
 ): number {
-  const uniqueEmployees = new Set(hours.map(h => h.employeeId));
+  const uniqueEmployees = new Set(hours.map((h) => h.employeeId));
   const employeeCount = uniqueEmployees.size;
-  
+
   return employeeCount > 0 ? totalTips / employeeCount : 0;
 }
 
@@ -185,27 +196,31 @@ export function calculateLaborCostPercentage(
  */
 export function validateHourEntries(hours: LogHourFormData[]): string[] {
   const errors: string[] = [];
-  
+
   // Check for duplicate employee-department combinations
   const combinations = new Set<string>();
   hours.forEach((hour, index) => {
     const key = `${hour.employeeId}-${hour.department}`;
     if (combinations.has(key)) {
-      errors.push(`Employee cannot have multiple entries for the same department (entry ${index + 1})`);
+      errors.push(
+        `Employee cannot have multiple entries for the same department (entry ${index + 1})`
+      );
     }
     combinations.add(key);
   });
 
   // Check for reasonable hour limits (max 24 hours per employee per day)
   const employeeHours = new Map<string, number>();
-  hours.forEach(hour => {
+  hours.forEach((hour) => {
     const current = employeeHours.get(hour.employeeId) || 0;
     employeeHours.set(hour.employeeId, current + hour.hours);
   });
 
   employeeHours.forEach((totalHours, employeeId) => {
     if (totalHours > 24) {
-      errors.push(`Employee ${employeeId} has more than 24 hours total (${totalHours} hours)`);
+      errors.push(
+        `Employee ${employeeId} has more than 24 hours total (${totalHours} hours)`
+      );
     }
   });
 

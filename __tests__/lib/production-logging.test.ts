@@ -11,8 +11,12 @@ import {
 } from '@/lib/production-logger';
 
 // Mock process.stdout and process.stderr
-const mockStdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-const mockStderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+const mockStdout = vi
+  .spyOn(process.stdout, 'write')
+  .mockImplementation(() => true);
+const mockStderr = vi
+  .spyOn(process.stderr, 'write')
+  .mockImplementation(() => true);
 
 describe('Production Logger', () => {
   beforeEach(() => {
@@ -57,8 +61,10 @@ describe('Production Logger', () => {
 
       const logCall = mockStdout.mock.calls[0][0] as string;
       const logEntry = JSON.parse(logCall);
-      
-      expect(logEntry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+
+      expect(logEntry.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+      );
     });
   });
 
@@ -246,7 +252,7 @@ describe('Production Logger', () => {
 
       // All calls should include the request context
       expect(mockStdout).toHaveBeenCalledTimes(5);
-      
+
       mockStdout.mock.calls.forEach((call) => {
         const logEntry = JSON.parse(call[0] as string);
         expect(logEntry.requestId).toBe('req123');

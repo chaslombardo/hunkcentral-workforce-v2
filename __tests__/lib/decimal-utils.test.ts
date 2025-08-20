@@ -65,9 +65,9 @@ describe('decimal-utils', () => {
 
       const result = convertUserDecimalFields(user);
 
-      expect(result.rateJunkCaptain).toBe(25.50);
-      expect(result.rateJunkWingman).toBe(20.00);
-      expect(result.salaryAmount).toBe(50000.00);
+      expect(result.rateJunkCaptain).toBe(25.5);
+      expect(result.rateJunkWingman).toBe(20.0);
+      expect(result.salaryAmount).toBe(50000.0);
       expect(result.commissionRate).toBe(0.05);
       expect(result.junkBonusGoal).toBe(0.14);
       expect(result.moveBonusGoal).toBe(0.24);
@@ -94,12 +94,12 @@ describe('decimal-utils', () => {
 
       const result = convertLogJobDecimalFields(job);
 
-      expect(result.revenue).toBe(1500.00);
-      expect(result.tips).toBe(75.50);
-      expect(result.junkOnMove).toBe(200.00);
-      expect(result.valuation).toBe(5000.00);
-      expect(result.materials).toBe(150.00);
-      expect(result.disposalCost).toBe(100.00);
+      expect(result.revenue).toBe(1500.0);
+      expect(result.tips).toBe(75.5);
+      expect(result.junkOnMove).toBe(200.0);
+      expect(result.valuation).toBe(5000.0);
+      expect(result.materials).toBe(150.0);
+      expect(result.disposalCost).toBe(100.0);
       expect(result.id).toBe('job-id');
       expect(result.jobType).toBe('junk');
     });
@@ -139,9 +139,9 @@ describe('decimal-utils', () => {
 
       const result = convertCommissionDecimalFields(commission);
 
-      expect(result.estimatedRevenue).toBe(1000.00);
-      expect(result.actualRevenue).toBe(1200.00);
-      expect(result.commissionAmount).toBe(60.00);
+      expect(result.estimatedRevenue).toBe(1000.0);
+      expect(result.actualRevenue).toBe(1200.0);
+      expect(result.commissionAmount).toBe(60.0);
       expect(result.id).toBe('comm-id');
       expect(result.status).toBe('matched');
     });
@@ -159,7 +159,7 @@ describe('decimal-utils', () => {
 
       const result = convertCommissionDecimalFields(commission);
 
-      expect(result.estimatedRevenue).toBe(1000.00);
+      expect(result.estimatedRevenue).toBe(1000.0);
       expect(result.actualRevenue).toBe(null);
       expect(result.commissionAmount).toBe(null);
     });

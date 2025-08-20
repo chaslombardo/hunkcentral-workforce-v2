@@ -27,11 +27,21 @@ export type SalaryFrequency = 'weekly' | 'bi-weekly' | 'monthly';
 
 export type DiscrepancyPriority = 'low' | 'medium' | 'high' | 'critical';
 
-export type DiscrepancyCategory = 'calculation' | 'data_integrity' | 'rate_issue' | 'hours_mismatch' | 'tips_error' | 'other';
+export type DiscrepancyCategory =
+  | 'calculation'
+  | 'data_integrity'
+  | 'rate_issue'
+  | 'hours_mismatch'
+  | 'tips_error'
+  | 'other';
 
 export type DiscrepancySeverity = 'low' | 'medium' | 'high' | 'critical';
 
-export type DiscrepancyStatus = 'open' | 'investigating' | 'resolved' | 'dismissed';
+export type DiscrepancyStatus =
+  | 'open'
+  | 'investigating'
+  | 'resolved'
+  | 'dismissed';
 
 export interface User {
   id: string;

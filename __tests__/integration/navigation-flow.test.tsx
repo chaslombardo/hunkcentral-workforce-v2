@@ -1,6 +1,6 @@
 /**
  * Navigation Flow Integration Tests
- * 
+ *
  * Tests for the enhanced navigation system including smart breadcrumbs,
  * unified mobile navigation, and navigation state management.
  */
@@ -31,9 +31,7 @@ vi.mock('next/navigation', () => ({
 // Mock navigation context
 const mockNavigationContext = {
   currentPath: '/dashboard',
-  breadcrumbs: [
-    { label: 'Dashboard', href: '/dashboard' }
-  ],
+  breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }],
   navigationState: {
     pendingLogs: 3,
     draftLogs: 1,
@@ -44,21 +42,43 @@ const mockNavigationContext = {
 
 vi.mock('@/contexts/navigation-context', () => ({
   useNavigationContext: () => mockNavigationContext,
-  NavigationProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  NavigationProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  Home: ({ className }: { className?: string }) => <div data-testid="home-icon" className={className} />,
-  FileText: ({ className }: { className?: string }) => <div data-testid="file-icon" className={className} />,
-  DollarSign: ({ className }: { className?: string }) => <div data-testid="dollar-icon" className={className} />,
-  BarChart3: ({ className }: { className?: string }) => <div data-testid="chart-icon" className={className} />,
-  Settings: ({ className }: { className?: string }) => <div data-testid="settings-icon" className={className} />,
-  Users: ({ className }: { className?: string }) => <div data-testid="users-icon" className={className} />,
-  ChevronRight: ({ className }: { className?: string }) => <div data-testid="chevron-right-icon" className={className} />,
-  Menu: ({ className }: { className?: string }) => <div data-testid="menu-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  Bell: ({ className }: { className?: string }) => <div data-testid="bell-icon" className={className} />,
+  Home: ({ className }: { className?: string }) => (
+    <div data-testid="home-icon" className={className} />
+  ),
+  FileText: ({ className }: { className?: string }) => (
+    <div data-testid="file-icon" className={className} />
+  ),
+  DollarSign: ({ className }: { className?: string }) => (
+    <div data-testid="dollar-icon" className={className} />
+  ),
+  BarChart3: ({ className }: { className?: string }) => (
+    <div data-testid="chart-icon" className={className} />
+  ),
+  Settings: ({ className }: { className?: string }) => (
+    <div data-testid="settings-icon" className={className} />
+  ),
+  Users: ({ className }: { className?: string }) => (
+    <div data-testid="users-icon" className={className} />
+  ),
+  ChevronRight: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-right-icon" className={className} />
+  ),
+  Menu: ({ className }: { className?: string }) => (
+    <div data-testid="menu-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  Bell: ({ className }: { className?: string }) => (
+    <div data-testid="bell-icon" className={className} />
+  ),
 }));
 
 // Import components to test
@@ -135,12 +155,18 @@ describe('Navigation Flow Integration Tests', () => {
     it('is responsive on mobile devices', () => {
       const breadcrumbs = [
         { label: 'Dashboard', href: '/dashboard' },
-        { label: 'Very Long Page Name That Should Truncate', href: '/long-page', current: true },
+        {
+          label: 'Very Long Page Name That Should Truncate',
+          href: '/long-page',
+          current: true,
+        },
       ];
 
       render(<SmartBreadcrumbs breadcrumbs={breadcrumbs} />);
 
-      const longPageName = screen.getByText('Very Long Page Name That Should Truncate');
+      const longPageName = screen.getByText(
+        'Very Long Page Name That Should Truncate'
+      );
       expect(longPageName).toHaveClass('truncate'); // Should truncate on mobile
     });
   });
@@ -186,7 +212,9 @@ describe('Navigation Flow Integration Tests', () => {
 
     it('shows active state for current page', () => {
       // Mock current path as logs
-      vi.mocked(require('next/navigation').usePathname).mockReturnValue('/logs');
+      vi.mocked(require('next/navigation').usePathname).mockReturnValue(
+        '/logs'
+      );
 
       render(<EnhancedSidebar user={mockUser} />);
 
@@ -237,7 +265,7 @@ describe('Navigation Flow Integration Tests', () => {
       render(<MobileNavigation user={mockUser} />);
 
       const navButtons = screen.getAllByRole('button');
-      navButtons.forEach(button => {
+      navButtons.forEach((button) => {
         const styles = window.getComputedStyle(button);
         // Should have minimum 48px touch targets
         expect(button).toHaveClass('h-12'); // 48px in Tailwind
@@ -286,7 +314,11 @@ describe('Navigation Flow Integration Tests', () => {
 
   describe('Navigation State Management', () => {
     it('updates navigation badges when state changes', async () => {
-      const { rerender } = render(<NavigationBadges navigationState={mockNavigationContext.navigationState} />);
+      const { rerender } = render(
+        <NavigationBadges
+          navigationState={mockNavigationContext.navigationState}
+        />
+      );
 
       expect(screen.getByText('3')).toBeInTheDocument(); // Initial pending logs
 
@@ -304,10 +336,10 @@ describe('Navigation Flow Integration Tests', () => {
     it('handles real-time updates from server', async () => {
       // Mock WebSocket or polling updates
       const mockUpdateState = vi.fn();
-      
+
       render(
         <div data-testid="navigation-container">
-          <NavigationBadges 
+          <NavigationBadges
             navigationState={mockNavigationContext.navigationState}
             onStateUpdate={mockUpdateState}
           />
@@ -315,9 +347,12 @@ describe('Navigation Flow Integration Tests', () => {
       );
 
       // Simulate server update
-      fireEvent(window, new CustomEvent('navigation-update', {
-        detail: { pendingLogs: 7 }
-      }));
+      fireEvent(
+        window,
+        new CustomEvent('navigation-update', {
+          detail: { pendingLogs: 7 },
+        })
+      );
 
       await waitFor(() => {
         expect(mockUpdateState).toHaveBeenCalledWith({ pendingLogs: 7 });
@@ -327,7 +362,9 @@ describe('Navigation Flow Integration Tests', () => {
     it('persists navigation state across page reloads', () => {
       // Mock localStorage
       const mockLocalStorage = {
-        getItem: vi.fn(() => JSON.stringify(mockNavigationContext.navigationState)),
+        getItem: vi.fn(() =>
+          JSON.stringify(mockNavigationContext.navigationState)
+        ),
         setItem: vi.fn(),
       };
 
@@ -335,7 +372,11 @@ describe('Navigation Flow Integration Tests', () => {
         value: mockLocalStorage,
       });
 
-      render(<NavigationBadges navigationState={mockNavigationContext.navigationState} />);
+      render(
+        <NavigationBadges
+          navigationState={mockNavigationContext.navigationState}
+        />
+      );
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('navigation-state');
     });
@@ -346,23 +387,23 @@ describe('Navigation Flow Integration Tests', () => {
       const TestNavigationFlow = () => {
         const [currentPath, setCurrentPath] = React.useState('/dashboard');
         const [breadcrumbs, setBreadcrumbs] = React.useState([
-          { label: 'Dashboard', href: '/dashboard', current: true }
+          { label: 'Dashboard', href: '/dashboard', current: true },
         ]);
 
         const handleNavigation = (path: string) => {
           setCurrentPath(path);
-          
+
           // Update breadcrumbs based on path
           if (path === '/logs') {
             setBreadcrumbs([
               { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Logs', href: '/logs', current: true }
+              { label: 'Logs', href: '/logs', current: true },
             ]);
           } else if (path === '/logs/create') {
             setBreadcrumbs([
               { label: 'Dashboard', href: '/dashboard' },
               { label: 'Logs', href: '/logs' },
-              { label: 'Create Log', href: '/logs/create', current: true }
+              { label: 'Create Log', href: '/logs/create', current: true },
             ]);
           }
         };
@@ -370,10 +411,7 @@ describe('Navigation Flow Integration Tests', () => {
         return (
           <div data-testid="navigation-flow">
             <SmartBreadcrumbs breadcrumbs={breadcrumbs} />
-            <EnhancedSidebar 
-              user={mockUser} 
-              onNavigate={handleNavigation}
-            />
+            <EnhancedSidebar user={mockUser} onNavigate={handleNavigation} />
           </div>
         );
       };
@@ -436,7 +474,9 @@ describe('Navigation Flow Integration Tests', () => {
       // Mock navigation error
       mockPush.mockRejectedValueOnce(new Error('Navigation failed'));
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       render(<EnhancedSidebar user={mockUser} />);
 
@@ -444,7 +484,10 @@ describe('Navigation Flow Integration Tests', () => {
       await user.click(logsLink);
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Navigation error:', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Navigation error:',
+          expect.any(Error)
+        );
       });
 
       consoleSpy.mockRestore();
@@ -453,10 +496,12 @@ describe('Navigation Flow Integration Tests', () => {
     it('supports keyboard navigation throughout the flow', async () => {
       render(
         <div data-testid="keyboard-navigation">
-          <SmartBreadcrumbs breadcrumbs={[
-            { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Logs', href: '/logs', current: true }
-          ]} />
+          <SmartBreadcrumbs
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Logs', href: '/logs', current: true },
+            ]}
+          />
           <EnhancedSidebar user={mockUser} />
         </div>
       );
@@ -466,7 +511,12 @@ describe('Navigation Flow Integration Tests', () => {
       expect(screen.getByText('Dashboard')).toHaveFocus();
 
       await user.tab();
-      expect(screen.getByText('Dashboard').closest('nav')?.nextElementSibling?.querySelector('a')).toHaveFocus();
+      expect(
+        screen
+          .getByText('Dashboard')
+          .closest('nav')
+          ?.nextElementSibling?.querySelector('a')
+      ).toHaveFocus();
 
       // Enter should activate navigation
       await user.keyboard('{Enter}');
@@ -476,10 +526,12 @@ describe('Navigation Flow Integration Tests', () => {
     it('maintains accessibility throughout navigation flow', () => {
       render(
         <div data-testid="accessible-navigation">
-          <SmartBreadcrumbs breadcrumbs={[
-            { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Current Page', href: '/current', current: true }
-          ]} />
+          <SmartBreadcrumbs
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Current Page', href: '/current', current: true },
+            ]}
+          />
           <EnhancedSidebar user={mockUser} />
           <MobileNavigation user={mockUser} />
         </div>
@@ -488,14 +540,14 @@ describe('Navigation Flow Integration Tests', () => {
       // Check ARIA labels and roles
       expect(screen.getByRole('navigation')).toBeInTheDocument();
       expect(screen.getByLabelText('Breadcrumb')).toBeInTheDocument();
-      
+
       // Check that current page is properly marked
       const currentPage = screen.getByText('Current Page');
       expect(currentPage).toHaveAttribute('aria-current', 'page');
 
       // Check mobile navigation accessibility
       const mobileNavButtons = screen.getAllByRole('button');
-      mobileNavButtons.forEach(button => {
+      mobileNavButtons.forEach((button) => {
         expect(button).toHaveAttribute('aria-label');
       });
     });

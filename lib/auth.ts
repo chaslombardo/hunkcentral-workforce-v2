@@ -22,7 +22,7 @@ export async function auth() {
     await logAuthError(error, {
       action: 'session_validation',
       url: '/auth-helper',
-      additionalData: { function: 'auth' }
+      additionalData: { function: 'auth' },
     });
     return null;
   }
@@ -36,7 +36,7 @@ export async function getSession() {
     await logAuthError(error, {
       action: 'session_validation',
       url: '/auth-helper',
-      additionalData: { function: 'getSession' }
+      additionalData: { function: 'getSession' },
     });
     return null;
   }
@@ -56,7 +56,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     try {
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { id: true, email: true, fullName: true, roles: true }
+        select: { id: true, email: true, fullName: true, roles: true },
       });
 
       if (!dbUser) {
@@ -66,7 +66,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
             action: 'session_validation',
             userId: user.id,
             url: '/current-user',
-            additionalData: { sessionEmail: user.email }
+            additionalData: { sessionEmail: user.email },
           }
         );
         return null;
@@ -77,14 +77,14 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
         id: dbUser.id,
         email: dbUser.email,
         fullName: dbUser.fullName,
-        roles: dbUser.roles as UserRole[]
+        roles: dbUser.roles as UserRole[],
       };
     } catch (dbError) {
       await logAuthError(dbError, {
         action: 'session_validation',
         userId: user.id,
         url: '/current-user',
-        additionalData: { error: 'database_validation_failed' }
+        additionalData: { error: 'database_validation_failed' },
       });
       // Return session user if database validation fails
       return user;
@@ -93,21 +93,21 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     await logAuthError(error, {
       action: 'session_validation',
       url: '/current-user',
-      additionalData: { function: 'getCurrentUser' }
+      additionalData: { function: 'getCurrentUser' },
     });
     return null;
   }
 }
 
 // Enhanced session validation with error recovery
-export async function validateSession(): Promise<{ 
-  user: SessionUser | null; 
-  isValid: boolean; 
-  error?: string 
+export async function validateSession(): Promise<{
+  user: SessionUser | null;
+  isValid: boolean;
+  error?: string;
 }> {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return { user: null, isValid: false, error: 'No valid session' };
     }
@@ -117,13 +117,14 @@ export async function validateSession(): Promise<{
     await logAuthError(error, {
       action: 'session_validation',
       url: '/validate-session',
-      additionalData: { function: 'validateSession' }
+      additionalData: { function: 'validateSession' },
     });
-    
-    return { 
-      user: null, 
-      isValid: false, 
-      error: error instanceof Error ? error.message : 'Session validation failed' 
+
+    return {
+      user: null,
+      isValid: false,
+      error:
+        error instanceof Error ? error.message : 'Session validation failed',
     };
   }
 }
@@ -133,28 +134,38 @@ export function hasRole(user: SessionUser | User, role: UserRole): boolean {
   return user.roles.includes(role);
 }
 
-export function hasAnyRole(user: SessionUser | User, roles: UserRole[]): boolean {
+export function hasAnyRole(
+  user: SessionUser | User,
+  roles: UserRole[]
+): boolean {
   return roles.some((role) => user.roles.includes(role));
 }
 
-export function requireAuth(user: SessionUser | User | null, context?: { url?: string; action?: string }): asserts user is SessionUser | User {
+export function requireAuth(
+  user: SessionUser | User | null,
+  context?: { url?: string; action?: string }
+): asserts user is SessionUser | User {
   if (!user) {
     const error = new Error('Authentication required');
     if (context) {
       logAuthError(error, {
         action: 'permission_check',
         url: context.url || '/unknown',
-        additionalData: { 
+        additionalData: {
           check: 'requireAuth',
-          action: context.action 
-        }
+          action: context.action,
+        },
       });
     }
     throw error;
   }
 }
 
-export function requireRole(user: SessionUser | User | null, role: UserRole, context?: { url?: string; action?: string }): asserts user is SessionUser | User {
+export function requireRole(
+  user: SessionUser | User | null,
+  role: UserRole,
+  context?: { url?: string; action?: string }
+): asserts user is SessionUser | User {
   requireAuth(user, context);
   if (!hasRole(user, role)) {
     const error = new Error(`Role '${role}' required`);
@@ -163,19 +174,23 @@ export function requireRole(user: SessionUser | User | null, role: UserRole, con
         action: 'permission_check',
         userId: user.id,
         url: context.url || '/unknown',
-        additionalData: { 
+        additionalData: {
           check: 'requireRole',
           requiredRole: role,
           userRoles: user.roles,
-          action: context.action 
-        }
+          action: context.action,
+        },
       });
     }
     throw error;
   }
 }
 
-export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[], context?: { url?: string; action?: string }): asserts user is SessionUser | User {
+export function requireAnyRole(
+  user: SessionUser | User | null,
+  roles: UserRole[],
+  context?: { url?: string; action?: string }
+): asserts user is SessionUser | User {
   requireAuth(user, context);
   if (roles.length > 0 && !hasAnyRole(user, roles)) {
     const error = new Error(`One of roles [${roles.join(', ')}] required`);
@@ -184,12 +199,12 @@ export function requireAnyRole(user: SessionUser | User | null, roles: UserRole[
         action: 'permission_check',
         userId: user.id,
         url: context.url || '/unknown',
-        additionalData: { 
+        additionalData: {
           check: 'requireAnyRole',
           requiredRoles: roles,
           userRoles: user.roles,
-          action: context.action 
-        }
+          action: context.action,
+        },
       });
     }
     throw error;
@@ -201,42 +216,48 @@ export function getManagerAccessibleRoles(): UserRole[] {
   return ['captain', 'wingman'];
 }
 
-export function canManagerAccessUser(managerUser: SessionUser | User, targetUser: SessionUser | User): boolean {
+export function canManagerAccessUser(
+  managerUser: SessionUser | User,
+  targetUser: SessionUser | User
+): boolean {
   // Users can access themselves
   if (managerUser.id === targetUser.id) {
     return true;
   }
-  
+
   // Admins can access anyone
   if (hasRole(managerUser, 'admin')) {
     return true;
   }
-  
+
   // Managers can only access captains and wingmen
   if (hasRole(managerUser, 'manager')) {
     const accessibleRoles = getManagerAccessibleRoles();
-    return targetUser.roles.some(role => accessibleRoles.includes(role));
+    return targetUser.roles.some((role) => accessibleRoles.includes(role));
   }
-  
+
   return false;
 }
 
-export function canUserAccessUserData(currentUser: SessionUser | User, targetUserId: string): boolean {
+export function canUserAccessUserData(
+  currentUser: SessionUser | User,
+  targetUserId: string
+): boolean {
   // Admins can access anyone
   if (hasRole(currentUser, 'admin')) {
     return true;
   }
-  
+
   // Users can access themselves
   if (currentUser.id === targetUserId) {
     return true;
   }
-  
+
   // Managers can access captains and wingmen (will be verified at data level)
   if (hasRole(currentUser, 'manager')) {
     return true; // Actual filtering happens in data queries
   }
-  
+
   return false;
 }
 

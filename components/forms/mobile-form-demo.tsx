@@ -6,25 +6,47 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { SmartInput, commonValidationRules } from './smart-input';
 import { MobileForm, useMobileForm } from './mobile-form';
-import { MobileFormValidation, useMobileFormValidation, mobileValidationRules } from './mobile-form-validation';
+import {
+  MobileFormValidation,
+  useMobileFormValidation,
+  mobileValidationRules,
+} from './mobile-form-validation';
 import { FormFeedback, useFormFeedback } from './form-feedback';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 // Demo form schema
 const mobileFormSchema = z.object({
-  name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().min(1, 'Phone number is required'),
   jobType: z.string().min(1, 'Please select a job type'),
-  amount: z.string().min(1, 'Amount is required').refine(
-    (val) => !isNaN(Number(val)) && Number(val) > 0,
-    'Amount must be a positive number'
-  ),
+  amount: z
+    .string()
+    .min(1, 'Amount is required')
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      'Amount must be a positive number'
+    ),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   priority: z.enum(['low', 'medium', 'high']),
 });
@@ -45,20 +67,16 @@ export function MobileFormDemo() {
     },
   });
 
-  const { 
-    autoSaveStatus, 
-    lastSaved, 
-    autoSaveError, 
-    createAutoSaveHandler 
-  } = useMobileForm();
+  const { autoSaveStatus, lastSaved, autoSaveError, createAutoSaveHandler } =
+    useMobileForm();
 
-  const { 
-    errors, 
-    addError, 
-    removeError, 
-    clearErrors, 
+  const {
+    errors,
+    addError,
+    removeError,
+    clearErrors,
     hasErrors,
-    validateField 
+    validateField,
   } = useMobileFormValidation();
 
   const { feedback, showSuccess, showError } = useFormFeedback();
@@ -69,13 +87,13 @@ export function MobileFormDemo() {
   // Auto-save handler
   const handleAutoSave = createAutoSaveHandler(async () => {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Simulate occasional failures for demo
     if (Math.random() < 0.1) {
       throw new Error('Network error');
     }
-    
+
     return { success: true };
   });
 
@@ -98,11 +116,11 @@ export function MobileFormDemo() {
   // Form submission
   const onSubmit = async (data: MobileFormData) => {
     clearErrors();
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Simulate validation errors for demo
       if (data.name.toLowerCase().includes('test')) {
         addError({
@@ -112,12 +130,12 @@ export function MobileFormDemo() {
         });
         return;
       }
-      
+
       showSuccess({
         title: 'Form Submitted Successfully',
         message: 'Your information has been processed.',
       });
-      
+
       // Reset form after successful submission
       form.reset();
       clearErrors();
@@ -130,12 +148,18 @@ export function MobileFormDemo() {
   };
 
   // Field validation handlers
-  const handleFieldValidation = (field: keyof MobileFormData, value: unknown) => {
+  const handleFieldValidation = (
+    field: keyof MobileFormData,
+    value: unknown
+  ) => {
     switch (field) {
       case 'name':
         validateField(field, value, [
           mobileValidationRules.required('Name is required'),
-          mobileValidationRules.minLength(2, 'Name must be at least 2 characters'),
+          mobileValidationRules.minLength(
+            2,
+            'Name must be at least 2 characters'
+          ),
         ]);
         break;
       case 'email':
@@ -159,7 +183,10 @@ export function MobileFormDemo() {
       case 'description':
         validateField(field, value, [
           mobileValidationRules.required('Description is required'),
-          mobileValidationRules.minLength(10, 'Description must be at least 10 characters'),
+          mobileValidationRules.minLength(
+            10,
+            'Description must be at least 10 characters'
+          ),
         ]);
         break;
     }
@@ -170,9 +197,12 @@ export function MobileFormDemo() {
       {/* Demo header */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-hunks-green">Mobile Form Optimization Demo</CardTitle>
+          <CardTitle className="text-hunks-green">
+            Mobile Form Optimization Demo
+          </CardTitle>
           <CardDescription>
-            This form demonstrates mobile-optimized inputs, auto-save functionality, and enhanced validation.
+            This form demonstrates mobile-optimized inputs, auto-save
+            functionality, and enhanced validation.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -187,9 +217,7 @@ export function MobileFormDemo() {
       </Card>
 
       {/* Form feedback */}
-      {feedback && (
-        <FormFeedback {...feedback} />
-      )}
+      {feedback && <FormFeedback {...feedback} />}
 
       {/* Validation errors */}
       <MobileFormValidation
@@ -247,7 +275,10 @@ export function MobileFormDemo() {
                 }}
                 validationRules={[
                   commonValidationRules.required('Name is required'),
-                  commonValidationRules.minLength(2, 'Name must be at least 2 characters'),
+                  commonValidationRules.minLength(
+                    2,
+                    'Name must be at least 2 characters'
+                  ),
                 ]}
                 mobileOptimized={true}
                 keyboardType="default"
@@ -348,7 +379,9 @@ export function MobileFormDemo() {
                 <Label htmlFor="priority">Priority Level</Label>
                 <Select
                   value={form.watch('priority')}
-                  onValueChange={(value: 'low' | 'medium' | 'high') => form.setValue('priority', value)}
+                  onValueChange={(value: 'low' | 'medium' | 'high') =>
+                    form.setValue('priority', value)
+                  }
                 >
                   <SelectTrigger id="priority" mobileOptimized={true}>
                     <SelectValue />
@@ -393,12 +426,30 @@ export function MobileFormDemo() {
           <CardTitle className="text-sm">Demo Features</CardTitle>
         </CardHeader>
         <CardContent className="text-sm space-y-2">
-          <p>• <strong>Touch Targets:</strong> All inputs are 48px+ tall for easy mobile interaction</p>
-          <p>• <strong>iOS Zoom Prevention:</strong> 16px font size prevents unwanted zooming</p>
-          <p>• <strong>Smart Keyboards:</strong> Appropriate keyboard types for each input</p>
-          <p>• <strong>Auto-Save:</strong> Form saves automatically every 10 seconds</p>
-          <p>• <strong>Progressive Validation:</strong> Real-time feedback as you type</p>
-          <p>• <strong>Mobile Optimized:</strong> Enhanced for touch devices and small screens</p>
+          <p>
+            • <strong>Touch Targets:</strong> All inputs are 48px+ tall for easy
+            mobile interaction
+          </p>
+          <p>
+            • <strong>iOS Zoom Prevention:</strong> 16px font size prevents
+            unwanted zooming
+          </p>
+          <p>
+            • <strong>Smart Keyboards:</strong> Appropriate keyboard types for
+            each input
+          </p>
+          <p>
+            • <strong>Auto-Save:</strong> Form saves automatically every 10
+            seconds
+          </p>
+          <p>
+            • <strong>Progressive Validation:</strong> Real-time feedback as you
+            type
+          </p>
+          <p>
+            • <strong>Mobile Optimized:</strong> Enhanced for touch devices and
+            small screens
+          </p>
         </CardContent>
       </Card>
     </div>

@@ -17,7 +17,9 @@ const mockUser = {
   commissionRate: 5.0,
 };
 
-const createMockCommissionEntry = (overrides: Partial<CommissionEntry> = {}): CommissionEntry => ({
+const createMockCommissionEntry = (
+  overrides: Partial<CommissionEntry> = {}
+): CommissionEntry => ({
   id: 'comm-1',
   salesId: 'user-1',
   sales: mockUser,
@@ -75,8 +77,16 @@ describe('Commission Matching Logic', () => {
     it('should find matching commission entries by job ID', () => {
       const commissionEntries = [
         createMockCommissionEntry({ jobId: 'JOB-001', status: 'pending' }),
-        createMockCommissionEntry({ id: 'comm-2', jobId: 'JOB-002', status: 'pending' }),
-        createMockCommissionEntry({ id: 'comm-3', jobId: 'JOB-001', status: 'matched' }), // Should be excluded
+        createMockCommissionEntry({
+          id: 'comm-2',
+          jobId: 'JOB-002',
+          status: 'pending',
+        }),
+        createMockCommissionEntry({
+          id: 'comm-3',
+          jobId: 'JOB-001',
+          status: 'matched',
+        }), // Should be excluded
       ];
 
       const matches = findCommissionMatches('JOB-001', commissionEntries);
@@ -99,8 +109,16 @@ describe('Commission Matching Logic', () => {
     it('should only return pending commission entries', () => {
       const commissionEntries = [
         createMockCommissionEntry({ jobId: 'JOB-001', status: 'pending' }),
-        createMockCommissionEntry({ id: 'comm-2', jobId: 'JOB-001', status: 'matched' }),
-        createMockCommissionEntry({ id: 'comm-3', jobId: 'JOB-001', status: 'approved' }),
+        createMockCommissionEntry({
+          id: 'comm-2',
+          jobId: 'JOB-001',
+          status: 'matched',
+        }),
+        createMockCommissionEntry({
+          id: 'comm-3',
+          jobId: 'JOB-001',
+          status: 'approved',
+        }),
       ];
 
       const matches = findCommissionMatches('JOB-001', commissionEntries);
@@ -191,9 +209,9 @@ describe('Commission Matching Logic', () => {
 
       commissionEntries = [
         createMockCommissionEntry({ jobId: 'JOB-001', estimatedRevenue: 500 }),
-        createMockCommissionEntry({ 
-          id: 'comm-2', 
-          jobId: 'JOB-002', 
+        createMockCommissionEntry({
+          id: 'comm-2',
+          jobId: 'JOB-002',
           estimatedRevenue: 750,
           sales: { ...mockUser, id: 'user-2', fullName: 'Jane Smith' },
         }),
@@ -208,24 +226,26 @@ describe('Commission Matching Logic', () => {
       expect(result.unmatched).toHaveLength(0);
 
       // Check first match
-      const match1 = result.matches.find(m => m.logJob.jobId === 'JOB-001');
+      const match1 = result.matches.find((m) => m.logJob.jobId === 'JOB-001');
       expect(match1).toBeDefined();
       expect(match1!.commissionEntry.jobId).toBe('JOB-001');
       expect(match1!.accuracyPercentage).toBeCloseTo(83.33, 2);
 
       // Check second match
-      const match2 = result.matches.find(m => m.logJob.jobId === 'JOB-002');
+      const match2 = result.matches.find((m) => m.logJob.jobId === 'JOB-002');
       expect(match2).toBeDefined();
       expect(match2!.commissionEntry.jobId).toBe('JOB-002');
       expect(match2!.accuracyPercentage).toBeCloseTo(93.75, 2);
     });
 
     it('should handle jobs with no commission entries', () => {
-      approvedLog.jobs.push(createMockLogJob({ 
-        id: 'job-3', 
-        jobId: 'JOB-003', 
-        revenue: 400 
-      }));
+      approvedLog.jobs.push(
+        createMockLogJob({
+          id: 'job-3',
+          jobId: 'JOB-003',
+          revenue: 400,
+        })
+      );
 
       const result = matchCommissions(approvedLog, commissionEntries);
 
@@ -236,12 +256,14 @@ describe('Commission Matching Logic', () => {
 
     it('should detect conflicts when multiple commission entries exist for same job', () => {
       // Add duplicate commission entry
-      commissionEntries.push(createMockCommissionEntry({
-        id: 'comm-3',
-        jobId: 'JOB-001',
-        estimatedRevenue: 550,
-        sales: { ...mockUser, id: 'user-3', fullName: 'Bob Wilson' },
-      }));
+      commissionEntries.push(
+        createMockCommissionEntry({
+          id: 'comm-3',
+          jobId: 'JOB-001',
+          estimatedRevenue: 550,
+          sales: { ...mockUser, id: 'user-3', fullName: 'Bob Wilson' },
+        })
+      );
 
       const result = matchCommissions(approvedLog, commissionEntries);
 
@@ -257,12 +279,14 @@ describe('Commission Matching Logic', () => {
 
     it('should identify unmatched commission entries', () => {
       // Add commission entry for job that doesn't exist in log
-      commissionEntries.push(createMockCommissionEntry({
-        id: 'comm-3',
-        jobId: 'JOB-999',
-        estimatedRevenue: 300,
-        sales: { ...mockUser, id: 'user-3', fullName: 'Bob Wilson' },
-      }));
+      commissionEntries.push(
+        createMockCommissionEntry({
+          id: 'comm-3',
+          jobId: 'JOB-999',
+          estimatedRevenue: 300,
+          sales: { ...mockUser, id: 'user-3', fullName: 'Bob Wilson' },
+        })
+      );
 
       const result = matchCommissions(approvedLog, commissionEntries);
 
@@ -274,11 +298,13 @@ describe('Commission Matching Logic', () => {
 
     it('should handle duplicate job IDs in the same log', () => {
       // Add duplicate job ID in the log (edge case)
-      approvedLog.jobs.push(createMockLogJob({ 
-        id: 'job-3', 
-        jobId: 'JOB-001', 
-        revenue: 700 
-      }));
+      approvedLog.jobs.push(
+        createMockLogJob({
+          id: 'job-3',
+          jobId: 'JOB-001',
+          revenue: 700,
+        })
+      );
 
       const result = matchCommissions(approvedLog, commissionEntries);
 
@@ -298,7 +324,7 @@ describe('Commission Matching Logic', () => {
 
     it('should handle empty log jobs', () => {
       const emptyLog = createMockDailyLog([]);
-      
+
       const result = matchCommissions(emptyLog, commissionEntries);
 
       expect(result.matches).toHaveLength(0);
@@ -322,10 +348,10 @@ describe('Commission Matching Logic', () => {
 
       expect(result.matches).toHaveLength(2);
 
-      const match1 = result.matches.find(m => m.logJob.jobId === 'JOB-001');
+      const match1 = result.matches.find((m) => m.logJob.jobId === 'JOB-001');
       expect(match1!.accuracyPercentage).toBeCloseTo(83.33, 2); // 500 vs 600
 
-      const match2 = result.matches.find(m => m.logJob.jobId === 'JOB-002');
+      const match2 = result.matches.find((m) => m.logJob.jobId === 'JOB-002');
       expect(match2!.accuracyPercentage).toBeCloseTo(93.75, 2); // 750 vs 800
     });
   });
@@ -378,23 +404,27 @@ describe('Commission Matching Logic', () => {
   describe('Performance Tests', () => {
     it('should handle large numbers of commission entries efficiently', () => {
       const startTime = Date.now();
-      
+
       // Create 1000 commission entries
       const largeCommissionList: CommissionEntry[] = [];
       for (let i = 0; i < 1000; i++) {
-        largeCommissionList.push(createMockCommissionEntry({
-          id: `comm-${i}`,
-          jobId: `JOB-${i.toString().padStart(3, '0')}`,
-        }));
+        largeCommissionList.push(
+          createMockCommissionEntry({
+            id: `comm-${i}`,
+            jobId: `JOB-${i.toString().padStart(3, '0')}`,
+          })
+        );
       }
 
       // Create log with 100 jobs
       const largeJobList: LogJob[] = [];
       for (let i = 0; i < 100; i++) {
-        largeJobList.push(createMockLogJob({
-          id: `job-${i}`,
-          jobId: `JOB-${i.toString().padStart(3, '0')}`,
-        }));
+        largeJobList.push(
+          createMockLogJob({
+            id: `job-${i}`,
+            jobId: `JOB-${i.toString().padStart(3, '0')}`,
+          })
+        );
       }
 
       const approvedLog = createMockDailyLog(largeJobList);

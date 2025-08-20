@@ -35,7 +35,7 @@ export function useMobileOptimizedLoading(
       // Add delay for mobile to prevent UI jank
       const delay = isMobile ? mobileDelay : desktopDelay;
       if (delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
       if (enableProgressiveLoading) {
@@ -47,7 +47,7 @@ export function useMobileOptimizedLoading(
       if (enableProgressiveLoading) {
         setProgress(75);
         // Small delay to show progress
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       setData(result);
@@ -59,7 +59,13 @@ export function useMobileOptimizedLoading(
       // Reset progress after a short delay
       setTimeout(() => setProgress(0), 200);
     }
-  }, [loadingFunction, isMobile, mobileDelay, desktopDelay, enableProgressiveLoading]);
+  }, [
+    loadingFunction,
+    isMobile,
+    mobileDelay,
+    desktopDelay,
+    enableProgressiveLoading,
+  ]);
 
   React.useEffect(() => {
     load();
@@ -88,19 +94,16 @@ export function useMobileIntersectionObserver(
     // On mobile, use a larger root margin for earlier loading
     const mobileOptions = {
       ...options,
-      rootMargin: isMobile ? '100px' : (options.rootMargin || '0px'),
+      rootMargin: isMobile ? '100px' : options.rootMargin || '0px',
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            callback();
-          }
-        });
-      },
-      mobileOptions
-    );
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          callback();
+        }
+      });
+    }, mobileOptions);
 
     observer.observe(targetRef.current);
 

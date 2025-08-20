@@ -17,7 +17,11 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <Suspense fallback={<div className="animate-pulse bg-muted h-96 rounded-lg" />}>
+            <Suspense
+              fallback={
+                <div className="animate-pulse bg-muted h-96 rounded-lg" />
+              }
+            >
               <LoginForm />
             </Suspense>
           </div>
@@ -30,9 +34,7 @@ export default function LoginPage() {
             <h2 className="text-4xl font-bold mb-4">
               College Hunks Hauling Junk & Moving
             </h2>
-            <p className="text-xl opacity-90">
-              Workforce Management System
-            </p>
+            <p className="text-xl opacity-90">Workforce Management System</p>
           </div>
         </div>
       </div>

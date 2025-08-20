@@ -39,7 +39,7 @@ The design requires enhanced database queries to support detailed breakdowns:
 
 ```sql
 -- Department breakdown query
-SELECT 
+SELECT
   lh.department,
   SUM(lh.hours) as total_hours,
   u.hourly_rates[lh.department] as rate,
@@ -50,7 +50,7 @@ WHERE lh.user_id = ? AND log_date BETWEEN ? AND ?
 GROUP BY lh.department, u.hourly_rates[lh.department]
 
 -- Daily work history query
-SELECT 
+SELECT
   dl.log_date,
   lh.department,
   lh.hours,
@@ -116,10 +116,10 @@ interface TipEntry {
 A comprehensive department analysis component using shadcn/ui cards and progress indicators:
 
 ```typescript
-export function DepartmentBreakdown({ 
-  departments, 
-  totalHours, 
-  totalPay 
+export function DepartmentBreakdown({
+  departments,
+  totalHours,
+  totalPay
 }: DepartmentBreakdownProps) {
   return (
     <div className="space-y-4">
@@ -160,10 +160,10 @@ export function DepartmentBreakdown({
 An interactive calendar component showing work patterns:
 
 ```typescript
-export function DailyWorkCalendar({ 
-  workEntries, 
-  selectedDate, 
-  onDateSelect 
+export function DailyWorkCalendar({
+  workEntries,
+  selectedDate,
+  onDateSelect
 }: DailyWorkCalendarProps) {
   return (
     <div className="space-y-4">
@@ -180,9 +180,9 @@ export function DailyWorkCalendar({
           highTips: { backgroundColor: '#ea7200', color: 'white' }
         }}
       />
-      
+
       {selectedDate && (
-        <DailyWorkDetail 
+        <DailyWorkDetail
           entry={workEntries.find(e => isSameDay(e.date, selectedDate))}
         />
       )}
@@ -199,7 +199,7 @@ A comprehensive tips tracking interface:
 export function TipsDetailView({ tips, totalTips }: TipsDetailViewProps) {
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [filterBy, setFilterBy] = useState<'all' | 'junk' | 'move'>('all');
-  
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -231,7 +231,7 @@ export function TipsDetailView({ tips, totalTips }: TipsDetailViewProps) {
           </Select>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         {filteredAndSortedTips.map((tip) => (
           <Card key={`${tip.logId}-${tip.jobId}`}>
@@ -309,16 +309,16 @@ CREATE INDEX idx_daily_logs_date_status ON daily_logs(log_date, status);
 
 -- View for department summary
 CREATE VIEW employee_department_summary AS
-SELECT 
+SELECT
   lh.user_id,
   dl.log_date,
   lh.department,
   SUM(lh.hours) as hours,
-  AVG(CASE WHEN lh.department = 'junk' THEN 
-    CASE WHEN lh.user_id = dl.captain_id OR lh.is_co_captain THEN u.junk_captain_rate 
+  AVG(CASE WHEN lh.department = 'junk' THEN
+    CASE WHEN lh.user_id = dl.captain_id OR lh.is_co_captain THEN u.junk_captain_rate
     ELSE u.junk_wingman_rate END
   WHEN lh.department = 'move' THEN
-    CASE WHEN lh.user_id = dl.captain_id OR lh.is_co_captain THEN u.move_captain_rate 
+    CASE WHEN lh.user_id = dl.captain_id OR lh.is_co_captain THEN u.move_captain_rate
     ELSE u.move_wingman_rate END
   ELSE u.admin_rate END) as effective_rate
 FROM log_hours lh
@@ -335,23 +335,27 @@ GROUP BY lh.user_id, dl.log_date, lh.department;
 The design includes comprehensive validation for payroll calculations:
 
 ```typescript
-function validatePayrollBreakdown(data: EnhancedPayrollCalculation): ValidationResult {
+function validatePayrollBreakdown(
+  data: EnhancedPayrollCalculation
+): ValidationResult {
   const errors: string[] = [];
-  
+
   // Validate department totals match overall totals
-  const departmentHoursSum = Object.values(data.departmentBreakdown)
-    .reduce((sum, dept) => sum + dept.hours, 0);
-  
+  const departmentHoursSum = Object.values(data.departmentBreakdown).reduce(
+    (sum, dept) => sum + dept.hours,
+    0
+  );
+
   if (Math.abs(departmentHoursSum - data.totalHours) > 0.01) {
     errors.push('Department hours do not match total hours');
   }
-  
+
   // Validate tips breakdown matches total tips
   const tipsSum = data.tipsBreakdown.reduce((sum, tip) => sum + tip.myShare, 0);
   if (Math.abs(tipsSum - data.tips) > 0.01) {
     errors.push('Tips breakdown does not match total tips');
   }
-  
+
   return { isValid: errors.length === 0, errors };
 }
 ```
@@ -363,7 +367,7 @@ The design includes graceful degradation when detailed data is unavailable:
 ```typescript
 function PayrollBreakdownWithFallback({ userId, payPeriod }: Props) {
   const { data, error, isLoading } = usePayrollBreakdown(userId, payPeriod);
-  
+
   if (error) {
     return (
       <Card className="border-yellow-200 bg-yellow-50">
@@ -381,7 +385,7 @@ function PayrollBreakdownWithFallback({ userId, payPeriod }: Props) {
       </Card>
     );
   }
-  
+
   return <PayrollBreakdownView data={data} />;
 }
 ```
@@ -399,13 +403,13 @@ describe('DepartmentBreakdown', () => {
       { department: 'junk', hours: 30, isPrimary: true, /* ... */ },
       { department: 'move', hours: 10, isPrimary: false, /* ... */ }
     ];
-    
+
     render(<DepartmentBreakdown departments={departments} />);
-    
+
     expect(screen.getByText('Primary')).toBeInTheDocument();
     expect(screen.getByTestId('junk-card')).toHaveClass('border-[#026937]');
   });
-  
+
   it('should calculate percentages correctly', () => {
     // Test percentage calculations
   });
@@ -421,13 +425,17 @@ describe('Enhanced Payroll Integration', () => {
   it('should calculate department breakdowns correctly', async () => {
     // Create test data with multiple departments
     const testLogs = createTestLogsWithMultipleDepartments();
-    
+
     // Calculate payroll
     const result = await calculateEnhancedPayroll(testUserId, testPayPeriod);
-    
+
     // Verify department totals match overall totals
-    expect(sumDepartmentHours(result.departmentBreakdown)).toEqual(result.totalHours);
-    expect(sumDepartmentPay(result.departmentBreakdown)).toEqual(result.grossWages);
+    expect(sumDepartmentHours(result.departmentBreakdown)).toEqual(
+      result.totalHours
+    );
+    expect(sumDepartmentPay(result.departmentBreakdown)).toEqual(
+      result.grossWages
+    );
   });
 });
 ```
@@ -439,20 +447,22 @@ Test the complete user workflow:
 ```typescript
 test('Employee can view detailed payroll breakdown', async ({ page }) => {
   await page.goto('/reports/my-payroll');
-  
+
   // Select a pay period
   await page.selectOption('[data-testid=pay-period-select]', 'current-period');
-  
+
   // Navigate to breakdown tab
   await page.click('[data-testid=breakdown-tab]');
-  
+
   // Verify department breakdown is visible
-  await expect(page.locator('[data-testid=department-breakdown]')).toBeVisible();
-  
+  await expect(
+    page.locator('[data-testid=department-breakdown]')
+  ).toBeVisible();
+
   // Check daily calendar
   await page.click('[data-testid=daily-history-tab]');
   await expect(page.locator('[data-testid=work-calendar]')).toBeVisible();
-  
+
   // Verify tips details
   await page.click('[data-testid=tips-tab]');
   await expect(page.locator('[data-testid=tips-breakdown]')).toBeVisible();
@@ -472,14 +482,14 @@ function usePayrollBreakdown(userId: string, payPeriod: PayPeriod) {
     ['payroll-summary', userId, payPeriod.id],
     () => getPayrollSummary(userId, payPeriod)
   );
-  
+
   // Load detailed breakdowns on demand
   const { data: breakdown } = useSWR(
     summary ? ['payroll-breakdown', userId, payPeriod.id] : null,
     () => getPayrollBreakdown(userId, payPeriod),
     { revalidateOnFocus: false }
   );
-  
+
   return { summary, breakdown };
 }
 ```
@@ -489,9 +499,12 @@ function usePayrollBreakdown(userId: string, payPeriod: PayPeriod) {
 Implement aggressive caching for closed pay periods:
 
 ```typescript
-export async function getPayrollBreakdown(userId: string, payPeriod: PayPeriod) {
+export async function getPayrollBreakdown(
+  userId: string,
+  payPeriod: PayPeriod
+) {
   const cacheKey = `payroll-breakdown-${userId}-${payPeriod.id}`;
-  
+
   // For closed pay periods, cache indefinitely
   if (payPeriod.status === 'closed') {
     return unstable_cache(
@@ -500,7 +513,7 @@ export async function getPayrollBreakdown(userId: string, payPeriod: PayPeriod) 
       { revalidate: false }
     )();
   }
-  
+
   // For open periods, cache for 1 hour
   return unstable_cache(
     () => calculatePayrollBreakdown(userId, payPeriod),
@@ -526,7 +539,7 @@ function MobileOptimizedBreakdown({ data }: Props) {
           <MobileDepartmentCard key={dept.department} department={dept} />
         ))}
       </div>
-      
+
       {/* Desktop: Grid layout */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.departmentBreakdown.map(dept => (

@@ -28,7 +28,7 @@ export async function logServerError(
   try {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
-    
+
     // Enhanced error context with more debugging information
     const enhancedContext = {
       ...context,
@@ -37,7 +37,10 @@ export async function logServerError(
       // Add comprehensive debugging context
       errorDetails: {
         name: error instanceof Error ? error.name : 'Unknown',
-        cause: error instanceof Error ? (error as Error & { cause?: unknown }).cause : undefined,
+        cause:
+          error instanceof Error
+            ? (error as Error & { cause?: unknown }).cause
+            : undefined,
         message: errorMessage,
         stackTrace: stack,
       },
@@ -54,7 +57,7 @@ export async function logServerError(
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
     };
-    
+
     const errorLog: ServerErrorLog = {
       level: 'error',
       message: errorMessage,
@@ -73,30 +76,38 @@ export async function logServerError(
             entityId: errorId,
             action: 'server_error',
             userId: context.userId || 'system',
-            changes: JSON.parse(JSON.stringify({
-              errorId,
-              level: errorLog.level,
-              message: errorLog.message,
-              component: context.component,
-              action: context.action,
-              url: context.url,
-              userAgent: context.userAgent,
-              // Enhanced stack trace with full context
-              errorDetails: enhancedContext.errorDetails,
-              systemInfo: enhancedContext.systemInfo,
-              requestInfo: enhancedContext.requestInfo,
-              additionalData: context.additionalData,
-              environment: process.env.NODE_ENV,
-              timestamp: new Date(errorLog.context.timestamp).toISOString(),
-              severity: determineSeverity(errorMessage, context.component),
-              // Add debugging helpers
-              debugInfo: {
-                stackLines: stack ? stack.split('\n').length : 0,
-                errorType: error instanceof Error ? error.constructor.name : typeof error,
-                hasStack: !!stack,
-                hasCause: !!(error instanceof Error && (error as Error & { cause?: unknown }).cause),
-              },
-            })),
+            changes: JSON.parse(
+              JSON.stringify({
+                errorId,
+                level: errorLog.level,
+                message: errorLog.message,
+                component: context.component,
+                action: context.action,
+                url: context.url,
+                userAgent: context.userAgent,
+                // Enhanced stack trace with full context
+                errorDetails: enhancedContext.errorDetails,
+                systemInfo: enhancedContext.systemInfo,
+                requestInfo: enhancedContext.requestInfo,
+                additionalData: context.additionalData,
+                environment: process.env.NODE_ENV,
+                timestamp: new Date(errorLog.context.timestamp).toISOString(),
+                severity: determineSeverity(errorMessage, context.component),
+                // Add debugging helpers
+                debugInfo: {
+                  stackLines: stack ? stack.split('\n').length : 0,
+                  errorType:
+                    error instanceof Error
+                      ? error.constructor.name
+                      : typeof error,
+                  hasStack: !!stack,
+                  hasCause: !!(
+                    error instanceof Error &&
+                    (error as Error & { cause?: unknown }).cause
+                  ),
+                },
+              })
+            ),
           },
         });
 
@@ -120,7 +131,7 @@ export async function logServerError(
           },
           dbError: dbError instanceof Error ? dbError.message : String(dbError),
         };
-        
+
         // Use structured JSON logging for production monitoring tools
         process.stderr.write(JSON.stringify(structuredLog) + '\n');
       }
@@ -137,7 +148,7 @@ export async function logServerError(
         stack,
         additionalData: context.additionalData,
       };
-      
+
       // Use structured logging even in development for consistency
       process.stderr.write(JSON.stringify(devLog, null, 2) + '\n');
     }
@@ -148,9 +159,12 @@ export async function logServerError(
       level: 'CRITICAL',
       message: 'Error logging system failure',
       originalError: error instanceof Error ? error.message : String(error),
-      loggingError: loggingError instanceof Error ? loggingError.message : String(loggingError),
+      loggingError:
+        loggingError instanceof Error
+          ? loggingError.message
+          : String(loggingError),
     };
-    
+
     process.stderr.write(JSON.stringify(fallbackLog) + '\n');
   }
 }
@@ -158,26 +172,44 @@ export async function logServerError(
 /**
  * Determines the severity level of an error based on message and component
  */
-function determineSeverity(message: string, component: string): 'low' | 'medium' | 'high' | 'critical' {
+function determineSeverity(
+  message: string,
+  component: string
+): 'low' | 'medium' | 'high' | 'critical' {
   const criticalKeywords = ['database', 'auth', 'payment', 'security', 'crash'];
   const highKeywords = ['server', 'api', 'session', 'permission'];
   const mediumKeywords = ['validation', 'form', 'ui', 'component'];
-  
+
   const lowerMessage = message.toLowerCase();
   const lowerComponent = component.toLowerCase();
-  
-  if (criticalKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+
+  if (
+    criticalKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    )
+  ) {
     return 'critical';
   }
-  
-  if (highKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+
+  if (
+    highKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    )
+  ) {
     return 'high';
   }
-  
-  if (mediumKeywords.some(keyword => lowerMessage.includes(keyword) || lowerComponent.includes(keyword))) {
+
+  if (
+    mediumKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    )
+  ) {
     return 'medium';
   }
-  
+
   return 'low';
 }
 
@@ -198,7 +230,7 @@ async function logCriticalError(errorLog: ServerErrorLog): Promise<void> {
     // - DataDog
     // - New Relic
     // - Custom webhook
-    
+
     const criticalAlert = {
       timestamp: new Date().toISOString(),
       level: 'CRITICAL',
@@ -207,16 +239,18 @@ async function logCriticalError(errorLog: ServerErrorLog): Promise<void> {
       error: errorLog,
       alertType: 'critical_error',
     };
-    
+
     // For now, log to stderr with CRITICAL prefix for monitoring tools to pick up
     process.stderr.write(`CRITICAL_ALERT: ${JSON.stringify(criticalAlert)}\n`);
-    
+
     // TODO: Implement actual external service integration
     // Example: await sendToSentry(criticalAlert);
     // Example: await sendToSlack(criticalAlert);
   } catch (alertError) {
     // Don't let critical alerting break the application
-    process.stderr.write(`ALERT_SYSTEM_FAILURE: ${JSON.stringify({ error: alertError })}\n`);
+    process.stderr.write(
+      `ALERT_SYSTEM_FAILURE: ${JSON.stringify({ error: alertError })}\n`
+    );
   }
 }
 
@@ -226,7 +260,14 @@ async function logCriticalError(errorLog: ServerErrorLog): Promise<void> {
 export async function logAuthError(
   error: Error | unknown,
   context: {
-    action: 'login' | 'session_validation' | 'redirect' | 'logout' | 'permission_check' | 'api_auth' | 'page_auth';
+    action:
+      | 'login'
+      | 'session_validation'
+      | 'redirect'
+      | 'logout'
+      | 'permission_check'
+      | 'api_auth'
+      | 'page_auth';
     userId?: string;
     url: string;
     userAgent?: string;
@@ -306,8 +347,9 @@ export function createErrorResponse(
   message: string;
   timestamp: number;
 } {
-  const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  
+  const errorMessage =
+    error instanceof Error ? error.message : 'An unexpected error occurred';
+
   // Log the error
   logServerError(error, {
     ...context,
@@ -316,7 +358,10 @@ export function createErrorResponse(
 
   return {
     error: 'server_error',
-    message: process.env.NODE_ENV === 'development' ? errorMessage : 'An unexpected error occurred',
+    message:
+      process.env.NODE_ENV === 'development'
+        ? errorMessage
+        : 'An unexpected error occurred',
     timestamp: Date.now(),
   };
 }

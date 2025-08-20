@@ -23,7 +23,7 @@ export class PerformanceMonitor {
    */
   startRender(componentName: string): string {
     if (!this.isEnabled) return '';
-    
+
     const markName = `${componentName}-render-start-${Date.now()}`;
     performance.mark(markName);
     return markName;
@@ -37,16 +37,16 @@ export class PerformanceMonitor {
 
     const endMarkName = `${componentName}-render-end-${Date.now()}`;
     performance.mark(endMarkName);
-    
+
     try {
       const measureName = `${componentName}-render-duration`;
       performance.measure(measureName, startMark, endMarkName);
-      
+
       const measure = performance.getEntriesByName(measureName)[0];
       if (measure) {
         this.recordRenderTime(componentName, measure.duration);
       }
-      
+
       // Clean up marks
       performance.clearMarks(startMark);
       performance.clearMarks(endMarkName);
@@ -63,10 +63,10 @@ export class PerformanceMonitor {
     if (!this.renderTimes.has(componentName)) {
       this.renderTimes.set(componentName, []);
     }
-    
+
     const times = this.renderTimes.get(componentName)!;
     times.push(duration);
-    
+
     // Keep only the last 100 measurements to prevent memory leaks
     if (times.length > 100) {
       times.shift();
@@ -101,11 +101,11 @@ export class PerformanceMonitor {
    */
   getAllStats(): Record<string, ReturnType<typeof this.getStats>> {
     const stats: Record<string, ReturnType<typeof this.getStats>> = {};
-    
+
     for (const [componentName] of this.renderTimes) {
       stats[componentName] = this.getStats(componentName);
     }
-    
+
     return stats;
   }
 
@@ -127,16 +127,19 @@ export class PerformanceMonitor {
 
     console.warn('🚀 Component Performance Stats');
     console.warn(
-      sortedStats.reduce((acc, [name, stat]) => {
-        acc[name] = {
-          'Renders': stat?.count,
-          'Avg (ms)': stat?.average.toFixed(2),
-          'Min (ms)': stat?.min.toFixed(2),
-          'Max (ms)': stat?.max.toFixed(2),
-          'Recent (ms)': stat?.recent.toFixed(2)
-        };
-        return acc;
-      }, {} as Record<string, Record<string, unknown>>)
+      sortedStats.reduce(
+        (acc, [name, stat]) => {
+          acc[name] = {
+            Renders: stat?.count,
+            'Avg (ms)': stat?.average.toFixed(2),
+            'Min (ms)': stat?.min.toFixed(2),
+            'Max (ms)': stat?.max.toFixed(2),
+            'Recent (ms)': stat?.recent.toFixed(2),
+          };
+          return acc;
+        },
+        {} as Record<string, Record<string, unknown>>
+      )
     );
     console.warn('End performance stats');
   }
@@ -161,11 +164,12 @@ export class PerformanceMonitor {
  */
 export function usePerformanceMonitor(componentName: string) {
   const monitor = PerformanceMonitor.getInstance();
-  
+
   return {
     startRender: () => monitor.startRender(componentName),
-    endRender: (startMark: string) => monitor.endRender(componentName, startMark),
-    getStats: () => monitor.getStats(componentName)
+    endRender: (startMark: string) =>
+      monitor.endRender(componentName, startMark),
+    getStats: () => monitor.getStats(componentName),
   };
 }
 
@@ -176,8 +180,9 @@ export function withPerformanceMonitor<P extends object>(
   Component: React.ComponentType<P>,
   componentName?: string
 ) {
-  const displayName = componentName || Component.displayName || Component.name || 'Component';
-  
+  const displayName =
+    componentName || Component.displayName || Component.name || 'Component';
+
   const WrappedComponent = React.forwardRef<unknown, P>((props, ref) => {
     const monitor = usePerformanceMonitor(displayName);
     const startMarkRef = React.useRef<string>('');
@@ -206,7 +211,7 @@ export const bundleAnalysis = {
    */
   logImportSize: (moduleName: string, moduleExports: unknown) => {
     if (process.env.NODE_ENV !== 'development') return;
-    
+
     try {
       const size = JSON.stringify(moduleExports).length;
       console.warn(`📦 ${moduleName}: ~${(size / 1024).toFixed(2)}KB`);
@@ -220,13 +225,13 @@ export const bundleAnalysis = {
    */
   warnLargeProps: (componentName: string, props: unknown, threshold = 1000) => {
     if (process.env.NODE_ENV !== 'development') return;
-    
+
     try {
       const size = JSON.stringify(props).length;
       if (size > threshold) {
         console.warn(
           `⚠️ ${componentName} has large props (${(size / 1024).toFixed(2)}KB). ` +
-          'Consider memoization or prop optimization.'
+            'Consider memoization or prop optimization.'
         );
       }
     } catch {
@@ -237,16 +242,22 @@ export const bundleAnalysis = {
   /**
    * Track component render for bundle optimization
    */
-  trackRender: (componentName: string, variant?: string, props?: Record<string, unknown>) => {
+  trackRender: (
+    componentName: string,
+    variant?: string,
+    props?: Record<string, unknown>
+  ) => {
     if (process.env.NODE_ENV !== 'development') return;
-    
+
     // Import bundle analyzer dynamically to avoid circular dependencies
-    import('./bundle-analyzer').then(({ bundleAnalyzer }) => {
-      bundleAnalyzer.trackComponentUsage(componentName, variant, props);
-    }).catch(() => {
-      // Ignore import failures
-    });
-  }
+    import('./bundle-analyzer')
+      .then(({ bundleAnalyzer }) => {
+        bundleAnalyzer.trackComponentUsage(componentName, variant, props);
+      })
+      .catch(() => {
+        // Ignore import failures
+      });
+  },
 };
 
 // Global performance monitoring instance
@@ -260,5 +271,6 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   }, 30000);
 
   // Add to window for manual inspection
-  (window as unknown as Record<string, unknown>).__performanceMonitor = performanceMonitor;
+  (window as unknown as Record<string, unknown>).__performanceMonitor =
+    performanceMonitor;
 }

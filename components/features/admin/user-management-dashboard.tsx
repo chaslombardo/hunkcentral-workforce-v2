@@ -127,11 +127,32 @@ interface UserListData {
 }
 
 const USER_ROLES: { value: UserRole; label: string; color: string }[] = [
-  { value: 'admin', label: 'Admin', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  { value: 'manager', label: 'Manager', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  { value: 'captain', label: 'Captain', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  { value: 'sales', label: 'Sales', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  { value: 'wingman', label: 'Wingman', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' },
+  {
+    value: 'admin',
+    label: 'Admin',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  },
+  {
+    value: 'manager',
+    label: 'Manager',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  },
+  {
+    value: 'captain',
+    label: 'Captain',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  },
+  {
+    value: 'sales',
+    label: 'Sales',
+    color:
+      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  },
+  {
+    value: 'wingman',
+    label: 'Wingman',
+    color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+  },
 ];
 
 export function UserManagementDashboard() {
@@ -158,34 +179,37 @@ export function UserManagementDashboard() {
     },
   });
 
-  const loadUsers = useCallback(async (params?: UserSearchFormData) => {
-    setLoading(true);
-    try {
-      const result = await getUsers(params);
-      if (result.success && result.data) {
-        // Convert decimal fields to numbers for TypeScript compatibility
-        const convertedData = {
-          ...result.data,
-          users: result.data.users.map(convertUserDecimalFields)
-        };
-        setData(convertedData);
-      } else {
+  const loadUsers = useCallback(
+    async (params?: UserSearchFormData) => {
+      setLoading(true);
+      try {
+        const result = await getUsers(params);
+        if (result.success && result.data) {
+          // Convert decimal fields to numbers for TypeScript compatibility
+          const convertedData = {
+            ...result.data,
+            users: result.data.users.map(convertUserDecimalFields),
+          };
+          setData(convertedData);
+        } else {
+          toast({
+            title: 'Error',
+            description: result.error || 'Failed to load users',
+            variant: 'destructive',
+          });
+        }
+      } catch {
         toast({
           title: 'Error',
-          description: result.error || 'Failed to load users',
+          description: 'An unexpected error occurred',
           variant: 'destructive',
         });
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+    },
+    [toast]
+  );
 
   useEffect(() => {
     loadUsers();
@@ -218,8 +242,8 @@ export function UserManagementDashboard() {
 
   const handleBulkDelete = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const selectedUsers = selectedRows.map(row => row.original);
-    
+    const selectedUsers = selectedRows.map((row) => row.original);
+
     let successCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
@@ -253,7 +277,8 @@ export function UserManagementDashboard() {
     if (errorCount > 0 && errors.length > 0) {
       toast({
         title: 'Delete Errors',
-        description: errors.slice(0, 3).join('; ') + (errors.length > 3 ? '...' : ''),
+        description:
+          errors.slice(0, 3).join('; ') + (errors.length > 3 ? '...' : ''),
         variant: 'destructive',
       });
     }
@@ -263,7 +288,10 @@ export function UserManagementDashboard() {
   };
 
   const getRoleColor = (role: string) => {
-    return USER_ROLES.find(r => r.value === role)?.color || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return (
+      USER_ROLES.find((r) => r.value === role)?.color ||
+      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+    );
   };
 
   const formatCurrency = (amount?: number | null) => {
@@ -299,13 +327,13 @@ export function UserManagementDashboard() {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="h-auto p-0 font-semibold hover:bg-transparent"
         >
           Name
-          {column.getIsSorted() === "asc" ? (
+          {column.getIsSorted() === 'asc' ? (
             <IconChevronUp className="ml-2 h-4 w-4" />
-          ) : column.getIsSorted() === "desc" ? (
+          ) : column.getIsSorted() === 'desc' ? (
             <IconChevronDown className="ml-2 h-4 w-4" />
           ) : (
             <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -313,7 +341,7 @@ export function UserManagementDashboard() {
         </Button>
       ),
       cell: ({ row }) => (
-        <Link 
+        <Link
           href={`/admin/users/${row.original.id}`}
           className="font-medium text-primary hover:underline"
         >
@@ -326,13 +354,13 @@ export function UserManagementDashboard() {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="h-auto p-0 font-semibold hover:bg-transparent"
         >
           Email
-          {column.getIsSorted() === "asc" ? (
+          {column.getIsSorted() === 'asc' ? (
             <IconChevronUp className="ml-2 h-4 w-4" />
-          ) : column.getIsSorted() === "desc" ? (
+          ) : column.getIsSorted() === 'desc' ? (
             <IconChevronDown className="ml-2 h-4 w-4" />
           ) : (
             <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -357,7 +385,7 @@ export function UserManagementDashboard() {
               variant="secondary"
               className={getRoleColor(role)}
             >
-              {USER_ROLES.find(r => r.value === role)?.label || role}
+              {USER_ROLES.find((r) => r.value === role)?.label || role}
             </Badge>
           ))}
         </div>
@@ -385,13 +413,13 @@ export function UserManagementDashboard() {
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="h-auto p-0 font-semibold hover:bg-transparent"
         >
           Created
-          {column.getIsSorted() === "asc" ? (
+          {column.getIsSorted() === 'asc' ? (
             <IconChevronUp className="ml-2 h-4 w-4" />
-          ) : column.getIsSorted() === "desc" ? (
+          ) : column.getIsSorted() === 'desc' ? (
             <IconChevronDown className="ml-2 h-4 w-4" />
           ) : (
             <IconChevronDown className="ml-2 h-4 w-4 opacity-50" />
@@ -451,15 +479,17 @@ export function UserManagementDashboard() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete User</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete {row.original.fullName}? 
-                    This action cannot be undone and will fail if the user 
-                    has existing logs, hours, or commission entries.
+                    Are you sure you want to delete {row.original.fullName}?
+                    This action cannot be undone and will fail if the user has
+                    existing logs, hours, or commission entries.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => handleDeleteUser(row.original.id, row.original.fullName)}
+                    onClick={() =>
+                      handleDeleteUser(row.original.id, row.original.fullName)
+                    }
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Delete
@@ -509,7 +539,9 @@ export function UserManagementDashboard() {
         <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
           <div className="flex flex-col items-center gap-1 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <h3 className="text-2xl font-bold tracking-tight">Loading Users...</h3>
+            <h3 className="text-2xl font-bold tracking-tight">
+              Loading Users...
+            </h3>
           </div>
         </div>
       </div>
@@ -539,7 +571,7 @@ export function UserManagementDashboard() {
                 .getAllColumns()
                 .filter(
                   (column) =>
-                    typeof column.accessorFn !== "undefined" &&
+                    typeof column.accessorFn !== 'undefined' &&
                     column.getCanHide()
                 )
                 .map((column) => {
@@ -554,11 +586,14 @@ export function UserManagementDashboard() {
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
-                  )
+                  );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <UserFormDialog mode="create" onSuccess={() => loadUsers(searchForm.getValues())} />
+          <UserFormDialog
+            mode="create"
+            onSuccess={() => loadUsers(searchForm.getValues())}
+          />
         </div>
       </div>
 
@@ -574,7 +609,10 @@ export function UserManagementDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={searchForm.handleSubmit(onSearch)} className="space-y-4">
+          <form
+            onSubmit={searchForm.handleSubmit(onSearch)}
+            className="space-y-4"
+          >
             <div className="flex gap-4">
               <div className="flex-1 relative">
                 <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -596,7 +634,7 @@ export function UserManagementDashboard() {
                 {loading ? 'Searching...' : 'Search'}
               </Button>
             </div>
-            
+
             {/* Role Filters */}
             <div className="space-y-3">
               <Label className="text-sm font-medium">Filter by Roles</Label>
@@ -607,13 +645,22 @@ export function UserManagementDashboard() {
                     className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer hover:bg-accent/50 has-[[aria-checked=true]]:border-primary has-[[aria-checked=true]]:bg-primary/5"
                   >
                     <Checkbox
-                      checked={searchForm.watch('roles')?.includes(role.value) || false}
+                      checked={
+                        searchForm.watch('roles')?.includes(role.value) || false
+                      }
                       onCheckedChange={(checked) => {
-                        const currentRoles = searchForm.getValues('roles') || [];
+                        const currentRoles =
+                          searchForm.getValues('roles') || [];
                         if (checked) {
-                          searchForm.setValue('roles', [...currentRoles, role.value]);
+                          searchForm.setValue('roles', [
+                            ...currentRoles,
+                            role.value,
+                          ]);
                         } else {
-                          searchForm.setValue('roles', currentRoles.filter(r => r !== role.value));
+                          searchForm.setValue(
+                            'roles',
+                            currentRoles.filter((r) => r !== role.value)
+                          );
                         }
                         // Auto-submit when role filter changes
                         searchForm.handleSubmit(onSearch)();
@@ -624,9 +671,10 @@ export function UserManagementDashboard() {
                   </Label>
                 ))}
               </div>
-              
+
               {/* Clear Filters */}
-              {(searchForm.watch('search') || (searchForm.watch('roles')?.length || 0) > 0) && (
+              {(searchForm.watch('search') ||
+                (searchForm.watch('roles')?.length || 0) > 0) && (
                 <Button
                   type="button"
                   variant="outline"
@@ -657,7 +705,8 @@ export function UserManagementDashboard() {
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} user(s) selected
+                {table.getFilteredSelectedRowModel().rows.length} user(s)
+                selected
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -678,8 +727,11 @@ export function UserManagementDashboard() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Selected Users</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete {table.getFilteredSelectedRowModel().rows.length} selected user(s)? 
-                        This action cannot be undone and will fail for users with existing logs, hours, or commission entries.
+                        Are you sure you want to delete{' '}
+                        {table.getFilteredSelectedRowModel().rows.length}{' '}
+                        selected user(s)? This action cannot be undone and will
+                        fail for users with existing logs, hours, or commission
+                        entries.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -707,15 +759,19 @@ export function UserManagementDashboard() {
               <div className="flex flex-col items-center gap-4 text-center">
                 <IconUsers className="h-12 w-12 text-muted-foreground" />
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-bold tracking-tight">No users found</h3>
+                  <h3 className="text-2xl font-bold tracking-tight">
+                    No users found
+                  </h3>
                   <p className="text-muted-foreground max-w-md">
-                    {searchForm.watch('search') || (searchForm.watch('roles')?.length || 0) > 0
-                      ? "No users match your current filters. Try adjusting your search criteria."
-                      : "Get started by creating your first user account."}
+                    {searchForm.watch('search') ||
+                    (searchForm.watch('roles')?.length || 0) > 0
+                      ? 'No users match your current filters. Try adjusting your search criteria.'
+                      : 'Get started by creating your first user account.'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {(searchForm.watch('search') || (searchForm.watch('roles')?.length || 0) > 0) && (
+                  {(searchForm.watch('search') ||
+                    (searchForm.watch('roles')?.length || 0) > 0) && (
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -762,7 +818,10 @@ export function UserManagementDashboard() {
                       <TableRow key={row.id}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -777,18 +836,26 @@ export function UserManagementDashboard() {
                   <div className="text-sm text-muted-foreground">
                     {data ? (
                       <>
-                        Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{' '}
-                        {Math.min(data.pagination.page * data.pagination.limit, data.pagination.total)} of{' '}
-                        {data.pagination.total} users
+                        Showing{' '}
+                        {(data.pagination.page - 1) * data.pagination.limit + 1}{' '}
+                        to{' '}
+                        {Math.min(
+                          data.pagination.page * data.pagination.limit,
+                          data.pagination.total
+                        )}{' '}
+                        of {data.pagination.total} users
                       </>
                     ) : (
                       'Loading...'
                     )}
                   </div>
-                  
+
                   {/* Rows per page selector */}
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                    <Label
+                      htmlFor="rows-per-page"
+                      className="text-sm font-medium"
+                    >
                       Rows per page
                     </Label>
                     <Select
@@ -801,7 +868,9 @@ export function UserManagementDashboard() {
                       }}
                     >
                       <SelectTrigger className="w-20 h-8" id="rows-per-page">
-                        <SelectValue placeholder={table.getState().pagination.pageSize} />
+                        <SelectValue
+                          placeholder={table.getState().pagination.pageSize}
+                        />
                       </SelectTrigger>
                       <SelectContent side="top">
                         {[10, 25, 50, 100].map((pageSize) => (
@@ -813,7 +882,7 @@ export function UserManagementDashboard() {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -842,19 +911,21 @@ export function UserManagementDashboard() {
                     <IconChevronLeft className="h-4 w-4" />
                     <span className="sr-only">Go to previous page</span>
                   </Button>
-                  
+
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">
-                      Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                      Page {table.getState().pagination.pageIndex + 1} of{' '}
+                      {table.getPageCount()}
                     </span>
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
                       table.nextPage();
-                      const currentPage = table.getState().pagination.pageIndex + 2;
+                      const currentPage =
+                        table.getState().pagination.pageIndex + 2;
                       searchForm.setValue('page', currentPage);
                       searchForm.handleSubmit(onSearch)();
                     }}

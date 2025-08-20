@@ -28,7 +28,9 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock console.error
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+const mockConsoleError = vi
+  .spyOn(console, 'error')
+  .mockImplementation(() => {});
 
 describe('Client Error Logger', () => {
   beforeEach(() => {
@@ -148,11 +150,13 @@ describe('Client Error Logger', () => {
     });
 
     it('should limit stored errors to 10', async () => {
-      const existingErrors = Array(10).fill(null).map((_, i) => ({
-        message: `Error ${i}`,
-        context: { component: 'test', action: 'test' },
-      }));
-      
+      const existingErrors = Array(10)
+        .fill(null)
+        .map((_, i) => ({
+          message: `Error ${i}`,
+          context: { component: 'test', action: 'test' },
+        }));
+
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(existingErrors));
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
@@ -166,7 +170,7 @@ describe('Client Error Logger', () => {
 
       const setItemCall = mockLocalStorage.setItem.mock.calls[0];
       const storedErrors = JSON.parse(setItemCall[1]);
-      
+
       expect(storedErrors).toHaveLength(10);
       expect(storedErrors[9].message).toBe('New error');
       expect(storedErrors[0].message).toBe('Error 1'); // First error removed
@@ -255,14 +259,16 @@ describe('Client Error Logger', () => {
         { message: 'Error 1', context: { component: 'test', action: 'test' } },
         { message: 'Error 2', context: { component: 'test', action: 'test' } },
       ];
-      
+
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(pendingErrors));
       mockFetch.mockResolvedValue(new Response('{}', { status: 200 }));
 
       await retryPendingErrors();
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('pending_errors');
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'pending_errors'
+      );
     });
 
     it('should stop retrying on network failure', async () => {
@@ -270,7 +276,7 @@ describe('Client Error Logger', () => {
         { message: 'Error 1', context: { component: 'test', action: 'test' } },
         { message: 'Error 2', context: { component: 'test', action: 'test' } },
       ];
-      
+
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(pendingErrors));
       mockFetch.mockRejectedValue(new Error('Network error'));
 
@@ -296,8 +302,14 @@ describe('Client Error Logger', () => {
 
       setupErrorRetry();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('load', expect.any(Function));
-      expect(addEventListenerSpy).toHaveBeenCalledWith('online', expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'load',
+        expect.any(Function)
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'online',
+        expect.any(Function)
+      );
     });
   });
 
@@ -307,17 +319,24 @@ describe('Client Error Logger', () => {
 
       setupGlobalErrorHandling();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(addEventListenerSpy).toHaveBeenCalledWith('unhandledrejection', expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function)
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'unhandledrejection',
+        expect.any(Function)
+      );
     });
 
     it('should handle global errors', async () => {
       mockFetch.mockResolvedValue(new Response('{}', { status: 200 }));
-      
+
       setupGlobalErrorHandling();
 
-      const errorHandler = vi.mocked(window.addEventListener).mock.calls
-        .find(call => call[0] === 'error')?.[1] as EventListener;
+      const errorHandler = vi
+        .mocked(window.addEventListener)
+        .mock.calls.find((call) => call[0] === 'error')?.[1] as EventListener;
 
       const errorEvent = new ErrorEvent('error', {
         error: new Error('Global error'),
@@ -330,7 +349,7 @@ describe('Client Error Logger', () => {
       errorHandler(errorEvent);
 
       // Wait for async logging
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockFetch).toHaveBeenCalledWith('/api/errors/client', {
         method: 'POST',
@@ -343,11 +362,14 @@ describe('Client Error Logger', () => {
 
     it('should handle unhandled promise rejections', async () => {
       mockFetch.mockResolvedValue(new Response('{}', { status: 200 }));
-      
+
       setupGlobalErrorHandling();
 
-      const rejectionHandler = vi.mocked(window.addEventListener).mock.calls
-        .find(call => call[0] === 'unhandledrejection')?.[1] as EventListener;
+      const rejectionHandler = vi
+        .mocked(window.addEventListener)
+        .mock.calls.find(
+          (call) => call[0] === 'unhandledrejection'
+        )?.[1] as EventListener;
 
       const rejectionEvent = new PromiseRejectionEvent('unhandledrejection', {
         promise: Promise.reject(new Error('Promise rejection')),
@@ -357,7 +379,7 @@ describe('Client Error Logger', () => {
       rejectionHandler(rejectionEvent);
 
       // Wait for async logging
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockFetch).toHaveBeenCalledWith('/api/errors/client', {
         method: 'POST',

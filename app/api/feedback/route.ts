@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!type || !title || !description || !priority) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -39,24 +39,32 @@ export async function POST(request: NextRequest) {
         title,
         description: [
           description,
-          reproductionSteps ? `\n\n**Steps to Reproduce:**\n${reproductionSteps}` : '',
-          expectedBehavior ? `\n\n**Expected Behavior:**\n${expectedBehavior}` : '',
+          reproductionSteps
+            ? `\n\n**Steps to Reproduce:**\n${reproductionSteps}`
+            : '',
+          expectedBehavior
+            ? `\n\n**Expected Behavior:**\n${expectedBehavior}`
+            : '',
           actualBehavior ? `\n\n**Actual Behavior:**\n${actualBehavior}` : '',
           url ? `\n\n**URL:** ${url}` : '',
           referrer ? `\n\n**Referrer:** ${referrer}` : '',
           attachScreenshot ? `\n\n**Browser Info Attached:** Yes` : '',
-        ].filter(Boolean).join(''),
+        ]
+          .filter(Boolean)
+          .join(''),
         page,
         priority,
         email,
         userId: session?.user?.id || null,
-        userAgent: browserInfo || JSON.stringify({
-          userAgent: body.userAgent,
-          screenResolution: body.screenResolution,
-        }),
+        userAgent:
+          browserInfo ||
+          JSON.stringify({
+            userAgent: body.userAgent,
+            screenResolution: body.screenResolution,
+          }),
         screenResolution: body.screenResolution,
         timestamp: new Date(timestamp),
-        status: "open",
+        status: 'open',
       },
     });
 
@@ -71,9 +79,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, id: feedback.id });
   } catch (error) {
-    console.error("Error submitting feedback:", error);
+    console.error('Error submitting feedback:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -89,7 +97,7 @@ async function trackFeedbackEvent(data: {
   try {
     await prisma.analyticsEvent.create({
       data: {
-        eventType: "feedback_submitted",
+        eventType: 'feedback_submitted',
         userId: data.userId,
         metadata: {
           feedbackType: data.feedbackType,
@@ -100,6 +108,6 @@ async function trackFeedbackEvent(data: {
       },
     });
   } catch (error) {
-    console.error("Error tracking feedback event:", error);
+    console.error('Error tracking feedback event:', error);
   }
 }

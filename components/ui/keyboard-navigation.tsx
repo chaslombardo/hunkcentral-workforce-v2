@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { keyboardUtils, focusUtils } from "@/lib/accessibility-utils"
+import * as React from 'react';
+import { keyboardUtils, focusUtils } from '@/lib/accessibility-utils';
 
 interface KeyboardNavigationProps {
-  children: React.ReactNode
-  orientation?: 'horizontal' | 'vertical' | 'grid'
-  gridColumns?: number
-  wrap?: boolean
-  onNavigate?: (index: number) => void
-  className?: string
+  children: React.ReactNode;
+  orientation?: 'horizontal' | 'vertical' | 'grid';
+  gridColumns?: number;
+  wrap?: boolean;
+  onNavigate?: (index: number) => void;
+  className?: string;
 }
 
 /**
@@ -21,7 +21,7 @@ export function KeyboardNavigation({
   gridColumns,
   // wrap = true,
   onNavigate,
-  className
+  className,
 }: KeyboardNavigationProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   // const [currentIndex, setCurrentIndex] = React.useState<number>(-1);
@@ -33,39 +33,45 @@ export function KeyboardNavigation({
   }, []);
 
   // Handle keyboard navigation
-  const handleKeyDown = React.useCallback((event: React.KeyboardEvent) => {
-    const focusableElements = getFocusableChildren();
-    if (focusableElements.length === 0) return;
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent) => {
+      const focusableElements = getFocusableChildren();
+      if (focusableElements.length === 0) return;
 
-    // Find current focused element index
-    const activeElement = document.activeElement as HTMLElement;
-    const currentIdx = focusableElements.indexOf(activeElement);
-    
-    if (currentIdx === -1) return;
+      // Find current focused element index
+      const activeElement = document.activeElement as HTMLElement;
+      const currentIdx = focusableElements.indexOf(activeElement);
 
-    // Handle arrow key navigation
-    const newIndex = keyboardUtils.handleArrowNavigation(
-      event,
-      currentIdx,
-      focusableElements.length,
-      orientation,
-      gridColumns
-    );
+      if (currentIdx === -1) return;
 
-    if (newIndex !== null) {
-      focusableElements[newIndex]?.focus();
-      // setCurrentIndex(newIndex);
-      onNavigate?.(newIndex);
-    }
+      // Handle arrow key navigation
+      const newIndex = keyboardUtils.handleArrowNavigation(
+        event,
+        currentIdx,
+        focusableElements.length,
+        orientation,
+        gridColumns
+      );
 
-    // Handle Home/End navigation
-    const homeEndIndex = keyboardUtils.handleHomeEndNavigation(event, focusableElements.length);
-    if (homeEndIndex !== null) {
-      focusableElements[homeEndIndex]?.focus();
-      // setCurrentIndex(homeEndIndex);
-      onNavigate?.(homeEndIndex);
-    }
-  }, [getFocusableChildren, orientation, gridColumns, onNavigate]);
+      if (newIndex !== null) {
+        focusableElements[newIndex]?.focus();
+        // setCurrentIndex(newIndex);
+        onNavigate?.(newIndex);
+      }
+
+      // Handle Home/End navigation
+      const homeEndIndex = keyboardUtils.handleHomeEndNavigation(
+        event,
+        focusableElements.length
+      );
+      if (homeEndIndex !== null) {
+        focusableElements[homeEndIndex]?.focus();
+        // setCurrentIndex(homeEndIndex);
+        onNavigate?.(homeEndIndex);
+      }
+    },
+    [getFocusableChildren, orientation, gridColumns, onNavigate]
+  );
 
   return (
     <div
@@ -89,11 +95,7 @@ export function KeyboardNavigationItem({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={className}
-      role="listitem"
-      {...props}
-    >
+    <div className={className} role="listitem" {...props}>
       {children}
     </div>
   );
@@ -105,13 +107,13 @@ export function KeyboardNavigationItem({
 export function useKeyboardShortcuts(shortcuts: Record<string, () => void>) {
   React.useEffect(() => {
     const handleKeyDown = keyboardUtils.createShortcutHandler(shortcuts);
-    
+
     const keyDownHandler = (event: KeyboardEvent) => {
       handleKeyDown(event as unknown as React.KeyboardEvent);
     };
 
     document.addEventListener('keydown', keyDownHandler);
-    
+
     return () => {
       document.removeEventListener('keydown', keyDownHandler);
     };
@@ -121,12 +123,15 @@ export function useKeyboardShortcuts(shortcuts: Record<string, () => void>) {
 /**
  * Hook for managing focus trap in modals/dialogs
  */
-export function useFocusTrap(isActive: boolean, containerRef: React.RefObject<HTMLElement>) {
+export function useFocusTrap(
+  isActive: boolean,
+  containerRef: React.RefObject<HTMLElement>
+) {
   React.useEffect(() => {
     if (!isActive || !containerRef.current) return;
 
     const cleanup = focusUtils.createFocusTrap(containerRef.current);
-    
+
     return cleanup;
   }, [isActive, containerRef]);
 }
@@ -149,12 +154,15 @@ export function useRovingTabindex(
     });
   }, [items, activeIndex]);
 
-  const setActiveItem = React.useCallback((index: number) => {
-    if (index >= 0 && index < items.length) {
-      setActiveIndex(index);
-      items[index].current?.focus();
-    }
-  }, [items]);
+  const setActiveItem = React.useCallback(
+    (index: number) => {
+      if (index >= 0 && index < items.length) {
+        setActiveIndex(index);
+        items[index].current?.focus();
+      }
+    },
+    [items]
+  );
 
   const moveToNext = React.useCallback(() => {
     const nextIndex = activeIndex + 1 >= items.length ? 0 : activeIndex + 1;
@@ -180,6 +188,6 @@ export function useRovingTabindex(
     moveToNext,
     moveToPrevious,
     moveToFirst,
-    moveToLast
+    moveToLast,
   };
 }

@@ -4,9 +4,18 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
-import { logProductionError, getErrorStatistics } from '@/lib/production-error-logger';
-import { initializeErrorReporter, ProductionErrorReporter } from '@/lib/production-error-reporter';
-import { reportComponentError, createUserFriendlyErrorMessage } from '@/lib/error-reporting';
+import {
+  logProductionError,
+  getErrorStatistics,
+} from '@/lib/production-error-logger';
+import {
+  initializeErrorReporter,
+  ProductionErrorReporter,
+} from '@/lib/production-error-reporter';
+import {
+  reportComponentError,
+  createUserFriendlyErrorMessage,
+} from '@/lib/error-reporting';
 
 // Mock dependencies
 vi.mock('@/lib/prisma', () => ({
@@ -116,10 +125,13 @@ describe('Production Error Monitoring', () => {
     it('should log production errors with comprehensive context', async () => {
       const mockPrisma = await import('@/lib/prisma');
       (mockPrisma.prisma.auditLog.findFirst as Mock).mockResolvedValue(null);
-      (mockPrisma.prisma.auditLog.create as Mock).mockResolvedValue({ id: 'test-id' });
+      (mockPrisma.prisma.auditLog.create as Mock).mockResolvedValue({
+        id: 'test-id',
+      });
 
       const testError = new Error('Test production error');
-      testError.stack = 'Error: Test production error\n    at test (test.js:1:1)';
+      testError.stack =
+        'Error: Test production error\n    at test (test.js:1:1)';
 
       const result = await logProductionError(testError, {
         component: 'test_component',
@@ -187,11 +199,15 @@ describe('Production Error Monitoring', () => {
         },
       };
 
-      (mockPrisma.prisma.auditLog.findFirst as Mock).mockResolvedValue(existingError);
-      (mockPrisma.prisma.auditLog.update as Mock).mockResolvedValue({ id: 'existing-id' });
+      (mockPrisma.prisma.auditLog.findFirst as Mock).mockResolvedValue(
+        existingError
+      );
+      (mockPrisma.prisma.auditLog.update as Mock).mockResolvedValue({
+        id: 'existing-id',
+      });
 
       const testError = new Error('Duplicate error');
-      
+
       const result = await logProductionError(testError, {
         component: 'test_component',
         action: 'test_action',
@@ -216,7 +232,9 @@ describe('Production Error Monitoring', () => {
     it('should determine error severity correctly', async () => {
       const mockPrisma = await import('@/lib/prisma');
       (mockPrisma.prisma.auditLog.findFirst as Mock).mockResolvedValue(null);
-      (mockPrisma.prisma.auditLog.create as Mock).mockResolvedValue({ id: 'test-id' });
+      (mockPrisma.prisma.auditLog.create as Mock).mockResolvedValue({
+        id: 'test-id',
+      });
 
       // Test critical error
       const criticalError = new Error('Database connection failed');
@@ -281,7 +299,7 @@ describe('Production Error Monitoring', () => {
       });
 
       const testError = new Error('Client-side test error');
-      
+
       const report = await reporter.reportError(testError, {
         component: 'test_component',
         action: 'test_action',
@@ -340,8 +358,9 @@ describe('Production Error Monitoring', () => {
       });
 
       // Trigger click event
-      const clickHandler = (mockWindow.document.addEventListener as Mock).mock.calls
-        .find(call => call[0] === 'click')?.[1];
+      const clickHandler = (
+        mockWindow.document.addEventListener as Mock
+      ).mock.calls.find((call) => call[0] === 'click')?.[1];
       if (clickHandler) {
         clickHandler(clickEvent);
       }
@@ -370,7 +389,9 @@ describe('Production Error Monitoring', () => {
 
     it('should handle offline error storage and retry', async () => {
       // Mock fetch to fail initially
-      (mockWindow.fetch as Mock).mockRejectedValueOnce(new Error('Network error'));
+      (mockWindow.fetch as Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
 
       const reporter = initializeErrorReporter({
         enableAutoReporting: true,
@@ -397,17 +418,21 @@ describe('Production Error Monitoring', () => {
 
       // Mock localStorage to return the stored error
       (mockWindow.localStorage.getItem as Mock).mockReturnValueOnce(
-        JSON.stringify([{
-          id: 'test-id',
-          message: 'Offline error',
-          timestamp: new Date().toISOString(),
-        }])
+        JSON.stringify([
+          {
+            id: 'test-id',
+            message: 'Offline error',
+            timestamp: new Date().toISOString(),
+          },
+        ])
       );
 
       await reporter.retryPendingReports();
 
       expect(mockWindow.fetch).toHaveBeenCalledTimes(2); // Initial failed attempt + retry
-      expect(mockWindow.localStorage.removeItem).toHaveBeenCalledWith('pending_error_reports');
+      expect(mockWindow.localStorage.removeItem).toHaveBeenCalledWith(
+        'pending_error_reports'
+      );
     });
   });
 
@@ -456,7 +481,9 @@ describe('Production Error Monitoring', () => {
         },
       ];
 
-      (mockPrisma.prisma.auditLog.findMany as Mock).mockResolvedValue(mockErrorLogs);
+      (mockPrisma.prisma.auditLog.findMany as Mock).mockResolvedValue(
+        mockErrorLogs
+      );
 
       const stats = await getErrorStatistics({
         start: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -502,28 +529,36 @@ describe('Production Error Monitoring', () => {
         type: 'auth',
         component: 'login',
       });
-      expect(authMessage).toBe('Authentication failed. Please try logging in again.');
+      expect(authMessage).toBe(
+        'Authentication failed. Please try logging in again.'
+      );
 
       const databaseError = new Error('Database connection timeout');
       const dbMessage = createUserFriendlyErrorMessage(databaseError, {
         type: 'database',
         component: 'data_service',
       });
-      expect(dbMessage).toBe('Unable to load data. Please try again in a moment.');
+      expect(dbMessage).toBe(
+        'Unable to load data. Please try again in a moment.'
+      );
 
       const networkError = new Error('Network request failed');
       const networkMessage = createUserFriendlyErrorMessage(networkError, {
         type: 'network',
         component: 'api_client',
       });
-      expect(networkMessage).toBe('Network connection error. Please check your internet connection.');
+      expect(networkMessage).toBe(
+        'Network connection error. Please check your internet connection.'
+      );
 
       const componentError = new Error('Component render failed');
       const componentMessage = createUserFriendlyErrorMessage(componentError, {
         type: 'component',
         component: 'user_profile',
       });
-      expect(componentMessage).toBe('A component failed to load. Please refresh the page.');
+      expect(componentMessage).toBe(
+        'A component failed to load. Please refresh the page.'
+      );
     });
 
     it('should show technical details in development', () => {
@@ -550,7 +585,7 @@ describe('Production Error Monitoring', () => {
       }));
 
       const testError = new Error('React component error');
-      
+
       await reportComponentError(testError, {
         component: 'UserProfile',
         action: 'render',
@@ -583,16 +618,24 @@ describe('Error Boundary Integration', () => {
   it('should handle errors in production error boundary', () => {
     // This would typically be tested with React Testing Library
     // but we'll test the core logic here
-    
+
     const testError = new Error('Boundary test error');
     const errorInfo = {
       componentStack: 'at TestComponent\n  at ErrorBoundary',
     };
 
     // Test error fingerprinting
-    const fingerprint1 = Buffer.from('test_component:render:Boundary test error:').toString('base64').substring(0, 32);
-    const fingerprint2 = Buffer.from('test_component:render:Boundary test error:').toString('base64').substring(0, 32);
-    
+    const fingerprint1 = Buffer.from(
+      'test_component:render:Boundary test error:'
+    )
+      .toString('base64')
+      .substring(0, 32);
+    const fingerprint2 = Buffer.from(
+      'test_component:render:Boundary test error:'
+    )
+      .toString('base64')
+      .substring(0, 32);
+
     expect(fingerprint1).toBe(fingerprint2); // Same errors should have same fingerprint
   });
 });

@@ -7,6 +7,7 @@ This style guide defines the visual design system for HUNKCentral, including bra
 ### Primary Brand Colors
 
 #### College Hunks Green
+
 - **Primary**: `#026937` (hunks-green-600)
 - **Usage**: Primary buttons, success states, brand accents
 - **Accessibility**: WCAG AA compliant with white text
@@ -23,6 +24,7 @@ This style guide defines the visual design system for HUNKCentral, including bra
 ```
 
 #### College Hunks Orange
+
 - **Secondary**: `#ea7200` (hunks-orange-500)
 - **Usage**: Secondary buttons, warning states, accent elements
 - **Accessibility**: WCAG AA compliant with white text
@@ -41,6 +43,7 @@ This style guide defines the visual design system for HUNKCentral, including bra
 ### Color Palette
 
 #### Green Shades
+
 ```css
 hunks-green-50:  #f0f9f4  /* Very light backgrounds */
 hunks-green-100: #dcf2e4  /* Light backgrounds */
@@ -56,6 +59,7 @@ hunks-green-950: #0b2214  /* Darkest */
 ```
 
 #### Orange Shades
+
 ```css
 hunks-orange-50:  #fef7ed  /* Very light backgrounds */
 hunks-orange-100: #fdecd4  /* Light backgrounds */
@@ -97,11 +101,15 @@ hunks-orange-950: #411703  /* Darkest */
 ## 🔤 Typography
 
 ### Font Stack
+
 ```css
-font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+font-family:
+  ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+  'Segoe UI Symbol', 'Noto Color Emoji';
 ```
 
 ### Type Scale
+
 ```css
 /* Headings */
 .text-4xl  /* 36px - Page titles */
@@ -117,6 +125,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ```
 
 ### Font Weights
+
 ```css
 .font-light    /* 300 - Light text */
 .font-normal   /* 400 - Body text */
@@ -128,6 +137,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ## 📏 Spacing & Layout
 
 ### Spacing Scale
+
 ```css
 /* Tailwind spacing scale */
 .p-1   /* 4px */
@@ -143,18 +153,21 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ### Component Spacing Guidelines
 
 #### Buttons
+
 - **Padding**: `px-4 py-2` (16px horizontal, 8px vertical)
 - **Small**: `px-3 py-1.5` (12px horizontal, 6px vertical)
 - **Large**: `px-6 py-3` (24px horizontal, 12px vertical)
 - **Icon**: `p-2` (8px all sides)
 
 #### Cards
+
 - **Padding**: `p-6` (24px all sides)
 - **Header**: `pb-4` (16px bottom)
 - **Content**: `py-4` (16px vertical)
 - **Footer**: `pt-4` (16px top)
 
 #### Forms
+
 - **Field spacing**: `space-y-4` (16px between fields)
 - **Label margin**: `mb-2` (8px bottom)
 - **Input padding**: `px-3 py-2` (12px horizontal, 8px vertical)
@@ -164,33 +177,33 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ### Buttons
 
 #### Primary Button
+
 ```tsx
-<BrandButton variant="primary">
-  Primary Action
-</BrandButton>
+<BrandButton variant="primary">Primary Action</BrandButton>
 ```
+
 - **Background**: `bg-hunks-green`
 - **Text**: `text-white`
 - **Hover**: `hover:bg-hunks-green-700`
 - **Focus**: `focus-visible:ring-hunks-green/20`
 
 #### Secondary Button
+
 ```tsx
-<BrandButton variant="secondary">
-  Secondary Action
-</BrandButton>
+<BrandButton variant="secondary">Secondary Action</BrandButton>
 ```
+
 - **Background**: `bg-hunks-orange`
 - **Text**: `text-white`
 - **Hover**: `hover:bg-hunks-orange-600`
 - **Focus**: `focus-visible:ring-hunks-orange/20`
 
 #### Outline Button
+
 ```tsx
-<BrandButton variant="outline-primary">
-  Outline Action
-</BrandButton>
+<BrandButton variant="outline-primary">Outline Action</BrandButton>
 ```
+
 - **Border**: `border-2 border-hunks-green`
 - **Text**: `text-hunks-green`
 - **Hover**: `hover:bg-hunks-green hover:text-white`
@@ -198,21 +211,22 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ### Cards
 
 #### Primary Card
+
 ```tsx
 <Card className="border-l-4 border-l-hunks-green">
   <CardHeader>
     <CardTitle>Card Title</CardTitle>
   </CardHeader>
-  <CardContent>
-    Card content
-  </CardContent>
+  <CardContent>Card content</CardContent>
 </Card>
 ```
+
 - **Border accent**: `border-l-4 border-l-hunks-green`
 - **Background**: `bg-card`
 - **Shadow**: `shadow-xs`
 
 #### Metric Card
+
 ```tsx
 <MetricCard
   title="Revenue"
@@ -221,6 +235,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
   change={{ value: 12.5, type: 'increase', period: 'this month' }}
 />
 ```
+
 - **Border accent**: Based on color prop
 - **Gradient**: `from-primary/5 to-card bg-gradient-to-t`
 - **Typography**: Tabular numbers for values
@@ -228,21 +243,21 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ### Status Indicators
 
 #### Success Status
+
 ```tsx
-<StatusIndicator variant="success">
-  Completed
-</StatusIndicator>
+<StatusIndicator variant="success">Completed</StatusIndicator>
 ```
+
 - **Background**: `bg-hunks-green/10`
 - **Text**: `text-hunks-green`
 - **Border**: `border-hunks-green/20`
 
 #### Warning Status
+
 ```tsx
-<StatusIndicator variant="warning">
-  Pending
-</StatusIndicator>
+<StatusIndicator variant="warning">Pending</StatusIndicator>
 ```
+
 - **Background**: `bg-hunks-orange/10`
 - **Text**: `text-hunks-orange`
 - **Border**: `border-hunks-orange/20`
@@ -250,6 +265,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ## 🎭 Visual Effects
 
 ### Shadows
+
 ```css
 /* Card shadows */
 .shadow-xs    /* Subtle card elevation */
@@ -263,6 +279,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ```
 
 ### Border Radius
+
 ```css
 .rounded-sm   /* 2px - Small elements */
 .rounded-md   /* 6px - Default components */
@@ -271,6 +288,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ```
 
 ### Animations
+
 ```css
 /* Micro-interactions */
 .transition-all .duration-200    /* Default transitions */
@@ -282,6 +300,7 @@ font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe U
 ## 📱 Responsive Design
 
 ### Breakpoints
+
 ```css
 sm:   /* 640px and up */
 md:   /* 768px and up */
@@ -291,26 +310,32 @@ xl:   /* 1280px and up */
 ```
 
 ### Mobile-First Guidelines
+
 - **Touch targets**: Minimum 44px (iOS) / 48px (Android)
 - **Font size**: Minimum 16px for inputs (prevents zoom on iOS)
 - **Spacing**: Increase padding on mobile for easier interaction
 - **Navigation**: Use bottom navigation or slide-out menus
 
 ### Container Queries
+
 ```css
-@container/card (min-width: 250px) {
-  .text-2xl { font-size: 1.875rem; }
+@container /card (min-width: 250px) {
+  .text-2xl {
+    font-size: 1.875rem;
+  }
 }
 ```
 
 ## ♿ Accessibility Guidelines
 
 ### Color Contrast
+
 - **Normal text**: 4.5:1 minimum ratio
 - **Large text**: 3:1 minimum ratio
 - **Brand colors**: Pre-tested for WCAG AA compliance
 
 ### Focus States
+
 ```css
 /* Visible focus indicators */
 .focus-visible:outline-none
@@ -320,6 +345,7 @@ xl:   /* 1280px and up */
 ```
 
 ### Screen Reader Support
+
 ```tsx
 // Proper labeling
 <button aria-label="Close dialog">
@@ -335,6 +361,7 @@ xl:   /* 1280px and up */
 ## 🎨 Usage Examples
 
 ### Dashboard Layout
+
 ```tsx
 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
   <MetricCard
@@ -355,6 +382,7 @@ xl:   /* 1280px and up */
 ```
 
 ### Form Layout
+
 ```tsx
 <form className="space-y-6">
   <SmartInput
@@ -367,7 +395,7 @@ xl:   /* 1280px and up */
     type="email"
     validationRules={[
       commonValidationRules.required(),
-      commonValidationRules.email()
+      commonValidationRules.email(),
     ]}
     progressiveValidation
   />
@@ -383,6 +411,7 @@ xl:   /* 1280px and up */
 ```
 
 ### Navigation Layout
+
 ```tsx
 <nav className="flex items-center space-x-4">
   <BrandButton variant="ghost-primary" size="sm">
@@ -400,18 +429,19 @@ xl:   /* 1280px and up */
 ## 🔧 Customization
 
 ### CSS Custom Properties
+
 ```css
 :root {
   /* Brand colors */
   --brand-primary: #026937;
   --brand-secondary: #ea7200;
-  
+
   /* Semantic colors */
   --brand-success: var(--brand-primary);
   --brand-warning: var(--brand-secondary);
   --brand-error: #dc2626;
   --brand-info: #3b82f6;
-  
+
   /* Component-specific */
   --button-radius: 6px;
   --card-radius: 8px;
@@ -420,6 +450,7 @@ xl:   /* 1280px and up */
 ```
 
 ### Tailwind Configuration
+
 ```js
 // tailwind.config.ts
 theme: {
