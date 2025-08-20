@@ -35,7 +35,7 @@ export function useAutoSave({
   const [error, setError] = useState<string | null>(null);
   const [currentLogId, setCurrentLogId] = useState<string | null>(logId);
   const [isOfflineSave, setIsOfflineSave] = useState(false);
-  
+
   const { toast } = useToast();
   const { isOnline, isOffline } = useOffline();
   const { storeData, getData } = useOfflineStorage();
@@ -64,18 +64,19 @@ export function useAutoSave({
           savedAt: new Date().toISOString(),
           isOffline: true,
         });
-        
+
         setStatus('offline');
         setLastSaved(new Date());
         setError(null);
         setIsOfflineSave(true);
-        
+
         // Update the last saved data reference
         lastDataRef.current = JSON.stringify(formData);
 
         toast({
           title: 'Saved Offline',
-          description: 'Your changes have been saved locally and will sync when you&apos;re back online.',
+          description:
+            'Your changes have been saved locally and will sync when you&apos;re back online.',
         });
 
         return { success: true, data: { id: offlineKey } };
@@ -89,7 +90,7 @@ export function useAutoSave({
         setLastSaved(new Date());
         setError(null);
         setIsOfflineSave(false);
-        
+
         // Update logId if this was a new log
         if (result.data?.id && !currentLogId) {
           setCurrentLogId(result.data.id);
@@ -107,15 +108,16 @@ export function useAutoSave({
             isOffline: true,
             failedOnlineSync: true,
           });
-          
+
           setStatus('offline');
           setLastSaved(new Date());
           setError('Saved offline due to connection issues');
           setIsOfflineSave(true);
-          
+
           toast({
             title: 'Saved Offline',
-            description: 'Online save failed, but your changes are saved locally.',
+            description:
+              'Online save failed, but your changes are saved locally.',
             variant: 'default',
           });
 
@@ -123,10 +125,11 @@ export function useAutoSave({
         } catch (offlineError) {
           setStatus('error');
           setError(result.error || 'Save failed');
-          
+
           toast({
             title: 'Save Failed',
-            description: result.error || 'Unable to save your changes. Please try again.',
+            description:
+              result.error || 'Unable to save your changes. Please try again.',
             variant: 'destructive',
           });
         }
@@ -135,7 +138,7 @@ export function useAutoSave({
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Save failed';
-      
+
       // Try offline save as fallback
       try {
         const offlineKey = currentLogId || `draft_${Date.now()}`;
@@ -145,12 +148,12 @@ export function useAutoSave({
           isOffline: true,
           failedOnlineSync: true,
         });
-        
+
         setStatus('offline');
         setLastSaved(new Date());
         setError('Saved offline due to connection issues');
         setIsOfflineSave(true);
-        
+
         toast({
           title: 'Saved Offline',
           description: 'Connection failed, but your changes are saved locally.',
@@ -161,7 +164,7 @@ export function useAutoSave({
         setStatus('error');
         setError(errorMessage);
         setIsOfflineSave(false);
-        
+
         toast({
           title: 'Save Failed',
           description: errorMessage,
@@ -183,7 +186,7 @@ export function useAutoSave({
 
     // If auto-save is explicitly enabled, keep the original logic
     const currentData = JSON.stringify(formData);
-    
+
     // Don't save if data hasn't changed
     if (currentData === lastDataRef.current) {
       return;
@@ -205,7 +208,7 @@ export function useAutoSave({
       const latestData = JSON.stringify(watch());
       if (latestData !== lastDataRef.current && !isSavingRef.current) {
         const result = await saveNow();
-        
+
         // Only show success toast for auto-saves if there was a previous error
         if (result.success && status === 'error') {
           toast({
@@ -248,10 +251,15 @@ export function useAutoSave({
     const loadOfflineData = async () => {
       if (currentLogId) {
         try {
-          const offlineData = await getData(currentLogId) as { isOffline?: boolean; savedAt?: string } | null;
+          const offlineData = (await getData(currentLogId)) as {
+            isOffline?: boolean;
+            savedAt?: string;
+          } | null;
           if (offlineData?.isOffline) {
             setIsOfflineSave(true);
-            setLastSaved(new Date(offlineData.savedAt || new Date().toISOString()));
+            setLastSaved(
+              new Date(offlineData.savedAt || new Date().toISOString())
+            );
             setStatus('offline');
           }
         } catch (e) {

@@ -61,9 +61,10 @@ export async function POST(request: NextRequest) {
         requestInfo: {
           method: request.method,
           headers: Object.fromEntries(request.headers.entries()),
-          ip: request.headers.get('x-forwarded-for') || 
-              request.headers.get('x-real-ip') || 
-              'unknown',
+          ip:
+            request.headers.get('x-forwarded-for') ||
+            request.headers.get('x-real-ip') ||
+            'unknown',
         },
       },
     });
@@ -73,7 +74,6 @@ export async function POST(request: NextRequest) {
       message: 'Error reported successfully',
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Failed to process client error report:', error);
 
@@ -99,22 +99,13 @@ export async function POST(request: NextRequest) {
 
 // Handle other HTTP methods
 export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 }
 
 export async function PUT() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 }
 
 export async function DELETE() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 }

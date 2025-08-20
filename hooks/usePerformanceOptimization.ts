@@ -12,27 +12,27 @@ interface PerformanceOptimizationOptions {
    * Component name for tracking
    */
   componentName: string;
-  
+
   /**
    * Props to monitor for size warnings
    */
   props?: Record<string, unknown>;
-  
+
   /**
    * Threshold for large props warning (in bytes)
    */
   propSizeThreshold?: number;
-  
+
   /**
    * Whether to track render performance
    */
   trackRenderTime?: boolean;
-  
+
   /**
    * Whether to warn about large props
    */
   warnLargeProps?: boolean;
-  
+
   /**
    * Component variant for bundle analysis
    */
@@ -48,7 +48,7 @@ export function usePerformanceOptimization({
   propSizeThreshold = 500,
   trackRenderTime = true,
   warnLargeProps = true,
-  variant
+  variant,
 }: PerformanceOptimizationOptions) {
   const monitor = usePerformanceMonitor(componentName);
   const startMarkRef = React.useRef<string>('');
@@ -74,22 +74,23 @@ export function usePerformanceOptimization({
     if (warnLargeProps) {
       bundleAnalysis.warnLargeProps(componentName, props, propSizeThreshold);
     }
-    
+
     bundleAnalysis.trackRender(componentName, variant, props);
   }, [componentName, props, propSizeThreshold, warnLargeProps, variant]);
 
   // Detect unnecessary re-renders
   React.useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      const propsChanged = JSON.stringify(props) !== JSON.stringify(lastPropsRef.current);
-      
+      const propsChanged =
+        JSON.stringify(props) !== JSON.stringify(lastPropsRef.current);
+
       if (renderCountRef.current > 1 && !propsChanged) {
         console.warn(
           `⚠️ ${componentName} re-rendered without prop changes (render #${renderCountRef.current}). ` +
-          'Consider using React.memo or optimizing parent component.'
+            'Consider using React.memo or optimizing parent component.'
         );
       }
-      
+
       lastPropsRef.current = props;
     }
   }, [componentName, props]);
@@ -100,20 +101,26 @@ export function usePerformanceOptimization({
   // Optimization recommendations
   const recommendations = React.useMemo(() => {
     const recs: string[] = [];
-    
+
     if (stats && stats.average > 16) {
       recs.push('Component render time exceeds 16ms - consider optimization');
     }
-    
-    if (renderCountRef.current > 10 && stats && stats.count > renderCountRef.current * 1.5) {
+
+    if (
+      renderCountRef.current > 10 &&
+      stats &&
+      stats.count > renderCountRef.current * 1.5
+    ) {
       recs.push('High re-render frequency detected - check prop stability');
     }
-    
+
     const propSize = JSON.stringify(props).length;
     if (propSize > propSizeThreshold) {
-      recs.push('Large props detected - consider memoization or prop optimization');
+      recs.push(
+        'Large props detected - consider memoization or prop optimization'
+      );
     }
-    
+
     return recs;
   }, [stats, props, propSizeThreshold]);
 
@@ -122,29 +129,31 @@ export function usePerformanceOptimization({
      * Current performance statistics
      */
     stats,
-    
+
     /**
      * Number of renders for this component instance
      */
     renderCount: renderCountRef.current,
-    
+
     /**
      * Performance optimization recommendations
      */
     recommendations,
-    
+
     /**
      * Whether the component is performing well
      */
-    isPerformant: stats ? stats.average < 16 && recommendations.length === 0 : true,
-    
+    isPerformant: stats
+      ? stats.average < 16 && recommendations.length === 0
+      : true,
+
     /**
      * Manual performance measurement utilities
      */
     measure: {
       start: () => monitor.startRender(),
-      end: (startMark: string) => monitor.endRender(startMark)
-    }
+      end: (startMark: string) => monitor.endRender(startMark),
+    },
   };
 }
 
@@ -160,13 +169,13 @@ export function useExpensiveCalculation<T>(
     const startTime = performance.now();
     const result = calculation();
     const duration = performance.now() - startTime;
-    
+
     if (process.env.NODE_ENV === 'development' && duration > 5) {
       console.warn(
         `⏱️ Expensive calculation in ${componentName || 'component'}: ${duration.toFixed(2)}ms`
       );
     }
-    
+
     return result;
   }, dependencies);
 }
@@ -180,19 +189,19 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
   componentName?: string
 ): T {
   const callCountRef = React.useRef(0);
-  
+
   const optimizedCallback = React.useCallback((...args: Parameters<T>) => {
     callCountRef.current++;
-    
+
     if (process.env.NODE_ENV === 'development' && callCountRef.current > 100) {
       console.warn(
         `🔄 High callback usage in ${componentName || 'component'}: ${callCountRef.current} calls`
       );
     }
-    
+
     return callback(...args);
   }, dependencies) as T;
-  
+
   return optimizedCallback;
 }
 
@@ -209,23 +218,27 @@ export function useMemoryLeakDetection(componentName: string) {
   React.useEffect(() => {
     return () => {
       // Clear all timers
-      timersRef.current.forEach(timer => clearTimeout(timer));
-      intervalsRef.current.forEach(interval => clearInterval(interval));
-      
+      timersRef.current.forEach((timer) => clearTimeout(timer));
+      intervalsRef.current.forEach((interval) => clearInterval(interval));
+
       // Remove all listeners
-      listenersRef.current.forEach(cleanup => cleanup());
-      
+      listenersRef.current.forEach((cleanup) => cleanup());
+
       const lifespan = Date.now() - mountTimeRef.current;
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.warn(`🧹 Cleaned up ${componentName} after ${lifespan}ms`);
-        
+
         if (timersRef.current.size > 0) {
-          console.warn(`⚠️ ${componentName} had ${timersRef.current.size} uncleaned timers`);
+          console.warn(
+            `⚠️ ${componentName} had ${timersRef.current.size} uncleaned timers`
+          );
         }
-        
+
         if (listenersRef.current.size > 0) {
-          console.warn(`⚠️ ${componentName} had ${listenersRef.current.size} uncleaned listeners`);
+          console.warn(
+            `⚠️ ${componentName} had ${listenersRef.current.size} uncleaned listeners`
+          );
         }
       }
     };
@@ -239,7 +252,7 @@ export function useMemoryLeakDetection(componentName: string) {
       timersRef.current.add(timer);
       return timer;
     },
-    
+
     /**
      * Register an interval for automatic cleanup
      */
@@ -247,18 +260,18 @@ export function useMemoryLeakDetection(componentName: string) {
       intervalsRef.current.add(interval);
       return interval;
     },
-    
+
     /**
      * Register a cleanup function
      */
     registerCleanup: (cleanup: () => void) => {
       listenersRef.current.add(cleanup);
     },
-    
+
     /**
      * Component lifespan in milliseconds
      */
-    getLifespan: () => Date.now() - mountTimeRef.current
+    getLifespan: () => Date.now() - mountTimeRef.current,
   };
 }
 

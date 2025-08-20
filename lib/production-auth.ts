@@ -44,7 +44,7 @@ export async function validateProductionSession(
     redirectOnFailure = false,
     allowGracefulDegradation = true,
     validateDatabase = true,
-    maxRetries = 2
+    maxRetries = 2,
   } = options;
 
   const requestId = `auth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -61,7 +61,7 @@ export async function validateProductionSession(
 
       if (!session?.user) {
         const error = 'No valid session found';
-        
+
         await logProductionError(new Error(error), {
           component: 'authentication',
           action: 'session_validation',
@@ -73,15 +73,15 @@ export async function validateProductionSession(
             requireAuth,
             requiredRoles,
             retryCount,
-            reason: 'no_session'
-          }
+            reason: 'no_session',
+          },
         });
 
         if (requireAuth && redirectOnFailure) {
-          const loginUrl = request 
+          const loginUrl = request
             ? `/auth/login?callbackUrl=${encodeURIComponent(new URL(request.url).pathname)}&error=session_required`
             : '/auth/login?error=session_required';
-          
+
           return {
             user: null,
             isValid: false,
@@ -89,16 +89,16 @@ export async function validateProductionSession(
             errorCode: 'NO_SESSION',
             shouldRedirect: true,
             redirectUrl: loginUrl,
-            metadata: { requestId, retryCount }
+            metadata: { requestId, retryCount },
           };
         }
 
-        return { 
-          user: null, 
-          isValid: false, 
-          error, 
+        return {
+          user: null,
+          isValid: false,
+          error,
           errorCode: 'NO_SESSION',
-          metadata: { requestId, retryCount }
+          metadata: { requestId, retryCount },
         };
       }
 
@@ -107,7 +107,7 @@ export async function validateProductionSession(
       // Validate session structure
       if (!user.id || !user.email || !user.roles) {
         const error = 'Invalid session structure';
-        
+
         await logProductionError(new Error(error), {
           component: 'authentication',
           action: 'session_validation',
@@ -121,8 +121,8 @@ export async function validateProductionSession(
             hasEmail: !!user.email,
             hasRoles: !!user.roles,
             retryCount,
-            reason: 'invalid_structure'
-          }
+            reason: 'invalid_structure',
+          },
         });
 
         if (redirectOnFailure) {
@@ -133,16 +133,16 @@ export async function validateProductionSession(
             errorCode: 'INVALID_SESSION_STRUCTURE',
             shouldRedirect: true,
             redirectUrl: '/auth/login?error=invalid_session',
-            metadata: { requestId, retryCount }
+            metadata: { requestId, retryCount },
           };
         }
 
-        return { 
-          user: null, 
-          isValid: false, 
-          error, 
+        return {
+          user: null,
+          isValid: false,
+          error,
           errorCode: 'INVALID_SESSION_STRUCTURE',
-          metadata: { requestId, retryCount }
+          metadata: { requestId, retryCount },
         };
       }
 
@@ -151,17 +151,17 @@ export async function validateProductionSession(
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { 
-              id: true, 
-              email: true, 
-              fullName: true, 
-              roles: true
-            }
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+              roles: true,
+            },
           });
 
           if (!dbUser) {
             const error = 'User no longer exists in database';
-            
+
             await logProductionError(new Error(error), {
               component: 'authentication',
               action: 'session_validation',
@@ -173,8 +173,8 @@ export async function validateProductionSession(
                 requestId,
                 sessionEmail: user.email,
                 retryCount,
-                reason: 'user_not_found'
-              }
+                reason: 'user_not_found',
+              },
             });
 
             if (redirectOnFailure) {
@@ -185,35 +185,36 @@ export async function validateProductionSession(
                 errorCode: 'USER_NOT_FOUND',
                 shouldRedirect: true,
                 redirectUrl: '/auth/login?error=invalid_session',
-                metadata: { requestId, retryCount }
+                metadata: { requestId, retryCount },
               };
             }
 
-            return { 
-              user: null, 
-              isValid: false, 
-              error, 
+            return {
+              user: null,
+              isValid: false,
+              error,
               errorCode: 'USER_NOT_FOUND',
-              metadata: { requestId, retryCount }
+              metadata: { requestId, retryCount },
             };
           }
-
 
           // Update user with current database data
           const validatedUser: SessionUser = {
             id: dbUser.id,
             email: dbUser.email,
             fullName: dbUser.fullName,
-            roles: dbUser.roles as UserRole[]
+            roles: dbUser.roles as UserRole[],
           };
 
           // Check role requirements
           if (requiredRoles.length > 0) {
-            const hasRequiredRole = requiredRoles.some(role => validatedUser.roles.includes(role));
-            
+            const hasRequiredRole = requiredRoles.some((role) =>
+              validatedUser.roles.includes(role)
+            );
+
             if (!hasRequiredRole) {
               const error = `Required roles: ${requiredRoles.join(', ')}`;
-              
+
               await logProductionError(new Error(error), {
                 component: 'authentication',
                 action: 'permission_check',
@@ -226,8 +227,8 @@ export async function validateProductionSession(
                   requiredRoles,
                   userRoles: validatedUser.roles,
                   retryCount,
-                  reason: 'insufficient_roles'
-                }
+                  reason: 'insufficient_roles',
+                },
               });
 
               if (redirectOnFailure) {
@@ -238,31 +239,41 @@ export async function validateProductionSession(
                   errorCode: 'INSUFFICIENT_ROLES',
                   shouldRedirect: true,
                   redirectUrl: '/dashboard?error=access_denied',
-                  metadata: { requestId, retryCount, requiredRoles, userRoles: validatedUser.roles }
+                  metadata: {
+                    requestId,
+                    retryCount,
+                    requiredRoles,
+                    userRoles: validatedUser.roles,
+                  },
                 };
               }
 
-              return { 
-                user: validatedUser, 
-                isValid: false, 
-                error, 
+              return {
+                user: validatedUser,
+                isValid: false,
+                error,
                 errorCode: 'INSUFFICIENT_ROLES',
-                metadata: { requestId, retryCount, requiredRoles, userRoles: validatedUser.roles }
+                metadata: {
+                  requestId,
+                  retryCount,
+                  requiredRoles,
+                  userRoles: validatedUser.roles,
+                },
               };
             }
           }
 
           // Note: lastLoginAt field removed from User model - no update needed
 
-          return { 
-            user: validatedUser, 
+          return {
+            user: validatedUser,
             isValid: true,
-            metadata: { requestId, retryCount, databaseValidated: true }
+            metadata: { requestId, retryCount, databaseValidated: true },
           };
-
         } catch (dbError) {
-          lastError = dbError instanceof Error ? dbError : new Error(String(dbError));
-          
+          lastError =
+            dbError instanceof Error ? dbError : new Error(String(dbError));
+
           await logProductionError(dbError, {
             component: 'authentication',
             action: 'database_validation',
@@ -274,29 +285,31 @@ export async function validateProductionSession(
               requestId,
               retryCount,
               error: 'database_check_failed',
-              allowGracefulDegradation
-            }
+              allowGracefulDegradation,
+            },
           });
 
           // Retry on database errors
           if (retryCount < maxRetries) {
             retryCount++;
-            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 100)); // Exponential backoff
+            await new Promise((resolve) =>
+              setTimeout(resolve, Math.pow(2, retryCount) * 100)
+            ); // Exponential backoff
             continue;
           }
 
           // Graceful degradation: return session user if database validation fails
           if (allowGracefulDegradation) {
-            return { 
-              user, 
+            return {
+              user,
               isValid: true,
-              metadata: { 
-                requestId, 
-                retryCount, 
-                databaseValidated: false, 
+              metadata: {
+                requestId,
+                retryCount,
+                databaseValidated: false,
                 gracefulDegradation: true,
-                dbError: lastError.message
-              }
+                dbError: lastError.message,
+              },
             };
           }
 
@@ -309,30 +322,29 @@ export async function validateProductionSession(
               errorCode: 'DATABASE_ERROR',
               shouldRedirect: true,
               redirectUrl: '/auth/login?error=system_error',
-              metadata: { requestId, retryCount, dbError: lastError.message }
+              metadata: { requestId, retryCount, dbError: lastError.message },
             };
           }
 
-          return { 
-            user: null, 
-            isValid: false, 
-            error, 
+          return {
+            user: null,
+            isValid: false,
+            error,
             errorCode: 'DATABASE_ERROR',
-            metadata: { requestId, retryCount, dbError: lastError.message }
+            metadata: { requestId, retryCount, dbError: lastError.message },
           };
         }
       } else {
         // Skip database validation
-        return { 
-          user, 
+        return {
+          user,
           isValid: true,
-          metadata: { requestId, retryCount, databaseValidated: false }
+          metadata: { requestId, retryCount, databaseValidated: false },
         };
       }
-
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      
+
       await logProductionError(error, {
         component: 'authentication',
         action: 'session_validation',
@@ -342,19 +354,21 @@ export async function validateProductionSession(
         metadata: {
           requestId,
           retryCount,
-          function: 'validateProductionSession'
-        }
+          function: 'validateProductionSession',
+        },
       });
 
       // Retry on general errors
       if (retryCount < maxRetries) {
         retryCount++;
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 100)); // Exponential backoff
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.pow(2, retryCount) * 100)
+        ); // Exponential backoff
         continue;
       }
 
       const errorMessage = 'Session validation failed';
-      
+
       if (requireAuth && redirectOnFailure) {
         return {
           user: null,
@@ -363,16 +377,16 @@ export async function validateProductionSession(
           errorCode: 'VALIDATION_ERROR',
           shouldRedirect: true,
           redirectUrl: '/auth/login?error=session_error',
-          metadata: { requestId, retryCount, originalError: lastError.message }
+          metadata: { requestId, retryCount, originalError: lastError.message },
         };
       }
 
-      return { 
-        user: null, 
-        isValid: false, 
-        error: errorMessage, 
+      return {
+        user: null,
+        isValid: false,
+        error: errorMessage,
         errorCode: 'VALIDATION_ERROR',
-        metadata: { requestId, retryCount, originalError: lastError.message }
+        metadata: { requestId, retryCount, originalError: lastError.message },
       };
     }
   }
@@ -383,7 +397,7 @@ export async function validateProductionSession(
     isValid: false,
     error: 'Maximum retries exceeded',
     errorCode: 'MAX_RETRIES_EXCEEDED',
-    metadata: { requestId, retryCount, originalError: lastError?.message }
+    metadata: { requestId, retryCount, originalError: lastError?.message },
   };
 }
 
@@ -396,7 +410,7 @@ export async function requireProductionAuth(
 ): Promise<SessionUser> {
   const result = await validateProductionSession(request, {
     requireAuth: true,
-    ...options
+    ...options,
   });
 
   if (!result.isValid || !result.user) {
@@ -421,7 +435,7 @@ export function withProductionApiAuth<T>(
       const result = await validateProductionSession(request, {
         requireAuth: true,
         redirectOnFailure: false,
-        ...options
+        ...options,
       });
 
       if (!result.isValid || !result.user) {
@@ -429,18 +443,16 @@ export function withProductionApiAuth<T>(
           error: result.errorCode || 'authentication_required',
           message: result.error || 'Authentication required',
           timestamp: new Date().toISOString(),
-          requestId: result.metadata?.requestId
+          requestId: result.metadata?.requestId,
         };
 
-        const statusCode = result.errorCode === 'INSUFFICIENT_ROLES' ? 403 : 401;
+        const statusCode =
+          result.errorCode === 'INSUFFICIENT_ROLES' ? 403 : 401;
 
-        return new Response(
-          JSON.stringify(errorResponse),
-          {
-            status: statusCode,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
+        return new Response(JSON.stringify(errorResponse), {
+          status: statusCode,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       return await handler(result.user, request);
@@ -450,18 +462,18 @@ export function withProductionApiAuth<T>(
         action: 'authentication_wrapper',
         url: request.url,
         userAgent: request.headers.get('user-agent') || 'unknown',
-        category: 'api'
+        category: 'api',
       });
 
       return new Response(
         JSON.stringify({
           error: 'server_error',
           message: 'An unexpected error occurred',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
@@ -480,7 +492,7 @@ export function withProductionPageAuth<T extends Record<string, unknown>>(
       const result = await validateProductionSession(undefined, {
         requireAuth: true,
         redirectOnFailure: true,
-        ...options
+        ...options,
       });
 
       if (result.shouldRedirect && result.redirectUrl) {
@@ -498,7 +510,7 @@ export function withProductionPageAuth<T extends Record<string, unknown>>(
         action: 'authentication_wrapper',
         url: '/page-component',
         userAgent: 'server',
-        category: 'auth'
+        category: 'auth',
       });
       redirect('/auth/login?error=server_error');
     }
@@ -519,8 +531,8 @@ export async function recoverSession(): Promise<{
       method: 'GET',
       credentials: 'include',
       headers: {
-        'Cache-Control': 'no-cache'
-      }
+        'Cache-Control': 'no-cache',
+      },
     });
 
     if (response.ok) {
@@ -530,16 +542,16 @@ export async function recoverSession(): Promise<{
       }
     }
 
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: 'Session recovery failed',
-      shouldReload: true
+      shouldReload: true,
     };
   } catch {
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: 'Network error during session recovery',
-      shouldReload: true
+      shouldReload: true,
     };
   }
 }
@@ -550,13 +562,13 @@ export async function recoverSession(): Promise<{
 export function createProductionAuthMiddleware() {
   return async (request: NextRequest): Promise<NextResponse> => {
     const requestId = `mw_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       const { pathname } = request.nextUrl;
-      
+
       // Allow public routes
       const publicRoutes = ['/auth', '/api/health', '/api/auth'];
-      if (publicRoutes.some(route => pathname.startsWith(route))) {
+      if (publicRoutes.some((route) => pathname.startsWith(route))) {
         return NextResponse.next();
       }
 
@@ -565,14 +577,17 @@ export function createProductionAuthMiddleware() {
         requireAuth: true,
         redirectOnFailure: false,
         allowGracefulDegradation: false,
-        validateDatabase: true
+        validateDatabase: true,
       });
 
       if (!result.isValid || !result.user) {
         const loginUrl = new URL('/auth/login', request.url);
         loginUrl.searchParams.set('callbackUrl', pathname);
-        loginUrl.searchParams.set('error', result.errorCode || 'session_required');
-        
+        loginUrl.searchParams.set(
+          'error',
+          result.errorCode || 'session_required'
+        );
+
         return NextResponse.redirect(loginUrl);
       }
 
@@ -581,7 +596,7 @@ export function createProductionAuthMiddleware() {
       response.headers.set('x-user-id', result.user.id);
       response.headers.set('x-user-roles', result.user.roles.join(','));
       response.headers.set('x-request-id', requestId);
-      
+
       return response;
     } catch (error) {
       await logProductionError(error, {
@@ -590,7 +605,7 @@ export function createProductionAuthMiddleware() {
         url: request.url,
         userAgent: request.headers.get('user-agent') || 'unknown',
         category: 'middleware',
-        metadata: { requestId }
+        metadata: { requestId },
       });
 
       // Redirect to login on middleware errors

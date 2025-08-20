@@ -1,13 +1,19 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  BarChart3, 
-  DollarSign, 
-  FileText, 
+import {
+  BarChart3,
+  DollarSign,
+  FileText,
   TrendingUp,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -62,10 +68,15 @@ export default function ReportsPage() {
         {reportCategories.map((category) => {
           const Icon = category.icon;
           return (
-            <Card key={category.href} className="hover:shadow-md transition-shadow">
+            <Card
+              key={category.href}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg bg-gray-100 ${category.color}`}>
+                  <div
+                    className={`p-2 rounded-lg bg-gray-100 ${category.color}`}
+                  >
                     <Icon className="h-6 w-6" />
                   </div>
                   <div>
@@ -78,9 +89,7 @@ export default function ReportsPage() {
                   {category.description}
                 </CardDescription>
                 <Button asChild className="w-full">
-                  <Link href={category.href}>
-                    View Reports
-                  </Link>
+                  <Link href={category.href}>View Reports</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -102,19 +111,28 @@ export default function ReportsPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
               <Button variant="outline" asChild>
-                <Link href="/reports/my-payroll" className="flex items-center space-x-2">
+                <Link
+                  href="/reports/my-payroll"
+                  className="flex items-center space-x-2"
+                >
                   <DollarSign className="h-4 w-4" />
                   <span>Current Pay Period</span>
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/reports/analytics" className="flex items-center space-x-2">
+                <Link
+                  href="/reports/analytics"
+                  className="flex items-center space-x-2"
+                >
                   <BarChart3 className="h-4 w-4" />
                   <span>This Month&apos;s Analytics</span>
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/reports/rankings" className="flex items-center space-x-2">
+                <Link
+                  href="/reports/rankings"
+                  className="flex items-center space-x-2"
+                >
                   <TrendingUp className="h-4 w-4" />
                   <span>Performance Rankings</span>
                 </Link>

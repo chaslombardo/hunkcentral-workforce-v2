@@ -13,7 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } from '@/components/ui/responsive-table';
+import {
+  ResponsiveTable,
+  MobileTableCard,
+  MobileTableItem,
+  MobileTableField,
+} from '@/components/ui/responsive-table';
 import { CommissionTableSkeleton } from '@/components/ui/skeleton-components';
 import {
   DropdownMenu,
@@ -36,7 +41,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { NoCommissionsEmptyState, NoCommissionMatchesEmptyState } from '@/components/features/empty-states';
+import {
+  NoCommissionsEmptyState,
+  NoCommissionMatchesEmptyState,
+} from '@/components/features/empty-states';
 
 interface CommissionEntry {
   id: string;
@@ -86,29 +94,45 @@ interface CommissionListProps {
   isLoading?: boolean;
 }
 
-export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, onReject, isLoading }: CommissionListProps) {
+export function CommissionList({
+  entries,
+  onEdit,
+  onDelete,
+  onView,
+  onApprove,
+  onReject,
+  isLoading,
+}: CommissionListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const componentLoading = isLoading;
 
   const filteredEntries = entries.filter((entry) => {
-    const matchesSearch = 
+    const matchesSearch =
       entry.jobId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.sales.fullName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || entry.status === statusFilter;
-    
+
+    const matchesStatus =
+      statusFilter === 'all' || entry.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
   const getStatusIndicator = (status: string) => {
-    return <StatusIndicator status={status as 'pending' | 'matched' | 'approved' | 'rejected'} />;
+    return (
+      <StatusIndicator
+        status={status as 'pending' | 'matched' | 'approved' | 'rejected'}
+      />
+    );
   };
 
   const getBookingAccuracy = (estimated: number, actual: number | null) => {
     if (!actual) return null;
-    const accuracy = Math.min((Math.min(estimated, actual) / Math.max(estimated, actual)) * 100, 100);
+    const accuracy = Math.min(
+      (Math.min(estimated, actual) / Math.max(estimated, actual)) * 100,
+      100
+    );
     return accuracy;
   };
 
@@ -122,9 +146,12 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
 
   // Calculate summary statistics
   const totalEntries = entries.length;
-  const pendingEntries = entries.filter(e => e.status === 'pending').length;
-  const matchedEntries = entries.filter(e => e.status === 'matched').length;
-  const totalCommission = entries.reduce((sum, entry) => sum + (entry.commissionAmount || 0), 0);
+  const pendingEntries = entries.filter((e) => e.status === 'pending').length;
+  const matchedEntries = entries.filter((e) => e.status === 'matched').length;
+  const totalCommission = entries.reduce(
+    (sum, entry) => sum + (entry.commissionAmount || 0),
+    0
+  );
 
   if (componentLoading) {
     return <CommissionTableSkeleton />;
@@ -144,7 +171,9 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
             <CardTitle className="text-sm font-medium">Total Entries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold tabular-nums @[250px]/card:text-3xl">{totalEntries}</div>
+            <div className="text-2xl font-bold tabular-nums @[250px]/card:text-3xl">
+              {totalEntries}
+            </div>
             <p className="text-xs text-muted-foreground">Commission bookings</p>
           </CardContent>
         </Card>
@@ -153,8 +182,12 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600 tabular-nums @[250px]/card:text-3xl">{pendingEntries}</div>
-            <p className="text-xs text-muted-foreground">Awaiting job completion</p>
+            <div className="text-2xl font-bold text-yellow-600 tabular-nums @[250px]/card:text-3xl">
+              {pendingEntries}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting job completion
+            </p>
           </CardContent>
         </Card>
         <Card className="@container/card border-l-4 border-l-hunks-green">
@@ -162,16 +195,24 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
             <CardTitle className="text-sm font-medium">Matched</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-hunks-green tabular-nums @[250px]/card:text-3xl">{matchedEntries}</div>
-            <p className="text-xs text-muted-foreground">Successfully matched</p>
+            <div className="text-2xl font-bold text-hunks-green tabular-nums @[250px]/card:text-3xl">
+              {matchedEntries}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Successfully matched
+            </p>
           </CardContent>
         </Card>
         <Card className="@container/card border-l-4 border-l-hunks-orange">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Commission</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Commission
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-hunks-orange tabular-nums @[250px]/card:text-3xl">{formatCurrency(totalCommission)}</div>
+            <div className="text-2xl font-bold text-hunks-orange tabular-nums @[250px]/card:text-3xl">
+              {formatCurrency(totalCommission)}
+            </div>
             <p className="text-xs text-muted-foreground">Earned commission</p>
           </CardContent>
         </Card>
@@ -231,18 +272,33 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                 </TableRow>
               ) : (
                 filteredEntries.map((entry) => {
-                  const accuracy = getBookingAccuracy(entry.estimatedRevenue, entry.actualRevenue);
-                  
+                  const accuracy = getBookingAccuracy(
+                    entry.estimatedRevenue,
+                    entry.actualRevenue
+                  );
+
                   return (
                     <TableRow key={entry.id} variant="branded">
-                      <TableCell className="font-medium">{entry.jobId}</TableCell>
+                      <TableCell className="font-medium">
+                        {entry.jobId}
+                      </TableCell>
                       <TableCell>{entry.clientName}</TableCell>
                       <TableCell>{entry.sales.fullName}</TableCell>
-                      <TableCell className="capitalize">{entry.jobType}</TableCell>
-                      <TableCell>{format(new Date(entry.targetDate), 'MMM d, yyyy')}</TableCell>
-                      <TableCell>{formatCurrency(entry.estimatedRevenue)}</TableCell>
-                      <TableCell>{formatCurrency(entry.actualRevenue)}</TableCell>
-                      <TableCell className="font-medium text-hunks-orange">{formatCurrency(entry.commissionAmount)}</TableCell>
+                      <TableCell className="capitalize">
+                        {entry.jobType}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(entry.targetDate), 'MMM d, yyyy')}
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(entry.estimatedRevenue)}
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(entry.actualRevenue)}
+                      </TableCell>
+                      <TableCell className="font-medium text-hunks-orange">
+                        {formatCurrency(entry.commissionAmount)}
+                      </TableCell>
                       <TableCell>
                         {accuracy !== null ? (
                           <HoverCard>
@@ -256,16 +312,28 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                             </HoverCardTrigger>
                             <HoverCardContent className="w-80">
                               <div className="space-y-2">
-                                <h4 className="text-sm font-semibold">Booking Accuracy</h4>
+                                <h4 className="text-sm font-semibold">
+                                  Booking Accuracy
+                                </h4>
                                 <div className="text-sm">
-                                  <div>Estimated: {formatCurrency(entry.estimatedRevenue)}</div>
-                                  <div>Actual: {formatCurrency(entry.actualRevenue)}</div>
+                                  <div>
+                                    Estimated:{' '}
+                                    {formatCurrency(entry.estimatedRevenue)}
+                                  </div>
+                                  <div>
+                                    Actual:{' '}
+                                    {formatCurrency(entry.actualRevenue)}
+                                  </div>
                                   <div>Accuracy: {accuracy.toFixed(1)}%</div>
                                 </div>
                                 {entry.matchedLog && (
                                   <div className="text-xs text-muted-foreground border-t pt-2">
-                                    Matched to log by {entry.matchedLog.captain.fullName} on{' '}
-                                    {format(new Date(entry.matchedLog.logDate), 'MMM d, yyyy')}
+                                    Matched to log by{' '}
+                                    {entry.matchedLog.captain.fullName} on{' '}
+                                    {format(
+                                      new Date(entry.matchedLog.logDate),
+                                      'MMM d, yyyy'
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -279,7 +347,10 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <BrandButton variant="ghost" className="h-8 w-8 p-0">
+                            <BrandButton
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </BrandButton>
                           </DropdownMenuTrigger>
@@ -297,7 +368,7 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                               </DropdownMenuItem>
                             )}
                             {onApprove && entry.status === 'matched' && (
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => onApprove(entry)}
                                 className="text-hunks-green"
                               >
@@ -305,17 +376,18 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                                 Approve
                               </DropdownMenuItem>
                             )}
-                            {onReject && ['matched', 'pending'].includes(entry.status) && (
-                              <DropdownMenuItem 
-                                onClick={() => onReject(entry)}
-                                className="text-destructive"
-                              >
-                                <X className="mr-2 h-4 w-4" />
-                                Reject
-                              </DropdownMenuItem>
-                            )}
+                            {onReject &&
+                              ['matched', 'pending'].includes(entry.status) && (
+                                <DropdownMenuItem
+                                  onClick={() => onReject(entry)}
+                                  className="text-destructive"
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  Reject
+                                </DropdownMenuItem>
+                              )}
                             {onDelete && entry.status === 'pending' && (
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => onDelete(entry)}
                                 className="text-destructive"
                               >
@@ -343,33 +415,61 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
           </div>
         ) : (
           filteredEntries.map((entry) => {
-            const accuracy = getBookingAccuracy(entry.estimatedRevenue, entry.actualRevenue);
-            
+            const accuracy = getBookingAccuracy(
+              entry.estimatedRevenue,
+              entry.actualRevenue
+            );
+
             return (
               <MobileTableItem key={entry.id} branded>
-                <MobileTableField label="Job ID" value={<span className="font-medium">{entry.jobId}</span>} />
+                <MobileTableField
+                  label="Job ID"
+                  value={<span className="font-medium">{entry.jobId}</span>}
+                />
                 <MobileTableField label="Client" value={entry.clientName} />
-                <MobileTableField label="Sales Person" value={entry.sales.fullName} />
-                <MobileTableField label="Type" value={<span className="capitalize">{entry.jobType}</span>} />
-                <MobileTableField label="Target Date" value={format(new Date(entry.targetDate), 'MMM d, yyyy')} />
-                <MobileTableField label="Estimated" value={formatCurrency(entry.estimatedRevenue)} />
-                <MobileTableField label="Actual" value={formatCurrency(entry.actualRevenue)} />
-                <MobileTableField 
-                  label="Commission" 
-                  value={<span className="font-medium text-hunks-orange">{formatCurrency(entry.commissionAmount)}</span>} 
+                <MobileTableField
+                  label="Sales Person"
+                  value={entry.sales.fullName}
+                />
+                <MobileTableField
+                  label="Type"
+                  value={<span className="capitalize">{entry.jobType}</span>}
+                />
+                <MobileTableField
+                  label="Target Date"
+                  value={format(new Date(entry.targetDate), 'MMM d, yyyy')}
+                />
+                <MobileTableField
+                  label="Estimated"
+                  value={formatCurrency(entry.estimatedRevenue)}
+                />
+                <MobileTableField
+                  label="Actual"
+                  value={formatCurrency(entry.actualRevenue)}
+                />
+                <MobileTableField
+                  label="Commission"
+                  value={
+                    <span className="font-medium text-hunks-orange">
+                      {formatCurrency(entry.commissionAmount)}
+                    </span>
+                  }
                 />
                 {accuracy !== null && (
-                  <MobileTableField 
-                    label="Accuracy" 
+                  <MobileTableField
+                    label="Accuracy"
                     value={
                       <div className="flex items-center gap-2">
                         <Progress value={accuracy} className="w-16" />
                         <span className="text-xs">{accuracy.toFixed(0)}%</span>
                       </div>
-                    } 
+                    }
                   />
                 )}
-                <MobileTableField label="Status" value={getStatusIndicator(entry.status)} />
+                <MobileTableField
+                  label="Status"
+                  value={getStatusIndicator(entry.status)}
+                />
                 <div className="flex justify-end pt-2 border-t border-hunks-green-200">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -391,7 +491,7 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                         </DropdownMenuItem>
                       )}
                       {onApprove && entry.status === 'matched' && (
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => onApprove(entry)}
                           className="text-hunks-green"
                         >
@@ -399,17 +499,18 @@ export function CommissionList({ entries, onEdit, onDelete, onView, onApprove, o
                           Approve
                         </DropdownMenuItem>
                       )}
-                      {onReject && ['matched', 'pending'].includes(entry.status) && (
-                        <DropdownMenuItem 
-                          onClick={() => onReject(entry)}
-                          className="text-destructive"
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Reject
-                        </DropdownMenuItem>
-                      )}
+                      {onReject &&
+                        ['matched', 'pending'].includes(entry.status) && (
+                          <DropdownMenuItem
+                            onClick={() => onReject(entry)}
+                            className="text-destructive"
+                          >
+                            <X className="mr-2 h-4 w-4" />
+                            Reject
+                          </DropdownMenuItem>
+                        )}
                       {onDelete && entry.status === 'pending' && (
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => onDelete(entry)}
                           className="text-destructive"
                         >

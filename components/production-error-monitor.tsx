@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { setupGlobalErrorHandling, setupErrorRetry, logClientError } from '@/lib/client-error-logger';
+import {
+  setupGlobalErrorHandling,
+  setupErrorRetry,
+  logClientError,
+} from '@/lib/client-error-logger';
 import { reportClientError } from '@/lib/error-reporting';
 
 /**
@@ -17,7 +21,7 @@ export function ProductionErrorMonitor() {
   useEffect(() => {
     // Set up global error handling for unhandled errors and promise rejections
     setupGlobalErrorHandling();
-    
+
     // Set up automatic retry mechanism for pending errors
     setupErrorRetry();
 
@@ -39,12 +43,15 @@ export function ProductionErrorMonitor() {
     // Performance monitoring
     const monitorPerformance = () => {
       if ('performance' in window && 'getEntriesByType' in performance) {
-        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-        
+        const navigation = performance.getEntriesByType(
+          'navigation'
+        )[0] as PerformanceNavigationTiming;
+
         if (navigation) {
           const loadTime = navigation.loadEventEnd - navigation.fetchStart;
-          const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart;
-          
+          const domContentLoaded =
+            navigation.domContentLoadedEventEnd - navigation.fetchStart;
+
           // Report slow page loads as potential issues
           if (loadTime > 5000) {
             reportClientError(new Error(`Slow page load: ${loadTime}ms`), {
@@ -62,7 +69,8 @@ export function ProductionErrorMonitor() {
                   requestStart: navigation.requestStart,
                   responseStart: navigation.responseStart,
                   responseEnd: navigation.responseEnd,
-                  domContentLoadedEventStart: navigation.domContentLoadedEventStart,
+                  domContentLoadedEventStart:
+                    navigation.domContentLoadedEventStart,
                   domContentLoadedEventEnd: navigation.domContentLoadedEventEnd,
                   loadEventStart: navigation.loadEventStart,
                   loadEventEnd: navigation.loadEventEnd,
@@ -74,30 +82,39 @@ export function ProductionErrorMonitor() {
       }
     };
 
-  // Memory usage monitoring
-  const monitorMemory = () => {
-    if ('memory' in performance) {
-      const memory = (performance as { memory: {
-        usedJSHeapSize: number;
-        totalJSHeapSize: number;
-        jsHeapSizeLimit: number;
-      } }).memory;
-      const usedMemory = memory.usedJSHeapSize;
-      const totalMemory = memory.totalJSHeapSize;
-      const memoryLimit = memory.jsHeapSizeLimit;
-        
+    // Memory usage monitoring
+    const monitorMemory = () => {
+      if ('memory' in performance) {
+        const memory = (
+          performance as {
+            memory: {
+              usedJSHeapSize: number;
+              totalJSHeapSize: number;
+              jsHeapSizeLimit: number;
+            };
+          }
+        ).memory;
+        const usedMemory = memory.usedJSHeapSize;
+        const totalMemory = memory.totalJSHeapSize;
+        const memoryLimit = memory.jsHeapSizeLimit;
+
         // Report high memory usage
         if (usedMemory / memoryLimit > 0.8) {
-          reportClientError(new Error(`High memory usage: ${Math.round((usedMemory / memoryLimit) * 100)}%`), {
-            component: 'memory_monitor',
-            action: 'high_memory_usage',
-            metadata: {
-              usedMemory,
-              totalMemory,
-              memoryLimit,
-              usagePercentage: (usedMemory / memoryLimit) * 100,
-            },
-          });
+          reportClientError(
+            new Error(
+              `High memory usage: ${Math.round((usedMemory / memoryLimit) * 100)}%`
+            ),
+            {
+              component: 'memory_monitor',
+              action: 'high_memory_usage',
+              metadata: {
+                usedMemory,
+                totalMemory,
+                memoryLimit,
+                usagePercentage: (usedMemory / memoryLimit) * 100,
+              },
+            }
+          );
         }
       }
     };
@@ -105,17 +122,19 @@ export function ProductionErrorMonitor() {
     // Console error monitoring with enhanced filtering
     const originalConsoleError = console.error;
     const originalConsoleWarn = console.warn;
-    
+
     console.error = (...args) => {
       // Call original console.error
       originalConsoleError.apply(console, args);
-      
+
       // Report console errors in production with filtering
       if (process.env.NODE_ENV === 'production') {
-        const errorMessage = args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ');
-        
+        const errorMessage = args
+          .map((arg) =>
+            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+          )
+          .join(' ');
+
         // Filter out known non-critical console errors
         const ignoredPatterns = [
           'Warning: ReactDOM.render is deprecated',
@@ -123,11 +142,11 @@ export function ProductionErrorMonitor() {
           'Download the React DevTools',
           'The above error occurred in the',
         ];
-        
-        const shouldIgnore = ignoredPatterns.some(pattern => 
+
+        const shouldIgnore = ignoredPatterns.some((pattern) =>
           errorMessage.includes(pattern)
         );
-        
+
         if (!shouldIgnore) {
           reportClientError(new Error(`Console Error: ${errorMessage}`), {
             component: 'console_monitor',
@@ -135,30 +154,34 @@ export function ProductionErrorMonitor() {
             metadata: {
               arguments: args.length,
               timestamp: new Date().toISOString(),
-              severity: errorMessage.toLowerCase().includes('critical') ? 'critical' : 'medium',
+              severity: errorMessage.toLowerCase().includes('critical')
+                ? 'critical'
+                : 'medium',
             },
           });
-          
-          setErrorCount(prev => prev + 1);
+
+          setErrorCount((prev) => prev + 1);
           setLastErrorTime(new Date());
-          
+
           if (errorMessage.toLowerCase().includes('critical')) {
-            setCriticalErrorCount(prev => prev + 1);
+            setCriticalErrorCount((prev) => prev + 1);
           }
         }
       }
     };
-    
+
     console.warn = (...args) => {
       // Call original console.warn
       originalConsoleWarn.apply(console, args);
-      
+
       // Report console warnings in production for critical issues only
       if (process.env.NODE_ENV === 'production') {
-        const warningMessage = args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ');
-        
+        const warningMessage = args
+          .map((arg) =>
+            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+          )
+          .join(' ');
+
         // Only report warnings that might indicate serious issues
         const criticalWarnings = [
           'memory',
@@ -168,11 +191,11 @@ export function ProductionErrorMonitor() {
           'database',
           'network timeout',
         ];
-        
-        const isCriticalWarning = criticalWarnings.some(keyword => 
+
+        const isCriticalWarning = criticalWarnings.some((keyword) =>
           warningMessage.toLowerCase().includes(keyword)
         );
-        
+
         if (isCriticalWarning) {
           reportClientError(new Error(`Console Warning: ${warningMessage}`), {
             component: 'console_monitor',
@@ -190,19 +213,28 @@ export function ProductionErrorMonitor() {
     // Resource loading error monitoring
     const handleResourceError = (event: Event) => {
       const target = event.target as HTMLElement;
-      if (target && (target.tagName === 'IMG' || target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-        const resourceUrl = target.tagName === 'LINK' 
-          ? (target as HTMLLinkElement).href 
-          : (target as HTMLImageElement | HTMLScriptElement).src;
-        reportClientError(new Error(`Failed to load resource: ${resourceUrl}`), {
-          component: 'resource_monitor',
-          action: 'resource_load_error',
-          metadata: {
-            resourceType: target.tagName.toLowerCase(),
-            resourceUrl,
-            timestamp: new Date().toISOString(),
-          },
-        });
+      if (
+        target &&
+        (target.tagName === 'IMG' ||
+          target.tagName === 'SCRIPT' ||
+          target.tagName === 'LINK')
+      ) {
+        const resourceUrl =
+          target.tagName === 'LINK'
+            ? (target as HTMLLinkElement).href
+            : (target as HTMLImageElement | HTMLScriptElement).src;
+        reportClientError(
+          new Error(`Failed to load resource: ${resourceUrl}`),
+          {
+            component: 'resource_monitor',
+            action: 'resource_load_error',
+            metadata: {
+              resourceType: target.tagName.toLowerCase(),
+              resourceUrl,
+              timestamp: new Date().toISOString(),
+            },
+          }
+        );
       }
     };
 
@@ -213,7 +245,7 @@ export function ProductionErrorMonitor() {
 
     // Initial performance check
     setTimeout(monitorPerformance, 2000);
-    
+
     // Periodic memory monitoring
     const memoryInterval = setInterval(monitorMemory, 30000); // Every 30 seconds
 
@@ -223,7 +255,7 @@ export function ProductionErrorMonitor() {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('error', handleResourceError, true);
       clearInterval(memoryInterval);
-      
+
       // Restore original console methods
       console.error = originalConsoleError;
       console.warn = originalConsoleWarn;
@@ -233,40 +265,45 @@ export function ProductionErrorMonitor() {
   // Enhanced error monitoring with categorization
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      setErrorCount(prev => prev + 1);
+      setErrorCount((prev) => prev + 1);
       setLastErrorTime(new Date());
-      
+
       // Check if it's a critical error
-      const isCritical = event.error?.message?.toLowerCase().includes('critical') ||
-                        event.error?.stack?.toLowerCase().includes('database') ||
-                        event.error?.stack?.toLowerCase().includes('auth');
-      
+      const isCritical =
+        event.error?.message?.toLowerCase().includes('critical') ||
+        event.error?.stack?.toLowerCase().includes('database') ||
+        event.error?.stack?.toLowerCase().includes('auth');
+
       if (isCritical) {
-        setCriticalErrorCount(prev => prev + 1);
+        setCriticalErrorCount((prev) => prev + 1);
       }
     };
-    
+
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      setErrorCount(prev => prev + 1);
+      setErrorCount((prev) => prev + 1);
       setLastErrorTime(new Date());
-      
+
       // Check if it's a critical promise rejection
       const reason = String(event.reason);
-      const isCritical = reason.toLowerCase().includes('critical') ||
-                        reason.toLowerCase().includes('database') ||
-                        reason.toLowerCase().includes('auth');
-      
+      const isCritical =
+        reason.toLowerCase().includes('critical') ||
+        reason.toLowerCase().includes('database') ||
+        reason.toLowerCase().includes('auth');
+
       if (isCritical) {
-        setCriticalErrorCount(prev => prev + 1);
+        setCriticalErrorCount((prev) => prev + 1);
       }
     };
-    
+
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    
+
     return () => {
       window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener(
+        'unhandledrejection',
+        handleUnhandledRejection
+      );
     };
   }, []);
 

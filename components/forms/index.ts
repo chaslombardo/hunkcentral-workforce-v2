@@ -4,7 +4,11 @@
  */
 
 // Direct exports for components
-export { FormFeedback, formFeedbackPresets, useFormFeedback } from './form-feedback';
+export {
+  FormFeedback,
+  formFeedbackPresets,
+  useFormFeedback,
+} from './form-feedback';
 export { SmartInput, commonValidationRules } from './smart-input';
 export { InlineSuccessCheck } from './success-animation';
 

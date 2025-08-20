@@ -2,7 +2,7 @@
 
 /**
  * Comprehensive Test Runner for Theme & UX Improvements
- * 
+ *
  * This script runs all tests related to the theme and UX improvements
  * and generates a comprehensive report of the testing results.
  */
@@ -34,9 +34,12 @@ class ComprehensiveTestRunner {
   private results: TestResult[] = [];
   private startTime: number = Date.now();
 
-  async runTestCategory(category: string, pattern: string): Promise<TestResult> {
+  async runTestCategory(
+    category: string,
+    pattern: string
+  ): Promise<TestResult> {
     console.log(`\n🧪 Running ${category} tests...`);
-    
+
     const startTime = Date.now();
     let passed = 0;
     let failed = 0;
@@ -45,7 +48,7 @@ class ComprehensiveTestRunner {
     try {
       const output = execSync(`npm run test -- --run ${pattern}`, {
         encoding: 'utf-8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
 
       // Parse vitest output to extract test results
@@ -73,7 +76,7 @@ class ComprehensiveTestRunner {
       // Parse error output for test results
       const output = error.stdout || error.message;
       const lines = output.split('\n');
-      
+
       for (const line of lines) {
         if (line.includes('Tests ')) {
           const match = line.match(/(\d+) failed \| (\d+) passed \((\d+)\)/);
@@ -85,23 +88,25 @@ class ComprehensiveTestRunner {
         }
       }
 
-      console.log(`❌ ${category}: ${passed}/${total} tests passed, ${failed} failed`);
+      console.log(
+        `❌ ${category}: ${passed}/${total} tests passed, ${failed} failed`
+      );
     }
 
     const duration = Date.now() - startTime;
-    
+
     return {
       category,
       passed,
       failed,
       total,
-      duration
+      duration,
     };
   }
 
   async runLintingAndTypeChecking(): Promise<TestResult> {
     console.log('\n🔍 Running linting and type checking...');
-    
+
     const startTime = Date.now();
     let passed = 0;
     let failed = 0;
@@ -131,45 +136,51 @@ class ComprehensiveTestRunner {
       passed,
       failed,
       total: passed + failed,
-      duration
+      duration,
     };
   }
 
   async runAllTests(): Promise<TestReport> {
-    console.log('🚀 Starting Comprehensive Test Suite for Theme & UX Improvements\n');
+    console.log(
+      '🚀 Starting Comprehensive Test Suite for Theme & UX Improvements\n'
+    );
 
     // Run different test categories
     const testCategories = [
       {
         name: 'Brand Components',
-        pattern: '__tests__/components/brand-*.test.tsx'
+        pattern: '__tests__/components/brand-*.test.tsx',
       },
       {
-        name: 'Form Components', 
-        pattern: '__tests__/components/*form*.test.tsx'
+        name: 'Form Components',
+        pattern: '__tests__/components/*form*.test.tsx',
       },
       {
         name: 'Visual Consistency',
-        pattern: '__tests__/visual/*.test.tsx'
+        pattern: '__tests__/visual/*.test.tsx',
       },
       {
         name: 'Navigation Integration',
-        pattern: '__tests__/integration/navigation-*.test.tsx'
+        pattern: '__tests__/integration/navigation-*.test.tsx',
       },
       {
         name: 'Accessibility',
-        pattern: '__tests__/accessibility/*.test.tsx'
+        pattern: '__tests__/accessibility/*.test.tsx',
       },
       {
         name: 'Existing Components',
-        pattern: '__tests__/components/accessibility-enhancements.test.tsx __tests__/components/smart-input.test.tsx'
-      }
+        pattern:
+          '__tests__/components/accessibility-enhancements.test.tsx __tests__/components/smart-input.test.tsx',
+      },
     ];
 
     // Run each test category
     for (const category of testCategories) {
       try {
-        const result = await this.runTestCategory(category.name, category.pattern);
+        const result = await this.runTestCategory(
+          category.name,
+          category.pattern
+        );
         this.results.push(result);
       } catch (error) {
         console.error(`Error running ${category.name} tests:`, error);
@@ -178,7 +189,7 @@ class ComprehensiveTestRunner {
           passed: 0,
           failed: 1,
           total: 1,
-          duration: 0
+          duration: 0,
         });
       }
     }
@@ -200,15 +211,19 @@ class ComprehensiveTestRunner {
       totalFailed,
       overallDuration: totalDuration,
       categories: this.results,
-      summary: this.generateSummary(totalTests, totalPassed, totalFailed)
+      summary: this.generateSummary(totalTests, totalPassed, totalFailed),
     };
 
     return report;
   }
 
-  private generateSummary(total: number, passed: number, failed: number): string {
+  private generateSummary(
+    total: number,
+    passed: number,
+    failed: number
+  ): string {
     const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-    
+
     let summary = `\n📊 COMPREHENSIVE TEST RESULTS SUMMARY\n`;
     summary += `${'='.repeat(50)}\n\n`;
     summary += `Total Tests: ${total}\n`;
@@ -220,7 +235,8 @@ class ComprehensiveTestRunner {
     summary += `${'-'.repeat(30)}\n`;
 
     for (const result of this.results) {
-      const categoryPassRate = result.total > 0 ? Math.round((result.passed / result.total) * 100) : 0;
+      const categoryPassRate =
+        result.total > 0 ? Math.round((result.passed / result.total) * 100) : 0;
       const status = result.failed === 0 ? '✅' : '❌';
       summary += `${status} ${result.category}: ${result.passed}/${result.total} (${categoryPassRate}%) - ${Math.round(result.duration / 1000)}s\n`;
     }
@@ -254,23 +270,34 @@ class ComprehensiveTestRunner {
 
     // Write detailed JSON report
     const jsonReport = JSON.stringify(report, null, 2);
-    const reportPath = join(process.cwd(), '__tests__', 'comprehensive-test-report.json');
+    const reportPath = join(
+      process.cwd(),
+      '__tests__',
+      'comprehensive-test-report.json'
+    );
     writeFileSync(reportPath, jsonReport);
     console.log(`\n📄 Detailed report saved to: ${reportPath}`);
 
     // Write markdown report
     const markdownReport = this.generateMarkdownReport(report);
-    const markdownPath = join(process.cwd(), '__tests__', 'comprehensive-test-report.md');
+    const markdownPath = join(
+      process.cwd(),
+      '__tests__',
+      'comprehensive-test-report.md'
+    );
     writeFileSync(markdownPath, markdownReport);
     console.log(`📄 Markdown report saved to: ${markdownPath}`);
   }
 
   private generateMarkdownReport(report: TestReport): string {
-    const passRate = report.totalTests > 0 ? Math.round((report.totalPassed / report.totalTests) * 100) : 0;
-    
+    const passRate =
+      report.totalTests > 0
+        ? Math.round((report.totalPassed / report.totalTests) * 100)
+        : 0;
+
     let markdown = `# Comprehensive Test Report - Theme & UX Improvements\n\n`;
     markdown += `**Generated:** ${new Date(report.timestamp).toLocaleString()}\n\n`;
-    
+
     markdown += `## Summary\n\n`;
     markdown += `| Metric | Value |\n`;
     markdown += `|--------|-------|\n`;
@@ -282,9 +309,10 @@ class ComprehensiveTestRunner {
 
     markdown += `## Test Categories\n\n`;
     for (const result of report.categories) {
-      const categoryPassRate = result.total > 0 ? Math.round((result.passed / result.total) * 100) : 0;
+      const categoryPassRate =
+        result.total > 0 ? Math.round((result.passed / result.total) * 100) : 0;
       const status = result.failed === 0 ? '✅' : '❌';
-      
+
       markdown += `### ${status} ${result.category}\n\n`;
       markdown += `- **Tests:** ${result.total}\n`;
       markdown += `- **Passed:** ${result.passed}\n`;
@@ -325,11 +353,11 @@ class ComprehensiveTestRunner {
 // Run the comprehensive test suite
 async function main() {
   const runner = new ComprehensiveTestRunner();
-  
+
   try {
     const report = await runner.runAllTests();
     await runner.generateReport(report);
-    
+
     // Exit with appropriate code
     process.exit(report.totalFailed > 0 ? 1 : 0);
   } catch (error) {

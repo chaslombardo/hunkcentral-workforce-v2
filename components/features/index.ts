@@ -11,8 +11,8 @@ export {
   NoDashboardDataEmptyState,
   NoAuditDataEmptyState,
   GenericEmptyState,
-  LoadingEmptyState
-} from "./empty-states"
+  LoadingEmptyState,
+} from './empty-states';
 
 // Empty State Illustrations
 export {
@@ -21,5 +21,5 @@ export {
   ReportsIllustration,
   UsersIllustration,
   SearchIllustration,
-  WelcomeIllustration
-} from "../ui/empty-state-illustrations"
+  WelcomeIllustration,
+} from '../ui/empty-state-illustrations';

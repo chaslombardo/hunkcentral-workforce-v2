@@ -57,7 +57,7 @@ export async function getAnalyticsData(): Promise<{
     }
 
     // Check if user has permission to view analytics
-    const canViewAnalytics = 
+    const canViewAnalytics =
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
 
@@ -149,135 +149,181 @@ export async function getAnalyticsData(): Promise<{
     });
 
     // Calculate overview metrics
-    const currentRevenue = currentMonthLogs.reduce((sum, log) => 
-      sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
-    );
-    
-    const lastRevenue = lastMonthLogs.reduce((sum, log) => 
-      sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
+    const currentRevenue = currentMonthLogs.reduce(
+      (sum, log) =>
+        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+      0
     );
 
-    const currentJobs = currentMonthLogs.reduce((sum, log) => sum + log.jobs.length, 0);
-    const lastJobs = lastMonthLogs.reduce((sum, log) => sum + log.jobs.length, 0);
+    const lastRevenue = lastMonthLogs.reduce(
+      (sum, log) =>
+        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+      0
+    );
 
-    const currentAvgJobValue = currentJobs > 0 ? currentRevenue / currentJobs : 0;
+    const currentJobs = currentMonthLogs.reduce(
+      (sum, log) => sum + log.jobs.length,
+      0
+    );
+    const lastJobs = lastMonthLogs.reduce(
+      (sum, log) => sum + log.jobs.length,
+      0
+    );
+
+    const currentAvgJobValue =
+      currentJobs > 0 ? currentRevenue / currentJobs : 0;
     const lastAvgJobValue = lastJobs > 0 ? lastRevenue / lastJobs : 0;
 
     // Calculate labor efficiency
     const currentLaborCost = currentMonthLogs.reduce((sum, log) => {
-      return sum + log.hours.reduce((hourSum, hour) => {
-        const employee = convertUserDecimalFields(hour.employee);
-        let rate = 0;
-        
-        switch (hour.department) {
-          case 'junk':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateJunkCaptain || 0) 
-              : (employee.rateJunkWingman || 0);
-            break;
-          case 'move':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateMoveCaptain || 0) 
-              : (employee.rateMoveWingman || 0);
-            break;
-          case 'zigma':
-            rate = employee.rateZigma || 0;
-            break;
-          case 'training':
-            rate = employee.rateTraining || 0;
-            break;
-          case 'estimating':
-            rate = employee.rateEstimating || 0;
-            break;
-          case 'warehouse':
-            rate = employee.rateWarehouse || 0;
-            break;
-          case 'admin':
-            rate = employee.rateAdmin || 0;
-            break;
-        }
-        
-        return hourSum + (Number(hour.hours) * rate);
-      }, 0);
+      return (
+        sum +
+        log.hours.reduce((hourSum, hour) => {
+          const employee = convertUserDecimalFields(hour.employee);
+          let rate = 0;
+
+          switch (hour.department) {
+            case 'junk':
+              rate =
+                log.captainId === hour.employeeId || hour.isCoCaptain
+                  ? employee.rateJunkCaptain || 0
+                  : employee.rateJunkWingman || 0;
+              break;
+            case 'move':
+              rate =
+                log.captainId === hour.employeeId || hour.isCoCaptain
+                  ? employee.rateMoveCaptain || 0
+                  : employee.rateMoveWingman || 0;
+              break;
+            case 'zigma':
+              rate = employee.rateZigma || 0;
+              break;
+            case 'training':
+              rate = employee.rateTraining || 0;
+              break;
+            case 'estimating':
+              rate = employee.rateEstimating || 0;
+              break;
+            case 'warehouse':
+              rate = employee.rateWarehouse || 0;
+              break;
+            case 'admin':
+              rate = employee.rateAdmin || 0;
+              break;
+          }
+
+          return hourSum + Number(hour.hours) * rate;
+        }, 0)
+      );
     }, 0);
 
     const lastLaborCost = lastMonthLogs.reduce((sum, log) => {
-      return sum + log.hours.reduce((hourSum, hour) => {
-        const employee = convertUserDecimalFields(hour.employee);
-        let rate = 0;
-        
-        switch (hour.department) {
-          case 'junk':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateJunkCaptain || 0) 
-              : (employee.rateJunkWingman || 0);
-            break;
-          case 'move':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateMoveCaptain || 0) 
-              : (employee.rateMoveWingman || 0);
-            break;
-          case 'zigma':
-            rate = employee.rateZigma || 0;
-            break;
-          case 'training':
-            rate = employee.rateTraining || 0;
-            break;
-          case 'estimating':
-            rate = employee.rateEstimating || 0;
-            break;
-          case 'warehouse':
-            rate = employee.rateWarehouse || 0;
-            break;
-          case 'admin':
-            rate = employee.rateAdmin || 0;
-            break;
-        }
-        
-        return hourSum + (Number(hour.hours) * rate);
-      }, 0);
+      return (
+        sum +
+        log.hours.reduce((hourSum, hour) => {
+          const employee = convertUserDecimalFields(hour.employee);
+          let rate = 0;
+
+          switch (hour.department) {
+            case 'junk':
+              rate =
+                log.captainId === hour.employeeId || hour.isCoCaptain
+                  ? employee.rateJunkCaptain || 0
+                  : employee.rateJunkWingman || 0;
+              break;
+            case 'move':
+              rate =
+                log.captainId === hour.employeeId || hour.isCoCaptain
+                  ? employee.rateMoveCaptain || 0
+                  : employee.rateMoveWingman || 0;
+              break;
+            case 'zigma':
+              rate = employee.rateZigma || 0;
+              break;
+            case 'training':
+              rate = employee.rateTraining || 0;
+              break;
+            case 'estimating':
+              rate = employee.rateEstimating || 0;
+              break;
+            case 'warehouse':
+              rate = employee.rateWarehouse || 0;
+              break;
+            case 'admin':
+              rate = employee.rateAdmin || 0;
+              break;
+          }
+
+          return hourSum + Number(hour.hours) * rate;
+        }, 0)
+      );
     }, 0);
 
-    const currentLaborEfficiency = currentRevenue > 0 ? (currentLaborCost / currentRevenue) * 100 : 0;
-    const lastLaborEfficiency = lastRevenue > 0 ? (lastLaborCost / lastRevenue) * 100 : 0;
+    const currentLaborEfficiency =
+      currentRevenue > 0 ? (currentLaborCost / currentRevenue) * 100 : 0;
+    const lastLaborEfficiency =
+      lastRevenue > 0 ? (lastLaborCost / lastRevenue) * 100 : 0;
 
     // Calculate job type breakdown
-    const junkJobs = currentMonthLogs.flatMap(log => log.jobs.filter(job => job.jobType === 'junk'));
-    const moveJobs = currentMonthLogs.flatMap(log => log.jobs.filter(job => job.jobType === 'move'));
+    const junkJobs = currentMonthLogs.flatMap((log) =>
+      log.jobs.filter((job) => job.jobType === 'junk')
+    );
+    const moveJobs = currentMonthLogs.flatMap((log) =>
+      log.jobs.filter((job) => job.jobType === 'move')
+    );
 
-    const junkRevenue = junkJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-    const moveRevenue = moveJobs.reduce((sum, job) => sum + Number(job.revenue), 0);
+    const junkRevenue = junkJobs.reduce(
+      (sum, job) => sum + Number(job.revenue),
+      0
+    );
+    const moveRevenue = moveJobs.reduce(
+      (sum, job) => sum + Number(job.revenue),
+      0
+    );
 
     // Calculate top performers
-    const captainPerformance = new Map<string, { name: string; jobs: number; revenue: number; laborCost: number }>();
+    const captainPerformance = new Map<
+      string,
+      { name: string; jobs: number; revenue: number; laborCost: number }
+    >();
 
-    currentMonthLogs.forEach(log => {
+    currentMonthLogs.forEach((log) => {
       const captainId = log.captainId;
       const captainName = log.captain.fullName;
-      
+
       if (!captainPerformance.has(captainId)) {
-        captainPerformance.set(captainId, { name: captainName, jobs: 0, revenue: 0, laborCost: 0 });
+        captainPerformance.set(captainId, {
+          name: captainName,
+          jobs: 0,
+          revenue: 0,
+          laborCost: 0,
+        });
       }
-      
+
       const performance = captainPerformance.get(captainId)!;
       performance.jobs += log.jobs.length;
-      performance.revenue += log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0);
-      
+      performance.revenue += log.jobs.reduce(
+        (sum, job) => sum + Number(job.revenue),
+        0
+      );
+
       // Calculate labor cost for this captain's logs
       const logLaborCost = log.hours.reduce((sum, hour) => {
         const employee = convertUserDecimalFields(hour.employee);
         let rate = 0;
-        
+
         switch (hour.department) {
           case 'junk':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateJunkCaptain || 0) 
-              : (employee.rateJunkWingman || 0);
+            rate =
+              log.captainId === hour.employeeId || hour.isCoCaptain
+                ? employee.rateJunkCaptain || 0
+                : employee.rateJunkWingman || 0;
             break;
           case 'move':
-            rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-              ? (employee.rateMoveCaptain || 0) 
-              : (employee.rateMoveWingman || 0);
+            rate =
+              log.captainId === hour.employeeId || hour.isCoCaptain
+                ? employee.rateMoveCaptain || 0
+                : employee.rateMoveWingman || 0;
             break;
           case 'zigma':
             rate = employee.rateZigma || 0;
@@ -295,19 +341,24 @@ export async function getAnalyticsData(): Promise<{
             rate = employee.rateAdmin || 0;
             break;
         }
-        
-        return sum + (Number(hour.hours) * rate);
+
+        return sum + Number(hour.hours) * rate;
       }, 0);
-      
+
       performance.laborCost += logLaborCost;
     });
 
-    const topPerformers: TopPerformer[] = Array.from(captainPerformance.values())
-      .map(performance => ({
+    const topPerformers: TopPerformer[] = Array.from(
+      captainPerformance.values()
+    )
+      .map((performance) => ({
         name: performance.name,
         jobs: performance.jobs,
         revenue: performance.revenue,
-        efficiency: performance.revenue > 0 ? (performance.laborCost / performance.revenue) * 100 : 0,
+        efficiency:
+          performance.revenue > 0
+            ? (performance.laborCost / performance.revenue) * 100
+            : 0,
       }))
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 3);
@@ -323,27 +374,52 @@ export async function getAnalyticsData(): Promise<{
     });
 
     const totalCommissions = commissionEntries
-      .filter(entry => entry.status === 'matched')
+      .filter((entry) => entry.status === 'matched')
       .reduce((sum, entry) => sum + Number(entry.commissionAmount || 0), 0);
 
-    const matchedEntries = commissionEntries.filter(entry => entry.status === 'matched').length;
-    const pendingEntries = commissionEntries.filter(entry => entry.status === 'pending').length;
+    const matchedEntries = commissionEntries.filter(
+      (entry) => entry.status === 'matched'
+    ).length;
+    const pendingEntries = commissionEntries.filter(
+      (entry) => entry.status === 'pending'
+    ).length;
 
     // Calculate booking accuracy (matched entries with actual revenue close to estimated)
     const accurateBookings = commissionEntries
-      .filter(entry => entry.status === 'matched' && entry.actualRevenue && entry.estimatedRevenue)
-      .filter(entry => {
-        const accuracy = Math.abs(Number(entry.actualRevenue) - Number(entry.estimatedRevenue)) / Number(entry.estimatedRevenue);
+      .filter(
+        (entry) =>
+          entry.status === 'matched' &&
+          entry.actualRevenue &&
+          entry.estimatedRevenue
+      )
+      .filter((entry) => {
+        const accuracy =
+          Math.abs(
+            Number(entry.actualRevenue) - Number(entry.estimatedRevenue)
+          ) / Number(entry.estimatedRevenue);
         return accuracy <= 0.2; // Within 20% is considered accurate
       }).length;
 
-    const avgAccuracy = matchedEntries > 0 ? (accurateBookings / matchedEntries) * 100 : 0;
+    const avgAccuracy =
+      matchedEntries > 0 ? (accurateBookings / matchedEntries) * 100 : 0;
 
     // Calculate percentage changes
-    const revenueChange = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue) * 100 : 0;
-    const jobsChange = lastJobs > 0 ? ((currentJobs - lastJobs) / lastJobs) * 100 : 0;
-    const avgJobValueChange = lastAvgJobValue > 0 ? ((currentAvgJobValue - lastAvgJobValue) / lastAvgJobValue) * 100 : 0;
-    const laborEfficiencyChange = lastLaborEfficiency > 0 ? ((currentLaborEfficiency - lastLaborEfficiency) / lastLaborEfficiency) * 100 : 0;
+    const revenueChange =
+      lastRevenue > 0
+        ? ((currentRevenue - lastRevenue) / lastRevenue) * 100
+        : 0;
+    const jobsChange =
+      lastJobs > 0 ? ((currentJobs - lastJobs) / lastJobs) * 100 : 0;
+    const avgJobValueChange =
+      lastAvgJobValue > 0
+        ? ((currentAvgJobValue - lastAvgJobValue) / lastAvgJobValue) * 100
+        : 0;
+    const laborEfficiencyChange =
+      lastLaborEfficiency > 0
+        ? ((currentLaborEfficiency - lastLaborEfficiency) /
+            lastLaborEfficiency) *
+          100
+        : 0;
 
     const analyticsData: AnalyticsData = {
       overview: {
@@ -382,7 +458,10 @@ export async function getAnalyticsData(): Promise<{
     console.error('Error fetching analytics data:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch analytics data',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch analytics data',
     };
   }
 }
@@ -415,7 +494,7 @@ export async function getPerformanceMetrics(): Promise<{
     }
 
     // Check permissions
-    const canViewAnalytics = 
+    const canViewAnalytics =
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
 
@@ -426,11 +505,11 @@ export async function getPerformanceMetrics(): Promise<{
     // Get last 6 months of data
     const now = new Date();
     const monthlyTrends = [];
-    
+
     for (let i = 5; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-      
+
       const logs = await prisma.dailyLog.findMany({
         where: {
           status: 'approved',
@@ -463,47 +542,55 @@ export async function getPerformanceMetrics(): Promise<{
         },
       });
 
-      const revenue = logs.reduce((sum, log) => 
-        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
+      const revenue = logs.reduce(
+        (sum, log) =>
+          sum +
+          log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+        0
       );
-      
+
       const jobs = logs.reduce((sum, log) => sum + log.jobs.length, 0);
-      
+
       const laborCost = logs.reduce((sum, log) => {
-        return sum + log.hours.reduce((hourSum, hour) => {
-          const employee = convertUserDecimalFields(hour.employee);
-          let rate = 0;
-          
-          switch (hour.department) {
-            case 'junk':
-              rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-                ? (employee.rateJunkCaptain || 0) 
-                : (employee.rateJunkWingman || 0);
-              break;
-            case 'move':
-              rate = (log.captainId === hour.employeeId || hour.isCoCaptain) 
-                ? (employee.rateMoveCaptain || 0) 
-                : (employee.rateMoveWingman || 0);
-              break;
-            case 'zigma':
-              rate = employee.rateZigma || 0;
-              break;
-            case 'training':
-              rate = employee.rateTraining || 0;
-              break;
-            case 'estimating':
-              rate = employee.rateEstimating || 0;
-              break;
-            case 'warehouse':
-              rate = employee.rateWarehouse || 0;
-              break;
-            case 'admin':
-              rate = employee.rateAdmin || 0;
-              break;
-          }
-          
-          return hourSum + (Number(hour.hours) * rate);
-        }, 0);
+        return (
+          sum +
+          log.hours.reduce((hourSum, hour) => {
+            const employee = convertUserDecimalFields(hour.employee);
+            let rate = 0;
+
+            switch (hour.department) {
+              case 'junk':
+                rate =
+                  log.captainId === hour.employeeId || hour.isCoCaptain
+                    ? employee.rateJunkCaptain || 0
+                    : employee.rateJunkWingman || 0;
+                break;
+              case 'move':
+                rate =
+                  log.captainId === hour.employeeId || hour.isCoCaptain
+                    ? employee.rateMoveCaptain || 0
+                    : employee.rateMoveWingman || 0;
+                break;
+              case 'zigma':
+                rate = employee.rateZigma || 0;
+                break;
+              case 'training':
+                rate = employee.rateTraining || 0;
+                break;
+              case 'estimating':
+                rate = employee.rateEstimating || 0;
+                break;
+              case 'warehouse':
+                rate = employee.rateWarehouse || 0;
+                break;
+              case 'admin':
+                rate = employee.rateAdmin || 0;
+                break;
+            }
+
+            return hourSum + Number(hour.hours) * rate;
+          }, 0)
+        );
       }, 0);
 
       const efficiency = revenue > 0 ? (laborCost / revenue) * 100 : 0;
@@ -520,12 +607,14 @@ export async function getPerformanceMetrics(): Promise<{
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const departmentStats = await prisma.$queryRaw<Array<{
-      department: string;
-      total_revenue: bigint;
-      total_hours: bigint;
-      labor_cost: bigint;
-    }>>`
+    const departmentStats = await prisma.$queryRaw<
+      Array<{
+        department: string;
+        total_revenue: bigint;
+        total_hours: bigint;
+        labor_cost: bigint;
+      }>
+    >`
       SELECT 
         lh.department,
         SUM(lj.revenue) as total_revenue,
@@ -558,11 +647,14 @@ export async function getPerformanceMetrics(): Promise<{
       ORDER BY total_revenue DESC
     `;
 
-    const departmentPerformance = departmentStats.map(stat => ({
+    const departmentPerformance = departmentStats.map((stat) => ({
       department: stat.department,
       revenue: Number(stat.total_revenue),
       hours: Number(stat.total_hours),
-      efficiency: Number(stat.total_revenue) > 0 ? (Number(stat.labor_cost) / Number(stat.total_revenue)) * 100 : 0,
+      efficiency:
+        Number(stat.total_revenue) > 0
+          ? (Number(stat.labor_cost) / Number(stat.total_revenue)) * 100
+          : 0,
     }));
 
     return {
@@ -576,7 +668,10 @@ export async function getPerformanceMetrics(): Promise<{
     console.error('Error fetching performance metrics:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch performance metrics',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch performance metrics',
     };
   }
 }
@@ -607,7 +702,7 @@ export async function getTrendAnalysis(): Promise<{
     }
 
     // Check permissions
-    const canViewAnalytics = 
+    const canViewAnalytics =
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
 
@@ -623,7 +718,7 @@ export async function getTrendAnalysis(): Promise<{
     for (let i = 11; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-      
+
       const logs = await prisma.dailyLog.findMany({
         where: {
           status: 'approved',
@@ -637,11 +732,17 @@ export async function getTrendAnalysis(): Promise<{
         },
       });
 
-      const revenue = logs.reduce((sum, log) => 
-        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
+      const revenue = logs.reduce(
+        (sum, log) =>
+          sum +
+          log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+        0
       );
 
-      const growth = previousRevenue > 0 ? ((revenue - previousRevenue) / previousRevenue) * 100 : 0;
+      const growth =
+        previousRevenue > 0
+          ? ((revenue - previousRevenue) / previousRevenue) * 100
+          : 0;
 
       revenueGrowth.push({
         period: safeFormatDate(monthStart, { month: 'short', year: 'numeric' }),
@@ -653,13 +754,16 @@ export async function getTrendAnalysis(): Promise<{
     }
 
     // Calculate seasonal patterns (average by month across available data)
-    const seasonalData = new Map<number, { revenue: number; jobs: number; count: number }>();
+    const seasonalData = new Map<
+      number,
+      { revenue: number; jobs: number; count: number }
+    >();
 
     for (let i = 11; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
       const monthNumber = monthStart.getMonth();
-      
+
       const logs = await prisma.dailyLog.findMany({
         where: {
           status: 'approved',
@@ -673,10 +777,13 @@ export async function getTrendAnalysis(): Promise<{
         },
       });
 
-      const revenue = logs.reduce((sum, log) => 
-        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
+      const revenue = logs.reduce(
+        (sum, log) =>
+          sum +
+          log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+        0
       );
-      
+
       const jobs = logs.reduce((sum, log) => sum + log.jobs.length, 0);
 
       if (!seasonalData.has(monthNumber)) {
@@ -691,13 +798,15 @@ export async function getTrendAnalysis(): Promise<{
 
     const seasonalPatterns = Array.from(seasonalData.entries())
       .map(([monthNumber, data]) => ({
-        month: safeFormatDate(new Date(2024, monthNumber, 1), { month: 'long' }),
+        month: safeFormatDate(new Date(2024, monthNumber, 1), {
+          month: 'long',
+        }),
         avgRevenue: data.count > 0 ? data.revenue / data.count : 0,
         avgJobs: data.count > 0 ? data.jobs / data.count : 0,
       }))
       .sort((a, b) => {
-        const monthA = new Date(Date.parse(a.month + " 1, 2024")).getMonth();
-        const monthB = new Date(Date.parse(b.month + " 1, 2024")).getMonth();
+        const monthA = new Date(Date.parse(a.month + ' 1, 2024')).getMonth();
+        const monthB = new Date(Date.parse(b.month + ' 1, 2024')).getMonth();
         return monthA - monthB;
       });
 
@@ -712,7 +821,10 @@ export async function getTrendAnalysis(): Promise<{
     console.error('Error fetching trend analysis:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch trend analysis',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch trend analysis',
     };
   }
 }

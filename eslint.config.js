@@ -14,13 +14,13 @@ const compat = new FlatCompat({
 export default [
   // Apply Next.js and TypeScript configs to all files
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
-  
+
   // Global rules for all files
   {
     rules: {
       // Warn about console.log in application code
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      
+
       // Temporarily relax strict rules for deployment
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -28,7 +28,7 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
-  
+
   // Override rules for test files and test utilities
   {
     files: [
@@ -44,7 +44,7 @@ export default [
       'no-console': 'off',
     },
   },
-  
+
   // Override rules for development and debug files
   {
     files: [

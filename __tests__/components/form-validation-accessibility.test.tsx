@@ -3,28 +3,60 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { axe, toHaveNoViolations } from 'jest-axe';
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input';
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
 import { FormFeedback } from '@/components/forms/form-feedback';
-import { MobileFormValidation, ValidationError } from '@/components/forms/mobile-form-validation';
+import {
+  MobileFormValidation,
+  ValidationError,
+} from '@/components/forms/mobile-form-validation';
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
 }));
 
 // Mock InlineSuccessCheck component
@@ -70,10 +102,7 @@ describe('Form Validation Accessibility Tests', () => {
 
     it('has no accessibility violations in success state', async () => {
       const { container } = render(
-        <SmartInput
-          label="Test Input"
-          success="This field is valid"
-        />
+        <SmartInput label="Test Input" success="This field is valid" />
       );
 
       const results = await axe(container);
@@ -87,7 +116,10 @@ describe('Form Validation Accessibility Tests', () => {
           type="email"
           hint="Enter your work email"
           error="Please enter a valid email address"
-          validationRules={[commonValidationRules.required(), commonValidationRules.email()]}
+          validationRules={[
+            commonValidationRules.required(),
+            commonValidationRules.email(),
+          ]}
         />
       );
 
@@ -101,7 +133,7 @@ describe('Form Validation Accessibility Tests', () => {
       const describedBy = input.getAttribute('aria-describedby');
       const referencedIds = describedBy?.split(' ') || [];
 
-      referencedIds.forEach(id => {
+      referencedIds.forEach((id) => {
         expect(document.getElementById(id)).toBeInTheDocument();
       });
     });
@@ -131,7 +163,9 @@ describe('Form Validation Accessibility Tests', () => {
 
       // Error message should be associated with input
       const errorMessage = screen.getByText('This field is required');
-      const errorId = errorMessage.closest('[role="alert"]')?.getAttribute('id');
+      const errorId = errorMessage
+        .closest('[role="alert"]')
+        ?.getAttribute('id');
       if (errorId) {
         expect(input.getAttribute('aria-describedby')).toContain(errorId);
       }
@@ -179,7 +213,9 @@ describe('Form Validation Accessibility Tests', () => {
       expect(label).toHaveAttribute('for', input.getAttribute('id'));
 
       // Hint should be referenced in aria-describedby
-      expect(input.getAttribute('aria-describedby')).toContain(hint.getAttribute('id'));
+      expect(input.getAttribute('aria-describedby')).toContain(
+        hint.getAttribute('id')
+      );
     });
 
     it('handles focus management correctly during validation', async () => {
@@ -207,11 +243,7 @@ describe('Form Validation Accessibility Tests', () => {
 
     it('provides appropriate role and state information', () => {
       render(
-        <SmartInput
-          label="Search Query"
-          keyboardType="search"
-          loading={true}
-        />
+        <SmartInput label="Search Query" keyboardType="search" loading={true} />
       );
 
       const input = screen.getByLabelText('Search Query');
@@ -270,14 +302,14 @@ describe('Form Validation Accessibility Tests', () => {
         <FormFeedback
           type="error"
           message="Something went wrong"
-          actions={[
-            { label: 'Custom Action', onClick: mockAction }
-          ]}
+          actions={[{ label: 'Custom Action', onClick: mockAction }]}
           onRetry={mockRetry}
         />
       );
 
-      const customButton = screen.getByRole('button', { name: 'Custom Action' });
+      const customButton = screen.getByRole('button', {
+        name: 'Custom Action',
+      });
       const retryButton = screen.getByRole('button', { name: 'Try Again' });
 
       // Buttons should be focusable and clickable
@@ -332,9 +364,7 @@ describe('Form Validation Accessibility Tests', () => {
     });
 
     it('provides proper ARIA structure for error list', () => {
-      render(
-        <MobileFormValidation errors={mockErrors} />
-      );
+      render(<MobileFormValidation errors={mockErrors} />);
 
       // Each error should be in an alert
       const alerts = screen.getAllByRole('alert');
@@ -352,7 +382,7 @@ describe('Form Validation Accessibility Tests', () => {
       const mockDismiss = vi.fn();
 
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={mockErrors}
           onErrorClick={mockErrorClick}
           onDismiss={mockDismiss}
@@ -361,7 +391,7 @@ describe('Form Validation Accessibility Tests', () => {
 
       // Error items should be clickable if onErrorClick is provided
       const firstError = screen.getByText('Email');
-      
+
       // Should respond to click (simulating keyboard activation)
       await user.click(firstError);
       expect(mockErrorClick).toHaveBeenCalledWith('email');
@@ -378,14 +408,17 @@ describe('Form Validation Accessibility Tests', () => {
     });
 
     it('handles collapsible content with proper ARIA states', async () => {
-      const manyErrors: ValidationError[] = Array.from({ length: 5 }, (_, i) => ({
-        field: `field${i}`,
-        message: `Error message ${i}`,
-        type: 'error' as const,
-      }));
+      const manyErrors: ValidationError[] = Array.from(
+        { length: 5 },
+        (_, i) => ({
+          field: `field${i}`,
+          message: `Error message ${i}`,
+          type: 'error' as const,
+        })
+      );
 
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={manyErrors}
           collapsible={true}
           maxVisible={3}
@@ -408,7 +441,7 @@ describe('Form Validation Accessibility Tests', () => {
 
     it('provides proper touch targets for mobile', () => {
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={mockErrors}
           onErrorClick={vi.fn()}
           onDismiss={vi.fn()}
@@ -417,8 +450,8 @@ describe('Form Validation Accessibility Tests', () => {
 
       // All interactive elements should have minimum 48px touch targets
       const dismissButtons = screen.getAllByRole('button', { name: 'Dismiss' });
-      
-      dismissButtons.forEach(button => {
+
+      dismissButtons.forEach((button) => {
         const styles = window.getComputedStyle(button);
         // Note: In a real test environment, you'd check computed styles
         // Here we're checking that the component has the right classes
@@ -445,7 +478,9 @@ describe('Form Validation Accessibility Tests', () => {
       // Should announce error state
       await waitFor(() => {
         expect(input).toHaveAttribute('aria-invalid', 'true');
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
       });
 
       // Type valid email
@@ -504,7 +539,7 @@ describe('Form Validation Accessibility Tests', () => {
       );
 
       const input = screen.getByLabelText('High Contrast Field');
-      
+
       // Should still be properly labeled and described
       expect(input).toHaveAttribute('aria-invalid', 'true');
       expect(input).toHaveAttribute('aria-describedby');
@@ -512,10 +547,7 @@ describe('Form Validation Accessibility Tests', () => {
 
     it('does not rely solely on color for error indication', () => {
       render(
-        <SmartInput
-          label="Error Field"
-          error="This field has an error"
-        />
+        <SmartInput label="Error Field" error="This field has an error" />
       );
 
       // Should have both visual (icon) and textual error indication

@@ -4,7 +4,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DailyLogFormSchema, CommissionEntrySchema, UserFormSchema } from '@/lib/validations';
+import {
+  DailyLogFormSchema,
+  CommissionEntrySchema,
+  UserFormSchema,
+} from '@/lib/validations';
 import { saveDraftLog, submitLog } from '@/lib/actions/logs';
 import { createCommissionEntry } from '@/lib/actions/commission';
 import { createUser, updateUser } from '@/lib/actions/users';
@@ -46,7 +50,9 @@ describe('Validation Edge Cases', () => {
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Captain selection is required');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Captain selection is required'
+      );
     });
 
     it('should reject whitespace-only captain ID', () => {
@@ -58,7 +64,9 @@ describe('Validation Edge Cases', () => {
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Captain selection is required');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Captain selection is required'
+      );
     });
 
     it('should reject invalid date objects', () => {
@@ -94,17 +102,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: -100, // Negative revenue
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: -100, // Negative revenue
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Revenue must be a positive number');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Revenue must be a positive number'
+      );
     });
 
     it('should reject negative tip amounts', () => {
@@ -112,17 +124,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 500,
-          tips: -25, // Negative tips
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 500,
+            tips: -25, // Negative tips
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Tips must be a positive number');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Tips must be a positive number'
+      );
     });
 
     it('should reject zero revenue', () => {
@@ -130,17 +146,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 0, // Zero revenue
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 0, // Zero revenue
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Revenue must be greater than 0');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Revenue must be greater than 0'
+      );
     });
 
     it('should accept zero tips', () => {
@@ -148,13 +168,15 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 500,
-          tips: 0, // Zero tips should be allowed
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 500,
+            tips: 0, // Zero tips should be allowed
+          },
+        ],
         hours: [],
       };
 
@@ -166,17 +188,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 100000000, // $100 million - unrealistic
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 100000000, // $100 million - unrealistic
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Revenue cannot exceed $10,000,000');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Revenue cannot exceed $10,000,000'
+      );
     });
 
     it('should reject negative hours', () => {
@@ -185,15 +211,19 @@ describe('Validation Edge Cases', () => {
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
         jobs: [],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk' as const,
-          hours: -5, // Negative hours
-          isCoCaptain: false,
-        }],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk' as const,
+            hours: -5, // Negative hours
+            isCoCaptain: false,
+          },
+        ],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Hours must be a positive number');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Hours must be a positive number'
+      );
     });
 
     it('should reject excessive daily hours', () => {
@@ -202,15 +232,19 @@ describe('Validation Edge Cases', () => {
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
         jobs: [],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk' as const,
-          hours: 25, // More than 24 hours in a day
-          isCoCaptain: false,
-        }],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk' as const,
+            hours: 25, // More than 24 hours in a day
+            isCoCaptain: false,
+          },
+        ],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Hours cannot exceed 24 per day');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Hours cannot exceed 24 per day'
+      );
     });
 
     it('should reject empty job ID', () => {
@@ -218,17 +252,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: '', // Empty job ID
-          clientName: 'Test Client',
-          revenue: 500,
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: '', // Empty job ID
+            clientName: 'Test Client',
+            revenue: 500,
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Job ID is required');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Job ID is required'
+      );
     });
 
     it('should reject empty client name', () => {
@@ -236,17 +274,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: '', // Empty client name
-          revenue: 500,
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: '', // Empty client name
+            revenue: 500,
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Client name is required');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Client name is required'
+      );
     });
 
     it('should handle very long job IDs', () => {
@@ -256,17 +298,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: longJobId,
-          clientName: 'Test Client',
-          revenue: 500,
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: longJobId,
+            clientName: 'Test Client',
+            revenue: 500,
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Job ID cannot exceed 100 characters');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Job ID cannot exceed 100 characters'
+      );
     });
 
     it('should handle very long client names', () => {
@@ -276,17 +322,21 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: longClientName,
-          revenue: 500,
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: longClientName,
+            revenue: 500,
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
-      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow('Client name cannot exceed 200 characters');
+      expect(() => DailyLogFormSchema.parse(invalidData)).toThrow(
+        'Client name cannot exceed 200 characters'
+      );
     });
 
     it('should handle fractional hours correctly', () => {
@@ -295,12 +345,14 @@ describe('Validation Edge Cases', () => {
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
         jobs: [],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk' as const,
-          hours: 7.5, // Fractional hours should be allowed
-          isCoCaptain: false,
-        }],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk' as const,
+            hours: 7.5, // Fractional hours should be allowed
+            isCoCaptain: false,
+          },
+        ],
       };
 
       expect(() => DailyLogFormSchema.parse(validData)).not.toThrow();
@@ -311,13 +363,15 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk' as const,
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 499.99, // Fractional revenue
-          tips: 49.50, // Fractional tips
-        }],
+        jobs: [
+          {
+            jobType: 'junk' as const,
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 499.99, // Fractional revenue
+            tips: 49.5, // Fractional tips
+          },
+        ],
         hours: [],
       };
 
@@ -336,7 +390,9 @@ describe('Validation Edge Cases', () => {
         estimatedRevenue: 500,
       };
 
-      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow('Sales person selection is required');
+      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow(
+        'Sales person selection is required'
+      );
     });
 
     it('should reject empty job ID', () => {
@@ -349,7 +405,9 @@ describe('Validation Edge Cases', () => {
         estimatedRevenue: 500,
       };
 
-      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow('Job ID is required');
+      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow(
+        'Job ID is required'
+      );
     });
 
     it('should reject negative estimated revenue', () => {
@@ -362,7 +420,9 @@ describe('Validation Edge Cases', () => {
         estimatedRevenue: -100,
       };
 
-      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow('Estimated revenue must be a positive number');
+      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow(
+        'Estimated revenue must be a positive number'
+      );
     });
 
     it('should reject zero estimated revenue', () => {
@@ -375,7 +435,9 @@ describe('Validation Edge Cases', () => {
         estimatedRevenue: 0,
       };
 
-      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow('Estimated revenue must be greater than 0');
+      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow(
+        'Estimated revenue must be greater than 0'
+      );
     });
 
     it('should reject past target dates beyond reasonable limit', () => {
@@ -405,7 +467,9 @@ describe('Validation Edge Cases', () => {
         estimatedRevenue: 50000000, // $50 million
       };
 
-      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow('Estimated revenue cannot exceed $10,000,000');
+      expect(() => CommissionEntrySchema.parse(invalidData)).toThrow(
+        'Estimated revenue cannot exceed $10,000,000'
+      );
     });
   });
 
@@ -418,7 +482,9 @@ describe('Validation Edge Cases', () => {
         password: 'password123',
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Invalid email address');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Invalid email address'
+      );
     });
 
     it('should reject empty full name', () => {
@@ -429,7 +495,9 @@ describe('Validation Edge Cases', () => {
         password: 'password123',
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Full name is required');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Full name is required'
+      );
     });
 
     it('should reject empty roles array', () => {
@@ -440,7 +508,9 @@ describe('Validation Edge Cases', () => {
         password: 'password123',
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('At least one role is required');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'At least one role is required'
+      );
     });
 
     it('should reject invalid role values', () => {
@@ -462,7 +532,9 @@ describe('Validation Edge Cases', () => {
         password: '123', // Too short
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Password must be at least 8 characters');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Password must be at least 8 characters'
+      );
     });
 
     it('should reject negative hourly rates', () => {
@@ -474,7 +546,9 @@ describe('Validation Edge Cases', () => {
         rateJunkWingman: -5, // Negative rate
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Rate must be a positive number');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Rate must be a positive number'
+      );
     });
 
     it('should reject excessive hourly rates', () => {
@@ -486,7 +560,9 @@ describe('Validation Edge Cases', () => {
         rateJunkWingman: 1000, // $1000/hour is excessive
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Rate cannot exceed $500 per hour');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Rate cannot exceed $500 per hour'
+      );
     });
 
     it('should reject negative salary amounts', () => {
@@ -498,7 +574,9 @@ describe('Validation Edge Cases', () => {
         salaryAmount: -1000,
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Salary amount must be positive');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Salary amount must be positive'
+      );
     });
 
     it('should reject invalid commission rates', () => {
@@ -510,7 +588,9 @@ describe('Validation Edge Cases', () => {
         commissionRate: 150, // 150% commission is excessive
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Commission rate cannot exceed 100%');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Commission rate cannot exceed 100%'
+      );
     });
 
     it('should reject negative commission rates', () => {
@@ -522,7 +602,9 @@ describe('Validation Edge Cases', () => {
         commissionRate: -5,
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Commission rate must be positive');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Commission rate must be positive'
+      );
     });
 
     it('should reject invalid bonus goal percentages', () => {
@@ -534,7 +616,9 @@ describe('Validation Edge Cases', () => {
         junkBonusGoal: 1.5, // 150% is excessive
       };
 
-      expect(() => UserFormSchema.parse(invalidData)).toThrow('Bonus goal cannot exceed 100%');
+      expect(() => UserFormSchema.parse(invalidData)).toThrow(
+        'Bonus goal cannot exceed 100%'
+      );
     });
   });
 
@@ -549,7 +633,7 @@ describe('Validation Edge Cases', () => {
       } as any;
 
       const result = await saveDraftLog(null, malformedData);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toContain('validation');
     });
@@ -559,18 +643,20 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk',
-          jobId: "'; DROP TABLE logs; --", // SQL injection attempt
-          clientName: 'Test Client',
-          revenue: 500,
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk',
+            jobId: "'; DROP TABLE logs; --", // SQL injection attempt
+            clientName: 'Test Client',
+            revenue: 500,
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
       const result = await submitLog(null, maliciousData);
-      
+
       // Should either succeed (if properly sanitized) or fail with validation error
       if (!result.success) {
         expect(result.error).not.toContain('DROP TABLE');
@@ -582,23 +668,27 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk',
-          jobId: 'JOB123',
-          clientName: '<script>alert("xss")</script>', // XSS attempt
-          revenue: 500,
-          tips: 50,
-        }],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk',
-          hours: 8,
-          isCoCaptain: false,
-        }],
+        jobs: [
+          {
+            jobType: 'junk',
+            jobId: 'JOB123',
+            clientName: '<script>alert("xss")</script>', // XSS attempt
+            revenue: 500,
+            tips: 50,
+          },
+        ],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk',
+            hours: 8,
+            isCoCaptain: false,
+          },
+        ],
       };
 
       const result = await submitLog(null, maliciousData);
-      
+
       // Should succeed but sanitize the input
       if (result.success) {
         // The malicious script should be escaped or removed
@@ -632,7 +722,7 @@ describe('Validation Edge Cases', () => {
       };
 
       const result = await saveDraftLog(null, largeData);
-      
+
       // Should either succeed or fail gracefully with size limit error
       if (!result.success) {
         expect(result.error).toMatch(/too large|limit|size/i);
@@ -644,30 +734,34 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk',
-          jobId: 'CONCURRENT-JOB',
-          clientName: 'Concurrent Client',
-          revenue: 500,
-          tips: 50,
-        }],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk',
-          hours: 8,
-          isCoCaptain: false,
-        }],
+        jobs: [
+          {
+            jobType: 'junk',
+            jobId: 'CONCURRENT-JOB',
+            clientName: 'Concurrent Client',
+            revenue: 500,
+            tips: 50,
+          },
+        ],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk',
+            hours: 8,
+            isCoCaptain: false,
+          },
+        ],
       };
 
       // Submit the same form data multiple times concurrently
-      const promises = Array.from({ length: 5 }, () => 
+      const promises = Array.from({ length: 5 }, () =>
         submitLog(null, formData)
       );
 
       const results = await Promise.all(promises);
-      
+
       // At least one should succeed, others might fail due to constraints
-      const successCount = results.filter(r => r.success).length;
+      const successCount = results.filter((r) => r.success).length;
       expect(successCount).toBeGreaterThanOrEqual(1);
     });
   });
@@ -686,7 +780,7 @@ describe('Validation Edge Cases', () => {
       circularData.self = circularData;
 
       const result = await saveDraftLog(null, circularData);
-      
+
       // Should handle gracefully without infinite loops
       expect(result.success).toBe(false);
     });
@@ -696,18 +790,20 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk',
-          jobId: 'NULL-TEST',
-          clientName: null, // Should be string
-          revenue: undefined, // Should be number
-          tips: 50,
-        }],
+        jobs: [
+          {
+            jobType: 'junk',
+            jobId: 'NULL-TEST',
+            clientName: null, // Should be string
+            revenue: undefined, // Should be number
+            tips: 50,
+          },
+        ],
         hours: [],
       };
 
       const result = await saveDraftLog(null, dataWithNulls);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toContain('validation');
     });
@@ -717,23 +813,27 @@ describe('Validation Edge Cases', () => {
         captainId: 'captain-id',
         logDate: new Date(),
         sections: { junk: true, move: false, otherHours: false },
-        jobs: [{
-          jobType: 'junk',
-          jobId: 'COERCION-TEST',
-          clientName: 'Test Client',
-          revenue: '500', // String instead of number
-          tips: '50', // String instead of number
-        }],
-        hours: [{
-          employeeId: 'emp-1',
-          department: 'junk',
-          hours: '8', // String instead of number
-          isCoCaptain: 'false', // String instead of boolean
-        }],
+        jobs: [
+          {
+            jobType: 'junk',
+            jobId: 'COERCION-TEST',
+            clientName: 'Test Client',
+            revenue: '500', // String instead of number
+            tips: '50', // String instead of number
+          },
+        ],
+        hours: [
+          {
+            employeeId: 'emp-1',
+            department: 'junk',
+            hours: '8', // String instead of number
+            isCoCaptain: 'false', // String instead of boolean
+          },
+        ],
       };
 
       const result = await saveDraftLog(null, coercionData);
-      
+
       // Zod should handle type coercion or reject invalid types
       if (result.success) {
         // If successful, values should be properly typed

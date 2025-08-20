@@ -9,10 +9,12 @@ interface UserDetailPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: UserDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: UserDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const result = await getUserById(id);
-  
+
   if (!result.success || !result.user) {
     return {
       title: 'User Not Found | HUNKCentral',
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: UserDetailPageProps): Promise
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const { id } = await params;
   const result = await getUserById(id);
-  
+
   if (!result.success || !result.user) {
     notFound();
   }

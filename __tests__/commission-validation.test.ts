@@ -10,7 +10,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -23,7 +23,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(invalidEntry);
@@ -40,7 +40,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(invalidEntry);
@@ -57,7 +57,7 @@ describe('Commission Entry Validation', () => {
         clientName: '',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(invalidEntry);
@@ -74,7 +74,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'invalid' as any,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(invalidEntry);
@@ -88,7 +88,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -102,7 +102,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'move' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -116,7 +116,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: 'invalid-date' as any,
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(invalidEntry);
@@ -136,7 +136,9 @@ describe('Commission Entry Validation', () => {
       const result = CommissionEntrySchema.safeParse(invalidEntry);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Estimated revenue must be greater than $0.00');
+        expect(result.error.issues[0].message).toBe(
+          'Estimated revenue must be greater than $0.00'
+        );
       }
     });
 
@@ -153,7 +155,9 @@ describe('Commission Entry Validation', () => {
       const result = CommissionEntrySchema.safeParse(invalidEntry);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Estimated revenue must be greater than $0.00');
+        expect(result.error.issues[0].message).toBe(
+          'Estimated revenue must be greater than $0.00'
+        );
       }
     });
 
@@ -178,7 +182,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'move' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 50000.00,
+        estimatedRevenue: 50000.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -194,7 +198,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -208,7 +212,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -222,7 +226,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -238,7 +242,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'John Smith Doe',
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 500.00,
+        estimatedRevenue: 500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -252,7 +256,7 @@ describe('Commission Entry Validation', () => {
         clientName: 'ABC Corporation LLC',
         jobType: 'move' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 1500.00,
+        estimatedRevenue: 1500.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);
@@ -266,7 +270,7 @@ describe('Commission Entry Validation', () => {
         clientName: "O'Connor & Associates",
         jobType: 'junk' as const,
         targetDate: new Date('2024-12-31'),
-        estimatedRevenue: 750.00,
+        estimatedRevenue: 750.0,
       };
 
       const result = CommissionEntrySchema.safeParse(validEntry);

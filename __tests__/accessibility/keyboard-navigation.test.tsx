@@ -1,6 +1,6 @@
 /**
  * Keyboard Navigation Accessibility Tests
- * 
+ *
  * Comprehensive tests for keyboard accessibility across all enhanced components.
  * Tests focus on tab order, keyboard activation, focus management, and ARIA support.
  */
@@ -42,14 +42,30 @@ vi.mock('@/contexts/navigation-context', () => ({
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  Home: ({ className }: { className?: string }) => <div data-testid="home-icon" className={className} />,
-  FileText: ({ className }: { className?: string }) => <div data-testid="file-icon" className={className} />,
-  Settings: ({ className }: { className?: string }) => <div data-testid="settings-icon" className={className} />,
-  ChevronRight: ({ className }: { className?: string }) => <div data-testid="chevron-right-icon" className={className} />,
-  TrendingUp: ({ className }: { className?: string }) => <div data-testid="trending-up-icon" className={className} />,
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
+  Home: ({ className }: { className?: string }) => (
+    <div data-testid="home-icon" className={className} />
+  ),
+  FileText: ({ className }: { className?: string }) => (
+    <div data-testid="file-icon" className={className} />
+  ),
+  Settings: ({ className }: { className?: string }) => (
+    <div data-testid="settings-icon" className={className} />
+  ),
+  ChevronRight: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-right-icon" className={className} />
+  ),
+  TrendingUp: ({ className }: { className?: string }) => (
+    <div data-testid="trending-up-icon" className={className} />
+  ),
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
 }));
 
 describe('Keyboard Navigation Accessibility Tests', () => {
@@ -58,53 +74,61 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Button Keyboard Navigation', () => {
     it('activates buttons with Enter key', async () => {
       const handleClick = vi.fn();
-      
+
       render(<BrandButton onClick={handleClick}>Test Button</BrandButton>);
 
       const button = screen.getByRole('button');
       button.focus();
-      
+
       await user.keyboard('{Enter}');
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it('activates buttons with Space key', async () => {
       const handleClick = vi.fn();
-      
+
       render(<BrandButton onClick={handleClick}>Test Button</BrandButton>);
 
       const button = screen.getByRole('button');
       button.focus();
-      
+
       await user.keyboard(' ');
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it('does not activate disabled buttons', async () => {
       const handleClick = vi.fn();
-      
-      render(<BrandButton onClick={handleClick} disabled>Disabled Button</BrandButton>);
+
+      render(
+        <BrandButton onClick={handleClick} disabled>
+          Disabled Button
+        </BrandButton>
+      );
 
       const button = screen.getByRole('button');
       button.focus();
-      
+
       await user.keyboard('{Enter}');
       await user.keyboard(' ');
-      
+
       expect(handleClick).not.toHaveBeenCalled();
     });
 
     it('does not activate loading buttons', async () => {
       const handleClick = vi.fn();
-      
-      render(<BrandButton onClick={handleClick} loading>Loading Button</BrandButton>);
+
+      render(
+        <BrandButton onClick={handleClick} loading>
+          Loading Button
+        </BrandButton>
+      );
 
       const button = screen.getByRole('button');
       button.focus();
-      
+
       await user.keyboard('{Enter}');
       await user.keyboard(' ');
-      
+
       expect(handleClick).not.toHaveBeenCalled();
     });
 
@@ -166,7 +190,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('handles Enter key in form inputs', async () => {
       const handleSubmit = vi.fn((e) => e.preventDefault());
-      
+
       render(
         <form onSubmit={handleSubmit}>
           <SmartInput label="Test Input" />
@@ -176,29 +200,31 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       const input = screen.getByLabelText('Test Input');
       input.focus();
-      
+
       await user.type(input, 'test value');
       await user.keyboard('{Enter}');
-      
+
       expect(handleSubmit).toHaveBeenCalledTimes(1);
     });
 
     it('shows validation errors with proper focus management', async () => {
       render(
-        <SmartInput 
+        <SmartInput
           label="Required Input"
-          validationRules={[{
-            test: (value) => value.length > 0,
-            message: 'This field is required',
-            type: 'error',
-            priority: 1,
-          }]}
+          validationRules={[
+            {
+              test: (value) => value.length > 0,
+              message: 'This field is required',
+              type: 'error',
+              priority: 1,
+            },
+          ]}
           validateOnBlur={true}
         />
       );
 
       const input = screen.getByLabelText('Required Input');
-      
+
       // Focus and blur without entering text
       input.focus();
       await user.tab();
@@ -214,7 +240,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('handles password toggle with keyboard', async () => {
       render(
-        <SmartInput 
+        <SmartInput
           label="Password"
           type="password"
           showPasswordToggle={true}
@@ -242,7 +268,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Interactive Card Keyboard Navigation', () => {
     it('makes interactive metric cards keyboard accessible', async () => {
       const handleClick = vi.fn();
-      
+
       render(
         <MetricCard
           title="Revenue"
@@ -255,7 +281,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       const card = screen.getByRole('button');
       card.focus();
-      
+
       await user.keyboard('{Enter}');
       expect(handleClick).toHaveBeenCalledTimes(1);
 
@@ -276,7 +302,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       const card = screen.getByRole('button');
       expect(card).toHaveAttribute('aria-label');
-      
+
       const ariaLabel = card.getAttribute('aria-label');
       expect(ariaLabel).toContain('Revenue');
       expect(ariaLabel).toContain('$1,234');
@@ -295,7 +321,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       // Should not be focusable
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
-      
+
       const card = screen.getByText('Revenue').closest('div');
       expect(card).not.toHaveAttribute('tabindex');
     });
@@ -394,7 +420,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Modal and Dialog Keyboard Navigation', () => {
     it('traps focus within dismissible feedback', async () => {
       const handleDismiss = vi.fn();
-      
+
       render(
         <div>
           <BrandButton>Before Modal</BrandButton>
@@ -410,10 +436,10 @@ describe('Keyboard Navigation Accessibility Tests', () => {
       );
 
       const dismissButton = screen.getByLabelText('Dismiss');
-      
+
       // Focus should be trapped within the feedback
       dismissButton.focus();
-      
+
       // Tab should not move outside the feedback
       await user.tab();
       expect(dismissButton).toHaveFocus(); // Should cycle back
@@ -426,7 +452,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('returns focus to trigger element after dismissal', async () => {
       const TestComponent = () => {
         const [showFeedback, setShowFeedback] = React.useState(false);
-        
+
         return (
           <div>
             <BrandButton onClick={() => setShowFeedback(true)}>
@@ -448,16 +474,16 @@ describe('Keyboard Navigation Accessibility Tests', () => {
       render(<TestComponent />);
 
       const triggerButton = screen.getByText('Show Feedback');
-      
+
       // Click to show feedback
       await user.click(triggerButton);
-      
+
       const dismissButton = screen.getByLabelText('Dismiss');
       expect(dismissButton).toBeInTheDocument();
-      
+
       // Dismiss feedback
       await user.click(dismissButton);
-      
+
       // Focus should return to trigger
       expect(triggerButton).toHaveFocus();
     });
@@ -469,13 +495,13 @@ describe('Keyboard Navigation Accessibility Tests', () => {
         <form>
           <SmartInput label="First Name" />
           <SmartInput label="Last Name" />
-          <SmartInput 
-            label="Email" 
+          <SmartInput
+            label="Email"
             type="email"
             hint="Enter your email address"
           />
-          <SmartInput 
-            label="Password" 
+          <SmartInput
+            label="Password"
             type="password"
             showPasswordToggle={true}
           />
@@ -518,14 +544,16 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('handles validation errors in tab order', async () => {
       render(
         <form>
-          <SmartInput 
+          <SmartInput
             label="Required Field"
-            validationRules={[{
-              test: (value) => value.length > 0,
-              message: 'This field is required',
-              type: 'error',
-              priority: 1,
-            }]}
+            validationRules={[
+              {
+                test: (value) => value.length > 0,
+                message: 'This field is required',
+                type: 'error',
+                priority: 1,
+              },
+            ]}
             validateOnBlur={true}
           />
           <BrandButton type="submit">Submit</BrandButton>
@@ -538,7 +566,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
       // Tab to input and blur to trigger validation
       await user.tab();
       expect(input).toHaveFocus();
-      
+
       await user.tab();
       expect(submitButton).toHaveFocus();
 
@@ -559,12 +587,14 @@ describe('Keyboard Navigation Accessibility Tests', () => {
             Skip to main content
           </a>
           <nav>
-            <EnhancedSidebar user={{
-              id: '1',
-              name: 'Test User',
-              email: 'test@example.com',
-              role: 'CAPTAIN',
-            }} />
+            <EnhancedSidebar
+              user={{
+                id: '1',
+                name: 'Test User',
+                email: 'test@example.com',
+                role: 'CAPTAIN',
+              }}
+            />
           </nav>
           <main id="main-content">
             <h1>Main Content</h1>
@@ -579,7 +609,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       // Activate skip link
       await user.keyboard('{Enter}');
-      
+
       // Focus should move to main content
       const mainContent = document.getElementById('main-content');
       expect(mainContent).toBeInTheDocument();
@@ -589,9 +619,9 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Keyboard Navigation Performance', () => {
     it('does not cause performance issues with rapid keyboard input', async () => {
       const handleChange = vi.fn();
-      
+
       render(
-        <SmartInput 
+        <SmartInput
           label="Performance Test"
           onValueChange={handleChange}
           validateOnChange={true}
@@ -610,27 +640,35 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       // Should handle rapid input without issues
       expect(input).toHaveValue(rapidText);
-      
+
       // Should debounce change events
-      await waitFor(() => {
-        expect(handleChange).toHaveBeenCalledWith(rapidText);
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          expect(handleChange).toHaveBeenCalledWith(rapidText);
+        },
+        { timeout: 200 }
+      );
     });
 
     it('maintains focus during dynamic content updates', async () => {
       const TestComponent = () => {
         const [items, setItems] = React.useState(['Item 1', 'Item 2']);
-        
+
         return (
           <div>
-            <BrandButton onClick={() => setItems([...items, `Item ${items.length + 1}`])}>
+            <BrandButton
+              onClick={() => setItems([...items, `Item ${items.length + 1}`])}
+            >
               Add Item
             </BrandButton>
             {items.map((item, index) => (
-              <BrandButton key={item} onClick={() => {
-                const newItems = items.filter((_, i) => i !== index);
-                setItems(newItems);
-              }}>
+              <BrandButton
+                key={item}
+                onClick={() => {
+                  const newItems = items.filter((_, i) => i !== index);
+                  setItems(newItems);
+                }}
+              >
                 {item}
               </BrandButton>
             ))}

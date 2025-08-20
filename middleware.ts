@@ -1,9 +1,17 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { edgeLogAuthEvent, edgeLogWarning, createEdgeRequestLogger } from '@/lib/edge-logger';
+import {
+  edgeLogAuthEvent,
+  edgeLogWarning,
+  createEdgeRequestLogger,
+} from '@/lib/edge-logger';
 
-function createErrorRedirect(req: NextRequest, error: string, originalPath: string) {
+function createErrorRedirect(
+  req: NextRequest,
+  error: string,
+  originalPath: string
+) {
   const loginUrl = new URL('/auth/login', req.url);
   loginUrl.searchParams.set('error', error);
   loginUrl.searchParams.set('callbackUrl', originalPath);
@@ -46,7 +54,10 @@ export default withAuth(
         if (token) {
           logger.authEvent('login_success', {
             userId: token.id as string,
-            metadata: { reason: 'already_authenticated', redirectTo: '/dashboard' },
+            metadata: {
+              reason: 'already_authenticated',
+              redirectTo: '/dashboard',
+            },
           });
           return NextResponse.redirect(new URL('/dashboard', req.url));
         }
@@ -63,9 +74,17 @@ export default withAuth(
       }
 
       // Require authentication for protected routes
-      const protectedRoutes = ['/dashboard', '/logs', '/commission', '/reports', '/admin'];
-      const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-      
+      const protectedRoutes = [
+        '/dashboard',
+        '/logs',
+        '/commission',
+        '/reports',
+        '/admin',
+      ];
+      const isProtectedRoute = protectedRoutes.some((route) =>
+        pathname.startsWith(route)
+      );
+
       if (isProtectedRoute) {
         if (!token) {
           logger.authEvent('permission_denied', {
@@ -77,8 +96,11 @@ export default withAuth(
         // Validate token structure
         if (!token.id || !token.roles) {
           logger.authEvent('permission_denied', {
-            userId: token?.id as string || 'unknown',
-            metadata: { reason: 'invalid_token_structure', requestedPath: pathname },
+            userId: (token?.id as string) || 'unknown',
+            metadata: {
+              reason: 'invalid_token_structure',
+              requestedPath: pathname,
+            },
           });
           return createErrorRedirect(req, 'invalid_session', pathname);
         }
@@ -91,12 +113,12 @@ export default withAuth(
       if (pathname.startsWith('/admin')) {
         if (!userRoles.includes('admin')) {
           logger.authEvent('permission_denied', {
-            userId: token?.id as string || 'unknown',
-            metadata: { 
-              reason: 'insufficient_role', 
-              requiredRole: 'admin', 
+            userId: (token?.id as string) || 'unknown',
+            metadata: {
+              reason: 'insufficient_role',
+              requiredRole: 'admin',
               userRoles,
-              requestedPath: pathname 
+              requestedPath: pathname,
             },
           });
           return createAccessDeniedRedirect(req, 'admin_required');
@@ -104,15 +126,18 @@ export default withAuth(
       }
 
       // Manager routes (managers and admins)
-      if (pathname.includes('/review') || pathname.includes('/reports/payroll')) {
+      if (
+        pathname.includes('/review') ||
+        pathname.includes('/reports/payroll')
+      ) {
         if (!userRoles.includes('manager') && !userRoles.includes('admin')) {
           logger.authEvent('permission_denied', {
-            userId: token?.id as string || 'unknown',
-            metadata: { 
-              reason: 'insufficient_role', 
-              requiredRole: 'manager_or_admin', 
+            userId: (token?.id as string) || 'unknown',
+            metadata: {
+              reason: 'insufficient_role',
+              requiredRole: 'manager_or_admin',
               userRoles,
-              requestedPath: pathname 
+              requestedPath: pathname,
             },
           });
           return createAccessDeniedRedirect(req, 'manager_required');
@@ -123,12 +148,12 @@ export default withAuth(
       if (pathname.startsWith('/commission')) {
         if (!userRoles.includes('sales') && !userRoles.includes('admin')) {
           logger.authEvent('permission_denied', {
-            userId: token?.id as string || 'unknown',
-            metadata: { 
-              reason: 'insufficient_role', 
-              requiredRole: 'sales_or_admin', 
+            userId: (token?.id as string) || 'unknown',
+            metadata: {
+              reason: 'insufficient_role',
+              requiredRole: 'sales_or_admin',
               userRoles,
-              requestedPath: pathname 
+              requestedPath: pathname,
             },
           });
           return createAccessDeniedRedirect(req, 'sales_required');
@@ -155,9 +180,13 @@ export default withAuth(
       authorized: ({ token, req }) => {
         try {
           const { pathname } = req.nextUrl;
-          
+
           // Allow access to public routes
-          if (pathname === '/' || pathname.startsWith('/auth') || pathname.startsWith('/api/health')) {
+          if (
+            pathname === '/' ||
+            pathname.startsWith('/auth') ||
+            pathname.startsWith('/api/health')
+          ) {
             return true;
           }
 
@@ -171,8 +200,8 @@ export default withAuth(
             edgeLogWarning('Invalid token structure detected', {
               component: 'middleware',
               action: 'token_validation',
-              metadata: { 
-                hasId: !!token.id, 
+              metadata: {
+                hasId: !!token.id,
                 hasEmail: !!token.email,
                 pathname: req.nextUrl.pathname,
               },

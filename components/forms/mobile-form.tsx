@@ -2,22 +2,29 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle2, 
-  AlertCircle, 
-  Loader2, 
-  Save, 
-  Wifi, 
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Save,
+  Wifi,
   WifiOff,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { useOffline } from '@/hooks/useOffline';
 
-export interface MobileFormProps extends Omit<React.ComponentProps<'form'>, 'autoSave'> {
+export interface MobileFormProps
+  extends Omit<React.ComponentProps<'form'>, 'autoSave'> {
   title?: string;
   description?: string;
   autoSave?: {
@@ -114,7 +121,10 @@ export function MobileForm({
             <span>Auto-saved</span>
             {lastSaved && (
               <span className="text-xs text-muted-foreground">
-                {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {lastSaved.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             )}
           </div>
@@ -126,7 +136,10 @@ export function MobileForm({
             <span>Saved offline</span>
             {lastSaved && (
               <span className="text-xs text-muted-foreground">
-                {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {lastSaved.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             )}
           </div>
@@ -144,7 +157,11 @@ export function MobileForm({
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
               <span className="text-xs">
-                Last saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                Last saved{' '}
+                {lastSaved.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             </div>
           );
@@ -161,12 +178,17 @@ export function MobileForm({
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              {title && <CardTitle className="text-hunks-green">{title}</CardTitle>}
+              {title && (
+                <CardTitle className="text-hunks-green">{title}</CardTitle>
+              )}
               {description && <CardDescription>{description}</CardDescription>}
             </div>
             <div className="flex items-center gap-2">
               {/* Connection status */}
-              <Badge variant={isOnline ? 'default' : 'secondary'} className="text-xs">
+              <Badge
+                variant={isOnline ? 'default' : 'secondary'}
+                className="text-xs"
+              >
                 {isOnline ? (
                   <>
                     <Wifi className="h-3 w-3 mr-1" />
@@ -201,22 +223,19 @@ export function MobileForm({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Auto-save failed: {autoSave.error}. Your changes may not be saved automatically.
+                Auto-save failed: {autoSave.error}. Your changes may not be
+                saved automatically.
               </AlertDescription>
             </Alert>
           )}
 
           {/* Form content */}
-          <div className="space-y-4">
-            {children}
-          </div>
+          <div className="space-y-4">{children}</div>
 
           {/* Form actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t">
             {/* Auto-save status */}
-            <div className="flex-1">
-              {getAutoSaveStatus()}
-            </div>
+            <div className="flex-1">{getAutoSaveStatus()}</div>
 
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -250,7 +269,11 @@ export function MobileForm({
               {submitButton && (
                 <Button
                   type="submit"
-                  disabled={isSubmitting || submitButton.disabled || autoSave?.status === 'saving'}
+                  disabled={
+                    isSubmitting ||
+                    submitButton.disabled ||
+                    autoSave?.status === 'saving'
+                  }
                   className={cn(
                     'bg-hunks-green hover:bg-hunks-green/90 text-white',
                     'min-h-[48px] touch-manipulation' // Mobile optimization
@@ -276,42 +299,46 @@ export function MobileForm({
 
 // Hook for managing mobile form state
 export function useMobileForm() {
-  const [autoSaveStatus, setAutoSaveStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error' | 'offline'>('idle');
+  const [autoSaveStatus, setAutoSaveStatus] = React.useState<
+    'idle' | 'saving' | 'saved' | 'error' | 'offline'
+  >('idle');
   const [lastSaved, setLastSaved] = React.useState<Date | null>(null);
   const [autoSaveError, setAutoSaveError] = React.useState<string | null>(null);
 
-  const createAutoSaveHandler = React.useCallback((
-    saveFunction: () => Promise<{ success: boolean; error?: string }>
-  ) => {
-    return async () => {
-      setAutoSaveStatus('saving');
-      setAutoSaveError(null);
+  const createAutoSaveHandler = React.useCallback(
+    (saveFunction: () => Promise<{ success: boolean; error?: string }>) => {
+      return async () => {
+        setAutoSaveStatus('saving');
+        setAutoSaveError(null);
 
-      try {
-        const result = await saveFunction();
-        
-        if (result.success) {
-          setAutoSaveStatus('saved');
-          setLastSaved(new Date());
-          
-          // Reset to idle after 3 seconds
-          setTimeout(() => {
-            setAutoSaveStatus('idle');
-          }, 3000);
-        } else {
+        try {
+          const result = await saveFunction();
+
+          if (result.success) {
+            setAutoSaveStatus('saved');
+            setLastSaved(new Date());
+
+            // Reset to idle after 3 seconds
+            setTimeout(() => {
+              setAutoSaveStatus('idle');
+            }, 3000);
+          } else {
+            setAutoSaveStatus('error');
+            setAutoSaveError(result.error || 'Save failed');
+          }
+
+          return result;
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Save failed';
           setAutoSaveStatus('error');
-          setAutoSaveError(result.error || 'Save failed');
+          setAutoSaveError(errorMessage);
+          return { success: false, error: errorMessage };
         }
-
-        return result;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Save failed';
-        setAutoSaveStatus('error');
-        setAutoSaveError(errorMessage);
-        return { success: false, error: errorMessage };
-      }
-    };
-  }, []);
+      };
+    },
+    []
+  );
 
   return {
     autoSaveStatus,

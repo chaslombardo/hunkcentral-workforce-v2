@@ -1,18 +1,41 @@
-"use client"
+'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { RankingsPageSkeleton, RankingsTabSkeleton } from '@/components/ui/skeleton-components';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  RankingsPageSkeleton,
+  RankingsTabSkeleton,
+} from '@/components/ui/skeleton-components';
 import { usePerformanceOptimization } from '@/hooks/usePerformanceOptimization';
-import type { CaptainPerformanceData, PerformanceRankingsResponse } from '@/types';
-import { 
-  Users, 
-  DollarSign, 
+import type {
+  CaptainPerformanceData,
+  PerformanceRankingsResponse,
+} from '@/types';
+import {
+  Users,
+  DollarSign,
   Target,
   Download,
   Trophy,
@@ -20,7 +43,7 @@ import {
   Info,
   TrendingUp,
   Award,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface RankingsClientProps {
@@ -28,8 +51,12 @@ interface RankingsClientProps {
   isCurrentUserCaptain: boolean;
 }
 
-export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: RankingsClientProps) {
-  const [performanceData, setPerformanceData] = useState<PerformanceRankingsResponse | null>(null);
+export default function RankingsClient({
+  currentUserId,
+  isCurrentUserCaptain,
+}: RankingsClientProps) {
+  const [performanceData, setPerformanceData] =
+    useState<PerformanceRankingsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,18 +85,18 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
     try {
       setError(null);
       if (skipCache) setRefreshing(true);
-      
+
       const url = new URL('/api/analytics/performance', window.location.origin);
       if (skipCache) {
         url.searchParams.set('skipCache', 'true');
       }
-      
+
       const response = await fetch(url.toString());
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch performance data');
       }
-      
+
       const data = await response.json();
       setPerformanceData(data);
     } catch (err) {
@@ -97,13 +124,25 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
     }
 
     const captains = performanceData.captains;
-    const avgJobSize = captains.reduce((sum, captain) => 
-      sum + captain.junkMetrics.averageJobSize + captain.moveMetrics.averageJobSize, 0
-    ) / (captains.length * 2);
+    const avgJobSize =
+      captains.reduce(
+        (sum, captain) =>
+          sum +
+          captain.junkMetrics.averageJobSize +
+          captain.moveMetrics.averageJobSize,
+        0
+      ) /
+      (captains.length * 2);
 
-    const avgLaborEfficiency = captains.reduce((sum, captain) => 
-      sum + captain.junkMetrics.laborPercentage + captain.moveMetrics.laborPercentage, 0
-    ) / (captains.length * 2);
+    const avgLaborEfficiency =
+      captains.reduce(
+        (sum, captain) =>
+          sum +
+          captain.junkMetrics.laborPercentage +
+          captain.moveMetrics.laborPercentage,
+        0
+      ) /
+      (captains.length * 2);
 
     return {
       totalCaptains: performanceData.totalCaptains,
@@ -129,9 +168,14 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
       <div className="container mx-auto py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
-            <div className="text-red-500 mb-4">Error loading performance data</div>
+            <div className="text-red-500 mb-4">
+              Error loading performance data
+            </div>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <BrandButton onClick={() => fetchPerformanceData()} className="gap-2">
+            <BrandButton
+              onClick={() => fetchPerformanceData()}
+              className="gap-2"
+            >
               <RefreshCw className="h-4 w-4" />
               Retry
             </BrandButton>
@@ -145,19 +189,24 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Captain Performance Rankings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Captain Performance Rankings
+          </h1>
           <p className="text-muted-foreground">
-            Performance metrics for all captains across Junk and Move operations.
+            Performance metrics for all captains across Junk and Move
+            operations.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <BrandButton 
-            variant="outline" 
-            onClick={handleRefresh} 
+          <BrandButton
+            variant="outline"
+            onClick={handleRefresh}
             disabled={refreshing}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
+            />
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </BrandButton>
           <BrandButton variant="outline" className="gap-2">
@@ -179,51 +228,75 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Captains</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Captains
+                </CardTitle>
                 <Users className="h-4 w-4 text-[#026937]" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{summaryMetrics.totalCaptains}</div>
-                <p className="text-xs text-muted-foreground">Active captains in system</p>
+                <div className="text-2xl font-bold">
+                  {summaryMetrics.totalCaptains}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Active captains in system
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Top Performer</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Top Performer
+                </CardTitle>
                 <Trophy className="h-4 w-4 text-[#ea7200]" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{summaryMetrics.topPerformer}</div>
-                <p className="text-xs text-muted-foreground">Highest total revenue</p>
+                <div className="text-2xl font-bold">
+                  {summaryMetrics.topPerformer}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Highest total revenue
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Job Size</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Avg Job Size
+                </CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{summaryMetrics.avgJobSize}</div>
-                <p className="text-xs text-muted-foreground">Across all operations</p>
+                <div className="text-2xl font-bold">
+                  {summaryMetrics.avgJobSize}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Across all operations
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Labor Efficiency</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Avg Labor Efficiency
+                </CardTitle>
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{summaryMetrics.avgLaborEfficiency}</div>
-                <p className="text-xs text-muted-foreground">Combined operations</p>
+                <div className="text-2xl font-bold">
+                  {summaryMetrics.avgLaborEfficiency}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Combined operations
+                </p>
               </CardContent>
             </Card>
           </div>
 
           {/* Rankings Table */}
-          <RankingsTable 
+          <RankingsTable
             captains={performanceData?.captains || []}
             currentUserId={currentUserId}
             isCurrentUserCaptain={isCurrentUserCaptain}
@@ -245,7 +318,9 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
       {process.env.NODE_ENV === 'development' && stats && (
         <div className="mt-8 p-4 bg-muted rounded-lg text-xs">
           <div className="font-medium mb-2">Performance Stats:</div>
-          <div>Renders: {stats.count}, Avg: {stats.average.toFixed(2)}ms</div>
+          <div>
+            Renders: {stats.count}, Avg: {stats.average.toFixed(2)}ms
+          </div>
           {recommendations.length > 0 && (
             <div className="mt-2">
               <div className="font-medium">Recommendations:</div>
@@ -263,12 +338,12 @@ export default function RankingsClient({ currentUserId, isCurrentUserCaptain }: 
 }
 
 // Memoized Rankings Table Component
-const RankingsTable = React.memo(function RankingsTable({ 
-  captains, 
-  currentUserId, 
+const RankingsTable = React.memo(function RankingsTable({
+  captains,
+  currentUserId,
   isCurrentUserCaptain,
   formatCurrency,
-  formatPercentage 
+  formatPercentage,
 }: {
   captains: CaptainPerformanceData[];
   currentUserId: string;
@@ -280,51 +355,67 @@ const RankingsTable = React.memo(function RankingsTable({
     <Card>
       <CardHeader>
         <CardTitle>Captain Performance Rankings</CardTitle>
-        <CardDescription>Combined performance metrics across all operations</CardDescription>
+        <CardDescription>
+          Combined performance metrics across all operations
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {captains.length > 0 ? (
             captains.map((captain, index) => {
-              const totalRevenue = captain.junkMetrics.totalRevenue + captain.moveMetrics.totalRevenue;
-              const totalJobs = captain.junkMetrics.jobCount + captain.moveMetrics.jobCount;
+              const totalRevenue =
+                captain.junkMetrics.totalRevenue +
+                captain.moveMetrics.totalRevenue;
+              const totalJobs =
+                captain.junkMetrics.jobCount + captain.moveMetrics.jobCount;
               const avgJobSize = totalJobs > 0 ? totalRevenue / totalJobs : 0;
               const isCurrentUser = currentUserId === captain.captainId;
-              const avgLaborPercentage = totalJobs > 0 ? 
-                (captain.junkMetrics.laborPercentage + captain.moveMetrics.laborPercentage) / 2 : 0;
-              
+              const avgLaborPercentage =
+                totalJobs > 0
+                  ? (captain.junkMetrics.laborPercentage +
+                      captain.moveMetrics.laborPercentage) /
+                    2
+                  : 0;
+
               return (
-                <div 
-                  key={captain.captainId} 
+                <div
+                  key={captain.captainId}
                   className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
-                    isCurrentUser && isCurrentUserCaptain 
-                      ? 'border-[#026937] bg-gradient-to-r from-[#026937]/10 to-[#ea7200]/5 shadow-md' 
-                      : isCurrentUser 
-                      ? 'border-[#026937] bg-[#026937]/5' 
-                      : 'hover:shadow-sm'
+                    isCurrentUser && isCurrentUserCaptain
+                      ? 'border-[#026937] bg-gradient-to-r from-[#026937]/10 to-[#ea7200]/5 shadow-md'
+                      : isCurrentUser
+                        ? 'border-[#026937] bg-[#026937]/5'
+                        : 'hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-medium ${
-                      index === 0 ? 'bg-[#ea7200]' : 'bg-[#026937]'
-                    }`}>
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-medium ${
+                        index === 0 ? 'bg-[#ea7200]' : 'bg-[#026937]'
+                      }`}
+                    >
                       {index + 1}
                     </div>
                     <div>
                       <div className="font-medium flex items-center gap-2">
                         {captain.captainName}
                         {isCurrentUser && (
-                          <Badge variant="outline" className={`${
-                            isCurrentUserCaptain 
-                              ? 'text-[#026937] border-[#026937] bg-[#026937]/10' 
-                              : 'text-[#026937] border-[#026937]'
-                          }`}>
+                          <Badge
+                            variant="outline"
+                            className={`${
+                              isCurrentUserCaptain
+                                ? 'text-[#026937] border-[#026937] bg-[#026937]/10'
+                                : 'text-[#026937] border-[#026937]'
+                            }`}
+                          >
                             {isCurrentUserCaptain ? (
                               <div className="flex items-center gap-1">
                                 <Award className="h-3 w-3" />
                                 You
                               </div>
-                            ) : 'You'}
+                            ) : (
+                              'You'
+                            )}
                           </Badge>
                         )}
                         {index === 0 && (
@@ -347,7 +438,10 @@ const RankingsTable = React.memo(function RankingsTable({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Average labor percentage across Junk (target: 14%) and Move (target: 24%) operations</p>
+                            <p>
+                              Average labor percentage across Junk (target: 14%)
+                              and Move (target: 24%) operations
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -355,10 +449,17 @@ const RankingsTable = React.memo(function RankingsTable({
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <div className="font-medium">{formatCurrency(totalRevenue)}</div>
-                      <div className="text-sm text-muted-foreground">Total Revenue</div>
+                      <div className="font-medium">
+                        {formatCurrency(totalRevenue)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Revenue
+                      </div>
                     </div>
-                    <CaptainDetailDialog captain={captain} isCurrentUser={isCurrentUser} />
+                    <CaptainDetailDialog
+                      captain={captain}
+                      isCurrentUser={isCurrentUser}
+                    />
                   </div>
                 </div>
               );
@@ -375,12 +476,12 @@ const RankingsTable = React.memo(function RankingsTable({
 });
 
 // Memoized Captain Detail Dialog
-const CaptainDetailDialog = React.memo(function CaptainDetailDialog({ 
-  captain, 
-  isCurrentUser 
-}: { 
-  captain: CaptainPerformanceData; 
-  isCurrentUser: boolean; 
+const CaptainDetailDialog = React.memo(function CaptainDetailDialog({
+  captain,
+  isCurrentUser,
+}: {
+  captain: CaptainPerformanceData;
+  isCurrentUser: boolean;
 }) {
   return (
     <Dialog>
@@ -396,7 +497,10 @@ const CaptainDetailDialog = React.memo(function CaptainDetailDialog({
             <TrendingUp className="h-5 w-5 text-[#026937]" />
             {captain.captainName} - Detailed Performance
             {isCurrentUser && (
-              <Badge variant="outline" className="text-[#026937] border-[#026937]">
+              <Badge
+                variant="outline"
+                className="text-[#026937] border-[#026937]"
+              >
                 Your Performance
               </Badge>
             )}

@@ -27,7 +27,7 @@ export async function logClientError(
   try {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
-    
+
     const errorLog: ClientErrorLog = {
       level: 'error',
       message: errorMessage,
@@ -64,7 +64,9 @@ export async function logClientError(
     } catch {
       // If network request fails, store in localStorage for later retry
       try {
-        const storedErrors = JSON.parse(localStorage.getItem('pending_errors') || '[]');
+        const storedErrors = JSON.parse(
+          localStorage.getItem('pending_errors') || '[]'
+        );
         storedErrors.push(errorLog);
         // Keep only last 10 errors to prevent storage overflow
         if (storedErrors.length > 10) {
@@ -91,7 +93,12 @@ export async function logClientError(
 export async function logClientAuthError(
   error: Error | unknown,
   context: {
-    action: 'login' | 'session_check' | 'redirect' | 'logout' | 'permission_denied';
+    action:
+      | 'login'
+      | 'session_check'
+      | 'redirect'
+      | 'logout'
+      | 'permission_denied';
     userId?: string;
     additionalData?: Record<string, unknown>;
   }
@@ -172,7 +179,9 @@ export async function logNetworkError(
  */
 export async function retryPendingErrors(): Promise<void> {
   try {
-    const storedErrors = JSON.parse(localStorage.getItem('pending_errors') || '[]');
+    const storedErrors = JSON.parse(
+      localStorage.getItem('pending_errors') || '[]'
+    );
     if (storedErrors.length === 0) return;
 
     for (const errorLog of storedErrors) {
@@ -204,7 +213,7 @@ export function setupErrorRetry(): void {
   if (typeof window !== 'undefined') {
     // Retry pending errors when the page loads
     window.addEventListener('load', retryPendingErrors);
-    
+
     // Retry pending errors when network comes back online
     window.addEventListener('online', retryPendingErrors);
   }

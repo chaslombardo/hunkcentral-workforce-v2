@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { createUser, updateUser, deleteUser, getUsers, getUserById, copyUserSettings } from '@/lib/actions/users';
+import {
+  createUser,
+  updateUser,
+  deleteUser,
+  getUsers,
+  getUserById,
+  copyUserSettings,
+} from '@/lib/actions/users';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
@@ -47,10 +54,10 @@ const mockUser = {
   email: 'john@example.com',
   fullName: 'John Doe',
   roles: ['captain'],
-  rateJunkCaptain: 25.00,
-  rateJunkWingman: 20.00,
-  rateMoveCaptain: 30.00,
-  rateMoveWingman: 25.00,
+  rateJunkCaptain: 25.0,
+  rateJunkWingman: 20.0,
+  rateMoveCaptain: 30.0,
+  rateMoveWingman: 25.0,
   rateZigma: null,
   rateTraining: null,
   rateEstimating: null,
@@ -83,7 +90,7 @@ describe('User Management Operations', () => {
         fullName: 'John Doe',
         password: 'password123',
         roles: ['captain'] as any,
-        rateJunkCaptain: 25.00,
+        rateJunkCaptain: 25.0,
         junkBonusGoal: 0.14,
         moveBonusGoal: 0.24,
       };
@@ -157,7 +164,7 @@ describe('User Management Operations', () => {
         email: 'john.updated@example.com',
         fullName: 'John Updated',
         roles: ['captain', 'manager'] as any,
-        rateJunkCaptain: 30.00,
+        rateJunkCaptain: 30.0,
         junkBonusGoal: 0.14,
         moveBonusGoal: 0.24,
       };
@@ -178,7 +185,7 @@ describe('User Management Operations', () => {
           email: 'john.updated@example.com',
           fullName: 'John Updated',
           roles: ['captain', 'manager'],
-          rateJunkCaptain: 30.00,
+          rateJunkCaptain: 30.0,
         }),
       });
       expect(prisma.auditLog.create).toHaveBeenCalled();
@@ -236,7 +243,8 @@ describe('User Management Operations', () => {
     it('should delete user successfully', async () => {
       (prisma.user.findUnique as any)
         .mockResolvedValueOnce(mockUser) // First call for existence check
-        .mockResolvedValueOnce({ // Second call for related data check
+        .mockResolvedValueOnce({
+          // Second call for related data check
           ...mockUser,
           dailyLogs: [],
           logHours: [],
@@ -257,7 +265,8 @@ describe('User Management Operations', () => {
     it('should fail if user has related data', async () => {
       (prisma.user.findUnique as any)
         .mockResolvedValueOnce(mockUser) // First call for existence check
-        .mockResolvedValueOnce({ // Second call for related data check
+        .mockResolvedValueOnce({
+          // Second call for related data check
           ...mockUser,
           dailyLogs: [{ id: 'log-1' }],
           logHours: [],
@@ -267,7 +276,9 @@ describe('User Management Operations', () => {
       const result = await deleteUser('user-1');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Cannot delete user with existing logs, hours, or commission entries');
+      expect(result.error).toBe(
+        'Cannot delete user with existing logs, hours, or commission entries'
+      );
       expect(prisma.user.delete).not.toHaveBeenCalled();
     });
 
@@ -341,7 +352,9 @@ describe('User Management Operations', () => {
       const result = await getUsers();
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Unauthorized: Admin or Manager access required');
+      expect(result.error).toBe(
+        'Unauthorized: Admin or Manager access required'
+      );
     });
   });
 
@@ -377,9 +390,9 @@ describe('User Management Operations', () => {
   describe('copyUserSettings', () => {
     it('should copy settings from source to target user', async () => {
       const sourceSettings = {
-        rateJunkCaptain: 25.00,
-        rateJunkWingman: 20.00,
-        salaryAmount: 5000.00,
+        rateJunkCaptain: 25.0,
+        rateJunkWingman: 20.0,
+        salaryAmount: 5000.0,
         salaryFrequency: 'monthly',
         salaryType: 'base',
         commissionRate: 5.0,
@@ -416,7 +429,10 @@ describe('User Management Operations', () => {
     it('should fail if source user not found', async () => {
       (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      const result = await copyUserSettings('nonexistent-user', 'target-user-id');
+      const result = await copyUserSettings(
+        'nonexistent-user',
+        'target-user-id'
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Source user not found');
@@ -437,7 +453,9 @@ describe('User Management Operations', () => {
 
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
-      (prisma.user.findUnique as any).mockRejectedValue(new Error('Database error'));
+      (prisma.user.findUnique as any).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await getUserById('user-1');
 
@@ -501,7 +519,7 @@ describe('User Management Operations', () => {
         fullName: 'John Doe',
         password: 'password123',
         roles: ['captain'] as any,
-        rateJunkCaptain: -10.00, // Invalid: negative
+        rateJunkCaptain: -10.0, // Invalid: negative
         junkBonusGoal: 0.14,
         moveBonusGoal: 0.24,
       };

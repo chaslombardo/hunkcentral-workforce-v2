@@ -1,31 +1,71 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules, ValidationRule } from '@/components/forms/smart-input';
-import { FormFeedback, useFormFeedback, formFeedbackPresets } from '@/components/forms/form-feedback';
-import { 
-  MobileFormValidation, 
-  useMobileFormValidation, 
+import {
+  SmartInput,
+  commonValidationRules,
+  ValidationRule,
+} from '@/components/forms/smart-input';
+import {
+  FormFeedback,
+  useFormFeedback,
+  formFeedbackPresets,
+} from '@/components/forms/form-feedback';
+import {
+  MobileFormValidation,
+  useMobileFormValidation,
   mobileValidationRules,
-  ValidationError 
+  ValidationError,
 } from '@/components/forms/mobile-form-validation';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
 }));
 
 // Mock InlineSuccessCheck component
@@ -50,7 +90,8 @@ describe('Comprehensive Form Validation Tests', () => {
           const employeeIdRegex = /^EMP-\d{4}-[A-Z]{2}$/;
           return employeeIdRegex.test(value);
         },
-        message: 'Employee ID must be in format EMP-XXXX-XX (e.g., EMP-1234-AB)',
+        message:
+          'Employee ID must be in format EMP-XXXX-XX (e.g., EMP-1234-AB)',
         type: 'error',
         priority: 1,
       };
@@ -70,15 +111,22 @@ describe('Comprehensive Form Validation Tests', () => {
       const input = screen.getByLabelText('Employee ID');
 
       // Test invalid formats
-      const invalidFormats = ['EMP-123-AB', 'emp-1234-ab', 'EMP-1234-A', 'EMP-1234-ABC'];
-      
+      const invalidFormats = [
+        'EMP-123-AB',
+        'emp-1234-ab',
+        'EMP-1234-A',
+        'EMP-1234-ABC',
+      ];
+
       for (const invalidFormat of invalidFormats) {
         await user.clear(input);
         await user.type(input, invalidFormat);
         await user.tab();
 
         await waitFor(() => {
-          expect(onValidationChange).toHaveBeenCalledWith(false, [businessRule.message]);
+          expect(onValidationChange).toHaveBeenCalledWith(false, [
+            businessRule.message,
+          ]);
         });
       }
 
@@ -96,7 +144,7 @@ describe('Comprehensive Form Validation Tests', () => {
       const asyncValidationRule: ValidationRule = {
         test: async (value: string) => {
           // Simulate API call to check username availability
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           return value !== 'taken-username';
         },
         message: 'This username is already taken',
@@ -126,11 +174,15 @@ describe('Comprehensive Form Validation Tests', () => {
 
       // Wait for validation to complete
       await waitFor(() => {
-        expect(onValidationChange).toHaveBeenCalledWith(false, ['This username is already taken']);
+        expect(onValidationChange).toHaveBeenCalledWith(false, [
+          'This username is already taken',
+        ]);
       });
 
       expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
-      expect(screen.getByText('This username is already taken')).toBeInTheDocument();
+      expect(
+        screen.getByText('This username is already taken')
+      ).toBeInTheDocument();
 
       // Test available username
       await user.clear(input);
@@ -163,7 +215,8 @@ describe('Comprehensive Form Validation Tests', () => {
           const hasSpecial = /[@$!%*?&]/.test(value);
           return hasUpper && hasLower && hasNumber && hasSpecial;
         },
-        message: 'Password must contain uppercase, lowercase, number, and special character',
+        message:
+          'Password must contain uppercase, lowercase, number, and special character',
         type: 'warning',
         priority: 2,
       };
@@ -185,7 +238,9 @@ describe('Comprehensive Form Validation Tests', () => {
       await user.tab();
 
       await waitFor(() => {
-        expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();
+        expect(
+          screen.getByText('Password must be at least 8 characters')
+        ).toBeInTheDocument();
       });
 
       // Test long but weak password (should show warning)
@@ -194,7 +249,11 @@ describe('Comprehensive Form Validation Tests', () => {
       await user.tab();
 
       await waitFor(() => {
-        expect(screen.getByText('Password must contain uppercase, lowercase, number, and special character')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Password must contain uppercase, lowercase, number, and special character'
+          )
+        ).toBeInTheDocument();
       });
 
       // Test strong password (should show no errors or warnings)
@@ -203,8 +262,14 @@ describe('Comprehensive Form Validation Tests', () => {
       await user.tab();
 
       await waitFor(() => {
-        expect(screen.queryByText('Password must be at least 8 characters')).not.toBeInTheDocument();
-        expect(screen.queryByText('Password must contain uppercase, lowercase, number, and special character')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Password must be at least 8 characters')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(
+            'Password must contain uppercase, lowercase, number, and special character'
+          )
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -218,7 +283,9 @@ describe('Comprehensive Form Validation Tests', () => {
         priority: 1,
       };
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       render(
         <SmartInput
@@ -234,10 +301,15 @@ describe('Comprehensive Form Validation Tests', () => {
       await user.tab();
 
       await waitFor(() => {
-        expect(screen.getByText('Validation error occurred')).toBeInTheDocument();
+        expect(
+          screen.getByText('Validation error occurred')
+        ).toBeInTheDocument();
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Validation rule error:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Validation rule error:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });
@@ -282,11 +354,7 @@ describe('Comprehensive Form Validation Tests', () => {
       expect(screen.getByText('Warning message')).toBeInTheDocument();
 
       rerender(
-        <FormFeedback
-          type="info"
-          title="Info Title"
-          message="Info message"
-        />
+        <FormFeedback type="info" title="Info Title" message="Info message" />
       );
 
       expect(screen.getByTestId('info-icon')).toBeInTheDocument();
@@ -304,7 +372,7 @@ describe('Comprehensive Form Validation Tests', () => {
           message="Something went wrong"
           suggestions={['Check your input', 'Try again later']}
           actions={[
-            { label: 'Custom Action', onClick: mockAction, variant: 'outline' }
+            { label: 'Custom Action', onClick: mockAction, variant: 'outline' },
           ]}
           onRetry={mockRetry}
           helpLink={{ text: 'Get Help', url: 'https://help.example.com' }}
@@ -328,7 +396,10 @@ describe('Comprehensive Form Validation Tests', () => {
       // Help link should open in new window
       const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
       await user.click(helpButton);
-      expect(openSpy).toHaveBeenCalledWith('https://help.example.com', '_blank');
+      expect(openSpy).toHaveBeenCalledWith(
+        'https://help.example.com',
+        '_blank'
+      );
       openSpy.mockRestore();
     });
 
@@ -358,20 +429,35 @@ describe('Comprehensive Form Validation Tests', () => {
 
   describe('MobileFormValidation Component', () => {
     const mockErrors: ValidationError[] = [
-      { field: 'email', message: 'Invalid email format', type: 'error', severity: 'high' },
-      { field: 'password', message: 'Password too weak', type: 'warning', severity: 'medium' },
-      { field: 'username', message: 'Username available', type: 'info', severity: 'low' },
+      {
+        field: 'email',
+        message: 'Invalid email format',
+        type: 'error',
+        severity: 'high',
+      },
+      {
+        field: 'password',
+        message: 'Password too weak',
+        type: 'warning',
+        severity: 'medium',
+      },
+      {
+        field: 'username',
+        message: 'Username available',
+        type: 'info',
+        severity: 'low',
+      },
     ];
 
     it('displays validation errors with proper grouping', () => {
-      render(
-        <MobileFormValidation errors={mockErrors} />
-      );
+      render(<MobileFormValidation errors={mockErrors} />);
 
       expect(screen.getByText('1 error')).toBeInTheDocument();
       expect(screen.getByText('1 warning')).toBeInTheDocument();
       expect(screen.getByText('1 info')).toBeInTheDocument();
-      expect(screen.getByText('Please review and fix the issues below')).toBeInTheDocument();
+      expect(
+        screen.getByText('Please review and fix the issues below')
+      ).toBeInTheDocument();
 
       expect(screen.getByText('Email')).toBeInTheDocument();
       expect(screen.getByText('Invalid email format')).toBeInTheDocument();
@@ -380,16 +466,19 @@ describe('Comprehensive Form Validation Tests', () => {
     });
 
     it('handles collapsible behavior correctly', async () => {
-      const manyErrors: ValidationError[] = Array.from({ length: 5 }, (_, i) => ({
-        field: `field${i}`,
-        message: `Error message ${i}`,
-        type: 'error' as const,
-        severity: 'medium' as const,
-      }));
+      const manyErrors: ValidationError[] = Array.from(
+        { length: 5 },
+        (_, i) => ({
+          field: `field${i}`,
+          message: `Error message ${i}`,
+          type: 'error' as const,
+          severity: 'medium' as const,
+        })
+      );
 
       render(
-        <MobileFormValidation 
-          errors={manyErrors} 
+        <MobileFormValidation
+          errors={manyErrors}
           collapsible={true}
           maxVisible={3}
         />
@@ -426,7 +515,7 @@ describe('Comprehensive Form Validation Tests', () => {
       const mockDismiss = vi.fn();
 
       render(
-        <MobileFormValidation 
+        <MobileFormValidation
           errors={mockErrors}
           onErrorClick={mockErrorClick}
           onDismiss={mockDismiss}
@@ -453,18 +542,16 @@ describe('Comprehensive Form Validation Tests', () => {
         hookResult = useFormFeedback();
         return (
           <div>
-            {hookResult.feedback && (
-              <FormFeedback {...hookResult.feedback} />
-            )}
-            <button onClick={() => hookResult.showSuccess({ message: 'Success!' })}>
+            {hookResult.feedback && <FormFeedback {...hookResult.feedback} />}
+            <button
+              onClick={() => hookResult.showSuccess({ message: 'Success!' })}
+            >
               Show Success
             </button>
             <button onClick={() => hookResult.showError({ message: 'Error!' })}>
               Show Error
             </button>
-            <button onClick={hookResult.clearFeedback}>
-              Clear
-            </button>
+            <button onClick={hookResult.clearFeedback}>Clear</button>
           </div>
         );
       }
@@ -494,22 +581,34 @@ describe('Comprehensive Form Validation Tests', () => {
         hookResult = useMobileFormValidation();
         return (
           <div>
-            <div data-testid="has-errors">{hookResult.hasErrors.toString()}</div>
-            <div data-testid="has-warnings">{hookResult.hasWarnings.toString()}</div>
-            <button onClick={() => hookResult.addError({
-              field: 'test',
-              message: 'Test error',
-              type: 'error'
-            })}>
+            <div data-testid="has-errors">
+              {hookResult.hasErrors.toString()}
+            </div>
+            <div data-testid="has-warnings">
+              {hookResult.hasWarnings.toString()}
+            </div>
+            <button
+              onClick={() =>
+                hookResult.addError({
+                  field: 'test',
+                  message: 'Test error',
+                  type: 'error',
+                })
+              }
+            >
               Add Error
             </button>
             <button onClick={() => hookResult.removeError('test')}>
               Remove Error
             </button>
-            <button onClick={() => hookResult.validateField('email', 'invalid', [
-              mobileValidationRules.required(),
-              mobileValidationRules.email()
-            ])}>
+            <button
+              onClick={() =>
+                hookResult.validateField('email', 'invalid', [
+                  mobileValidationRules.required(),
+                  mobileValidationRules.email(),
+                ])
+              }
+            >
               Validate Email
             </button>
           </div>
@@ -576,11 +675,11 @@ describe('Comprehensive Form Validation Tests', () => {
       ];
 
       testCases.forEach(({ rule, validValues, invalidValues }) => {
-        validValues.forEach(value => {
+        validValues.forEach((value) => {
           expect(rule.test(value)).toBe(true);
         });
 
-        invalidValues.forEach(value => {
+        invalidValues.forEach((value) => {
           expect(rule.test(value)).toBe(false);
         });
       });
@@ -589,11 +688,7 @@ describe('Comprehensive Form Validation Tests', () => {
     it('validates strong password rule correctly', () => {
       const rule = commonValidationRules.strongPassword();
 
-      const validPasswords = [
-        'StrongPass123!',
-        'MyP@ssw0rd',
-        'Complex1@',
-      ];
+      const validPasswords = ['StrongPass123!', 'MyP@ssw0rd', 'Complex1@'];
 
       const invalidPasswords = [
         'weak',
@@ -604,11 +699,11 @@ describe('Comprehensive Form Validation Tests', () => {
         'nouppercas3!',
       ];
 
-      validPasswords.forEach(password => {
+      validPasswords.forEach((password) => {
         expect(rule.test(password)).toBe(true);
       });
 
-      invalidPasswords.forEach(password => {
+      invalidPasswords.forEach((password) => {
         expect(rule.test(password)).toBe(false);
       });
     });
@@ -630,11 +725,11 @@ describe('Comprehensive Form Validation Tests', () => {
       ];
 
       testCases.forEach(({ rule, validValues, invalidValues }) => {
-        validValues.forEach(value => {
+        validValues.forEach((value) => {
           expect(rule.test(value)).toBe(true);
         });
 
-        invalidValues.forEach(value => {
+        invalidValues.forEach((value) => {
           expect(rule.test(value)).toBe(false);
         });
       });
@@ -645,17 +740,26 @@ describe('Comprehensive Form Validation Tests', () => {
     it('generates correct preset configurations', () => {
       const formSubmittedPreset = formFeedbackPresets.formSubmitted('log');
       expect(formSubmittedPreset.title).toBe('Success!');
-      expect(formSubmittedPreset.message).toBe('Your log has been submitted successfully.');
+      expect(formSubmittedPreset.message).toBe(
+        'Your log has been submitted successfully.'
+      );
 
       const validationErrorPreset = formFeedbackPresets.validationError(3);
       expect(validationErrorPreset.title).toBe('Validation Error');
-      expect(validationErrorPreset.message).toBe('Please fix 3 errors below and try again.');
+      expect(validationErrorPreset.message).toBe(
+        'Please fix 3 errors below and try again.'
+      );
 
       const networkErrorPreset = formFeedbackPresets.networkError();
       expect(networkErrorPreset.title).toBe('Connection Error');
-      expect(networkErrorPreset.suggestions).toContain('Check your internet connection');
+      expect(networkErrorPreset.suggestions).toContain(
+        'Check your internet connection'
+      );
 
-      const unsavedChangesPreset = formFeedbackPresets.unsavedChanges(vi.fn(), vi.fn());
+      const unsavedChangesPreset = formFeedbackPresets.unsavedChanges(
+        vi.fn(),
+        vi.fn()
+      );
       expect(unsavedChangesPreset.title).toBe('Unsaved Changes');
       expect(unsavedChangesPreset.actions).toHaveLength(2);
     });

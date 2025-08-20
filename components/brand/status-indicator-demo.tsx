@@ -1,18 +1,28 @@
 /**
  * StatusIndicator Demo Component
- * 
+ *
  * Demonstrates the usage of the StatusIndicator component with various
  * status types, sizes, and configurations.
  */
 
-import React from "react";
-import { StatusIndicator, StatusIndicators, type StatusType } from "./status-indicator";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import {
+  StatusIndicator,
+  StatusIndicators,
+  type StatusType,
+} from './status-indicator';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const allStatuses: StatusType[] = [
   'pending',
-  'approved', 
+  'approved',
   'matched',
   'rejected',
   'open',
@@ -27,7 +37,7 @@ const allStatuses: StatusType[] = [
   'processing',
   'draft',
   'submitted',
-  'completed'
+  'completed',
 ];
 
 export default function StatusIndicatorDemo() {
@@ -36,7 +46,8 @@ export default function StatusIndicatorDemo() {
       <div>
         <h2 className="text-2xl font-bold mb-2">Status Indicator System</h2>
         <p className="text-muted-foreground">
-          Enhanced status indicators built on shadcn/ui Badge with College Hunks brand theming.
+          Enhanced status indicators built on shadcn/ui Badge with College Hunks
+          brand theming.
         </p>
       </div>
 
@@ -125,7 +136,11 @@ export default function StatusIndicatorDemo() {
             <StatusIndicator status="approved" text="Commission Approved" />
             <StatusIndicator status="pending" text="Awaiting Review" />
             <StatusIndicator status="matched" text="Auto-Matched" />
-            <StatusIndicator status="processing" text="Calculating..." animated />
+            <StatusIndicator
+              status="processing"
+              text="Calculating..."
+              animated
+            />
           </div>
         </CardContent>
       </Card>
@@ -204,21 +219,27 @@ export default function StatusIndicatorDemo() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Daily Log #1234</div>
-                  <div className="text-sm text-muted-foreground">Captain: John Smith</div>
+                  <div className="text-sm text-muted-foreground">
+                    Captain: John Smith
+                  </div>
                 </div>
                 <StatusIndicator status="pending" text="Awaiting Review" />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Commission Entry #5678</div>
-                  <div className="text-sm text-muted-foreground">Sales: Jane Doe</div>
+                  <div className="text-sm text-muted-foreground">
+                    Sales: Jane Doe
+                  </div>
                 </div>
                 <StatusIndicator status="matched" text="Auto-Matched" />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Pay Period: Jan 2024</div>
-                  <div className="text-sm text-muted-foreground">15 employees</div>
+                  <div className="text-sm text-muted-foreground">
+                    15 employees
+                  </div>
                 </div>
                 <StatusIndicator status="locked" />
               </div>

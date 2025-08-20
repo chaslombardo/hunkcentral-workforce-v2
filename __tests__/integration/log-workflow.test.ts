@@ -3,9 +3,23 @@
  * Tests the end-to-end process from log creation to approval and commission matching
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+  vi,
+} from 'vitest';
 import { prisma } from '@/lib/prisma';
-import { saveDraftLog, submitLog, approveLog, loadLog } from '@/lib/actions/logs';
+import {
+  saveDraftLog,
+  submitLog,
+  approveLog,
+  loadLog,
+} from '@/lib/actions/logs';
 import { createCommissionEntry } from '@/lib/actions/commission';
 import { calculatePayroll } from '@/lib/payCalculator';
 import type { DailyLogFormData } from '@/lib/validations';
@@ -25,7 +39,7 @@ const { auth } = await import('@/lib/auth');
 describe('Complete Log Workflow Integration', () => {
   // Generate unique test IDs to avoid conflicts
   const testRunId = Date.now().toString();
-  
+
   // Test users
   const captainUser = {
     user: {
@@ -73,10 +87,10 @@ describe('Complete Log Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Test Captain',
           roles: ['captain'],
-          rateJunkCaptain: 20.00,
-          rateJunkWingman: 15.00,
-          rateMoveCaptain: 22.00,
-          rateMoveWingman: 17.00,
+          rateJunkCaptain: 20.0,
+          rateJunkWingman: 15.0,
+          rateMoveCaptain: 22.0,
+          rateMoveWingman: 17.0,
           junkBonusGoal: 0.14,
           moveBonusGoal: 0.24,
         },
@@ -86,7 +100,7 @@ describe('Complete Log Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Test Manager',
           roles: ['manager'],
-          rateAdmin: 25.00,
+          rateAdmin: 25.0,
         },
         {
           id: salesUser.user.id,
@@ -95,7 +109,7 @@ describe('Complete Log Workflow Integration', () => {
           fullName: 'Test Sales',
           roles: ['sales'],
           commissionRate: 5.0,
-          rateAdmin: 20.00,
+          rateAdmin: 20.0,
         },
         {
           id: wingmanUser.user.id,
@@ -103,8 +117,8 @@ describe('Complete Log Workflow Integration', () => {
           password: 'hashedpassword',
           fullName: 'Test Wingman',
           roles: ['wingman'],
-          rateJunkWingman: 15.00,
-          rateMoveWingman: 17.00,
+          rateJunkWingman: 15.0,
+          rateMoveWingman: 17.0,
         },
       ],
     });
@@ -113,8 +127,13 @@ describe('Complete Log Workflow Integration', () => {
   afterAll(async () => {
     try {
       // Clean up test data in proper order (child records first)
-      const userIds = [captainUser.user.id, managerUser.user.id, salesUser.user.id, wingmanUser.user.id];
-      
+      const userIds = [
+        captainUser.user.id,
+        managerUser.user.id,
+        salesUser.user.id,
+        wingmanUser.user.id,
+      ];
+
       await prisma.auditLog.deleteMany({
         where: {
           userId: {
@@ -139,14 +158,16 @@ describe('Complete Log Workflow Integration', () => {
       await prisma.logJob.deleteMany({
         where: {
           logId: {
-            in: await prisma.dailyLog.findMany({
-              where: {
-                captainId: {
-                  in: [captainUser.user.id],
+            in: await prisma.dailyLog
+              .findMany({
+                where: {
+                  captainId: {
+                    in: [captainUser.user.id],
+                  },
                 },
-              },
-              select: { id: true },
-            }).then(logs => logs.map(log => log.id)),
+                select: { id: true },
+              })
+              .then((logs) => logs.map((log) => log.id)),
           },
         },
       });
@@ -177,9 +198,9 @@ describe('Complete Log Workflow Integration', () => {
     it('should handle complete workflow: create → submit → approve → commission matching', async () => {
       // Step 1: Sales person creates commission entry
       vi.mocked(auth).mockResolvedValue(salesUser);
-      
+
       const workflowJobId = `WORKFLOW-${testRunId}`;
-      
+
       const commissionResult = await createCommissionEntry({
         salesId: salesUser.user.id,
         jobId: workflowJobId,
@@ -244,7 +265,10 @@ describe('Complete Log Workflow Integration', () => {
       // Step 4: Manager approves log
       vi.mocked(auth).mockResolvedValue(managerUser);
 
-      const approveResult = await approveLog(logId, 'Integration test approval');
+      const approveResult = await approveLog(
+        logId,
+        'Integration test approval'
+      );
       expect(approveResult.success).toBe(true);
       expect(approveResult.data?.status).toBe('approved');
 
@@ -272,9 +296,9 @@ describe('Complete Log Workflow Integration', () => {
       });
 
       expect(auditLogs.length).toBeGreaterThanOrEqual(3); // create, submit, approve
-      expect(auditLogs.some(log => log.action === 'create')).toBe(true);
-      expect(auditLogs.some(log => log.action === 'submit')).toBe(true);
-      expect(auditLogs.some(log => log.action === 'approve')).toBe(true);
+      expect(auditLogs.some((log) => log.action === 'create')).toBe(true);
+      expect(auditLogs.some((log) => log.action === 'submit')).toBe(true);
+      expect(auditLogs.some((log) => log.action === 'approve')).toBe(true);
 
       // Step 7: Verify payroll calculation includes this log
       const users = await prisma.user.findMany({
@@ -307,8 +331,6 @@ describe('Complete Log Workflow Integration', () => {
       const payPeriodStart = new Date('2025-08-01');
       const payPeriodEnd = new Date('2025-08-31');
 
-
-
       const payrollCalculations = calculatePayroll(
         users,
         approvedLogs,
@@ -318,7 +340,9 @@ describe('Complete Log Workflow Integration', () => {
       );
 
       // Verify captain payroll
-      const captainPayroll = payrollCalculations.find(p => p.employeeId === captainUser.user.id);
+      const captainPayroll = payrollCalculations.find(
+        (p) => p.employeeId === captainUser.user.id
+      );
       expect(captainPayroll).toBeDefined();
       expect(captainPayroll!.totalHours).toBe(6);
       expect(captainPayroll!.grossWages).toBe(120); // 6 hours * $20 captain rate
@@ -326,14 +350,18 @@ describe('Complete Log Workflow Integration', () => {
       expect(captainPayroll!.bonuses).toBe(0); // No bonus (21% actual vs 14% goal)
 
       // Verify wingman payroll
-      const wingmanPayroll = payrollCalculations.find(p => p.employeeId === wingmanUser.user.id);
+      const wingmanPayroll = payrollCalculations.find(
+        (p) => p.employeeId === wingmanUser.user.id
+      );
       expect(wingmanPayroll).toBeDefined();
       expect(wingmanPayroll!.totalHours).toBe(6);
       expect(wingmanPayroll!.grossWages).toBe(90); // 6 hours * $15 wingman rate
       expect(wingmanPayroll!.tips).toBe(75); // 150 tips / 2 employees
 
       // Verify sales payroll
-      const salesPayroll = payrollCalculations.find(p => p.employeeId === salesUser.user.id);
+      const salesPayroll = payrollCalculations.find(
+        (p) => p.employeeId === salesUser.user.id
+      );
       expect(salesPayroll).toBeDefined();
       expect(salesPayroll!.commission).toBe(50); // 5% of $1000
     });
@@ -342,7 +370,7 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(captainUser);
 
       const autosaveJobId = `AUTOSAVE-${testRunId}`;
-      
+
       const initialFormData: DailyLogFormData = {
         captainId: captainUser.user.id,
         logDate: new Date('2024-01-16'),
@@ -398,7 +426,7 @@ describe('Complete Log Workflow Integration', () => {
       vi.mocked(auth).mockResolvedValue(salesUser);
 
       const conflictJobId = `CONFLICT-${testRunId}`;
-      
+
       const commission1Result = await createCommissionEntry({
         salesId: salesUser.user.id,
         jobId: conflictJobId,
@@ -483,7 +511,10 @@ describe('Complete Log Workflow Integration', () => {
       // Approve log - should detect conflict
       vi.mocked(auth).mockResolvedValue(managerUser);
 
-      const approveResult = await approveLog(logId, 'Testing conflict handling');
+      const approveResult = await approveLog(
+        logId,
+        'Testing conflict handling'
+      );
       expect(approveResult.success).toBe(true);
       expect(approveResult.data?.commissionMatching.conflictCount).toBe(1);
 
@@ -585,7 +616,10 @@ describe('Complete Log Workflow Integration', () => {
       // Try to approve as wingman (should fail)
       vi.mocked(auth).mockResolvedValue(wingmanUser);
 
-      const approveResult = await approveLog(logId, 'Unauthorized approval attempt');
+      const approveResult = await approveLog(
+        logId,
+        'Unauthorized approval attempt'
+      );
       expect(approveResult.success).toBe(false);
       expect(approveResult.error).toBe('Manager access required');
     });

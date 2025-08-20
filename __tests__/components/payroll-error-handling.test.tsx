@@ -1,13 +1,16 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { PayrollErrorBoundary, PayrollComponentErrorBoundary } from '@/components/features/reports/payroll-error-boundary';
-import { 
-  PayrollSummaryFallback, 
-  DepartmentBreakdownFallback, 
-  DailyWorkFallback, 
+import {
+  PayrollErrorBoundary,
+  PayrollComponentErrorBoundary,
+} from '@/components/features/reports/payroll-error-boundary';
+import {
+  PayrollSummaryFallback,
+  DepartmentBreakdownFallback,
+  DailyWorkFallback,
   TipsDetailFallback,
-  PayrollLoadingSkeleton 
+  PayrollLoadingSkeleton,
 } from '@/components/features/reports/payroll-fallback-views';
 
 // Mock localStorage
@@ -36,7 +39,10 @@ Object.defineProperty(window, 'location', {
 });
 
 // Component that throws an error for testing
-function ErrorThrowingComponent({ shouldThrow = true, errorMessage = 'Test error' }) {
+function ErrorThrowingComponent({
+  shouldThrow = true,
+  errorMessage = 'Test error',
+}) {
   if (shouldThrow) {
     throw new Error(errorMessage);
   }
@@ -61,7 +67,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByText('Component loaded successfully')).toBeInTheDocument();
+    expect(
+      screen.getByText('Component loaded successfully')
+    ).toBeInTheDocument();
   });
 
   it('should render error fallback when error occurs', () => {
@@ -71,8 +79,14 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByText(/System Error - Payroll Data Unavailable/)).toBeInTheDocument();
-    expect(screen.getByText(/An unexpected error occurred while loading your payroll information/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/System Error - Payroll Data Unavailable/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /An unexpected error occurred while loading your payroll information/
+      )
+    ).toBeInTheDocument();
   });
 
   it('should categorize different error types correctly', () => {
@@ -82,7 +96,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByText(/Cache Error - Payroll Data Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cache Error - Payroll Data Unavailable/)
+    ).toBeInTheDocument();
 
     rerender(
       <PayrollErrorBoundary>
@@ -90,7 +106,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByText(/Cache Error - Payroll Data Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cache Error - Payroll Data Unavailable/)
+    ).toBeInTheDocument();
 
     rerender(
       <PayrollErrorBoundary>
@@ -98,7 +116,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByText(/Cache Error - Payroll Data Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cache Error - Payroll Data Unavailable/)
+    ).toBeInTheDocument();
   });
 
   it('should handle retry functionality', async () => {
@@ -157,7 +177,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    expect(screen.getByRole('button', { name: /Clear Cache & Retry/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Clear Cache & Retry/ })
+    ).toBeInTheDocument();
   });
 
   it('should handle page reload', () => {
@@ -180,7 +202,9 @@ describe('PayrollErrorBoundary', () => {
       </PayrollErrorBoundary>
     );
 
-    const dashboardButton = screen.getByRole('button', { name: /Return to Dashboard/ });
+    const dashboardButton = screen.getByRole('button', {
+      name: /Return to Dashboard/,
+    });
     fireEvent.click(dashboardButton);
 
     expect(mockLocation.href).toBe('/dashboard');
@@ -188,7 +212,7 @@ describe('PayrollErrorBoundary', () => {
 
   it('should call onError callback when provided', () => {
     const onError = vi.fn();
-    
+
     render(
       <PayrollErrorBoundary onError={onError}>
         <ErrorThrowingComponent errorMessage="Test callback error" />
@@ -220,8 +244,12 @@ describe('PayrollComponentErrorBoundary', () => {
       </PayrollComponentErrorBoundary>
     );
 
-    expect(screen.getByText(/Department Breakdown Unavailable/)).toBeInTheDocument();
-    expect(screen.getByText(/This section couldn't load due to a technical issue/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Department Breakdown Unavailable/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/This section couldn't load due to a technical issue/)
+    ).toBeInTheDocument();
   });
 
   it('should provide retry functionality for components', async () => {
@@ -243,7 +271,9 @@ describe('PayrollComponentErrorBoundary', () => {
       );
     });
 
-    expect(screen.getByText('Component loaded successfully')).toBeInTheDocument();
+    expect(
+      screen.getByText('Component loaded successfully')
+    ).toBeInTheDocument();
   });
 });
 
@@ -253,24 +283,14 @@ describe('PayrollSummaryFallback', () => {
   });
 
   it('should render unavailable state when no data', () => {
-    render(
-      <PayrollSummaryFallback
-        error="Network error"
-        onRetry={vi.fn()}
-      />
-    );
+    render(<PayrollSummaryFallback error="Network error" onRetry={vi.fn()} />);
 
     expect(screen.getByText(/Payroll Summary Unavailable/)).toBeInTheDocument();
     expect(screen.getByText(/Network error/)).toBeInTheDocument();
   });
 
   it('should render offline state correctly', () => {
-    render(
-      <PayrollSummaryFallback
-        isOffline={true}
-        onRetry={vi.fn()}
-      />
-    );
+    render(<PayrollSummaryFallback isOffline={true} onRetry={vi.fn()} />);
 
     expect(screen.getByText(/Offline Mode/)).toBeInTheDocument();
     expect(screen.getByText(/You're currently offline/)).toBeInTheDocument();
@@ -300,16 +320,11 @@ describe('PayrollSummaryFallback', () => {
 
   it('should handle retry with count tracking', async () => {
     const onRetry = vi.fn();
-    
-    render(
-      <PayrollSummaryFallback
-        error="Network error"
-        onRetry={onRetry}
-      />
-    );
+
+    render(<PayrollSummaryFallback error="Network error" onRetry={onRetry} />);
 
     const retryButton = screen.getByRole('button', { name: /Try Again/ });
-    
+
     fireEvent.click(retryButton);
     expect(onRetry).toHaveBeenCalledTimes(1);
 
@@ -321,16 +336,11 @@ describe('PayrollSummaryFallback', () => {
 
   it('should disable retry after max attempts', async () => {
     const onRetry = vi.fn();
-    
-    render(
-      <PayrollSummaryFallback
-        error="Network error"
-        onRetry={onRetry}
-      />
-    );
+
+    render(<PayrollSummaryFallback error="Network error" onRetry={onRetry} />);
 
     const retryButton = screen.getByRole('button', { name: /Try Again/ });
-    
+
     // Click 5 times to reach max
     for (let i = 0; i < 5; i++) {
       fireEvent.click(retryButton);
@@ -338,32 +348,32 @@ describe('PayrollSummaryFallback', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Max Retries/)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Max Retries/ })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: /Max Retries/ })
+      ).toBeDisabled();
     });
   });
 
   it('should show clear cache option for cache errors', () => {
     render(
-      <PayrollSummaryFallback
-        error="cached data corrupted"
-        onRetry={vi.fn()}
-      />
+      <PayrollSummaryFallback error="cached data corrupted" onRetry={vi.fn()} />
     );
 
-    expect(screen.getByRole('button', { name: /Clear Cache/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Clear Cache/ })
+    ).toBeInTheDocument();
   });
 
   it('should clear cache when clear cache button is clicked', async () => {
     const onRetry = vi.fn();
-    
+
     render(
-      <PayrollSummaryFallback
-        error="cached data corrupted"
-        onRetry={onRetry}
-      />
+      <PayrollSummaryFallback error="cached data corrupted" onRetry={onRetry} />
     );
 
-    const clearCacheButton = screen.getByRole('button', { name: /Clear Cache/ });
+    const clearCacheButton = screen.getByRole('button', {
+      name: /Clear Cache/,
+    });
     fireEvent.click(clearCacheButton);
 
     // Should call localStorage.removeItem for payroll cache keys
@@ -389,22 +399,23 @@ describe('DepartmentBreakdownFallback', () => {
       />
     );
 
-    expect(screen.getByText(/Department Breakdown Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Department Breakdown Unavailable/)
+    ).toBeInTheDocument();
     expect(screen.getByText('40h')).toBeInTheDocument();
     expect(screen.getByText('$1,000.00')).toBeInTheDocument();
   });
 
   it('should handle retry functionality', () => {
     const onRetry = vi.fn();
-    
+
     render(
-      <DepartmentBreakdownFallback
-        error="Network error"
-        onRetry={onRetry}
-      />
+      <DepartmentBreakdownFallback error="Network error" onRetry={onRetry} />
     );
 
-    const retryButton = screen.getByRole('button', { name: /Try Loading Breakdown/ });
+    const retryButton = screen.getByRole('button', {
+      name: /Try Loading Breakdown/,
+    });
     fireEvent.click(retryButton);
 
     expect(onRetry).toHaveBeenCalled();
@@ -422,7 +433,9 @@ describe('DailyWorkFallback', () => {
       />
     );
 
-    expect(screen.getByText(/Daily Work History Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Daily Work History Unavailable/)
+    ).toBeInTheDocument();
     expect(screen.getByText('15')).toBeInTheDocument();
     expect(screen.getByText('8.2h')).toBeInTheDocument();
   });
@@ -467,7 +480,7 @@ describe('Error Recovery Integration', () => {
 
   it('should handle complete error recovery flow', async () => {
     let shouldThrow = true;
-    
+
     const TestComponent = () => {
       if (shouldThrow) {
         throw new Error('Network request failed');
@@ -482,7 +495,9 @@ describe('Error Recovery Integration', () => {
     );
 
     // Should show error state
-    expect(screen.getByText(/System Error - Payroll Data Unavailable/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/System Error - Payroll Data Unavailable/)
+    ).toBeInTheDocument();
 
     // Click retry
     const retryButton = screen.getByRole('button', { name: /Try Again/ });
@@ -490,7 +505,7 @@ describe('Error Recovery Integration', () => {
 
     // Simulate successful recovery
     shouldThrow = false;
-    
+
     await waitFor(() => {
       rerender(
         <PayrollErrorBoundary>
@@ -505,23 +520,15 @@ describe('Error Recovery Integration', () => {
 
   it('should handle offline to online transition', async () => {
     const onRetry = vi.fn().mockResolvedValue(undefined);
-    
+
     const { rerender } = render(
-      <PayrollSummaryFallback
-        isOffline={true}
-        onRetry={onRetry}
-      />
+      <PayrollSummaryFallback isOffline={true} onRetry={onRetry} />
     );
 
     expect(screen.getByText(/Offline Mode/)).toBeInTheDocument();
 
     // Simulate coming back online
-    rerender(
-      <PayrollSummaryFallback
-        isOffline={false}
-        onRetry={onRetry}
-      />
-    );
+    rerender(<PayrollSummaryFallback isOffline={false} onRetry={onRetry} />);
 
     const retryButton = screen.getByRole('button', { name: /Try Again/ });
     fireEvent.click(retryButton);

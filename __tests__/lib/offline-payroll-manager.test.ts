@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { OfflinePayrollManager, offlinePayrollManager } from '@/lib/offlinePayrollManager';
+import {
+  OfflinePayrollManager,
+  offlinePayrollManager,
+} from '@/lib/offlinePayrollManager';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -53,7 +56,7 @@ describe('OfflinePayrollManager', () => {
     it('should return the same instance', () => {
       const instance1 = OfflinePayrollManager.getInstance();
       const instance2 = OfflinePayrollManager.getInstance();
-      
+
       expect(instance1).toBe(instance2);
       expect(instance1).toBe(offlinePayrollManager);
     });
@@ -61,7 +64,12 @@ describe('OfflinePayrollManager', () => {
 
   describe('cacheData', () => {
     it('should cache summary data correctly', async () => {
-      await offlinePayrollManager.cacheData('summary', testData, testUserId, testPayPeriodId);
+      await offlinePayrollManager.cacheData(
+        'summary',
+        testData,
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         'payroll-cache-summary-user-123-period-456',
@@ -75,7 +83,13 @@ describe('OfflinePayrollManager', () => {
     });
 
     it('should cache details data with tab name', async () => {
-      await offlinePayrollManager.cacheData('details', testData, testUserId, testPayPeriodId, 'breakdown');
+      await offlinePayrollManager.cacheData(
+        'details',
+        testData,
+        testUserId,
+        testPayPeriodId,
+        'breakdown'
+      );
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         'payroll-cache-details-user-123-period-456-breakdown',
@@ -90,7 +104,12 @@ describe('OfflinePayrollManager', () => {
 
       // Should not throw error
       await expect(
-        offlinePayrollManager.cacheData('summary', testData, testUserId, testPayPeriodId)
+        offlinePayrollManager.cacheData(
+          'summary',
+          testData,
+          testUserId,
+          testPayPeriodId
+        )
       ).resolves.toBeUndefined();
 
       expect(mockConsole.error).toHaveBeenCalledWith(
@@ -103,15 +122,20 @@ describe('OfflinePayrollManager', () => {
       const mockTimestamp = 1640995200000; // Fixed timestamp for testing
       vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
 
-      await offlinePayrollManager.cacheData('summary', testData, testUserId, testPayPeriodId);
+      await offlinePayrollManager.cacheData(
+        'summary',
+        testData,
+        testUserId,
+        testPayPeriodId
+      );
 
-      const cachedDataCall = mockLocalStorage.setItem.mock.calls.find(call => 
+      const cachedDataCall = mockLocalStorage.setItem.mock.calls.find((call) =>
         call[0].includes('summary')
       );
-      
+
       expect(cachedDataCall).toBeDefined();
       const cachedData = JSON.parse(cachedDataCall![1]);
-      
+
       expect(cachedData).toMatchObject({
         data: testData,
         timestamp: mockTimestamp,
@@ -136,7 +160,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(cachedData));
 
-      const result = await offlinePayrollManager.getCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.getCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toEqual(cachedData);
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
@@ -147,7 +175,11 @@ describe('OfflinePayrollManager', () => {
     it('should return null for non-existent cache', async () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const result = await offlinePayrollManager.getCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.getCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBeNull();
     });
@@ -155,7 +187,7 @@ describe('OfflinePayrollManager', () => {
     it('should handle expired cache', async () => {
       const expiredData = {
         data: testData,
-        timestamp: Date.now() - (25 * 60 * 60 * 1000), // 25 hours ago
+        timestamp: Date.now() - 25 * 60 * 60 * 1000, // 25 hours ago
         version: '1.0.0',
         payPeriodId: testPayPeriodId,
         userId: testUserId,
@@ -164,7 +196,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(expiredData));
 
-      const result = await offlinePayrollManager.getCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.getCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBeNull();
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
@@ -184,7 +220,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(oldVersionData));
 
-      const result = await offlinePayrollManager.getCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.getCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBeNull();
       expect(mockLocalStorage.removeItem).toHaveBeenCalled();
@@ -193,7 +233,11 @@ describe('OfflinePayrollManager', () => {
     it('should handle corrupted cache data', async () => {
       mockLocalStorage.getItem.mockReturnValue('invalid json');
 
-      const result = await offlinePayrollManager.getCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.getCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBeNull();
       expect(mockConsole.error).toHaveBeenCalledWith(
@@ -217,7 +261,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(cachedData));
 
-      const result = await offlinePayrollManager.hasCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.hasCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBe(true);
     });
@@ -225,7 +273,11 @@ describe('OfflinePayrollManager', () => {
     it('should return false for no cached data', async () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const result = await offlinePayrollManager.hasCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.hasCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBe(false);
     });
@@ -233,7 +285,7 @@ describe('OfflinePayrollManager', () => {
     it('should return false for expired cached data', async () => {
       const expiredData = {
         data: testData,
-        timestamp: Date.now() - (25 * 60 * 60 * 1000), // 25 hours ago
+        timestamp: Date.now() - 25 * 60 * 60 * 1000, // 25 hours ago
         version: '1.0.0',
         payPeriodId: testPayPeriodId,
         userId: testUserId,
@@ -242,7 +294,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(expiredData));
 
-      const result = await offlinePayrollManager.hasCachedData('summary', testUserId, testPayPeriodId);
+      const result = await offlinePayrollManager.hasCachedData(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result).toBe(false);
     });
@@ -250,7 +306,7 @@ describe('OfflinePayrollManager', () => {
 
   describe('getCacheAge', () => {
     it('should return correct cache age in minutes', async () => {
-      const oneHourAgo = Date.now() - (60 * 60 * 1000); // 1 hour ago
+      const oneHourAgo = Date.now() - 60 * 60 * 1000; // 1 hour ago
       const cachedData = {
         data: testData,
         timestamp: oneHourAgo,
@@ -262,7 +318,11 @@ describe('OfflinePayrollManager', () => {
 
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(cachedData));
 
-      const age = await offlinePayrollManager.getCacheAge('summary', testUserId, testPayPeriodId);
+      const age = await offlinePayrollManager.getCacheAge(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(age).toBe(60); // 60 minutes
     });
@@ -270,7 +330,11 @@ describe('OfflinePayrollManager', () => {
     it('should return 0 for non-existent cache', async () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const age = await offlinePayrollManager.getCacheAge('summary', testUserId, testPayPeriodId);
+      const age = await offlinePayrollManager.getCacheAge(
+        'summary',
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(age).toBe(0);
     });
@@ -286,7 +350,9 @@ describe('OfflinePayrollManager', () => {
         'payroll-cache-summary-user-123-period-789', // Different period
       ];
 
-      Object.defineProperty(mockLocalStorage, 'length', { value: mockKeys.length });
+      Object.defineProperty(mockLocalStorage, 'length', {
+        value: mockKeys.length,
+      });
       mockLocalStorage.key.mockImplementation((index) => mockKeys[index]);
 
       // Mock Object.keys to return our test keys
@@ -309,7 +375,9 @@ describe('OfflinePayrollManager', () => {
       );
 
       // Should not remove keys for other periods or non-payroll keys
-      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith('other-cache-key');
+      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith(
+        'other-cache-key'
+      );
       expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith(
         'payroll-cache-summary-user-123-period-789'
       );
@@ -341,7 +409,9 @@ describe('OfflinePayrollManager', () => {
       );
 
       // Should not remove non-payroll keys
-      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith('other-cache-key');
+      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith(
+        'other-cache-key'
+      );
     });
   });
 
@@ -358,7 +428,7 @@ describe('OfflinePayrollManager', () => {
 
       const expiredData = {
         data: testData,
-        timestamp: Date.now() - (25 * 60 * 60 * 1000), // 25 hours ago
+        timestamp: Date.now() - 25 * 60 * 60 * 1000, // 25 hours ago
         version: '1.0.0',
         payPeriodId: testPayPeriodId,
         userId: testUserId,
@@ -402,13 +472,23 @@ describe('OfflinePayrollManager', () => {
       await offlinePayrollManager.clearExpiredCache();
 
       // Should remove expired, old version, and corrupted entries
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('payroll-cache-expired');
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('payroll-cache-old-version');
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('payroll-cache-corrupted');
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'payroll-cache-expired'
+      );
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'payroll-cache-old-version'
+      );
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+        'payroll-cache-corrupted'
+      );
 
       // Should not remove valid entries or sync timestamps
-      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith('payroll-cache-valid');
-      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith('payroll-cache-last-sync-period-456');
+      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith(
+        'payroll-cache-valid'
+      );
+      expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith(
+        'payroll-cache-last-sync-period-456'
+      );
     });
   });
 
@@ -416,14 +496,14 @@ describe('OfflinePayrollManager', () => {
     it('should return correct offline state', async () => {
       const summaryData = {
         data: testData,
-        timestamp: Date.now() - (30 * 60 * 1000), // 30 minutes ago
+        timestamp: Date.now() - 30 * 60 * 1000, // 30 minutes ago
         version: '1.0.0',
         payPeriodId: testPayPeriodId,
         userId: testUserId,
         type: 'summary',
       };
 
-      const syncTimestamp = (Date.now() - (15 * 60 * 1000)).toString(); // 15 minutes ago
+      const syncTimestamp = (Date.now() - 15 * 60 * 1000).toString(); // 15 minutes ago
 
       mockLocalStorage.getItem.mockImplementation((key) => {
         if (key.includes('summary')) {
@@ -435,7 +515,11 @@ describe('OfflinePayrollManager', () => {
         return null;
       });
 
-      const state = await offlinePayrollManager.getOfflineState(testUserId, testPayPeriodId, true);
+      const state = await offlinePayrollManager.getOfflineState(
+        testUserId,
+        testPayPeriodId,
+        true
+      );
 
       expect(state).toMatchObject({
         isOffline: true,
@@ -449,7 +533,11 @@ describe('OfflinePayrollManager', () => {
     it('should handle no cached data', async () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const state = await offlinePayrollManager.getOfflineState(testUserId, testPayPeriodId, false);
+      const state = await offlinePayrollManager.getOfflineState(
+        testUserId,
+        testPayPeriodId,
+        false
+      );
 
       expect(state).toMatchObject({
         isOffline: false,
@@ -466,7 +554,11 @@ describe('OfflinePayrollManager', () => {
       const freshData = { ...testData, totalPay: 1100 };
       const fetchFn = vi.fn().mockResolvedValue(freshData);
 
-      const result = await offlinePayrollManager.syncWhenOnline(testUserId, testPayPeriodId, fetchFn);
+      const result = await offlinePayrollManager.syncWhenOnline(
+        testUserId,
+        testPayPeriodId,
+        fetchFn
+      );
 
       expect(result).toEqual({
         success: true,
@@ -493,7 +585,11 @@ describe('OfflinePayrollManager', () => {
       const fetchFn = vi.fn().mockRejectedValue(new Error('Network error'));
       mockLocalStorage.getItem.mockReturnValue(JSON.stringify(cachedData));
 
-      const result = await offlinePayrollManager.syncWhenOnline(testUserId, testPayPeriodId, fetchFn);
+      const result = await offlinePayrollManager.syncWhenOnline(
+        testUserId,
+        testPayPeriodId,
+        fetchFn
+      );
 
       expect(result).toEqual({
         success: false,
@@ -508,7 +604,11 @@ describe('OfflinePayrollManager', () => {
       const fetchFn = vi.fn().mockRejectedValue(new Error('Network error'));
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const result = await offlinePayrollManager.syncWhenOnline(testUserId, testPayPeriodId, fetchFn);
+      const result = await offlinePayrollManager.syncWhenOnline(
+        testUserId,
+        testPayPeriodId,
+        fetchFn
+      );
 
       expect(result).toEqual({
         success: false,
@@ -519,9 +619,9 @@ describe('OfflinePayrollManager', () => {
 
   describe('getCacheStats', () => {
     it('should return correct cache statistics', async () => {
-      const oldTimestamp = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
-      const newTimestamp = Date.now() - (30 * 60 * 1000); // 30 minutes ago
-      const expiredTimestamp = Date.now() - (25 * 60 * 60 * 1000); // 25 hours ago
+      const oldTimestamp = Date.now() - 2 * 60 * 60 * 1000; // 2 hours ago
+      const newTimestamp = Date.now() - 30 * 60 * 1000; // 30 minutes ago
+      const expiredTimestamp = Date.now() - 25 * 60 * 60 * 1000; // 25 hours ago
 
       const validData = JSON.stringify({
         data: testData,
@@ -579,7 +679,11 @@ describe('OfflinePayrollManager', () => {
 
       expect(stats).toMatchObject({
         totalEntries: 4, // Excludes sync timestamp
-        totalSize: validData.length + oldData.length + expiredData.length + 'invalid json'.length,
+        totalSize:
+          validData.length +
+          oldData.length +
+          expiredData.length +
+          'invalid json'.length,
         oldestEntry: new Date(oldTimestamp),
         newestEntry: new Date(newTimestamp),
         expiredEntries: 2, // expired + corrupted

@@ -24,7 +24,7 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
   let session;
   let userAgent: string | undefined;
   let currentUrl: string = '/logs/edit';
-  
+
   try {
     // Resolve params
     const resolvedParams = await params;
@@ -68,8 +68,11 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
 
     // Check user permissions - captains can edit their own logs, managers and admins can edit any log
     const userRoles = session.user.roles || [];
-    const canEditLogs = userRoles.includes('captain') || userRoles.includes('manager') || userRoles.includes('admin');
-    
+    const canEditLogs =
+      userRoles.includes('captain') ||
+      userRoles.includes('manager') ||
+      userRoles.includes('admin');
+
     if (!canEditLogs) {
       await logAuthError(new Error('Insufficient permissions'), {
         action: 'permission_check',
@@ -88,7 +91,7 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
 
     // Load the existing log
     const logResult = await loadLog(logId);
-    
+
     if (!logResult.success || !logResult.data) {
       await logPageError(new Error(`Failed to load log: ${logResult.error}`), {
         page: 'logs_edit',
@@ -107,9 +110,9 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
     const logData = logResult.data;
 
     // Check if user can edit this specific log
-    const canEditThisLog = 
+    const canEditThisLog =
       logData.captainId === session.user.id ||
-      logData.createdById === session.user.id || 
+      logData.createdById === session.user.id ||
       userRoles.includes('manager') ||
       userRoles.includes('admin');
 
@@ -158,7 +161,13 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
       disposalCost: 0, // Could be calculated from jobs
       hours: logData.hours.map((hour: LogHour) => ({
         employeeId: hour.employeeId,
-        department: hour.department as 'junk' | 'move' | 'admin' | 'training' | 'estimating' | 'warehouse',
+        department: hour.department as
+          | 'junk'
+          | 'move'
+          | 'admin'
+          | 'training'
+          | 'estimating'
+          | 'warehouse',
         hours: Number(hour.hours),
         isCoCaptain: hour.isCoCaptain || false,
       })),
@@ -169,20 +178,23 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Edit Daily Log</h1>
           <p className="text-muted-foreground">
-            Make changes to your daily work log for {new Date(logData.logDate).toLocaleDateString()}.
+            Make changes to your daily work log for{' '}
+            {new Date(logData.logDate).toLocaleDateString()}.
           </p>
           <div className="mt-2 text-sm text-muted-foreground">
-            Status: <span className="capitalize font-medium">{logData.status}</span>
+            Status:{' '}
+            <span className="capitalize font-medium">{logData.status}</span>
             {logData.submittedAt && (
-              <span> • Submitted: {new Date(logData.submittedAt).toLocaleDateString()}</span>
+              <span>
+                {' '}
+                • Submitted:{' '}
+                {new Date(logData.submittedAt).toLocaleDateString()}
+              </span>
             )}
           </div>
         </div>
         <ErrorBoundary fallback={LogCreateErrorFallback}>
-          <CaptainLogForm 
-            initialLogId={logId} 
-            initialData={initialFormData}
-          />
+          <CaptainLogForm initialLogId={logId} initialData={initialFormData} />
         </ErrorBoundary>
       </div>
     );
@@ -200,14 +212,18 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
         errorType: error instanceof Error ? error.constructor.name : 'Unknown',
       },
     });
-    
+
     // Return user-friendly error fallback
-    return <LogCreateErrorFallback 
-      error={error instanceof Error ? error : new Error('Unknown error occurred')}
-      context={{
-        page: 'logs_edit',
-        userId: session?.user?.id,
-      }}
-    />;
+    return (
+      <LogCreateErrorFallback
+        error={
+          error instanceof Error ? error : new Error('Unknown error occurred')
+        }
+        context={{
+          page: 'logs_edit',
+          userId: session?.user?.id,
+        }}
+      />
+    );
   }
 }

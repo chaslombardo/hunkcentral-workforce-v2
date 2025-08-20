@@ -1,10 +1,16 @@
-import { Suspense } from "react"
-import { PayPeriodManager } from "@/components/features/admin/pay-period-manager"
-import { PayPeriodSummaryTiles } from "@/components/features/admin/pay-period-summary-tiles"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Suspense } from 'react';
+import { PayPeriodManager } from '@/components/features/admin/pay-period-manager';
+import { PayPeriodSummaryTiles } from '@/components/features/admin/pay-period-summary-tiles';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default function PayPeriodsPage() {
   return (
@@ -17,7 +23,8 @@ export default function PayPeriodsPage() {
           <CardHeader>
             <CardTitle>Pay Period Management</CardTitle>
             <CardDescription>
-              Manage pay periods and control when data can be modified for payroll processing
+              Manage pay periods and control when data can be modified for
+              payroll processing
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -28,7 +35,7 @@ export default function PayPeriodsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 function PayPeriodSummaryTilesSkeleton() {
@@ -47,7 +54,7 @@ function PayPeriodSummaryTilesSkeleton() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function PayPeriodManagerSkeleton() {
@@ -78,5 +85,5 @@ function PayPeriodManagerSkeleton() {
         ))}
       </div>
     </div>
-  )
+  );
 }

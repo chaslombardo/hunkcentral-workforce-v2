@@ -1,17 +1,21 @@
-import * as React from "react"
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils';
 
-export interface TextareaProps extends React.ComponentProps<"textarea"> {
+export interface TextareaProps extends React.ComponentProps<'textarea'> {
   mobileOptimized?: boolean;
 }
 
-function Textarea({ className, mobileOptimized = true, ...props }: TextareaProps) {
+function Textarea({
+  className,
+  mobileOptimized = true,
+  ...props
+}: TextareaProps) {
   return (
     <textarea
       data-slot="textarea"
       className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content w-full rounded-md border bg-transparent px-3 py-2 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content w-full rounded-md border bg-transparent px-3 py-2 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
         // Mobile optimizations
         mobileOptimized && [
           'min-h-24', // Larger minimum height for mobile
@@ -27,7 +31,7 @@ function Textarea({ className, mobileOptimized = true, ...props }: TextareaProps
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Textarea }
+export { Textarea };

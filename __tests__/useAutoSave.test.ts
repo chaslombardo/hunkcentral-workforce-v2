@@ -58,7 +58,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: mockFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -77,7 +77,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: mockFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -106,7 +106,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: mockFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -129,7 +129,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: mockFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -152,7 +152,7 @@ describe('useAutoSave Hook', () => {
         const form = useForm<DailyLogFormData>({
           defaultValues: formData,
         });
-        
+
         return useAutoSave({
           watch: form.watch,
           logId: null,
@@ -168,13 +168,16 @@ describe('useAutoSave Hook', () => {
     // Change form data
     const updatedFormData = {
       ...mockFormData,
-      jobs: [...mockFormData.jobs, {
-        jobType: 'junk' as const,
-        jobId: 'J456',
-        clientName: 'Another Client',
-        revenue: 200,
-        tips: 20,
-      }],
+      jobs: [
+        ...mockFormData.jobs,
+        {
+          jobType: 'junk' as const,
+          jobId: 'J456',
+          clientName: 'Another Client',
+          revenue: 200,
+          tips: 20,
+        },
+      ],
     };
 
     rerender({ formData: updatedFormData });
@@ -202,7 +205,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: emptyFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -225,7 +228,7 @@ describe('useAutoSave Hook', () => {
       const form = useForm<DailyLogFormData>({
         defaultValues: mockFormData,
       });
-      
+
       return useAutoSave({
         watch: form.watch,
         logId: null,
@@ -236,7 +239,7 @@ describe('useAutoSave Hook', () => {
 
     // Start first save (don't await)
     const firstSave = result.current.saveNow();
-    
+
     // Try to start second save immediately
     const secondSave = await result.current.saveNow();
 

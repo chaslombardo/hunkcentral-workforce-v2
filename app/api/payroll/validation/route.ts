@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await validateEmployeePayroll(employeeId, payPeriodId);
-    
+
     if (!result.success) {
       return NextResponse.json(
         { error: result.error },

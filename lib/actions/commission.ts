@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache';
 
 import { prisma } from '@/lib/prisma';
-import { CommissionEntrySchema, type CommissionEntryFormData } from '@/lib/validations';
+import {
+  CommissionEntrySchema,
+  type CommissionEntryFormData,
+} from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
 import { canModifyDataForDate } from '@/lib/actions/pay-periods';
@@ -22,7 +25,9 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
     // Check if data can be modified for the target date
     const canModify = await canModifyDataForDate(validatedData.targetDate);
     if (!canModify) {
-      throw new Error('Cannot create commission entry for this date - pay period is locked or closed');
+      throw new Error(
+        'Cannot create commission entry for this date - pay period is locked or closed'
+      );
     }
 
     // Note: We allow duplicate job IDs from different sales people
@@ -76,8 +81,10 @@ export async function getCommissionEntries(userId?: string) {
     const whereClause = userId ? { salesId: userId } : {};
 
     // Check if user has permission to view all entries
-    const canViewAll = session.user.roles?.includes('manager') || session.user.roles?.includes('admin');
-    
+    const canViewAll =
+      session.user.roles?.includes('manager') ||
+      session.user.roles?.includes('admin');
+
     // If not manager/admin and no specific userId, show only their own entries
     if (!canViewAll && !userId) {
       whereClause.salesId = session.user.id;
@@ -125,7 +132,9 @@ export async function getCommissionEntries(userId?: string) {
     });
 
     // Convert Decimal fields to numbers using utility
-    const commissionEntries = entries.map(entry => convertCommissionDecimalFields(entry));
+    const commissionEntries = entries.map((entry) =>
+      convertCommissionDecimalFields(entry)
+    );
 
     return { success: true, data: commissionEntries };
   } catch (error) {
@@ -135,7 +144,10 @@ export async function getCommissionEntries(userId?: string) {
   }
 }
 
-export async function updateCommissionEntry(id: string, data: Partial<CommissionEntryFormData>) {
+export async function updateCommissionEntry(
+  id: string,
+  data: Partial<CommissionEntryFormData>
+) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -152,7 +164,7 @@ export async function updateCommissionEntry(id: string, data: Partial<Commission
     }
 
     // Check permissions - only the creator or managers/admins can update
-    const canUpdate = 
+    const canUpdate =
       existingEntry.salesId === session.user.id ||
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
@@ -168,7 +180,9 @@ export async function updateCommissionEntry(id: string, data: Partial<Commission
       });
 
       if (duplicateEntry) {
-        throw new Error('Job ID already exists. Duplicate entries are not allowed.');
+        throw new Error(
+          'Job ID already exists. Duplicate entries are not allowed.'
+        );
       }
     }
 
@@ -224,7 +238,7 @@ export async function deleteCommissionEntry(id: string) {
     }
 
     // Check permissions - only the creator or managers/admins can delete
-    const canDelete = 
+    const canDelete =
       existingEntry.salesId === session.user.id ||
       session.user.roles?.includes('manager') ||
       session.user.roles?.includes('admin');
@@ -271,7 +285,10 @@ export async function approveCommissionEntry(id: string, comments?: string) {
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       throw new Error('Manager access required to approve commission entries');
     }
 
@@ -353,7 +370,10 @@ export async function rejectCommissionEntry(id: string, reason?: string) {
     }
 
     // Check if user has manager or admin role
-    if (!session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       throw new Error('Manager access required to reject commission entries');
     }
 
@@ -377,7 +397,9 @@ export async function rejectCommissionEntry(id: string, reason?: string) {
 
     // Only allow rejection of matched or pending entries
     if (!['matched', 'pending'].includes(existingEntry.status)) {
-      throw new Error('Only matched or pending commission entries can be rejected');
+      throw new Error(
+        'Only matched or pending commission entries can be rejected'
+      );
     }
 
     // Update the entry status to rejected
@@ -438,10 +460,7 @@ export async function getSalesUsers() {
     // Get users with sales role or commission rate
     const users = await prisma.user.findMany({
       where: {
-        OR: [
-          { roles: { has: 'sales' } },
-          { commissionRate: { not: null } },
-        ],
+        OR: [{ roles: { has: 'sales' } }, { commissionRate: { not: null } }],
       },
       select: {
         id: true,
@@ -455,7 +474,7 @@ export async function getSalesUsers() {
     });
 
     // Convert Decimal to number for commission rate only and return only needed fields
-    const salesUsers = users.map(user => ({
+    const salesUsers = users.map((user) => ({
       id: user.id,
       fullName: user.fullName,
       email: user.email,

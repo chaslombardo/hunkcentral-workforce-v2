@@ -3,8 +3,15 @@
  * Provides comprehensive error reporting and debugging tools
  */
 
-import { logServerError, logAuthError, logDatabaseError } from '@/lib/errorLogger';
-import { logClientError, logClientComponentError } from '@/lib/client-error-logger';
+import {
+  logServerError,
+  logAuthError,
+  logDatabaseError,
+} from '@/lib/errorLogger';
+import {
+  logClientError,
+  logClientComponentError,
+} from '@/lib/client-error-logger';
 
 export interface ErrorReport {
   id: string;
@@ -49,7 +56,7 @@ export function createErrorReport(
 ): ErrorReport {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const stack = error instanceof Error ? error.stack : undefined;
-  
+
   return {
     id: `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     timestamp: new Date().toISOString(),
@@ -113,8 +120,9 @@ function determineErrorLevel(
   if (
     type === 'database' ||
     type === 'auth' ||
-    criticalKeywords.some(keyword => 
-      lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    criticalKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
     )
   ) {
     return 'critical';
@@ -124,8 +132,9 @@ function determineErrorLevel(
   if (
     type === 'server' ||
     type === 'network' ||
-    highKeywords.some(keyword => 
-      lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    highKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
     )
   ) {
     return 'high';
@@ -134,8 +143,9 @@ function determineErrorLevel(
   // Check for medium priority errors
   if (
     type === 'component' ||
-    mediumKeywords.some(keyword => 
-      lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
+    mediumKeywords.some(
+      (keyword) =>
+        lowerMessage.includes(keyword) || lowerComponent.includes(keyword)
     )
   ) {
     return 'medium';
@@ -258,7 +268,14 @@ export async function reportDatabaseError(
 export async function reportAuthError(
   error: Error | unknown,
   context: {
-    action: 'login' | 'session_validation' | 'redirect' | 'logout' | 'permission_check' | 'api_auth' | 'page_auth';
+    action:
+      | 'login'
+      | 'session_validation'
+      | 'redirect'
+      | 'logout'
+      | 'permission_check'
+      | 'api_auth'
+      | 'page_auth';
     userId?: string;
     url: string;
     userAgent?: string;
@@ -384,7 +401,9 @@ export function extractErrorDebugInfo(error: Error | unknown): {
 /**
  * Creates a comprehensive error context for debugging
  */
-export function createErrorContext(additionalContext?: Record<string, unknown>): Record<string, unknown> {
+export function createErrorContext(
+  additionalContext?: Record<string, unknown>
+): Record<string, unknown> {
   const context: Record<string, unknown> = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
@@ -468,7 +487,7 @@ export function withErrorReporting<T extends unknown[], R>(
           });
           break;
       }
-      
+
       throw error;
     }
   };

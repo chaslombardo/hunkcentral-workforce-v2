@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import { 
-  DollarSign, 
-  Users, 
-  ShoppingCart, 
+import {
+  DollarSign,
+  Users,
+  ShoppingCart,
   TrendingUp,
   Clock,
-  Target
-} from "lucide-react"
+  Target,
+} from 'lucide-react';
 
-import { MetricCard, METRIC_PRESETS } from "./metric-card"
+import { MetricCard, METRIC_PRESETS } from './metric-card';
 
 export function MetricCardDemo() {
   return (
@@ -23,11 +23,11 @@ export function MetricCardDemo() {
           value: 12.5,
           type: 'increase',
           period: 'last 30 days',
-          label: 'Up'
+          label: 'Up',
         }}
         footer={{
           primary: 'Strong revenue growth',
-          secondary: 'Exceeding monthly targets'
+          secondary: 'Exceeding monthly targets',
         }}
       />
 
@@ -40,11 +40,11 @@ export function MetricCardDemo() {
           value: -5.2,
           type: 'decrease',
           period: 'this month',
-          label: 'Down'
+          label: 'Down',
         }}
         footer={{
           primary: 'Customer acquisition needs attention',
-          secondary: 'Focus on marketing campaigns'
+          secondary: 'Focus on marketing campaigns',
         }}
       />
 
@@ -57,11 +57,11 @@ export function MetricCardDemo() {
           value: 8.1,
           type: 'increase',
           period: 'this week',
-          label: 'Up'
+          label: 'Up',
         }}
         footer={{
           primary: 'Order volume increasing',
-          secondary: 'Peak season performance'
+          secondary: 'Peak season performance',
         }}
       />
 
@@ -74,11 +74,11 @@ export function MetricCardDemo() {
           value: 0,
           type: 'neutral',
           period: 'this quarter',
-          label: 'Stable'
+          label: 'Stable',
         }}
         footer={{
           primary: 'Steady growth maintained',
-          secondary: 'Meeting growth projections'
+          secondary: 'Meeting growth projections',
         }}
       />
 
@@ -101,11 +101,11 @@ export function MetricCardDemo() {
           value: -2.1,
           type: 'decrease',
           period: 'vs target (16%)',
-          label: 'Below target'
+          label: 'Below target',
         }}
         footer={{
           primary: 'Under labor cost goal',
-          secondary: 'Bonus eligible performance'
+          secondary: 'Bonus eligible performance',
         }}
       />
 
@@ -120,11 +120,11 @@ export function MetricCardDemo() {
           value: 15.7,
           type: 'increase',
           period: 'last 7 days',
-          label: 'Slower'
+          label: 'Slower',
         }}
         footer={{
           primary: 'Response time increased',
-          secondary: 'Need to optimize support flow'
+          secondary: 'Need to optimize support flow',
         }}
       />
 
@@ -136,9 +136,9 @@ export function MetricCardDemo() {
         color="neutral"
         footer={{
           primary: 'All systems operational',
-          secondary: 'No incidents reported'
+          secondary: 'No incidents reported',
         }}
       />
     </div>
-  )
+  );
 }

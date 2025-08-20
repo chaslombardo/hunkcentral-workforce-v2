@@ -5,13 +5,12 @@ import { useFormContext } from 'react-hook-form';
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   FormControl,
   FormField,
@@ -31,13 +30,22 @@ interface JobTileProps {
   canRemove: boolean;
 }
 
-export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps) {
+export function JobTile({
+  jobIndex,
+  jobType,
+  onRemove,
+  canRemove,
+}: JobTileProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const { control, watch, formState: { errors } } = useFormContext<DailyLogFormData>();
-  
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<DailyLogFormData>();
+
   const jobData = watch(`jobs.${jobIndex}`) as LogJobFormData;
   const isMove = jobType === 'move';
-  
+
   // Check if this job has validation errors
   const hasErrors = errors.jobs?.[jobIndex];
 
@@ -147,7 +155,9 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
                           min="0"
                           placeholder="0.00"
                           className="pl-8 focus-visible:ring-hunks-green"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value) || 0)
+                          }
                         />
                       </div>
                     </FormControl>
@@ -174,7 +184,9 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
                           min="0"
                           placeholder="0.00"
                           className="pl-8 focus-visible:ring-hunks-green"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value) || 0)
+                          }
                         />
                       </div>
                     </FormControl>
@@ -189,7 +201,9 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
               <>
                 <Separator />
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-hunks-green">Move Upsells</h4>
+                  <h4 className="text-sm font-medium text-hunks-green">
+                    Move Upsells
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={control}
@@ -209,7 +223,11 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
                                 min="0"
                                 placeholder="0.00"
                                 className="pl-8 focus-visible:ring-hunks-green"
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
                               />
                             </div>
                           </FormControl>
@@ -236,7 +254,11 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
                                 min="0"
                                 placeholder="0.00"
                                 className="pl-8 focus-visible:ring-hunks-green"
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
                               />
                             </div>
                           </FormControl>
@@ -263,7 +285,11 @@ export function JobTile({ jobIndex, jobType, onRemove, canRemove }: JobTileProps
                                 min="0"
                                 placeholder="0.00"
                                 className="pl-8 focus-visible:ring-hunks-green"
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
                               />
                             </div>
                           </FormControl>

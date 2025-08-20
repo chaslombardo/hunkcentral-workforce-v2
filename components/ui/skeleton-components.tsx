@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export function LogFormSkeleton() {
   return (
@@ -21,17 +21,17 @@ export function LogFormSkeleton() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
-export function TableSkeleton({ 
-  rows = 5, 
-  columns = 5, 
+export function TableSkeleton({
+  rows = 5,
+  columns = 5,
   branded = false,
   showHeader = true,
-  showFilters = true 
-}: { 
-  rows?: number; 
+  showFilters = true,
+}: {
+  rows?: number;
   columns?: number;
   branded?: boolean;
   showHeader?: boolean;
@@ -52,52 +52,52 @@ export function TableSkeleton({
           </div>
         </div>
       )}
-      
+
       {/* Table */}
-      <div className={cn(
-        "border rounded-lg overflow-hidden",
-        branded && "border-hunks-green-200"
-      )}>
+      <div
+        className={cn(
+          'border rounded-lg overflow-hidden',
+          branded && 'border-hunks-green-200'
+        )}
+      >
         {/* Table Header */}
         {showHeader && (
-          <div className={cn(
-            "p-4 border-b",
-            branded ? "bg-hunks-green-50 border-hunks-green-200" : "bg-muted/50"
-          )}>
+          <div
+            className={cn(
+              'p-4 border-b',
+              branded
+                ? 'bg-hunks-green-50 border-hunks-green-200'
+                : 'bg-muted/50'
+            )}
+          >
             <div className="flex items-center space-x-4">
               {Array.from({ length: columns }).map((_, j) => (
-                <Skeleton 
-                  data-testid="skeleton" 
-                  key={j} 
-                  className={cn(
-                    "h-4 w-20",
-                    branded && "bg-hunks-green-200/50"
-                  )} 
+                <Skeleton
+                  data-testid="skeleton"
+                  key={j}
+                  className={cn('h-4 w-20', branded && 'bg-hunks-green-200/50')}
                 />
               ))}
             </div>
           </div>
         )}
-        
+
         {/* Table Body */}
         <div className="p-4 space-y-3">
           {Array.from({ length: rows }).map((_, i) => (
             <div key={i} className="flex items-center space-x-4">
               {Array.from({ length: columns }).map((_, j) => (
-                <Skeleton 
-                  data-testid="skeleton" 
-                  key={j} 
-                  className={cn(
-                    "h-4 w-20",
-                    branded && "bg-hunks-green-100/50"
-                  )} 
+                <Skeleton
+                  data-testid="skeleton"
+                  key={j}
+                  className={cn('h-4 w-20', branded && 'bg-hunks-green-100/50')}
                 />
               ))}
             </div>
           ))}
         </div>
       </div>
-      
+
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <Skeleton data-testid="skeleton" className="h-4 w-32" />
@@ -110,7 +110,7 @@ export function TableSkeleton({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function PayrollTableSkeleton() {
@@ -130,10 +130,10 @@ export function PayrollTableSkeleton() {
           </Card>
         ))}
       </div>
-      
+
       <TableSkeleton rows={8} columns={9} branded={true} />
     </div>
-  )
+  );
 }
 
 export function CommissionTableSkeleton() {
@@ -153,10 +153,10 @@ export function CommissionTableSkeleton() {
           </Card>
         ))}
       </div>
-      
+
       <TableSkeleton rows={6} columns={11} branded={true} />
     </div>
-  )
+  );
 }
 
 export function LogReviewTableSkeleton() {
@@ -170,7 +170,7 @@ export function LogReviewTableSkeleton() {
         <TableSkeleton rows={8} columns={9} branded={true} />
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export function RankingsPageSkeleton() {
@@ -218,13 +218,24 @@ export function RankingsPageSkeleton() {
           <CardContent>
             <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center gap-4">
-                    <Skeleton data-testid="skeleton" className="h-8 w-8 rounded-full" />
+                    <Skeleton
+                      data-testid="skeleton"
+                      className="h-8 w-8 rounded-full"
+                    />
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <Skeleton data-testid="skeleton" className="h-5 w-32" />
-                        {i === 0 && <Skeleton data-testid="skeleton" className="h-5 w-20 rounded-full" />}
+                        {i === 0 && (
+                          <Skeleton
+                            data-testid="skeleton"
+                            className="h-5 w-20 rounded-full"
+                          />
+                        )}
                       </div>
                       <div className="flex items-center gap-4">
                         <Skeleton data-testid="skeleton" className="h-3 w-16" />
@@ -235,7 +246,10 @@ export function RankingsPageSkeleton() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <Skeleton data-testid="skeleton" className="h-5 w-20 mb-1" />
+                      <Skeleton
+                        data-testid="skeleton"
+                        className="h-5 w-20 mb-1"
+                      />
                       <Skeleton data-testid="skeleton" className="h-3 w-16" />
                     </div>
                     <Skeleton data-testid="skeleton" className="h-8 w-16" />
@@ -247,7 +261,7 @@ export function RankingsPageSkeleton() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 export function RankingsTabSkeleton() {
@@ -278,11 +292,20 @@ export function RankingsTabSkeleton() {
         <CardContent>
           <div className="space-y-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={i}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
                 <div className="flex items-center gap-4">
-                  <Skeleton data-testid="skeleton" className="h-8 w-8 rounded-full" />
+                  <Skeleton
+                    data-testid="skeleton"
+                    className="h-8 w-8 rounded-full"
+                  />
                   <div>
-                    <Skeleton data-testid="skeleton" className="h-5 w-28 mb-2" />
+                    <Skeleton
+                      data-testid="skeleton"
+                      className="h-5 w-28 mb-2"
+                    />
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <Skeleton data-testid="skeleton" className="h-3 w-12" />
                       <Skeleton data-testid="skeleton" className="h-3 w-16" />
@@ -293,7 +316,10 @@ export function RankingsTabSkeleton() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <Skeleton data-testid="skeleton" className="h-5 w-20 mb-1" />
+                    <Skeleton
+                      data-testid="skeleton"
+                      className="h-5 w-20 mb-1"
+                    />
                     <Skeleton data-testid="skeleton" className="h-3 w-16" />
                   </div>
                   <Skeleton data-testid="skeleton" className="h-8 w-16" />
@@ -304,5 +330,5 @@ export function RankingsTabSkeleton() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { logServerError, logAuthError, logDatabaseError, logPageError, createErrorResponse } from '@/lib/errorLogger';
+import {
+  logServerError,
+  logAuthError,
+  logDatabaseError,
+  logPageError,
+  createErrorResponse,
+} from '@/lib/errorLogger';
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -36,14 +42,17 @@ describe('Error Logger', () => {
 
       await logServerError(error, context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'Test error',
-        component: 'test_component',
-        action: 'test_action',
-        userId: 'user123',
-        url: '/test',
-        stack: expect.any(String),
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'Test error',
+          component: 'test_component',
+          action: 'test_action',
+          userId: 'user123',
+          url: '/test',
+          stack: expect.any(String),
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -60,13 +69,16 @@ describe('Error Logger', () => {
 
       await logServerError('String error', context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'String error',
-        component: 'test_component',
-        action: 'test_action',
-        url: '/test',
-        stack: undefined,
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'String error',
+          component: 'test_component',
+          action: 'test_action',
+          url: '/test',
+          stack: undefined,
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -100,13 +112,16 @@ describe('Error Logger', () => {
 
       await logAuthError(error, context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'Auth failed',
-        component: 'authentication',
-        action: 'login',
-        userId: 'user123',
-        url: '/auth/login',
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'Auth failed',
+          component: 'authentication',
+          action: 'login',
+          userId: 'user123',
+          url: '/auth/login',
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -125,11 +140,14 @@ describe('Error Logger', () => {
 
       await logAuthError(error, context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'Permission denied',
-        component: 'authentication',
-        action: 'permission_check',
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'Permission denied',
+          component: 'authentication',
+          action: 'permission_check',
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -151,13 +169,16 @@ describe('Error Logger', () => {
 
       await logDatabaseError(error, context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'Connection timeout',
-        component: 'database',
-        action: 'select',
-        userId: 'user123',
-        url: '/logs',
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'Connection timeout',
+          component: 'database',
+          action: 'select',
+          userId: 'user123',
+          url: '/logs',
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -179,13 +200,16 @@ describe('Error Logger', () => {
 
       await logPageError(error, context);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Server Error:', expect.objectContaining({
-        message: 'Render failed',
-        component: 'page_render',
-        action: 'render_logs',
-        userId: 'user123',
-        url: '/logs',
-      }));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Server Error:',
+        expect.objectContaining({
+          message: 'Render failed',
+          component: 'page_render',
+          action: 'render_logs',
+          userId: 'user123',
+          url: '/logs',
+        })
+      );
 
       process.env.NODE_ENV = originalEnv;
     });

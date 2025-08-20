@@ -22,10 +22,10 @@ const mockManagerUserData = {
         email: 'captain1@test.com',
         fullName: 'Captain One',
         roles: ['captain'],
-        rateJunkCaptain: 20.00,
-        rateJunkWingman: 15.00,
-        rateMoveCaptain: 22.00,
-        rateMoveWingman: 17.00,
+        rateJunkCaptain: 20.0,
+        rateJunkWingman: 15.0,
+        rateMoveCaptain: 22.0,
+        rateMoveWingman: 17.0,
         salaryAmount: null,
         commissionRate: null,
         junkBonusGoal: 0.14,
@@ -39,9 +39,9 @@ const mockManagerUserData = {
         fullName: 'Wingman One',
         roles: ['wingman'],
         rateJunkCaptain: null,
-        rateJunkWingman: 15.00,
+        rateJunkWingman: 15.0,
         rateMoveCaptain: null,
-        rateMoveWingman: 17.00,
+        rateMoveWingman: 17.0,
         salaryAmount: null,
         commissionRate: null,
         junkBonusGoal: 0.14,
@@ -54,11 +54,11 @@ const mockManagerUserData = {
         email: 'captain2@test.com',
         fullName: 'Captain Two',
         roles: ['captain'],
-        rateJunkCaptain: 21.00,
-        rateJunkWingman: 15.00,
-        rateMoveCaptain: 23.00,
-        rateMoveWingman: 17.00,
-        salaryAmount: 50000.00,
+        rateJunkCaptain: 21.0,
+        rateJunkWingman: 15.0,
+        rateMoveCaptain: 23.0,
+        rateMoveWingman: 17.0,
+        salaryAmount: 50000.0,
         salaryFrequency: 'annual',
         salaryType: 'base',
         commissionRate: 0.05,
@@ -87,7 +87,7 @@ const mockAdminUserData = {
         email: 'sales1@test.com',
         fullName: 'Sales One',
         roles: ['sales'],
-        commissionRate: 0.10,
+        commissionRate: 0.1,
         junkBonusGoal: 0.14,
         moveBonusGoal: 0.24,
         createdAt: new Date('2024-01-01'),
@@ -98,7 +98,7 @@ const mockAdminUserData = {
         email: 'manager1@test.com',
         fullName: 'Manager One',
         roles: ['manager'],
-        salaryAmount: 60000.00,
+        salaryAmount: 60000.0,
         salaryFrequency: 'annual',
         salaryType: 'base',
         junkBonusGoal: 0.14,
@@ -147,15 +147,19 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
 
       await waitFor(() => {
         // Should show salary information (using partial text match)
-        expect(screen.getByText((content, element) => {
-          return content.includes('Salary:') && content.includes('50,000');
-        })).toBeInTheDocument();
-        
+        expect(
+          screen.getByText((content, element) => {
+            return content.includes('Salary:') && content.includes('50,000');
+          })
+        ).toBeInTheDocument();
+
         // Should show commission information (using partial text match)
-        expect(screen.getByText((content, element) => {
-          return content.includes('Commission:') && content.includes('5');
-        })).toBeInTheDocument();
-        
+        expect(
+          screen.getByText((content, element) => {
+            return content.includes('Commission:') && content.includes('5');
+          })
+        ).toBeInTheDocument();
+
         // Should show hourly only for users without salary/commission (there are multiple users with this)
         expect(screen.getAllByText('Hourly only').length).toBeGreaterThan(0);
       });
@@ -230,18 +234,23 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
 
       render(<UserManagementDashboard />);
 
-      const searchInput = await screen.findByPlaceholderText('Search by name, email, or role...');
-      
+      const searchInput = await screen.findByPlaceholderText(
+        'Search by name, email, or role...'
+      );
+
       fireEvent.change(searchInput, { target: { value: 'Captain' } });
 
       // Should trigger search with debounce
-      await waitFor(() => {
-        expect(mockGetUsers).toHaveBeenCalledWith(
-          expect.objectContaining({
-            search: 'Captain',
-          })
-        );
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(mockGetUsers).toHaveBeenCalledWith(
+            expect.objectContaining({
+              search: 'Captain',
+            })
+          );
+        },
+        { timeout: 500 }
+      );
     });
 
     it('should support sorting functionality', async () => {
@@ -257,12 +266,13 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
 
       // Test that sorting headers exist and are clickable
       const headers = screen.getAllByRole('button');
-      const sortableHeaders = headers.filter(header => 
-        header.textContent?.includes('Name') || 
-        header.textContent?.includes('Email') || 
-        header.textContent?.includes('Created')
+      const sortableHeaders = headers.filter(
+        (header) =>
+          header.textContent?.includes('Name') ||
+          header.textContent?.includes('Email') ||
+          header.textContent?.includes('Created')
       );
-      
+
       expect(sortableHeaders.length).toBeGreaterThan(0);
     });
   });
@@ -300,7 +310,9 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
       render(<UserManagementDashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText('Showing 1 to 3 of 3 users')).toBeInTheDocument();
+        expect(
+          screen.getByText('Showing 1 to 3 of 3 users')
+        ).toBeInTheDocument();
         expect(screen.getByText('Page 1 of 1')).toBeInTheDocument();
       });
     });
@@ -366,7 +378,9 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
 
       await waitFor(() => {
         expect(screen.getByText('No users found')).toBeInTheDocument();
-        expect(screen.getByText('Get started by creating your first user account.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Get started by creating your first user account.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -387,12 +401,18 @@ describe('UserManagementDashboard - Manager Capabilities', () => {
       render(<UserManagementDashboard />);
 
       // Simulate a search that returns no results
-      const searchInput = await screen.findByPlaceholderText('Search by name, email, or role...');
+      const searchInput = await screen.findByPlaceholderText(
+        'Search by name, email, or role...'
+      );
       fireEvent.change(searchInput, { target: { value: 'NonExistentUser' } });
 
       await waitFor(() => {
         expect(screen.getByText('No users found')).toBeInTheDocument();
-        expect(screen.getByText('No users match your current filters. Try adjusting your search criteria.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No users match your current filters. Try adjusting your search criteria.'
+          )
+        ).toBeInTheDocument();
       });
     });
   });

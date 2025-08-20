@@ -88,7 +88,7 @@ export function logWarning(
   }
 ): void {
   const logEntry = createLogEntry('WARN', message, context);
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.warn(JSON.stringify(logEntry));
   } else {
@@ -100,7 +100,13 @@ export function logWarning(
  * Logs authentication events
  */
 export function logAuthEvent(
-  event: 'login_attempt' | 'login_success' | 'login_failure' | 'logout' | 'session_expired' | 'permission_denied',
+  event:
+    | 'login_attempt'
+    | 'login_success'
+    | 'login_failure'
+    | 'logout'
+    | 'session_expired'
+    | 'permission_denied',
   context: {
     userId?: string;
     sessionId?: string;
@@ -115,7 +121,7 @@ export function logAuthEvent(
     action: event,
     ...context,
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -149,7 +155,7 @@ export function logDatabaseOperation(
       ...context.metadata,
     },
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -172,8 +178,9 @@ export function logApiRequest(
   }
 ): void {
   const message = `API ${method} ${endpoint}`;
-  const level = context.statusCode && context.statusCode >= 400 ? 'WARN' : 'INFO';
-  
+  const level =
+    context.statusCode && context.statusCode >= 400 ? 'WARN' : 'INFO';
+
   const logEntry = createLogEntry(level, message, {
     component: 'api',
     action: `${method.toLowerCase()}_${endpoint.replace(/\//g, '_')}`,
@@ -186,7 +193,7 @@ export function logApiRequest(
       ...context.metadata,
     },
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -217,7 +224,7 @@ export function logPerformanceMetric(
       ...context.metadata,
     },
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -248,7 +255,7 @@ export function logBusinessEvent(
       ...context.metadata,
     },
   });
-  
+
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(logEntry));
   }
@@ -265,25 +272,72 @@ export function createRequestLogger(context: {
   userAgent?: string;
 }) {
   return {
-    info: (message: string, additionalContext: { component: string; action: string; metadata?: Record<string, unknown> }) =>
-      logInfo(message, { ...context, ...additionalContext }),
-    
-    warning: (message: string, additionalContext: { component: string; action: string; metadata?: Record<string, unknown> }) =>
-      logWarning(message, { ...context, ...additionalContext }),
-    
-    authEvent: (event: Parameters<typeof logAuthEvent>[0], metadata?: Record<string, unknown>) =>
-      logAuthEvent(event, { ...context, metadata }),
-    
-    dbOperation: (operation: Parameters<typeof logDatabaseOperation>[0], table: string, additionalContext?: { duration?: number; recordCount?: number; metadata?: Record<string, unknown> }) =>
-      logDatabaseOperation(operation, table, { ...context, ...additionalContext }),
-    
-    apiRequest: (method: string, endpoint: string, additionalContext?: { statusCode?: number; duration?: number; metadata?: Record<string, unknown> }) =>
-      logApiRequest(method, endpoint, { ...context, ...additionalContext }),
-    
-    performanceMetric: (metric: string, value: number, additionalContext: { component: string; action: string; unit?: string; metadata?: Record<string, unknown> }) =>
+    info: (
+      message: string,
+      additionalContext: {
+        component: string;
+        action: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) => logInfo(message, { ...context, ...additionalContext }),
+
+    warning: (
+      message: string,
+      additionalContext: {
+        component: string;
+        action: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) => logWarning(message, { ...context, ...additionalContext }),
+
+    authEvent: (
+      event: Parameters<typeof logAuthEvent>[0],
+      metadata?: Record<string, unknown>
+    ) => logAuthEvent(event, { ...context, metadata }),
+
+    dbOperation: (
+      operation: Parameters<typeof logDatabaseOperation>[0],
+      table: string,
+      additionalContext?: {
+        duration?: number;
+        recordCount?: number;
+        metadata?: Record<string, unknown>;
+      }
+    ) =>
+      logDatabaseOperation(operation, table, {
+        ...context,
+        ...additionalContext,
+      }),
+
+    apiRequest: (
+      method: string,
+      endpoint: string,
+      additionalContext?: {
+        statusCode?: number;
+        duration?: number;
+        metadata?: Record<string, unknown>;
+      }
+    ) => logApiRequest(method, endpoint, { ...context, ...additionalContext }),
+
+    performanceMetric: (
+      metric: string,
+      value: number,
+      additionalContext: {
+        component: string;
+        action: string;
+        unit?: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) =>
       logPerformanceMetric(metric, value, { ...context, ...additionalContext }),
-    
-    businessEvent: (event: string, additionalContext?: { entityType?: string; entityId?: string; metadata?: Record<string, unknown> }) =>
-      logBusinessEvent(event, { ...context, ...additionalContext }),
+
+    businessEvent: (
+      event: string,
+      additionalContext?: {
+        entityType?: string;
+        entityId?: string;
+        metadata?: Record<string, unknown>;
+      }
+    ) => logBusinessEvent(event, { ...context, ...additionalContext }),
   };
 }

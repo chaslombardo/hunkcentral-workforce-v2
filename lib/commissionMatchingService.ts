@@ -1,10 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { 
-  processCommissionMatching, 
-  type MatchResult, 
-  type CommissionConflict 
+import {
+  processCommissionMatching,
+  type MatchResult,
+  type CommissionConflict,
 } from '@/lib/commissionMatcher';
 import type { CommissionEntry, DailyLog, LogJob } from '@/types';
 import { logCommissionChange } from '@/lib/auditLogger';
@@ -33,7 +33,7 @@ export async function handleLogApprovalCommissionMatching(
   try {
     // Process the commission matching
     const matchResult = await processCommissionMatching(approvedLogId);
-    
+
     const notifications: MatchingNotification[] = [];
 
     // Process successful matches
@@ -42,7 +42,7 @@ export async function handleLogApprovalCommissionMatching(
         'match',
         match.commissionEntry.id,
         userId,
-        { 
+        {
           status: 'pending',
           actualRevenue: null,
           commissionAmount: null,
@@ -51,8 +51,9 @@ export async function handleLogApprovalCommissionMatching(
         {
           status: 'matched',
           actualRevenue: Number(match.logJob.revenue),
-          commissionAmount: match.commissionEntry.sales.commissionRate 
-            ? Number(match.logJob.revenue) * (Number(match.commissionEntry.sales.commissionRate) / 100)
+          commissionAmount: match.commissionEntry.sales.commissionRate
+            ? Number(match.logJob.revenue) *
+              (Number(match.commissionEntry.sales.commissionRate) / 100)
             : 0,
           matchedLogId: approvedLogId,
         }
@@ -68,8 +69,9 @@ export async function handleLogApprovalCommissionMatching(
           accuracy: match.accuracyPercentage,
           estimatedRevenue: match.commissionEntry.estimatedRevenue,
           actualRevenue: Number(match.logJob.revenue),
-          commissionAmount: match.commissionEntry.sales.commissionRate 
-            ? Number(match.logJob.revenue) * (Number(match.commissionEntry.sales.commissionRate) / 100)
+          commissionAmount: match.commissionEntry.sales.commissionRate
+            ? Number(match.logJob.revenue) *
+              (Number(match.commissionEntry.sales.commissionRate) / 100)
             : 0,
         },
       });
@@ -83,7 +85,7 @@ export async function handleLogApprovalCommissionMatching(
         message: `Multiple commission entries found for job ${conflict.jobId}. Manual resolution required.`,
         data: {
           jobId: conflict.jobId,
-          conflictingEntries: conflict.commissionEntries.map(entry => ({
+          conflictingEntries: conflict.commissionEntries.map((entry) => ({
             id: entry.id,
             salesPerson: entry.sales.fullName,
             estimatedRevenue: entry.estimatedRevenue,
@@ -97,8 +99,10 @@ export async function handleLogApprovalCommissionMatching(
     // Add summary notification if there were matches
     if (matchResult.matches.length > 0) {
       const totalCommission = matchResult.matches.reduce((sum, match) => {
-        const commissionRate = Number(match.commissionEntry.sales.commissionRate || 0);
-        return sum + (Number(match.logJob.revenue) * (commissionRate / 100));
+        const commissionRate = Number(
+          match.commissionEntry.sales.commissionRate || 0
+        );
+        return sum + Number(match.logJob.revenue) * (commissionRate / 100);
       }, 0);
 
       notifications.push({
@@ -120,14 +124,19 @@ export async function handleLogApprovalCommissionMatching(
     };
   } catch (error) {
     // Error in commission matching service
-    
+
     return {
       success: false,
-      notifications: [{
-        type: 'error',
-        title: 'Commission Matching Failed',
-        message: error instanceof Error ? error.message : 'An unexpected error occurred during commission matching',
-      }],
+      notifications: [
+        {
+          type: 'error',
+          title: 'Commission Matching Failed',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'An unexpected error occurred during commission matching',
+        },
+      ],
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
@@ -179,7 +188,7 @@ export async function resolveCommissionConflict(
 
     // Get all conflicting commission entries for this job ID
     const conflictingEntries = await prisma.commissionEntry.findMany({
-      where: { 
+      where: {
         jobId,
         status: 'pending',
       },
@@ -209,21 +218,18 @@ export async function resolveCommissionConflict(
     });
 
     // Mark other entries as conflicts (or optionally delete them)
-    const otherEntries = conflictingEntries.filter(entry => entry.id !== selectedCommissionEntryId);
+    const otherEntries = conflictingEntries.filter(
+      (entry) => entry.id !== selectedCommissionEntryId
+    );
     for (const entry of otherEntries) {
       await prisma.commissionEntry.delete({
         where: { id: entry.id },
       });
 
       // Log the deletion
-      await logCommissionChange(
-        'delete',
-        entry.id,
-        userId,
-        entry,
-        undefined,
-        { reason: 'Conflict resolution - duplicate entry removed' }
-      );
+      await logCommissionChange('delete', entry.id, userId, entry, undefined, {
+        reason: 'Conflict resolution - duplicate entry removed',
+      });
     }
 
     // Log the successful match
@@ -231,7 +237,7 @@ export async function resolveCommissionConflict(
       'match',
       selectedCommissionEntryId,
       userId,
-      { 
+      {
         status: 'pending',
         actualRevenue: null,
         commissionAmount: null,
@@ -266,14 +272,19 @@ export async function resolveCommissionConflict(
     };
   } catch (error) {
     // Error resolving commission conflict
-    
+
     return {
       success: false,
-      notifications: [{
-        type: 'error',
-        title: 'Conflict Resolution Failed',
-        message: error instanceof Error ? error.message : 'An unexpected error occurred during conflict resolution',
-      }],
+      notifications: [
+        {
+          type: 'error',
+          title: 'Conflict Resolution Failed',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'An unexpected error occurred during conflict resolution',
+        },
+      ],
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
@@ -306,7 +317,7 @@ export async function getCommissionConflicts(): Promise<{
     for (const group of duplicateJobIds) {
       // Get the commission entries for this job ID
       const commissionEntries = await prisma.commissionEntry.findMany({
-        where: { 
+        where: {
           jobId: group.jobId,
           status: 'pending',
         },
@@ -366,7 +377,9 @@ export async function getCommissionConflicts(): Promise<{
           junkOnMove: logJob.junkOnMove ? Number(logJob.junkOnMove) : undefined,
           valuation: logJob.valuation ? Number(logJob.valuation) : undefined,
           materials: logJob.materials ? Number(logJob.materials) : undefined,
-          disposalCost: logJob.disposalCost ? Number(logJob.disposalCost) : undefined,
+          disposalCost: logJob.disposalCost
+            ? Number(logJob.disposalCost)
+            : undefined,
           jobType: logJob.jobType as 'junk' | 'move',
           log: {
             ...logJob.log,
@@ -374,32 +387,56 @@ export async function getCommissionConflicts(): Promise<{
               ...logJob.log.captain,
               junkBonusGoal: Number(logJob.log.captain.junkBonusGoal),
               moveBonusGoal: Number(logJob.log.captain.moveBonusGoal),
-              roles: logJob.log.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+              roles: logJob.log.captain.roles as (
+                | 'admin'
+                | 'manager'
+                | 'captain'
+                | 'sales'
+                | 'wingman'
+              )[],
             },
             createdBy: {
               ...logJob.log.captain,
               junkBonusGoal: Number(logJob.log.captain.junkBonusGoal),
               moveBonusGoal: Number(logJob.log.captain.moveBonusGoal),
-              roles: logJob.log.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
+              roles: logJob.log.captain.roles as (
+                | 'admin'
+                | 'manager'
+                | 'captain'
+                | 'sales'
+                | 'wingman'
+              )[],
             },
             jobs: [],
             hours: [],
           } as DailyLog,
         } as LogJob;
 
-        const transformedCommissionEntries = commissionEntries.map(entry => ({
+        const transformedCommissionEntries = commissionEntries.map((entry) => ({
           ...entry,
           estimatedRevenue: Number(entry.estimatedRevenue),
-          actualRevenue: entry.actualRevenue ? Number(entry.actualRevenue) : null,
-          commissionAmount: entry.commissionAmount ? Number(entry.commissionAmount) : null,
+          actualRevenue: entry.actualRevenue
+            ? Number(entry.actualRevenue)
+            : null,
+          commissionAmount: entry.commissionAmount
+            ? Number(entry.commissionAmount)
+            : null,
           status: entry.status as 'pending' | 'matched' | 'approved',
           jobType: entry.jobType as 'junk' | 'move',
           sales: {
             ...entry.sales,
             junkBonusGoal: Number(entry.sales.junkBonusGoal),
             moveBonusGoal: Number(entry.sales.moveBonusGoal),
-            roles: entry.sales.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-            commissionRate: entry.sales.commissionRate ? Number(entry.sales.commissionRate) : undefined,
+            roles: entry.sales.roles as (
+              | 'admin'
+              | 'manager'
+              | 'captain'
+              | 'sales'
+              | 'wingman'
+            )[],
+            commissionRate: entry.sales.commissionRate
+              ? Number(entry.sales.commissionRate)
+              : undefined,
           },
         })) as CommissionEntry[];
 
@@ -418,7 +455,7 @@ export async function getCommissionConflicts(): Promise<{
     };
   } catch (error) {
     // Error getting commission conflicts
-    
+
     return {
       success: false,
       conflicts: [],
@@ -447,7 +484,7 @@ export async function getCommissionMatchingStats(): Promise<{
         where: { status: 'pending' },
       }),
       prisma.commissionEntry.findMany({
-        where: { 
+        where: {
           status: 'matched',
           actualRevenue: { not: null },
           commissionAmount: { not: null },
@@ -470,18 +507,22 @@ export async function getCommissionMatchingStats(): Promise<{
       if (entry.actualRevenue && entry.commissionAmount) {
         const estimated = Number(entry.estimatedRevenue);
         const actual = Number(entry.actualRevenue);
-        
+
         if (estimated > 0) {
-          const accuracy = Math.min((Math.min(estimated, actual) / Math.max(estimated, actual)) * 100, 100);
+          const accuracy = Math.min(
+            (Math.min(estimated, actual) / Math.max(estimated, actual)) * 100,
+            100
+          );
           totalAccuracy += accuracy;
           accuracyCount++;
         }
-        
+
         totalCommissionValue += Number(entry.commissionAmount);
       }
     }
 
-    const averageAccuracy = accuracyCount > 0 ? totalAccuracy / accuracyCount : 0;
+    const averageAccuracy =
+      accuracyCount > 0 ? totalAccuracy / accuracyCount : 0;
 
     return {
       success: true,
@@ -495,7 +536,7 @@ export async function getCommissionMatchingStats(): Promise<{
     };
   } catch (error) {
     // Error getting commission matching stats
-    
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

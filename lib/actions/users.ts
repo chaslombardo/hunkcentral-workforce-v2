@@ -5,8 +5,16 @@ import bcrypt from 'bcryptjs';
 import { ZodError } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { CreateUserSchema, UpdateUserSchema, UserSearchSchema } from '@/lib/validations';
-import type { CreateUserFormData, UpdateUserFormData, UserSearchFormData } from '@/lib/validations';
+import {
+  CreateUserSchema,
+  UpdateUserSchema,
+  UserSearchSchema,
+} from '@/lib/validations';
+import type {
+  CreateUserFormData,
+  UpdateUserFormData,
+  UserSearchFormData,
+} from '@/lib/validations';
 
 // Create a new user
 export async function createUser(data: CreateUserFormData) {
@@ -24,20 +32,20 @@ export async function createUser(data: CreateUserFormData) {
         const issues = error.issues;
         if (issues && issues.length > 0) {
           const firstIssue = issues[0];
-          return { 
-            success: false, 
-            error: firstIssue.message 
+          return {
+            success: false,
+            error: firstIssue.message,
           };
         }
       }
       throw error; // Re-throw if not a ZodError
     }
-    
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email },
     });
-    
+
     if (existingUser) {
       throw new Error('User with this email already exists');
     }
@@ -71,18 +79,21 @@ export async function createUser(data: CreateUserFormData) {
     });
 
     revalidatePath('/admin/users');
-    return { success: true, user: { id: user.id, email: user.email, fullName: user.fullName } };
+    return {
+      success: true,
+      user: { id: user.id, email: user.email, fullName: user.fullName },
+    };
   } catch (error) {
     // Error creating user
     if (error instanceof Error) {
-      return { 
-        success: false, 
-        error: error.message 
+      return {
+        success: false,
+        error: error.message,
       };
     }
-    return { 
-      success: false, 
-      error: 'Failed to create user' 
+    return {
+      success: false,
+      error: 'Failed to create user',
     };
   }
 }
@@ -103,20 +114,20 @@ export async function updateUser(data: UpdateUserFormData) {
         const issues = error.issues;
         if (issues && issues.length > 0) {
           const firstIssue = issues[0];
-          return { 
-            success: false, 
-            error: firstIssue.message 
+          return {
+            success: false,
+            error: firstIssue.message,
           };
         }
       }
       throw error; // Re-throw if not a ZodError
     }
-    
+
     // Get existing user for audit trail
     const existingUser = await prisma.user.findUnique({
       where: { id: validatedData.id },
     });
-    
+
     if (!existingUser) {
       throw new Error('User not found');
     }
@@ -124,7 +135,7 @@ export async function updateUser(data: UpdateUserFormData) {
     // Prepare update data
     const updateData: Record<string, unknown> = { ...validatedData };
     delete updateData.id;
-    
+
     // Hash password if provided
     if (validatedData.password) {
       updateData.password = await bcrypt.hash(validatedData.password, 12);
@@ -161,18 +172,25 @@ export async function updateUser(data: UpdateUserFormData) {
     });
 
     revalidatePath('/admin/users');
-    return { success: true, user: { id: updatedUser.id, email: updatedUser.email, fullName: updatedUser.fullName } };
+    return {
+      success: true,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        fullName: updatedUser.fullName,
+      },
+    };
   } catch (error) {
     // Error updating user
     if (error instanceof Error) {
-      return { 
-        success: false, 
-        error: error.message 
+      return {
+        success: false,
+        error: error.message,
       };
     }
-    return { 
-      success: false, 
-      error: 'Failed to update user' 
+    return {
+      success: false,
+      error: 'Failed to update user',
     };
   }
 }
@@ -189,7 +207,7 @@ export async function deleteUser(userId: string) {
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
     });
-    
+
     if (!existingUser) {
       throw new Error('User not found');
     }
@@ -204,8 +222,14 @@ export async function deleteUser(userId: string) {
       },
     });
 
-    if (relatedData?.dailyLogs.length || relatedData?.logHours.length || relatedData?.commissionEntries.length) {
-      throw new Error('Cannot delete user with existing logs, hours, or commission entries');
+    if (
+      relatedData?.dailyLogs.length ||
+      relatedData?.logHours.length ||
+      relatedData?.commissionEntries.length
+    ) {
+      throw new Error(
+        'Cannot delete user with existing logs, hours, or commission entries'
+      );
     }
 
     // Delete user
@@ -234,9 +258,9 @@ export async function deleteUser(userId: string) {
     return { success: true };
   } catch (error) {
     // Error deleting user
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to delete user' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete user',
     };
   }
 }
@@ -245,7 +269,10 @@ export async function deleteUser(userId: string) {
 export async function getUsers(params: Partial<UserSearchFormData> = {}) {
   try {
     const session = await getSession();
-    if (!session?.user?.roles?.includes('admin') && !session?.user?.roles?.includes('manager')) {
+    if (
+      !session?.user?.roles?.includes('admin') &&
+      !session?.user?.roles?.includes('manager')
+    ) {
       throw new Error('Unauthorized: Admin or Manager access required');
     }
 
@@ -260,7 +287,7 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
 
     // Build where clause
     const conditions: Record<string, unknown>[] = [];
-    
+
     if (search) {
       conditions.push({
         OR: [
@@ -269,7 +296,7 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
         ],
       });
     }
-    
+
     if (roles && roles.length > 0) {
       conditions.push({
         roles: { hasSome: roles },
@@ -277,17 +304,21 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
     }
 
     // Manager role filtering - managers can only see captains and wingmen
-    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       conditions.push({
         roles: { hasSome: ['captain', 'wingman'] },
       });
     }
 
-    const where = conditions.length > 0 
-      ? conditions.length === 1 
-        ? conditions[0] 
-        : { AND: conditions }
-      : {};
+    const where =
+      conditions.length > 0
+        ? conditions.length === 1
+          ? conditions[0]
+          : { AND: conditions }
+        : {};
 
     // Get total count
     const total = await prisma.user.count({ where });
@@ -337,9 +368,9 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
     };
   } catch (error) {
     // Error fetching users
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to fetch users' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch users',
     };
   }
 }
@@ -348,7 +379,10 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
 export async function getUserById(userId: string) {
   try {
     const session = await getSession();
-    if (!session?.user?.roles?.includes('admin') && !session?.user?.roles?.includes('manager')) {
+    if (
+      !session?.user?.roles?.includes('admin') &&
+      !session?.user?.roles?.includes('manager')
+    ) {
       throw new Error('Unauthorized: Admin or Manager access required');
     }
 
@@ -384,38 +418,55 @@ export async function getUserById(userId: string) {
     }
 
     // Check manager access permissions
-    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
-      const hasAccessibleRole = user.roles.some(role => ['captain', 'wingman'].includes(role));
+    if (
+      session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
+      const hasAccessibleRole = user.roles.some((role) =>
+        ['captain', 'wingman'].includes(role)
+      );
       if (!hasAccessibleRole) {
-        throw new Error('Access denied: Managers can only view captain and wingman users');
+        throw new Error(
+          'Access denied: Managers can only view captain and wingman users'
+        );
       }
-      
+
       // Log manager access for audit trail
-      await prisma.auditLog.create({
-        data: {
-          entityType: 'user_access',
-          entityId: userId,
-          action: 'manager_view_user',
-          changes: {
-            action: 'manager_access',
-            targetUserId: userId,
-            targetUserRoles: user.roles,
-            accessType: 'view_user_profile',
+      await prisma.auditLog
+        .create({
+          data: {
+            entityType: 'user_access',
+            entityId: userId,
+            action: 'manager_view_user',
+            changes: {
+              action: 'manager_access',
+              targetUserId: userId,
+              targetUserRoles: user.roles,
+              accessType: 'view_user_profile',
+            },
+            userId: session.user.id,
           },
-          userId: session.user.id,
-        },
-      }).catch(() => {
-        // Don't fail the main operation if audit logging fails
-      });
+        })
+        .catch(() => {
+          // Don't fail the main operation if audit logging fails
+        });
     }
 
     // Convert Decimal fields to numbers for client components
     const userWithNumbers = {
       ...user,
-      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : null,
-      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : null,
-      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : null,
-      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : null,
+      rateJunkCaptain: user.rateJunkCaptain
+        ? Number(user.rateJunkCaptain)
+        : null,
+      rateJunkWingman: user.rateJunkWingman
+        ? Number(user.rateJunkWingman)
+        : null,
+      rateMoveCaptain: user.rateMoveCaptain
+        ? Number(user.rateMoveCaptain)
+        : null,
+      rateMoveWingman: user.rateMoveWingman
+        ? Number(user.rateMoveWingman)
+        : null,
       rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
       rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
       rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,
@@ -430,9 +481,9 @@ export async function getUserById(userId: string) {
     return { success: true, user: userWithNumbers };
   } catch (error) {
     // Error fetching user
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to fetch user' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch user',
     };
   }
 }
@@ -496,9 +547,10 @@ export async function copyUserSettings(fromUserId: string, toUserId: string) {
     return { success: true };
   } catch (error) {
     // Error copying user settings
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to copy user settings' 
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to copy user settings',
     };
   }
 }

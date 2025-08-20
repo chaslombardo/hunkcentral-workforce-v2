@@ -46,7 +46,10 @@ export function LogTotals({ calculation }: LogTotalsProps) {
 
   // Calculate overall progress (using a blended goal of 19% as middle ground)
   const overallGoal = 19; // Blended goal between junk (14%) and move (24%)
-  const overallProgressValue = Math.min((overallLaborCostPercentage / overallGoal) * 100, 100);
+  const overallProgressValue = Math.min(
+    (overallLaborCostPercentage / overallGoal) * 100,
+    100
+  );
   const isOverallUnderGoal = overallLaborCostPercentage <= overallGoal;
 
   return (
@@ -70,7 +73,7 @@ export function LogTotals({ calculation }: LogTotalsProps) {
               {formatCurrency(totalRevenue)}
             </p>
           </div>
-          
+
           <div className="text-center p-3 rounded-lg bg-hunks-orange/10 border border-hunks-orange/20">
             <DollarSign className="h-5 w-5 mx-auto mb-1 text-hunks-orange" />
             <p className="text-xs text-muted-foreground">Total Tips</p>
@@ -78,21 +81,17 @@ export function LogTotals({ calculation }: LogTotalsProps) {
               {formatCurrency(totalTips)}
             </p>
           </div>
-          
+
           <div className="text-center p-3 rounded-lg bg-muted/50 border">
             <Clock className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">Total Hours</p>
-            <p className="text-lg font-bold">
-              {totalHours.toFixed(1)}h
-            </p>
+            <p className="text-lg font-bold">{totalHours.toFixed(1)}h</p>
           </div>
-          
+
           <div className="text-center p-3 rounded-lg bg-muted/50 border">
             <Users className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">Team Members</p>
-            <p className="text-lg font-bold">
-              {employeeSummary.length}
-            </p>
+            <p className="text-lg font-bold">{employeeSummary.length}</p>
           </div>
         </div>
 
@@ -109,14 +108,20 @@ export function LogTotals({ calculation }: LogTotalsProps) {
                 </HoverCardTrigger>
                 <HoverCardContent className="w-80">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold">Overall Labor Cost</h4>
+                    <h4 className="text-sm font-semibold">
+                      Overall Labor Cost
+                    </h4>
                     <div className="text-xs space-y-1">
                       <p>Total Labor Cost: {formatCurrency(totalLaborCost)}</p>
                       <p>Total Revenue: {formatCurrency(totalRevenue)}</p>
-                      <p>Overall Percentage: {formatPercentage(overallLaborCostPercentage)}</p>
+                      <p>
+                        Overall Percentage:{' '}
+                        {formatPercentage(overallLaborCostPercentage)}
+                      </p>
                       <Separator className="my-2" />
                       <p className="text-muted-foreground">
-                        This combines labor costs from all sections (Junk, Move, and Other Hours)
+                        This combines labor costs from all sections (Junk, Move,
+                        and Other Hours)
                       </p>
                     </div>
                   </div>
@@ -124,11 +129,11 @@ export function LogTotals({ calculation }: LogTotalsProps) {
               </HoverCard>
               <div className="flex items-center gap-2">
                 <Badge
-                  variant={isOverallUnderGoal ? "default" : "destructive"}
+                  variant={isOverallUnderGoal ? 'default' : 'destructive'}
                   className={
                     isOverallUnderGoal
-                      ? "bg-hunks-green hover:bg-hunks-green/90 text-white"
-                      : ""
+                      ? 'bg-hunks-green hover:bg-hunks-green/90 text-white'
+                      : ''
                   }
                 >
                   {formatPercentage(overallLaborCostPercentage)}
@@ -139,15 +144,17 @@ export function LogTotals({ calculation }: LogTotalsProps) {
               value={overallProgressValue}
               className={`h-3 ${
                 isOverallUnderGoal
-                  ? "[&>div]:bg-hunks-green"
-                  : "[&>div]:bg-destructive"
+                  ? '[&>div]:bg-hunks-green'
+                  : '[&>div]:bg-destructive'
               }`}
             />
           </div>
         )}
 
         {/* Section Breakdown */}
-        {(sectionBreakdown.junk || sectionBreakdown.move || sectionBreakdown.other) && (
+        {(sectionBreakdown.junk ||
+          sectionBreakdown.move ||
+          sectionBreakdown.other) && (
           <>
             <Separator />
             <div className="space-y-3">
@@ -155,63 +162,91 @@ export function LogTotals({ calculation }: LogTotalsProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 {sectionBreakdown.junk && (
                   <div className="p-3 rounded-lg bg-muted/30 border">
-                    <p className="font-medium text-hunks-green mb-2">Junk Section</p>
+                    <p className="font-medium text-hunks-green mb-2">
+                      Junk Section
+                    </p>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Revenue:</span>
-                        <span className="font-medium">{formatCurrency(sectionBreakdown.junk.totalRevenue)}</span>
+                        <span className="font-medium">
+                          {formatCurrency(sectionBreakdown.junk.totalRevenue)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Labor %:</span>
-                        <span className={`font-medium ${sectionBreakdown.junk.isUnderGoal ? 'text-hunks-green' : 'text-destructive'}`}>
-                          {formatPercentage(sectionBreakdown.junk.laborCostPercentage)}
+                        <span
+                          className={`font-medium ${sectionBreakdown.junk.isUnderGoal ? 'text-hunks-green' : 'text-destructive'}`}
+                        >
+                          {formatPercentage(
+                            sectionBreakdown.junk.laborCostPercentage
+                          )}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Hours:</span>
-                        <span className="font-medium">{sectionBreakdown.junk.totalHours.toFixed(1)}h</span>
+                        <span className="font-medium">
+                          {sectionBreakdown.junk.totalHours.toFixed(1)}h
+                        </span>
                       </div>
                     </div>
                   </div>
                 )}
-                
+
                 {sectionBreakdown.move && (
                   <div className="p-3 rounded-lg bg-muted/30 border">
-                    <p className="font-medium text-hunks-orange mb-2">Move Section</p>
+                    <p className="font-medium text-hunks-orange mb-2">
+                      Move Section
+                    </p>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Revenue:</span>
-                        <span className="font-medium">{formatCurrency(sectionBreakdown.move.totalRevenue)}</span>
+                        <span className="font-medium">
+                          {formatCurrency(sectionBreakdown.move.totalRevenue)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Labor %:</span>
-                        <span className={`font-medium ${sectionBreakdown.move.isUnderGoal ? 'text-hunks-green' : 'text-destructive'}`}>
-                          {formatPercentage(sectionBreakdown.move.laborCostPercentage)}
+                        <span
+                          className={`font-medium ${sectionBreakdown.move.isUnderGoal ? 'text-hunks-green' : 'text-destructive'}`}
+                        >
+                          {formatPercentage(
+                            sectionBreakdown.move.laborCostPercentage
+                          )}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Hours:</span>
-                        <span className="font-medium">{sectionBreakdown.move.totalHours.toFixed(1)}h</span>
+                        <span className="font-medium">
+                          {sectionBreakdown.move.totalHours.toFixed(1)}h
+                        </span>
                       </div>
                     </div>
                   </div>
                 )}
-                
+
                 {sectionBreakdown.other && (
                   <div className="p-3 rounded-lg bg-muted/30 border">
                     <p className="font-medium mb-2">Other Hours</p>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Labor Cost:</span>
-                        <span className="font-medium">{formatCurrency(sectionBreakdown.other.totalLaborCost)}</span>
+                        <span className="font-medium">
+                          {formatCurrency(
+                            sectionBreakdown.other.totalLaborCost
+                          )}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Hours:</span>
-                        <span className="font-medium">{sectionBreakdown.other.totalHours.toFixed(1)}h</span>
+                        <span className="font-medium">
+                          {sectionBreakdown.other.totalHours.toFixed(1)}h
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Team:</span>
-                        <span className="font-medium">{sectionBreakdown.other.employeeCount} HUNKs</span>
+                        <span className="font-medium">
+                          {sectionBreakdown.other.employeeCount} HUNKs
+                        </span>
                       </div>
                     </div>
                   </div>

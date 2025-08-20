@@ -159,80 +159,86 @@ All data displays (tables, charts, reports, payroll views) must implement the fo
 ```typescript
 // Universal DataTable component with full functionality
 interface UniversalDataTableProps<T> {
-  data: T[]
-  columns: ColumnDef<T>[]
-  
+  data: T[];
+  columns: ColumnDef<T>[];
+
   // Search functionality
-  searchable?: boolean
-  searchPlaceholder?: string
-  globalSearch?: boolean
-  columnSearch?: boolean
-  
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  globalSearch?: boolean;
+  columnSearch?: boolean;
+
   // Sorting functionality
-  sortable?: boolean
-  defaultSort?: { column: string; direction: 'asc' | 'desc' }
-  multiSort?: boolean
-  
+  sortable?: boolean;
+  defaultSort?: { column: string; direction: 'asc' | 'desc' };
+  multiSort?: boolean;
+
   // Filtering functionality
-  filters?: FilterConfig[]
-  quickFilters?: QuickFilterConfig[]
-  advancedFilters?: boolean
-  
+  filters?: FilterConfig[];
+  quickFilters?: QuickFilterConfig[];
+  advancedFilters?: boolean;
+
   // Grouping and aggregation
-  groupBy?: GroupByConfig[]
-  aggregations?: AggregationConfig[]
-  
+  groupBy?: GroupByConfig[];
+  aggregations?: AggregationConfig[];
+
   // Export functionality
-  exportOptions?: ('excel' | 'csv' | 'pdf' | 'print')[]
-  
+  exportOptions?: ('excel' | 'csv' | 'pdf' | 'print')[];
+
   // Pagination
-  pagination?: boolean
-  pageSize?: number
-  pageSizeOptions?: number[]
-  
+  pagination?: boolean;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+
   // Actions
-  actions?: ActionConfig[]
-  bulkActions?: BulkActionConfig[]
-  rowActions?: RowActionConfig[]
+  actions?: ActionConfig[];
+  bulkActions?: BulkActionConfig[];
+  rowActions?: RowActionConfig[];
 }
 
 // Filter configuration types
 interface FilterConfig {
-  key: string
-  label: string
-  type: 'select' | 'multiSelect' | 'dateRange' | 'numberRange' | 'text' | 'boolean'
-  options?: { value: string; label: string }[]
-  placeholder?: string
+  key: string;
+  label: string;
+  type:
+    | 'select'
+    | 'multiSelect'
+    | 'dateRange'
+    | 'numberRange'
+    | 'text'
+    | 'boolean';
+  options?: { value: string; label: string }[];
+  placeholder?: string;
 }
 
 interface QuickFilterConfig {
-  key: string
-  label: string
-  value: any
-  icon?: React.ComponentType
+  key: string;
+  label: string;
+  value: any;
+  icon?: React.ComponentType;
 }
 
 // Chart filtering and interaction
 interface UniversalChartProps {
-  data: any[]
-  type: 'line' | 'bar' | 'area' | 'pie' | 'scatter'
-  
+  data: any[];
+  type: 'line' | 'bar' | 'area' | 'pie' | 'scatter';
+
   // Interactive features
-  interactive?: boolean
-  zoomable?: boolean
-  brushable?: boolean
-  
+  interactive?: boolean;
+  zoomable?: boolean;
+  brushable?: boolean;
+
   // Filtering
-  dateRangeFilter?: boolean
-  categoryFilter?: boolean
-  valueFilter?: boolean
-  
+  dateRangeFilter?: boolean;
+  categoryFilter?: boolean;
+  valueFilter?: boolean;
+
   // Export
-  exportOptions?: ('png' | 'svg' | 'pdf')[]
-  
+  exportOptions?: ('png' | 'svg' | 'pdf')[];
+
   // Drill-down capability
-  drillDown?: boolean
-  onDrillDown?: (data: any) => void
+  drillDown?: boolean;
+  onDrillDown?: (data: any) => void;
 }
 ```
 
@@ -253,10 +259,10 @@ const STANDARD_FILTERS = {
       { label: 'Last month', value: 'lastMonth' },
       { label: 'Current pay period', value: 'currentPayPeriod' },
       { label: 'Previous pay period', value: 'previousPayPeriod' },
-      { label: 'Custom range', value: 'custom' }
-    ]
+      { label: 'Custom range', value: 'custom' },
+    ],
   },
-  
+
   // Status filters
   status: {
     type: 'multiSelect',
@@ -265,10 +271,10 @@ const STANDARD_FILTERS = {
       { value: 'pending', label: 'Pending', color: 'yellow' },
       { value: 'approved', label: 'Approved', color: 'blue' },
       { value: 'rejected', label: 'Rejected', color: 'red' },
-      { value: 'draft', label: 'Draft', color: 'gray' }
-    ]
+      { value: 'draft', label: 'Draft', color: 'gray' },
+    ],
   },
-  
+
   // Role filters
   role: {
     type: 'multiSelect',
@@ -277,10 +283,10 @@ const STANDARD_FILTERS = {
       { value: 'manager', label: 'Manager' },
       { value: 'captain', label: 'Captain' },
       { value: 'wingman', label: 'Wingman' },
-      { value: 'sales', label: 'Sales Consultant' }
-    ]
+      { value: 'sales', label: 'Sales Consultant' },
+    ],
   },
-  
+
   // Amount ranges
   amountRange: {
     type: 'numberRange',
@@ -289,10 +295,10 @@ const STANDARD_FILTERS = {
       { label: '$100 - $500', value: { min: 100, max: 500 } },
       { label: '$500 - $1,000', value: { min: 500, max: 1000 } },
       { label: '$1,000 - $5,000', value: { min: 1000, max: 5000 } },
-      { label: 'Over $5,000', value: { min: 5000 } }
-    ]
-  }
-}
+      { label: 'Over $5,000', value: { min: 5000 } },
+    ],
+  },
+};
 
 // Quick filter buttons for common actions
 const QUICK_FILTERS = {
@@ -300,21 +306,21 @@ const QUICK_FILTERS = {
     { key: 'pending', label: 'Pending Approval', icon: IconClock },
     { key: 'today', label: 'Today', icon: IconCalendar },
     { key: 'myLogs', label: 'My Logs', icon: IconUser },
-    { key: 'highRevenue', label: 'High Revenue', icon: IconTrendingUp }
+    { key: 'highRevenue', label: 'High Revenue', icon: IconTrendingUp },
   ],
   payroll: [
     { key: 'currentPeriod', label: 'Current Period', icon: IconCalendar },
     { key: 'needsReview', label: 'Needs Review', icon: IconAlertCircle },
     { key: 'highEarners', label: 'Top Earners', icon: IconTrendingUp },
-    { key: 'newEmployees', label: 'New Employees', icon: IconUserPlus }
+    { key: 'newEmployees', label: 'New Employees', icon: IconUserPlus },
   ],
   commission: [
     { key: 'pending', label: 'Pending Match', icon: IconClock },
     { key: 'matched', label: 'Matched', icon: IconCheck },
     { key: 'thisWeek', label: 'This Week', icon: IconCalendar },
-    { key: 'highValue', label: 'High Value', icon: IconDollarSign }
-  ]
-}
+    { key: 'highValue', label: 'High Value', icon: IconDollarSign },
+  ],
+};
 ```
 
 ### Key Component Implementations
@@ -322,11 +328,12 @@ const QUICK_FILTERS = {
 #### Role-Specific Dashboard Components
 
 **Captain Dashboard Components:**
+
 ```typescript
 // Using dashboard-01 SectionCards pattern with branded styling
 const CaptainMetricsCards = () => {
   const metrics = useCaptainMetrics() // Pre-computed data
-  
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <BrandedMetricCard
@@ -366,7 +373,7 @@ const LaborCostChart = () => {
     jobType: 'all',
     department: 'all'
   })
-  
+
   return (
     <Card className="hunk-gradient-bg">
       <CardHeader>
@@ -435,11 +442,12 @@ const LaborCostChart = () => {
 ```
 
 **Manager Dashboard Components:**
+
 ```typescript
 // Using dashboard-01 DataTable pattern with comprehensive filtering
 const PendingLogsTable = () => {
   const pendingLogs = usePendingLogs() // Pre-computed data
-  
+
   return (
     <DataTable
       data={pendingLogs}
@@ -554,14 +562,14 @@ const UserManagementInterface = () => {
 // Granular permission system
 const UserPermissionDialog = ({ user }: { user: User }) => {
   const permissions = useUserPermissions(user.id)
-  
+
   return (
     <Dialog>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Manage Permissions - {user.fullName}</DialogTitle>
         </DialogHeader>
-        
+
         <Tabs defaultValue="roles">
           <TabsList>
             <TabsTrigger value="roles">Roles & Access</TabsTrigger>
@@ -569,19 +577,19 @@ const UserPermissionDialog = ({ user }: { user: User }) => {
             <TabsTrigger value="permissions">Granular Permissions</TabsTrigger>
             <TabsTrigger value="locations">Location Access</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="roles">
             <RoleAssignmentPanel user={user} />
           </TabsContent>
-          
+
           <TabsContent value="compensation">
             <CompensationSettingsPanel user={user} />
           </TabsContent>
-          
+
           <TabsContent value="permissions">
             <GranularPermissionsPanel user={user} />
           </TabsContent>
-          
+
           <TabsContent value="locations">
             <LocationAccessPanel user={user} />
           </TabsContent>
@@ -691,7 +699,7 @@ const GranularPermissionsPanel = ({ user }: { user: User }) => {
 const ReportsInterface = () => {
   const { user } = useSession()
   const availableReports = useAvailableReports(user)
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -741,7 +749,7 @@ const ReportsInterface = () => {
 const MyPayrollReport = () => {
   const { user } = useSession()
   const payrollData = useMyPayroll(user.id)
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -774,9 +782,9 @@ const MyPayrollReport = () => {
               subtitle={`${payrollData.commissionJobs} jobs`}
             />
           </div>
-          
+
           <Separator className="my-6" />
-          
+
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Detailed Breakdown</h3>
@@ -803,7 +811,7 @@ const MyPayrollReport = () => {
                 </Button>
               </div>
             </div>
-            <PayrollBreakdownTable 
+            <PayrollBreakdownTable
               data={payrollData.breakdown}
               searchable={true}
               sortable={true}
@@ -824,7 +832,7 @@ const MyPayrollReport = () => {
 // Team Payroll - Available to managers and admins with advanced filtering
 const TeamPayrollReport = () => {
   const teamPayroll = useTeamPayroll()
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -935,7 +943,7 @@ const AdminReports = () => {
   --primary-dark: #014d28;
   --secondary-light: #ff8c1a;
   --secondary-dark: #cc5f00;
-  
+
   /* Light theme specific */
   --background: #ffffff;
   --foreground: #0a0a0a;
@@ -947,14 +955,14 @@ const AdminReports = () => {
 }
 
 /* Dark Theme */
-[data-theme="dark"] {
+[data-theme='dark'] {
   --primary: #028a4a; /* Slightly lighter green for dark mode */
   --secondary: #ff8c1a; /* Slightly lighter orange for dark mode */
   --primary-light: #02a855;
   --primary-dark: #014d28;
   --secondary-light: #ffa533;
   --secondary-dark: #cc5f00;
-  
+
   /* Dark theme specific */
   --background: #0a0a0a;
   --foreground: #fafafa;
@@ -1043,22 +1051,22 @@ const AdminReports = () => {
 const HunkLogo = ({ size = "md", showText = true }: { size?: "sm" | "md" | "lg", showText?: boolean }) => {
   const sizeClasses = {
     sm: "h-8 w-8",
-    md: "h-12 w-12", 
+    md: "h-12 w-12",
     lg: "h-16 w-16"
   }
-  
+
   return (
     <div className="hunk-logo-container">
       <div className={`${sizeClasses[size]} relative`}>
         {/* Light theme logo */}
-        <img 
-          src="/images/college-hunks-logo-light.svg" 
+        <img
+          src="/images/college-hunks-logo-light.svg"
           alt="College Hunks Hauling Junk & Moving"
           className="hunk-logo-light h-full w-full object-contain"
         />
         {/* Dark theme logo */}
-        <img 
-          src="/images/college-hunks-logo-dark.svg" 
+        <img
+          src="/images/college-hunks-logo-dark.svg"
           alt="College Hunks Hauling Junk & Moving"
           className="hunk-logo-dark h-full w-full object-contain"
         />
@@ -1076,25 +1084,25 @@ const HunkLogo = ({ size = "md", showText = true }: { size?: "sm" | "md" | "lg",
 // Theme provider and toggle component
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
-  
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('hunk-theme') as 'light' | 'dark' | 'system' || 'system'
     setTheme(savedTheme)
     applyTheme(savedTheme)
   }, [])
-  
+
   const applyTheme = (newTheme: 'light' | 'dark' | 'system') => {
     const root = document.documentElement
-    
+
     if (newTheme === 'system') {
       root.removeAttribute('data-theme')
     } else {
       root.setAttribute('data-theme', newTheme)
     }
-    
+
     localStorage.setItem('hunk-theme', newTheme)
   }
-  
+
   return (
     <ThemeContext.Provider value={{ theme, setTheme: (newTheme) => {
       setTheme(newTheme)
@@ -1108,7 +1116,7 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 // Theme toggle component
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme()
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -1146,9 +1154,9 @@ const BrandedHeader = () => {
       <div className="flex w-full items-center gap-4 px-4 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 h-4" />
-        
+
         <HunkLogo size="sm" />
-        
+
         <div className="ml-auto flex items-center gap-4">
           <DateRangeSelector />
           <ThemeToggle />
@@ -1163,7 +1171,7 @@ const BrandedHeader = () => {
 // Branded sidebar with College Hunks theming and theme support
 const BrandedSidebar = () => {
   const { theme } = useTheme()
-  
+
   return (
     <Sidebar collapsible="icon" className="border-r border-primary/10 dark:border-primary/20">
       <SidebarHeader className="hunk-gradient-bg">
@@ -1171,12 +1179,12 @@ const BrandedSidebar = () => {
           <HunkLogo size="md" showText={!isCollapsed} />
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent className="bg-background/50 dark:bg-background/80">
         <NavMain items={navigationItems} />
         <NavSecondary items={secondaryItems} />
       </SidebarContent>
-      
+
       <SidebarFooter className="border-t border-primary/10 dark:border-primary/20 bg-background/50 dark:bg-background/80">
         <div className="flex items-center justify-between p-2">
           <NavUser user={user} />
@@ -1201,7 +1209,7 @@ const BrandedMetricCard = ({ title, value, trend, icon, type }: MetricCardProps)
         return 'hunk-accent-border'
     }
   }
-  
+
   return (
     <Card className={`${getBrandedStyle(type)} hunk-gradient-bg`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -1246,13 +1254,13 @@ const BrandedLoginPage = () => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center space-y-4">
             {/* Theme-aware mascot */}
-            <img 
-              src="/images/college-hunks-mascot-light.svg" 
+            <img
+              src="/images/college-hunks-mascot-light.svg"
               alt="College Hunks Mascot"
               className="hunk-logo-light h-64 w-64 mx-auto"
             />
-            <img 
-              src="/images/college-hunks-mascot-dark.svg" 
+            <img
+              src="/images/college-hunks-mascot-dark.svg"
               alt="College Hunks Mascot"
               className="hunk-logo-dark h-64 w-64 mx-auto"
             />
@@ -1303,20 +1311,20 @@ const DashboardSkeleton = () => {
 
 ```typescript
 // Enhanced DataTable with comprehensive functionality
-const EnhancedDataTable = <T,>({ 
-  data, 
-  columns, 
+const EnhancedDataTable = <T,>({
+  data,
+  columns,
   searchable = true,
   sortable = true,
   filters = [],
   quickFilters = [],
   exportOptions = ['excel', 'csv', 'pdf'],
-  ...props 
+  ...props
 }: UniversalDataTableProps<T>) => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [sorting, setSorting] = useState<SortingState>([])
-  
+
   return (
     <div className="space-y-4">
       {/* Search and Quick Filters Bar */}
@@ -1333,7 +1341,7 @@ const EnhancedDataTable = <T,>({
               />
             </div>
           )}
-          
+
           {quickFilters.length > 0 && (
             <div className="flex gap-2">
               {quickFilters.map((filter) => (
@@ -1351,7 +1359,7 @@ const EnhancedDataTable = <T,>({
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {/* Advanced Filters */}
           {filters.length > 0 && (
@@ -1368,7 +1376,7 @@ const EnhancedDataTable = <T,>({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
-                <FilterPanel 
+                <FilterPanel
                   filters={filters}
                   values={columnFilters}
                   onChange={setColumnFilters}
@@ -1376,7 +1384,7 @@ const EnhancedDataTable = <T,>({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          
+
           {/* Export Options */}
           {exportOptions.length > 0 && (
             <DropdownMenu>
@@ -1398,7 +1406,7 @@ const EnhancedDataTable = <T,>({
           )}
         </div>
       </div>
-      
+
       {/* Data Table */}
       <div className="rounded-md border hunk-accent-border">
         <Table>
@@ -1410,7 +1418,7 @@ const EnhancedDataTable = <T,>({
           </TableBody>
         </Table>
       </div>
-      
+
       {/* Pagination */}
       <DataTablePagination table={table} />
     </div>
@@ -1418,20 +1426,20 @@ const EnhancedDataTable = <T,>({
 }
 
 // Interactive Chart with filtering capabilities
-const InteractiveChart = ({ 
-  data, 
-  type, 
+const InteractiveChart = ({
+  data,
+  type,
   dateRangeFilter = true,
   categoryFilter = true,
   exportOptions = ['png', 'svg', 'pdf'],
-  ...props 
+  ...props
 }: UniversalChartProps) => {
   const [filters, setFilters] = useState({
     dateRange: 'currentPayPeriod',
     categories: [],
     valueRange: null
   })
-  
+
   return (
     <Card className="hunk-gradient-bg">
       <CardHeader>
@@ -1440,11 +1448,11 @@ const InteractiveChart = ({
             <CardTitle className="text-primary">{props.title}</CardTitle>
             <CardDescription>{props.description}</CardDescription>
           </div>
-          
+
           <div className="flex gap-2">
             {dateRangeFilter && (
-              <Select 
-                value={filters.dateRange} 
+              <Select
+                value={filters.dateRange}
                 onValueChange={(value) => setFilters({...filters, dateRange: value})}
               >
                 <SelectTrigger className="w-40">
@@ -1459,7 +1467,7 @@ const InteractiveChart = ({
                 </SelectContent>
               </Select>
             )}
-            
+
             {categoryFilter && (
               <MultiSelect
                 options={getCategoryOptions(data)}
@@ -1468,7 +1476,7 @@ const InteractiveChart = ({
                 placeholder="Filter categories..."
               />
             )}
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -1487,7 +1495,7 @@ const InteractiveChart = ({
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <ChartContainer config={chartConfig}>
           {/* Render appropriate chart type with filtered data */}
@@ -1562,7 +1570,7 @@ model User {
   department        String?   // Primary department
   isActive          Boolean   @default(true)
   lastLoginAt       DateTime?
-  
+
   // Theme preferences
   themePreference   String?   @default("system") // 'light', 'dark', 'system'
 
@@ -1614,7 +1622,7 @@ model Permission {
   description String?  // Description of what this permission allows
   category    String   // Group permissions by category
   defaultRoles String[] // Roles that get this permission by default
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -1628,7 +1636,7 @@ model Location {
   code        String   @unique // e.g., "ATL"
   address     String?
   isActive    Boolean  @default(true)
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -1644,7 +1652,7 @@ model PrecomputedMetrics {
   metricType      String   // 'captain_stats', 'manager_overview', etc.
   metricData      Json     // Computed values
   computedAt      DateTime @default(now())
-  
+
   user            User?    @relation(fields: [userId], references: [id])
   payPeriod       PayPeriod @relation(fields: [payPeriodId], references: [id])
 
@@ -1789,33 +1797,33 @@ model AuditLog {
 // Background job for metric computation
 export async function computeMetrics(payPeriodId: string) {
   const payPeriod = await prisma.payPeriod.findUnique({
-    where: { id: payPeriodId }
-  })
+    where: { id: payPeriodId },
+  });
 
   // Compute captain metrics
   const captains = await prisma.user.findMany({
-    where: { roles: { has: 'captain' } }
-  })
+    where: { roles: { has: 'captain' } },
+  });
 
   for (const captain of captains) {
-    const metrics = await computeCaptainMetrics(captain.id, payPeriod)
-    
+    const metrics = await computeCaptainMetrics(captain.id, payPeriod);
+
     await prisma.precomputedMetrics.upsert({
       where: {
         userId_payPeriodId_metricType: {
           userId: captain.id,
           payPeriodId,
-          metricType: 'captain_stats'
-        }
+          metricType: 'captain_stats',
+        },
       },
       update: { metricData: metrics, computedAt: new Date() },
       create: {
         userId: captain.id,
         payPeriodId,
         metricType: 'captain_stats',
-        metricData: metrics
-      }
-    })
+        metricData: metrics,
+      },
+    });
   }
 }
 
@@ -1826,23 +1834,23 @@ async function computeCaptainMetrics(captainId: string, payPeriod: PayPeriod) {
       captainId,
       logDate: {
         gte: payPeriod.startDate,
-        lte: payPeriod.endDate
+        lte: payPeriod.endDate,
       },
-      status: 'approved'
+      status: 'approved',
     },
     _sum: {
       totalRevenue: true,
       totalTips: true,
       totalHours: true,
-      laborBonus: true
+      laborBonus: true,
     },
     _count: {
-      id: true
+      id: true,
     },
     _avg: {
-      laborCostPercent: true
-    }
-  })
+      laborCostPercent: true,
+    },
+  });
 
   // Additional job-specific calculations
   const jobStats = await prisma.logJob.groupBy({
@@ -1852,14 +1860,14 @@ async function computeCaptainMetrics(captainId: string, payPeriod: PayPeriod) {
         captainId,
         logDate: {
           gte: payPeriod.startDate,
-          lte: payPeriod.endDate
+          lte: payPeriod.endDate,
         },
-        status: 'approved'
-      }
+        status: 'approved',
+      },
     },
     _count: { id: true },
-    _avg: { revenue: true }
-  })
+    _avg: { revenue: true },
+  });
 
   return {
     totalJobs: result._count.id,
@@ -1868,14 +1876,17 @@ async function computeCaptainMetrics(captainId: string, payPeriod: PayPeriod) {
     totalHours: result._sum.totalHours,
     laborBonus: result._sum.laborBonus,
     avgLaborCost: result._avg.laborCostPercent,
-    jobsByType: jobStats.reduce((acc, stat) => {
-      acc[stat.jobType] = {
-        count: stat._count.id,
-        avgSize: stat._avg.revenue
-      }
-      return acc
-    }, {} as Record<string, any>)
-  }
+    jobsByType: jobStats.reduce(
+      (acc, stat) => {
+        acc[stat.jobType] = {
+          count: stat._count.id,
+          avgSize: stat._avg.revenue,
+        };
+        return acc;
+      },
+      {} as Record<string, any>
+    ),
+  };
 }
 ```
 
@@ -1890,17 +1901,17 @@ export async function getDashboardData(userId: string, payPeriodId: string) {
       userId_payPeriodId_metricType: {
         userId,
         payPeriodId,
-        metricType: 'captain_stats'
-      }
-    }
-  })
+        metricType: 'captain_stats',
+      },
+    },
+  });
 
   if (metrics && isRecentlyComputed(metrics.computedAt)) {
-    return metrics.metricData
+    return metrics.metricData;
   }
 
   // Fallback to real-time computation if cache is stale
-  return await computeRealTimeMetrics(userId, payPeriodId)
+  return await computeRealTimeMetrics(userId, payPeriodId);
 }
 
 // Efficient bulk operations for manager review
@@ -1912,11 +1923,11 @@ export async function getBulkLogData(logIds: string[]) {
       jobs: true,
       hours: {
         include: {
-          employee: { select: { fullName: true } }
-        }
-      }
-    }
-  })
+          employee: { select: { fullName: true } },
+        },
+      },
+    },
+  });
 }
 ```
 
@@ -1929,27 +1940,31 @@ export async function getBulkLogData(logIds: string[]) {
 export class PayrollCalculator {
   static calculateLaborCost(hours: LogHour[], rates: UserRates): number {
     return hours.reduce((total, hour) => {
-      const rate = hour.isCoCaptain || hour.employee.roles.includes('captain')
-        ? rates[`${hour.department}Captain`]
-        : rates[`${hour.department}Wingman`]
-      return total + (hour.hours * rate)
-    }, 0)
+      const rate =
+        hour.isCoCaptain || hour.employee.roles.includes('captain')
+          ? rates[`${hour.department}Captain`]
+          : rates[`${hour.department}Wingman`];
+      return total + hour.hours * rate;
+    }, 0);
   }
 
   static calculateLaborPercentage(laborCost: number, revenue: number): number {
-    return revenue === 0 ? 0 : (laborCost / revenue) * 100
+    return revenue === 0 ? 0 : (laborCost / revenue) * 100;
   }
 
   static calculateBonus(
-    laborPercent: number, 
-    goalPercent: number, 
+    laborPercent: number,
+    goalPercent: number,
     revenue: number
   ): number {
-    return Math.max((goalPercent - laborPercent) / 100 * revenue, 0)
+    return Math.max(((goalPercent - laborPercent) / 100) * revenue, 0);
   }
 
-  static calculateTipsPerHunk(totalTips: number, employeeCount: number): number {
-    return employeeCount === 0 ? 0 : totalTips / employeeCount
+  static calculateTipsPerHunk(
+    totalTips: number,
+    employeeCount: number
+  ): number {
+    return employeeCount === 0 ? 0 : totalTips / employeeCount;
   }
 }
 ```
@@ -1961,16 +1976,16 @@ export class PayrollCalculator {
 export class CommissionMatcher {
   static async matchCommissions(approvedLog: DailyLog) {
     const jobs = await prisma.logJob.findMany({
-      where: { logId: approvedLog.id }
-    })
+      where: { logId: approvedLog.id },
+    });
 
     for (const job of jobs) {
       const pendingCommission = await prisma.commissionEntry.findUnique({
-        where: { jobId: job.jobId }
-      })
+        where: { jobId: job.jobId },
+      });
 
       if (pendingCommission) {
-        await this.createMatch(pendingCommission, job, approvedLog)
+        await this.createMatch(pendingCommission, job, approvedLog);
       }
     }
   }
@@ -1980,7 +1995,8 @@ export class CommissionMatcher {
     job: LogJob,
     log: DailyLog
   ) {
-    const commissionAmount = job.revenue * (commission.sales.commissionRate / 100)
+    const commissionAmount =
+      job.revenue * (commission.sales.commissionRate / 100);
 
     await prisma.commissionEntry.update({
       where: { id: commission.id },
@@ -1988,9 +2004,9 @@ export class CommissionMatcher {
         status: 'matched',
         actualRevenue: job.revenue,
         commissionAmount,
-        matchedLogId: log.id
-      }
-    })
+        matchedLogId: log.id,
+      },
+    });
 
     // Create audit log
     await prisma.auditLog.create({
@@ -2002,10 +2018,10 @@ export class CommissionMatcher {
         changes: {
           status: { from: 'pending', to: 'matched' },
           actualRevenue: job.revenue,
-          commissionAmount
-        }
-      }
-    })
+          commissionAmount,
+        },
+      },
+    });
   }
 }
 ```
@@ -2021,45 +2037,58 @@ export const logFormSchema = z.object({
   logDate: z.date(),
   sections: z.object({
     junk: z.object({
-      jobs: z.array(z.object({
-        jobId: z.string().regex(/^\d{7,10}$/, "Job ID must be 7-10 digits"),
-        clientName: z.string().min(1, "Client name required"),
-        revenue: z.number().min(1, "Revenue must be at least $1"),
-        tips: z.number().min(0, "Tips cannot be negative"),
-        disposalCost: z.number().min(0).optional()
-      })),
-      hours: z.array(employeeHourSchema)
+      jobs: z.array(
+        z.object({
+          jobId: z.string().regex(/^\d{7,10}$/, 'Job ID must be 7-10 digits'),
+          clientName: z.string().min(1, 'Client name required'),
+          revenue: z.number().min(1, 'Revenue must be at least $1'),
+          tips: z.number().min(0, 'Tips cannot be negative'),
+          disposalCost: z.number().min(0).optional(),
+        })
+      ),
+      hours: z.array(employeeHourSchema),
     }),
     move: z.object({
-      jobs: z.array(z.object({
-        jobId: z.string().regex(/^\d{7,10}$/, "Job ID must be 7-10 digits"),
-        clientName: z.string().min(1, "Client name required"),
-        revenue: z.number().min(1, "Revenue must be at least $1"),
-        tips: z.number().min(0, "Tips cannot be negative"),
-        junkOnMove: z.number().min(0).optional(),
-        valuation: z.number().min(0).optional(),
-        materials: z.number().min(0).optional()
-      })),
-      hours: z.array(employeeHourSchema)
+      jobs: z.array(
+        z.object({
+          jobId: z.string().regex(/^\d{7,10}$/, 'Job ID must be 7-10 digits'),
+          clientName: z.string().min(1, 'Client name required'),
+          revenue: z.number().min(1, 'Revenue must be at least $1'),
+          tips: z.number().min(0, 'Tips cannot be negative'),
+          junkOnMove: z.number().min(0).optional(),
+          valuation: z.number().min(0).optional(),
+          materials: z.number().min(0).optional(),
+        })
+      ),
+      hours: z.array(employeeHourSchema),
     }),
     other: z.object({
-      hours: z.array(employeeHourSchema)
-    })
-  })
-})
+      hours: z.array(employeeHourSchema),
+    }),
+  }),
+});
 
 const employeeHourSchema = z.object({
   employeeId: z.string().uuid(),
-  department: z.enum(['junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin']),
-  hours: z.number().min(0).max(24, "Maximum 24 hours per day"),
-  isCoCaptain: z.boolean().default(false)
-})
+  department: z.enum([
+    'junk',
+    'move',
+    'zigma',
+    'training',
+    'estimating',
+    'warehouse',
+    'admin',
+  ]),
+  hours: z.number().min(0).max(24, 'Maximum 24 hours per day'),
+  isCoCaptain: z.boolean().default(false),
+});
 
 // Currency input validation
-export const currencyInputSchema = z.number()
-  .min(0, "Amount cannot be negative")
-  .max(10000000, "Amount too large")
-  .transform(val => Math.round(val * 100) / 100) // Round to 2 decimal places
+export const currencyInputSchema = z
+  .number()
+  .min(0, 'Amount cannot be negative')
+  .max(10000000, 'Amount too large')
+  .transform((val) => Math.round(val * 100) / 100); // Round to 2 decimal places
 ```
 
 ### Error Handling Strategy
@@ -2069,23 +2098,23 @@ export const currencyInputSchema = z.number()
 export class ErrorHandler {
   static handleFormError(error: any, form: UseFormReturn<any>) {
     if (error instanceof z.ZodError) {
-      error.errors.forEach(err => {
+      error.errors.forEach((err) => {
         form.setError(err.path.join('.') as any, {
-          message: err.message
-        })
-      })
+          message: err.message,
+        });
+      });
     } else {
-      toast.error("An unexpected error occurred. Please try again.")
+      toast.error('An unexpected error occurred. Please try again.');
     }
   }
 
   static handleApiError(error: any) {
     if (error.code === 'P2002') {
-      return "This record already exists"
+      return 'This record already exists';
     } else if (error.code === 'P2025') {
-      return "Record not found"
+      return 'Record not found';
     } else {
-      return "An error occurred while processing your request"
+      return 'An error occurred while processing your request';
     }
   }
 }
@@ -2107,7 +2136,7 @@ describe('CaptainDashboard', () => {
     }
 
     render(<CaptainDashboard metrics={mockMetrics} />)
-    
+
     expect(screen.getByText('15')).toBeInTheDocument()
     expect(screen.getByText('$5,000.00')).toBeInTheDocument()
     expect(screen.getByText('16.5%')).toBeInTheDocument()
@@ -2116,9 +2145,9 @@ describe('CaptainDashboard', () => {
 
   it('updates when date range changes', async () => {
     const { rerender } = render(<CaptainDashboard payPeriodId="pp17" />)
-    
+
     rerender(<CaptainDashboard payPeriodId="pp16" />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('PP16')).toBeInTheDocument()
     })
@@ -2133,19 +2162,19 @@ describe('CaptainDashboard', () => {
 describe('Performance Tests', () => {
   it('dashboard loads in under 500ms', async () => {
     const startTime = performance.now()
-    
+
     render(<CaptainDashboard />)
     await waitFor(() => screen.getByTestId('dashboard-loaded'))
-    
+
     const loadTime = performance.now() - startTime
     expect(loadTime).toBeLessThan(500)
   })
 
   it('handles 100 concurrent users', async () => {
-    const promises = Array.from({ length: 100 }, () => 
+    const promises = Array.from({ length: 100 }, () =>
       request(app).get('/api/dashboard').expect(200)
     )
-    
+
     const results = await Promise.all(promises)
     expect(results.every(r => r.status === 200)).toBe(true)
   })
@@ -2165,7 +2194,7 @@ export const PERMISSION_CATEGORIES = {
     VIEW_OWN_DASHBOARD: 'view_own_dashboard',
     VIEW_TEAM_DASHBOARD: 'view_team_dashboard',
     VIEW_ALL_DASHBOARDS: 'view_all_dashboards',
-    CHANGE_DATE_RANGE: 'change_date_range'
+    CHANGE_DATE_RANGE: 'change_date_range',
   },
   LOGS: {
     CREATE_LOGS: 'create_logs',
@@ -2173,14 +2202,14 @@ export const PERMISSION_CATEGORIES = {
     EDIT_TEAM_LOGS: 'edit_team_logs',
     APPROVE_LOGS: 'approve_logs',
     DELETE_LOGS: 'delete_logs',
-    VIEW_LOG_HISTORY: 'view_log_history'
+    VIEW_LOG_HISTORY: 'view_log_history',
   },
   COMMISSION: {
     CREATE_COMMISSIONS: 'create_commissions',
     VIEW_OWN_COMMISSIONS: 'view_own_commissions',
     VIEW_ALL_COMMISSIONS: 'view_all_commissions',
     EDIT_COMMISSIONS: 'edit_commissions',
-    APPROVE_COMMISSIONS: 'approve_commissions'
+    APPROVE_COMMISSIONS: 'approve_commissions',
   },
   PAYROLL: {
     VIEW_OWN_PAYROLL: 'view_own_payroll',
@@ -2188,7 +2217,7 @@ export const PERMISSION_CATEGORIES = {
     VIEW_ALL_PAYROLL: 'view_all_payroll',
     GENERATE_REPORTS: 'generate_reports',
     EXPORT_PAYROLL: 'export_payroll',
-    EDIT_PAYROLL: 'edit_payroll'
+    EDIT_PAYROLL: 'edit_payroll',
   },
   USERS: {
     VIEW_USERS: 'view_users',
@@ -2196,34 +2225,34 @@ export const PERMISSION_CATEGORIES = {
     EDIT_USERS: 'edit_users',
     DELETE_USERS: 'delete_users',
     MANAGE_PERMISSIONS: 'manage_permissions',
-    BULK_OPERATIONS: 'bulk_operations'
+    BULK_OPERATIONS: 'bulk_operations',
   },
   ADMIN: {
     MANAGE_PAY_PERIODS: 'manage_pay_periods',
     VIEW_AUDIT_LOGS: 'view_audit_logs',
     SYSTEM_SETTINGS: 'system_settings',
-    BACKUP_RESTORE: 'backup_restore'
-  }
-} as const
+    BACKUP_RESTORE: 'backup_restore',
+  },
+} as const;
 
 // Role-based default permissions
 export const DEFAULT_ROLE_PERMISSIONS = {
   wingman: [
     PERMISSION_CATEGORIES.DASHBOARD.VIEW_OWN_DASHBOARD,
     PERMISSION_CATEGORIES.PAYROLL.VIEW_OWN_PAYROLL,
-    PERMISSION_CATEGORIES.LOGS.VIEW_LOG_HISTORY
+    PERMISSION_CATEGORIES.LOGS.VIEW_LOG_HISTORY,
   ],
   captain: [
     ...DEFAULT_ROLE_PERMISSIONS.wingman,
     PERMISSION_CATEGORIES.LOGS.CREATE_LOGS,
     PERMISSION_CATEGORIES.LOGS.EDIT_OWN_LOGS,
-    PERMISSION_CATEGORIES.COMMISSION.VIEW_OWN_COMMISSIONS
+    PERMISSION_CATEGORIES.COMMISSION.VIEW_OWN_COMMISSIONS,
   ],
   sales: [
     PERMISSION_CATEGORIES.DASHBOARD.VIEW_OWN_DASHBOARD,
     PERMISSION_CATEGORIES.COMMISSION.CREATE_COMMISSIONS,
     PERMISSION_CATEGORIES.COMMISSION.VIEW_OWN_COMMISSIONS,
-    PERMISSION_CATEGORIES.PAYROLL.VIEW_OWN_PAYROLL
+    PERMISSION_CATEGORIES.PAYROLL.VIEW_OWN_PAYROLL,
   ],
   manager: [
     ...DEFAULT_ROLE_PERMISSIONS.captain,
@@ -2234,12 +2263,14 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     PERMISSION_CATEGORIES.PAYROLL.GENERATE_REPORTS,
     PERMISSION_CATEGORIES.COMMISSION.VIEW_ALL_COMMISSIONS,
     PERMISSION_CATEGORIES.USERS.VIEW_USERS,
-    PERMISSION_CATEGORIES.ADMIN.VIEW_AUDIT_LOGS
+    PERMISSION_CATEGORIES.ADMIN.VIEW_AUDIT_LOGS,
   ],
   admin: [
-    ...Object.values(PERMISSION_CATEGORIES).flatMap(category => Object.values(category))
-  ]
-}
+    ...Object.values(PERMISSION_CATEGORIES).flatMap((category) =>
+      Object.values(category)
+    ),
+  ],
+};
 ```
 
 ## Performance Rankings and Gamification System
@@ -2254,7 +2285,7 @@ const PerformanceRankings = () => {
   const [selectedMetric, setSelectedMetric] = useState('totalRevenue')
   const [timeframe, setTimeframe] = useState('currentPayPeriod')
   const rankings = usePerformanceRankings(selectedMetric, timeframe)
-  
+
   return (
     <Card className="hunk-gradient-bg">
       <CardHeader>
@@ -2317,7 +2348,7 @@ const RankingItem = ({ position, identifier, value, isCurrentUser, trend }) => {
     2: 'text-gray-600 bg-gray-50 dark:bg-gray-900/20',
     3: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20'
   }
-  
+
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg border ${
       isCurrentUser ? 'border-primary bg-primary/5' : 'border-border'
@@ -2362,7 +2393,7 @@ const calculatePerformanceRankings = async (metric: string, timeframe: string) =
       captain: { select: { id: true, fullName: true } }
     }
   })
-  
+
   // Calculate metrics without exposing dollar amounts
   const metrics = logs.reduce((acc, log) => {
     const captainId = log.captainId
@@ -2380,7 +2411,7 @@ const calculatePerformanceRankings = async (metric: string, timeframe: string) =
         jobCount: 0
       }
     }
-    
+
     // Aggregate data from log sheets only
     log.jobs.forEach(job => {
       acc[captainId].totalRevenue += job.revenue
@@ -2393,15 +2424,15 @@ const calculatePerformanceRankings = async (metric: string, timeframe: string) =
       }
       acc[captainId].totalTips += job.tips
     })
-    
+
     acc[captainId].totalJobs = log.jobs.length
     acc[captainId].totalHours += log.hours.reduce((sum, h) => sum + h.hours, 0)
     acc[captainId].laborCostSum += log.laborCostPercent || 0
     acc[captainId].jobCount += 1
-    
+
     return acc
   }, {})
-  
+
   // Convert to rankings with anonymous identifiers
   return Object.entries(metrics)
     .map(([captainId, data]) => ({
@@ -2419,24 +2450,28 @@ const calculatePerformanceRankings = async (metric: string, timeframe: string) =
 The system tracks performance in multiple categories based on daily log data:
 
 #### **Revenue Rankings:**
+
 - Total Revenue (all jobs combined)
 - Junk Revenue (junk jobs only)
 - Move Revenue (move jobs only)
 - Average Job Size (revenue per job)
 
 #### **Efficiency Rankings:**
+
 - Lowest Junk Labor Cost % (closer to 14% goal)
 - Lowest Move Labor Cost % (closer to 24% goal)
 - Tips per Job (tips earned divided by jobs)
 - Revenue per Hour (efficiency metric)
 
 #### **Productivity Rankings:**
+
 - Total Jobs Completed
 - Junk Jobs Completed
 - Move Jobs Completed
 - Hours Worked (productivity indicator)
 
 #### **Privacy Protection:**
+
 - Anonymous identifiers (Captain A, HUNK-001, etc.)
 - No dollar amounts shown to other users
 - Percentage-based and ratio metrics only
@@ -2455,45 +2490,48 @@ export function useAvailableReports(user: User) {
       title: 'My Payroll',
       description: 'Your personal compensation breakdown',
       requiredPermission: PERMISSION_CATEGORIES.PAYROLL.VIEW_OWN_PAYROLL,
-      availableToAll: true
+      availableToAll: true,
     },
     {
       key: 'team-payroll',
       title: 'Team Payroll',
       description: 'Payroll overview for your team',
       requiredPermission: PERMISSION_CATEGORIES.PAYROLL.VIEW_TEAM_PAYROLL,
-      requiredRole: 'Manager+'
+      requiredRole: 'Manager+',
     },
     {
       key: 'commission-reports',
       title: 'Commission Reports',
       description: 'Commission tracking and analytics',
       requiredPermission: PERMISSION_CATEGORIES.COMMISSION.VIEW_OWN_COMMISSIONS,
-      conditionalAccess: (user) => 
-        user.roles.includes('sales') || 
-        hasPermission(user, PERMISSION_CATEGORIES.COMMISSION.VIEW_ALL_COMMISSIONS)
+      conditionalAccess: (user) =>
+        user.roles.includes('sales') ||
+        hasPermission(
+          user,
+          PERMISSION_CATEGORIES.COMMISSION.VIEW_ALL_COMMISSIONS
+        ),
     },
     {
       key: 'labor-analytics',
       title: 'Labor Analytics',
       description: 'Labor cost analysis and efficiency metrics',
       requiredPermission: PERMISSION_CATEGORIES.PAYROLL.GENERATE_REPORTS,
-      requiredRole: 'Manager+'
+      requiredRole: 'Manager+',
     },
     {
       key: 'admin-reports',
       title: 'Admin Reports',
       description: 'System administration and compliance reports',
       requiredPermission: PERMISSION_CATEGORIES.ADMIN.SYSTEM_SETTINGS,
-      requiredRole: 'Admin'
-    }
-  ]
+      requiredRole: 'Admin',
+    },
+  ];
 
-  return reports.filter(report => {
-    if (report.availableToAll) return true
-    if (report.conditionalAccess) return report.conditionalAccess(user)
-    return hasPermission(user, report.requiredPermission)
-  })
+  return reports.filter((report) => {
+    if (report.availableToAll) return true;
+    if (report.conditionalAccess) return report.conditionalAccess(user);
+    return hasPermission(user, report.requiredPermission);
+  });
 }
 ```
 
@@ -2502,8 +2540,8 @@ export function useAvailableReports(user: User) {
 ```typescript
 // Title-based dashboard customization
 export function getDashboardConfig(user: User) {
-  const baseConfig = getRoleBasedConfig(user.roles)
-  
+  const baseConfig = getRoleBasedConfig(user.roles);
+
   // Customize based on title
   switch (user.title) {
     case 'Senior Captain':
@@ -2511,41 +2549,41 @@ export function getDashboardConfig(user: User) {
         ...baseConfig,
         showTeamMetrics: true,
         showTrainingProgress: true,
-        additionalWidgets: ['team-performance', 'mentorship-stats']
-      }
-    
+        additionalWidgets: ['team-performance', 'mentorship-stats'],
+      };
+
     case 'Regional Manager':
       return {
         ...baseConfig,
         showMultiLocationData: true,
         showRegionalMetrics: true,
-        additionalWidgets: ['location-comparison', 'regional-trends']
-      }
-    
+        additionalWidgets: ['location-comparison', 'regional-trends'],
+      };
+
     default:
-      return baseConfig
+      return baseConfig;
   }
 }
 
 // Department-specific report filters
 export function getDepartmentReports(user: User) {
-  const reports = []
-  
+  const reports = [];
+
   switch (user.department) {
     case 'Operations':
-      reports.push('operational-efficiency', 'capacity-utilization')
-      break
+      reports.push('operational-efficiency', 'capacity-utilization');
+      break;
     case 'Sales':
-      reports.push('sales-performance', 'commission-analytics')
-      break
+      reports.push('sales-performance', 'commission-analytics');
+      break;
     case 'Human Resources':
-      reports.push('employee-performance', 'compensation-analysis')
-      break
+      reports.push('employee-performance', 'compensation-analysis');
+      break;
   }
-  
-  return reports.filter(report => 
+
+  return reports.filter((report) =>
     hasPermission(user, `view_${report.replace('-', '_')}`)
-  )
+  );
 }
 ```
 
@@ -2560,36 +2598,37 @@ export function withAuth<T extends Record<string, any>>(
   requiredRoles?: string[]
 ) {
   return async (req: NextRequest, context: T) => {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user) {
-      return NextResponse.redirect('/auth/login')
+      return NextResponse.redirect('/auth/login');
     }
 
-    if (requiredRoles && !requiredRoles.some(role => 
-      session.user.roles.includes(role)
-    )) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (
+      requiredRoles &&
+      !requiredRoles.some((role) => session.user.roles.includes(role))
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    return handler(req, { ...context, user: session.user })
-  }
+    return handler(req, { ...context, user: session.user });
+  };
 }
 
 // Row-level security
 export function createUserFilter(userId: string, roles: string[]) {
   if (roles.includes('admin')) {
-    return {} // Admin sees everything
+    return {}; // Admin sees everything
   } else if (roles.includes('manager')) {
     return {
       OR: [
         { createdById: userId },
         { captainId: userId },
-        { status: 'submitted' } // Managers see submitted logs
-      ]
-    }
+        { status: 'submitted' }, // Managers see submitted logs
+      ],
+    };
   } else {
-    return { createdById: userId } // Users see only their own data
+    return { createdById: userId }; // Users see only their own data
   }
 }
 ```
@@ -2597,6 +2636,7 @@ export function createUserFilter(userId: string, roles: string[]) {
 ## Implementation Plan
 
 ### Phase 1: Foundation & Performance (Weeks 1-2)
+
 - Set up Next.js 15 with TypeScript strict mode
 - Configure shadcn/ui with New York theme and brand colors
 - Implement pre-computed metrics system
@@ -2604,30 +2644,35 @@ export function createUserFilter(userId: string, roles: string[]) {
 - Set up background job processing
 
 ### Phase 2: Authentication & Navigation (Weeks 3-4)
+
 - Implement login-02 block for authentication
 - Create sidebar-07 based navigation with role-based menus
 - Set up NextAuth.js with proper session management
 - Implement role-based access control
 
 ### Phase 3: Dashboard Implementation (Weeks 5-6)
+
 - Build role-specific dashboards using dashboard-01 block
 - Implement date range controls for all dashboards
 - Create interactive charts and modern metric cards
 - Add real-time updates and smooth animations
 
 ### Phase 4: Core Features (Weeks 7-8)
+
 - Build optimized log creation forms
 - Implement manager review interface with bulk operations
 - Create commission tracking system with auto-matching
 - Add comprehensive form validation with Zod
 
 ### Phase 5: Reports & Admin (Weeks 9-10)
+
 - Build payroll reporting system
 - Implement user management interface
 - Create pay period management
 - Add audit trail functionality
 
 ### Phase 6: Testing & Optimization (Weeks 11-12)
+
 - Comprehensive testing (unit, integration, E2E)
 - Performance optimization and monitoring
 - Mobile responsiveness testing

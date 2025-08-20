@@ -25,7 +25,11 @@ export async function getAuditLogs(
   try {
     const session = await auth();
     if (!session?.user) {
-      return { success: false, data: { logs: [], total: 0 }, error: 'Unauthorized' };
+      return {
+        success: false,
+        data: { logs: [], total: 0 },
+        error: 'Unauthorized',
+      };
     }
 
     // Check if user has manager or admin role
@@ -34,8 +38,12 @@ export async function getAuditLogs(
       select: { roles: true },
     });
 
-    if (!user?.roles.some(role => ['manager', 'admin'].includes(role))) {
-      return { success: false, data: { logs: [], total: 0 }, error: 'Insufficient permissions' };
+    if (!user?.roles.some((role) => ['manager', 'admin'].includes(role))) {
+      return {
+        success: false,
+        data: { logs: [], total: 0 },
+        error: 'Insufficient permissions',
+      };
     }
 
     // Build where clause
@@ -137,7 +145,7 @@ export async function getEntityAuditHistory(
       select: { roles: true },
     });
 
-    if (!user?.roles.some(role => ['manager', 'admin'].includes(role))) {
+    if (!user?.roles.some((role) => ['manager', 'admin'].includes(role))) {
       return { success: false, data: [], error: 'Insufficient permissions' };
     }
 
@@ -201,10 +209,15 @@ export async function getUserActivitySummary(
   try {
     const session = await auth();
     if (!session?.user) {
-      return { 
-        success: false, 
-        data: { totalActions: 0, actionBreakdown: {}, entityBreakdown: {}, recentActivity: [] },
-        error: 'Unauthorized' 
+      return {
+        success: false,
+        data: {
+          totalActions: 0,
+          actionBreakdown: {},
+          entityBreakdown: {},
+          recentActivity: [],
+        },
+        error: 'Unauthorized',
       };
     }
 
@@ -214,11 +227,16 @@ export async function getUserActivitySummary(
       select: { roles: true },
     });
 
-    if (!user?.roles.some(role => ['manager', 'admin'].includes(role))) {
-      return { 
-        success: false, 
-        data: { totalActions: 0, actionBreakdown: {}, entityBreakdown: {}, recentActivity: [] },
-        error: 'Insufficient permissions' 
+    if (!user?.roles.some((role) => ['manager', 'admin'].includes(role))) {
+      return {
+        success: false,
+        data: {
+          totalActions: 0,
+          actionBreakdown: {},
+          entityBreakdown: {},
+          recentActivity: [],
+        },
+        error: 'Insufficient permissions',
       };
     }
 
@@ -241,10 +259,13 @@ export async function getUserActivitySummary(
       _count: { action: true },
     });
 
-    const actionBreakdown = actionCounts.reduce((acc, item) => {
-      acc[item.action] = item._count.action;
-      return acc;
-    }, {} as Record<string, number>);
+    const actionBreakdown = actionCounts.reduce(
+      (acc, item) => {
+        acc[item.action] = item._count.action;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Get entity breakdown
     const entityCounts = await prisma.auditLog.groupBy({
@@ -253,10 +274,13 @@ export async function getUserActivitySummary(
       _count: { entityType: true },
     });
 
-    const entityBreakdown = entityCounts.reduce((acc, item) => {
-      acc[item.entityType] = item._count.entityType;
-      return acc;
-    }, {} as Record<string, number>);
+    const entityBreakdown = entityCounts.reduce(
+      (acc, item) => {
+        acc[item.entityType] = item._count.entityType;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Get recent activity
     const recentActivity = await prisma.auditLog.findMany({
@@ -297,7 +321,12 @@ export async function getUserActivitySummary(
     console.error('Failed to fetch user activity summary:', error);
     return {
       success: false,
-      data: { totalActions: 0, actionBreakdown: {}, entityBreakdown: {}, recentActivity: [] },
+      data: {
+        totalActions: 0,
+        actionBreakdown: {},
+        entityBreakdown: {},
+        recentActivity: [],
+      },
       error: 'Failed to fetch activity summary',
     };
   }

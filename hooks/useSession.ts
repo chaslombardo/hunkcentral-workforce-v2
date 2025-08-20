@@ -18,10 +18,10 @@ export function useSession() {
       // Check if session has required fields
       if (!user?.id || !user?.email || !user?.roles) {
         setSessionError('Invalid session data');
-        console.error('Invalid session structure:', { 
-          hasId: !!user?.id, 
-          hasEmail: !!user?.email, 
-          hasRoles: !!user?.roles 
+        console.error('Invalid session structure:', {
+          hasId: !!user?.id,
+          hasEmail: !!user?.email,
+          hasRoles: !!user?.roles,
         });
       } else {
         setSessionError(null);

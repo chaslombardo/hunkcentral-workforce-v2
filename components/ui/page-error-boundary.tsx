@@ -2,21 +2,30 @@
 
 import React from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  Home, 
-  Bug, 
-  Shield, 
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Bug,
+  Shield,
   Database,
   Server,
   Wifi,
 } from 'lucide-react';
-import { reportComponentError, createUserFriendlyErrorMessage } from '@/lib/error-reporting';
+import {
+  reportComponentError,
+  createUserFriendlyErrorMessage,
+} from '@/lib/error-reporting';
 
 interface PageErrorFallbackProps {
   error: Error;
@@ -24,7 +33,11 @@ interface PageErrorFallbackProps {
   errorId?: string;
 }
 
-function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProps) {
+function PageErrorFallback({
+  error,
+  resetError,
+  errorId,
+}: PageErrorFallbackProps) {
   const [isReporting, setIsReporting] = React.useState(false);
   const [reportSent, setReportSent] = React.useState(false);
 
@@ -48,18 +61,36 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
     }
   };
 
-  const getErrorType = (error: Error): 'auth' | 'network' | 'database' | 'server' | 'component' => {
+  const getErrorType = (
+    error: Error
+  ): 'auth' | 'network' | 'database' | 'server' | 'component' => {
     const message = error.message.toLowerCase();
-    if (message.includes('auth') || message.includes('unauthorized') || message.includes('forbidden')) {
+    if (
+      message.includes('auth') ||
+      message.includes('unauthorized') ||
+      message.includes('forbidden')
+    ) {
       return 'auth';
     }
-    if (message.includes('network') || message.includes('fetch') || message.includes('connection')) {
+    if (
+      message.includes('network') ||
+      message.includes('fetch') ||
+      message.includes('connection')
+    ) {
       return 'network';
     }
-    if (message.includes('database') || message.includes('prisma') || message.includes('sql')) {
+    if (
+      message.includes('database') ||
+      message.includes('prisma') ||
+      message.includes('sql')
+    ) {
       return 'database';
     }
-    if (message.includes('server') || message.includes('500') || message.includes('internal')) {
+    if (
+      message.includes('server') ||
+      message.includes('500') ||
+      message.includes('internal')
+    ) {
       return 'server';
     }
     return 'component';
@@ -73,21 +104,31 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
 
   const getErrorIcon = () => {
     switch (errorType) {
-      case 'auth': return <Shield className="h-6 w-6" />;
-      case 'network': return <Wifi className="h-6 w-6" />;
-      case 'database': return <Database className="h-6 w-6" />;
-      case 'server': return <Server className="h-6 w-6" />;
-      default: return <Bug className="h-6 w-6" />;
+      case 'auth':
+        return <Shield className="h-6 w-6" />;
+      case 'network':
+        return <Wifi className="h-6 w-6" />;
+      case 'database':
+        return <Database className="h-6 w-6" />;
+      case 'server':
+        return <Server className="h-6 w-6" />;
+      default:
+        return <Bug className="h-6 w-6" />;
     }
   };
 
   const getErrorColor = () => {
     switch (errorType) {
-      case 'auth': return 'text-orange-600';
-      case 'network': return 'text-blue-600';
-      case 'database': return 'text-purple-600';
-      case 'server': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'auth':
+        return 'text-orange-600';
+      case 'network':
+        return 'text-blue-600';
+      case 'database':
+        return 'text-purple-600';
+      case 'server':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
@@ -147,14 +188,12 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
           {/* Error Type and Message */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className={getErrorColor()}>
-                {getErrorIcon()}
-              </div>
+              <div className={getErrorColor()}>{getErrorIcon()}</div>
               <Badge variant="outline" className="capitalize">
                 {errorType} Error
               </Badge>
             </div>
-            
+
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="font-medium">
@@ -168,7 +207,9 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
             <div className="space-y-2">
               <h4 className="font-semibold text-sm">Development Details:</h4>
               <div className="text-sm font-mono bg-muted p-3 rounded border">
-                <div className="text-destructive font-semibold">{error.name}: {error.message}</div>
+                <div className="text-destructive font-semibold">
+                  {error.name}: {error.message}
+                </div>
                 {error.stack && (
                   <pre className="mt-2 text-xs whitespace-pre-wrap text-muted-foreground">
                     {error.stack.split('\n').slice(1, 6).join('\n')}
@@ -197,9 +238,9 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
               <RefreshCw className="h-4 w-4 mr-2" />
               Try Again
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = '/dashboard'}
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = '/dashboard')}
               className="flex-1"
             >
               <Home className="h-4 w-4 mr-2" />
@@ -228,10 +269,9 @@ function PageErrorFallback({ error, resetError, errorId }: PageErrorFallbackProp
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {reportSent 
+                {reportSent
                   ? 'Thank you! Your error report helps us identify and fix issues.'
-                  : 'Send an anonymous error report to help us identify and fix this issue.'
-                }
+                  : 'Send an anonymous error report to help us identify and fix this issue.'}
               </p>
             </div>
           )}
@@ -253,7 +293,10 @@ interface PageErrorBoundaryProps {
   pageName?: string;
 }
 
-export function PageErrorBoundary({ children, pageName }: PageErrorBoundaryProps) {
+export function PageErrorBoundary({
+  children,
+  pageName,
+}: PageErrorBoundaryProps) {
   return (
     <ErrorBoundary
       level="page"

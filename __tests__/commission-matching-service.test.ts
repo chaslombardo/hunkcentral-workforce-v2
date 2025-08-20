@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { 
+import {
   handleLogApprovalCommissionMatching,
   resolveCommissionConflict,
   getCommissionConflicts,
@@ -108,13 +108,18 @@ describe('Commission Matching Service', () => {
     it('should handle successful commission matching', async () => {
       mockProcessCommissionMatching.mockResolvedValue(mockMatchResult);
 
-      const result = await handleLogApprovalCommissionMatching('log-1', 'user-manager');
+      const result = await handleLogApprovalCommissionMatching(
+        'log-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
       expect(result.notifications).toHaveLength(3); // 1 match + 1 conflict + 1 summary
-      
+
       // Check success notification
-      const successNotifications = result.notifications.filter(n => n.type === 'success');
+      const successNotifications = result.notifications.filter(
+        (n) => n.type === 'success'
+      );
       expect(successNotifications).toHaveLength(2); // 1 match + 1 summary
       expect(successNotifications[0].title).toBe('Commission Matched');
       expect(successNotifications[0].message).toContain('JOB-001');
@@ -122,14 +127,22 @@ describe('Commission Matching Service', () => {
       expect(successNotifications[0].message).toContain('83.3%');
 
       // Check conflict notification
-      const conflictNotifications = result.notifications.filter(n => n.type === 'conflict');
+      const conflictNotifications = result.notifications.filter(
+        (n) => n.type === 'conflict'
+      );
       expect(conflictNotifications).toHaveLength(1);
-      expect(conflictNotifications[0].title).toBe('Commission Conflict Detected');
+      expect(conflictNotifications[0].title).toBe(
+        'Commission Conflict Detected'
+      );
       expect(conflictNotifications[0].message).toContain('JOB-002');
 
       // Check summary notification
-      expect(successNotifications[1].title).toBe('Commission Matching Complete');
-      expect(successNotifications[1].message).toContain('1 commission(s) matched');
+      expect(successNotifications[1].title).toBe(
+        'Commission Matching Complete'
+      );
+      expect(successNotifications[1].message).toContain(
+        '1 commission(s) matched'
+      );
 
       expect(mockLogCommissionChange).toHaveBeenCalledWith(
         'match',
@@ -147,7 +160,10 @@ describe('Commission Matching Service', () => {
         unmatched: [],
       });
 
-      const result = await handleLogApprovalCommissionMatching('log-1', 'user-manager');
+      const result = await handleLogApprovalCommissionMatching(
+        'log-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
       expect(result.notifications).toHaveLength(0);
@@ -155,9 +171,14 @@ describe('Commission Matching Service', () => {
     });
 
     it('should handle processing errors', async () => {
-      mockProcessCommissionMatching.mockRejectedValue(new Error('Database error'));
+      mockProcessCommissionMatching.mockRejectedValue(
+        new Error('Database error')
+      );
 
-      const result = await handleLogApprovalCommissionMatching('log-1', 'user-manager');
+      const result = await handleLogApprovalCommissionMatching(
+        'log-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(false);
       expect(result.notifications).toHaveLength(1);
@@ -187,10 +208,15 @@ describe('Commission Matching Service', () => {
 
       mockProcessCommissionMatching.mockResolvedValue(matchWithCommission);
 
-      const result = await handleLogApprovalCommissionMatching('log-1', 'user-manager');
+      const result = await handleLogApprovalCommissionMatching(
+        'log-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
-      const successNotification = result.notifications.find(n => n.type === 'success' && n.title === 'Commission Matched');
+      const successNotification = result.notifications.find(
+        (n) => n.type === 'success' && n.title === 'Commission Matched'
+      );
       expect(successNotification?.data.commissionAmount).toBe(100); // 1000 * 0.10
     });
 
@@ -214,10 +240,15 @@ describe('Commission Matching Service', () => {
 
       mockProcessCommissionMatching.mockResolvedValue(matchWithZeroCommission);
 
-      const result = await handleLogApprovalCommissionMatching('log-1', 'user-manager');
+      const result = await handleLogApprovalCommissionMatching(
+        'log-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
-      const successNotification = result.notifications.find(n => n.type === 'success' && n.title === 'Commission Matched');
+      const successNotification = result.notifications.find(
+        (n) => n.type === 'success' && n.title === 'Commission Matched'
+      );
       expect(successNotification?.data.commissionAmount).toBe(0);
     });
   });
@@ -255,15 +286,23 @@ describe('Commission Matching Service', () => {
     ];
 
     beforeEach(() => {
-      mockPrisma.commissionEntry.findUnique.mockResolvedValue(mockCommissionEntry);
+      mockPrisma.commissionEntry.findUnique.mockResolvedValue(
+        mockCommissionEntry
+      );
       mockPrisma.logJob.findFirst.mockResolvedValue(mockLogJob);
-      mockPrisma.commissionEntry.findMany.mockResolvedValue(mockConflictingEntries);
+      mockPrisma.commissionEntry.findMany.mockResolvedValue(
+        mockConflictingEntries
+      );
       mockPrisma.commissionEntry.update.mockResolvedValue(mockCommissionEntry);
       mockPrisma.commissionEntry.delete.mockResolvedValue({});
     });
 
     it('should resolve conflict successfully', async () => {
-      const result = await resolveCommissionConflict('JOB-001', 'comm-1', 'user-manager');
+      const result = await resolveCommissionConflict(
+        'JOB-001',
+        'comm-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
       expect(result.notifications).toHaveLength(1);
@@ -292,7 +331,11 @@ describe('Commission Matching Service', () => {
     it('should handle commission entry not found', async () => {
       mockPrisma.commissionEntry.findUnique.mockResolvedValue(null);
 
-      const result = await resolveCommissionConflict('JOB-001', 'comm-1', 'user-manager');
+      const result = await resolveCommissionConflict(
+        'JOB-001',
+        'comm-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(false);
       expect(result.notifications[0].type).toBe('error');
@@ -302,7 +345,11 @@ describe('Commission Matching Service', () => {
     it('should handle log job not found', async () => {
       mockPrisma.logJob.findFirst.mockResolvedValue(null);
 
-      const result = await resolveCommissionConflict('JOB-001', 'comm-1', 'user-manager');
+      const result = await resolveCommissionConflict(
+        'JOB-001',
+        'comm-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(false);
       expect(result.notifications[0].type).toBe('error');
@@ -315,7 +362,11 @@ describe('Commission Matching Service', () => {
         log: { ...mockLogJob.log, status: 'submitted' },
       });
 
-      const result = await resolveCommissionConflict('JOB-001', 'comm-1', 'user-manager');
+      const result = await resolveCommissionConflict(
+        'JOB-001',
+        'comm-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(false);
       expect(result.notifications[0].type).toBe('error');
@@ -332,7 +383,11 @@ describe('Commission Matching Service', () => {
       };
       mockPrisma.commissionEntry.findUnique.mockResolvedValue(highRateEntry);
 
-      const result = await resolveCommissionConflict('JOB-001', 'comm-1', 'user-manager');
+      const result = await resolveCommissionConflict(
+        'JOB-001',
+        'comm-1',
+        'user-manager'
+      );
 
       expect(result.success).toBe(true);
       expect(mockPrisma.commissionEntry.update).toHaveBeenCalledWith({
@@ -349,10 +404,7 @@ describe('Commission Matching Service', () => {
 
   describe('getCommissionConflicts', () => {
     it('should return conflicts correctly', async () => {
-      const mockGroupBy = [
-        { jobId: 'JOB-001' },
-        { jobId: 'JOB-002' },
-      ];
+      const mockGroupBy = [{ jobId: 'JOB-001' }, { jobId: 'JOB-002' }];
 
       const mockCommissionEntries = [
         {
@@ -379,7 +431,9 @@ describe('Commission Matching Service', () => {
       };
 
       mockPrisma.commissionEntry.groupBy.mockResolvedValue(mockGroupBy);
-      mockPrisma.commissionEntry.findMany.mockResolvedValue(mockCommissionEntries);
+      mockPrisma.commissionEntry.findMany.mockResolvedValue(
+        mockCommissionEntries
+      );
       mockPrisma.logJob.findFirst
         .mockResolvedValueOnce(mockLogJob)
         .mockResolvedValueOnce(null); // Second job has no approved log
@@ -393,7 +447,9 @@ describe('Commission Matching Service', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrisma.commissionEntry.groupBy.mockRejectedValue(new Error('Database error'));
+      mockPrisma.commissionEntry.groupBy.mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await getCommissionConflicts();
 
@@ -426,7 +482,7 @@ describe('Commission Matching Service', () => {
         success: true,
         conflicts: [{ jobId: 'JOB-001' }],
       });
-      
+
       // Replace the import with our mock
       vi.doMock('@/lib/commissionMatchingService', async () => {
         const actual = await vi.importActual('@/lib/commissionMatchingService');
@@ -443,7 +499,7 @@ describe('Commission Matching Service', () => {
       expect(result.stats!.totalPending).toBe(5);
       expect(result.stats!.totalMatched).toBe(2);
       expect(result.stats!.totalCommissionValue).toBe(67.5);
-      
+
       // Average accuracy: ((83.33 + 93.75) / 2) = 88.54
       expect(result.stats!.averageAccuracy).toBeCloseTo(88.54, 1);
     });
@@ -462,7 +518,9 @@ describe('Commission Matching Service', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrisma.commissionEntry.count.mockRejectedValue(new Error('Database error'));
+      mockPrisma.commissionEntry.count.mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await getCommissionMatchingStats();
 

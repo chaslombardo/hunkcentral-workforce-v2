@@ -5,13 +5,13 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { calculatePayroll } from '@/lib/payCalculator';
 import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
-import type { 
-  User, 
-  Department, 
-  PayPeriod, 
-  PayPeriodStatus, 
+import type {
+  User,
+  Department,
+  PayPeriod,
+  PayPeriodStatus,
   DailyLog,
-  CommissionEntry 
+  CommissionEntry,
 } from '@/types';
 
 // Types for pay period analysis
@@ -80,7 +80,11 @@ export interface PayrollInsight {
 export async function getPayPeriodComparison(
   employeeId: string,
   currentPeriodId: string,
-  comparisonType: 'previous' | 'same-last-month' | 'best-period' | 'average' = 'previous'
+  comparisonType:
+    | 'previous'
+    | 'same-last-month'
+    | 'best-period'
+    | 'average' = 'previous'
 ): Promise<{ success: boolean; data?: PayPeriodComparison; error?: string }> {
   try {
     const session = await getSession();
@@ -89,8 +93,10 @@ export async function getPayPeriodComparison(
     }
 
     // Check if user can access this payroll data
-    if (session.user.id !== employeeId && 
-        !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
+    if (
+      session.user.id !== employeeId &&
+      !session.user.roles?.some((role) => ['admin', 'manager'].includes(role))
+    ) {
       throw new Error('Unauthorized: Can only view your own payroll data');
     }
 
@@ -139,19 +145,37 @@ export async function getPayPeriodComparison(
     const employeeForCalculation: User = {
       ...employee,
       roles: employee.roles as User['roles'],
-      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
-      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
-      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
-      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
+      rateJunkCaptain: employee.rateJunkCaptain
+        ? Number(employee.rateJunkCaptain)
+        : undefined,
+      rateJunkWingman: employee.rateJunkWingman
+        ? Number(employee.rateJunkWingman)
+        : undefined,
+      rateMoveCaptain: employee.rateMoveCaptain
+        ? Number(employee.rateMoveCaptain)
+        : undefined,
+      rateMoveWingman: employee.rateMoveWingman
+        ? Number(employee.rateMoveWingman)
+        : undefined,
       rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
-      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
-      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
-      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
+      rateTraining: employee.rateTraining
+        ? Number(employee.rateTraining)
+        : undefined,
+      rateEstimating: employee.rateEstimating
+        ? Number(employee.rateEstimating)
+        : undefined,
+      rateWarehouse: employee.rateWarehouse
+        ? Number(employee.rateWarehouse)
+        : undefined,
       rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
-      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
+      salaryAmount: employee.salaryAmount
+        ? Number(employee.salaryAmount)
+        : undefined,
       salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
       salaryType: employee.salaryType as User['salaryType'],
-      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
+      commissionRate: employee.commissionRate
+        ? Number(employee.commissionRate)
+        : undefined,
       junkBonusGoal: Number(employee.junkBonusGoal),
       moveBonusGoal: Number(employee.moveBonusGoal),
     };
@@ -167,7 +191,7 @@ export async function getPayPeriodComparison(
 
     // Get comparison period
     let comparisonPeriod: PayPeriod | null = null;
-    
+
     if (comparisonType === 'previous') {
       const result = await prisma.payPeriod.findFirst({
         where: {
@@ -176,7 +200,7 @@ export async function getPayPeriodComparison(
         },
         orderBy: { endDate: 'desc' },
       });
-      
+
       if (result) {
         comparisonPeriod = {
           ...result,
@@ -188,20 +212,21 @@ export async function getPayPeriodComparison(
 
     let previousPeriodData: PayrollPeriodData | undefined;
     if (comparisonPeriod) {
-      previousPeriodData = await getPayrollPeriodData(
-        employeeForCalculation,
-        {
-          ...comparisonPeriod,
-          status: comparisonPeriod.status as PayPeriodStatus,
-        }
-      );
+      previousPeriodData = await getPayrollPeriodData(employeeForCalculation, {
+        ...comparisonPeriod,
+        status: comparisonPeriod.status as PayPeriodStatus,
+      });
     }
 
     // Calculate trends
     const trends = calculateTrends(currentPeriodData, previousPeriodData);
 
     // Generate insights
-    const insights = generateInsights(currentPeriodData, previousPeriodData, trends);
+    const insights = generateInsights(
+      currentPeriodData,
+      previousPeriodData,
+      trends
+    );
 
     const comparison: PayPeriodComparison = {
       currentPeriod: currentPeriodData,
@@ -215,7 +240,10 @@ export async function getPayPeriodComparison(
     // Error fetching pay period comparison
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch pay period comparison',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch pay period comparison',
     };
   }
 }
@@ -272,25 +300,43 @@ async function getPayrollPeriodData(
   const employeeForCalculation: User = {
     ...employee,
     roles: employee.roles as User['roles'],
-    rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
-    rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
-    rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
-    rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
+    rateJunkCaptain: employee.rateJunkCaptain
+      ? Number(employee.rateJunkCaptain)
+      : undefined,
+    rateJunkWingman: employee.rateJunkWingman
+      ? Number(employee.rateJunkWingman)
+      : undefined,
+    rateMoveCaptain: employee.rateMoveCaptain
+      ? Number(employee.rateMoveCaptain)
+      : undefined,
+    rateMoveWingman: employee.rateMoveWingman
+      ? Number(employee.rateMoveWingman)
+      : undefined,
     rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
-    rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
-    rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
-    rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
+    rateTraining: employee.rateTraining
+      ? Number(employee.rateTraining)
+      : undefined,
+    rateEstimating: employee.rateEstimating
+      ? Number(employee.rateEstimating)
+      : undefined,
+    rateWarehouse: employee.rateWarehouse
+      ? Number(employee.rateWarehouse)
+      : undefined,
     rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
-    salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
+    salaryAmount: employee.salaryAmount
+      ? Number(employee.salaryAmount)
+      : undefined,
     salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
     salaryType: employee.salaryType as User['salaryType'],
-    commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
+    commissionRate: employee.commissionRate
+      ? Number(employee.commissionRate)
+      : undefined,
     junkBonusGoal: Number(employee.junkBonusGoal),
     moveBonusGoal: Number(employee.moveBonusGoal),
   };
 
   // Convert logs data (simplified conversion for this use case)
-  const logsForCalculation: DailyLog[] = approvedLogs.map(log => ({
+  const logsForCalculation: DailyLog[] = approvedLogs.map((log) => ({
     ...log,
     status: log.status as DailyLog['status'],
     submittedAt: log.submittedAt || undefined,
@@ -301,43 +347,49 @@ async function getPayrollPeriodData(
     createdBy: employeeForCalculation,
     approvedBy: log.approvedBy ? employeeForCalculation : undefined,
     lastEditedBy: log.lastEditedBy ? employeeForCalculation : undefined,
-    hours: log.hours?.map(hour => ({
-      ...hour,
-      log: {} as DailyLog,
-      department: hour.department as Department,
-      hours: Number(hour.hours),
-      employee: employeeForCalculation,
-    })) || [],
-    jobs: log.jobs?.map(job => ({
-      ...job,
-      jobType: job.jobType as 'junk' | 'move',
-      revenue: Number(job.revenue),
-      tips: Number(job.tips),
-      junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
-      valuation: job.valuation ? Number(job.valuation) : undefined,
-      materials: job.materials ? Number(job.materials) : undefined,
-      disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
-      log: {} as DailyLog,
-    })) || [],
+    hours:
+      log.hours?.map((hour) => ({
+        ...hour,
+        log: {} as DailyLog,
+        department: hour.department as Department,
+        hours: Number(hour.hours),
+        employee: employeeForCalculation,
+      })) || [],
+    jobs:
+      log.jobs?.map((job) => ({
+        ...job,
+        jobType: job.jobType as 'junk' | 'move',
+        revenue: Number(job.revenue),
+        tips: Number(job.tips),
+        junkOnMove: job.junkOnMove ? Number(job.junkOnMove) : undefined,
+        valuation: job.valuation ? Number(job.valuation) : undefined,
+        materials: job.materials ? Number(job.materials) : undefined,
+        disposalCost: job.disposalCost ? Number(job.disposalCost) : undefined,
+        log: {} as DailyLog,
+      })) || [],
   }));
 
   // Convert commission entries
-  const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(commission => ({
-    ...commission,
-    ...convertCommissionDecimalFields(commission),
-    jobType: commission.jobType as CommissionEntry['jobType'],
-    status: commission.status as CommissionEntry['status'],
-    matchedLogId: commission.matchedLogId || undefined,
-    matchedLog: commission.matchedLog ? {
-      ...commission.matchedLog,
-      status: commission.matchedLog.status as DailyLog['status'],
-      submittedAt: commission.matchedLog.submittedAt || undefined,
-      approvedAt: commission.matchedLog.approvedAt || undefined,
-      approvedById: commission.matchedLog.approvedById || undefined,
-      lastEditedById: commission.matchedLog.lastEditedById || undefined,
-    } as DailyLog : undefined,
-    sales: employeeForCalculation,
-  }));
+  const commissionsForCalculation: CommissionEntry[] = commissionEntries.map(
+    (commission) => ({
+      ...commission,
+      ...convertCommissionDecimalFields(commission),
+      jobType: commission.jobType as CommissionEntry['jobType'],
+      status: commission.status as CommissionEntry['status'],
+      matchedLogId: commission.matchedLogId || undefined,
+      matchedLog: commission.matchedLog
+        ? ({
+            ...commission.matchedLog,
+            status: commission.matchedLog.status as DailyLog['status'],
+            submittedAt: commission.matchedLog.submittedAt || undefined,
+            approvedAt: commission.matchedLog.approvedAt || undefined,
+            approvedById: commission.matchedLog.approvedById || undefined,
+            lastEditedById: commission.matchedLog.lastEditedById || undefined,
+          } as DailyLog)
+        : undefined,
+      sales: employeeForCalculation,
+    })
+  );
 
   // Calculate payroll using existing logic
   const payrollCalculation = calculatePayroll(
@@ -352,13 +404,13 @@ async function getPayrollPeriodData(
   const departmentBreakdown = {} as PayrollPeriodData['departmentBreakdown'];
   const employeePayroll = payrollCalculation[0]; // Get the first (and only) employee's payroll
   const totalHours = employeePayroll.totalHours;
-  
+
   Object.entries(employeePayroll.hoursByDepartment).forEach(([dept, hours]) => {
     if (hours > 0) {
       const department = dept as Department;
       const rate = getEmployeeRate(employee, department, false); // Simplified rate calculation
       const pay = hours * rate;
-      
+
       departmentBreakdown[department] = {
         hours,
         pay,
@@ -368,7 +420,10 @@ async function getPayrollPeriodData(
   });
 
   // Calculate daily averages
-  const workingDays = Math.max(1, getWorkingDaysInPeriod(payPeriod.startDate, payPeriod.endDate));
+  const workingDays = Math.max(
+    1,
+    getWorkingDaysInPeriod(payPeriod.startDate, payPeriod.endDate)
+  );
   const dailyAverages = {
     pay: employeePayroll.totalPay / workingDays,
     hours: totalHours / workingDays,
@@ -402,10 +457,14 @@ function calculateTrends(
   current: PayrollPeriodData,
   previous?: PayrollPeriodData
 ): PayrollTrends {
-  const createTrendData = (currentValue: number, previousValue: number = 0): TrendData => {
+  const createTrendData = (
+    currentValue: number,
+    previousValue: number = 0
+  ): TrendData => {
     const change = currentValue - previousValue;
-    const changePercentage = previousValue > 0 ? (change / previousValue) * 100 : 0;
-    
+    const changePercentage =
+      previousValue > 0 ? (change / previousValue) * 100 : 0;
+
     return {
       current: currentValue,
       previous: previousValue,
@@ -427,7 +486,9 @@ function calculateTrends(
     ),
     tipsPerHour: createTrendData(
       current.totalHours > 0 ? current.tips / current.totalHours : 0,
-      previous && previous.totalHours > 0 ? previous.tips / previous.totalHours : 0
+      previous && previous.totalHours > 0
+        ? previous.tips / previous.totalHours
+        : 0
     ),
   };
 }
@@ -458,7 +519,8 @@ function generateInsights(
     insights.push({
       type: 'positive',
       title: 'Strong Labor Efficiency',
-      description: 'Your efficiency is above target, earning additional bonuses',
+      description:
+        'Your efficiency is above target, earning additional bonuses',
       metric: `${current.laborEfficiency.overallEfficiency}% efficiency`,
       recommendation: 'Continue focusing on efficient job completion',
     });
@@ -476,9 +538,10 @@ function generateInsights(
   }
 
   // Department mix insight
-  const primaryDept = Object.entries(current.departmentBreakdown)
-    .sort(([,a], [,b]) => b.hours - a.hours)[0];
-  
+  const primaryDept = Object.entries(current.departmentBreakdown).sort(
+    ([, a], [, b]) => b.hours - a.hours
+  )[0];
+
   if (primaryDept) {
     insights.push({
       type: 'neutral',
@@ -494,12 +557,20 @@ function generateInsights(
 /**
  * Get employee rate for a department (simplified)
  */
-function getEmployeeRate(employee: User, department: Department, isCaptain: boolean): number {
+function getEmployeeRate(
+  employee: User,
+  department: Department,
+  isCaptain: boolean
+): number {
   switch (department) {
     case 'junk':
-      return isCaptain ? (employee.rateJunkCaptain || 0) : (employee.rateJunkWingman || 0);
+      return isCaptain
+        ? employee.rateJunkCaptain || 0
+        : employee.rateJunkWingman || 0;
     case 'move':
-      return isCaptain ? (employee.rateMoveCaptain || 0) : (employee.rateMoveWingman || 0);
+      return isCaptain
+        ? employee.rateMoveCaptain || 0
+        : employee.rateMoveWingman || 0;
     case 'zigma':
       return employee.rateZigma || 0;
     case 'training':
@@ -538,8 +609,10 @@ export async function getHistoricalPayrollData(
     }
 
     // Check if user can access this payroll data
-    if (session.user.id !== employeeId && 
-        !session.user.roles?.some(role => ['admin', 'manager'].includes(role))) {
+    if (
+      session.user.id !== employeeId &&
+      !session.user.roles?.some((role) => ['admin', 'manager'].includes(role))
+    ) {
       throw new Error('Unauthorized: Can only view your own payroll data');
     }
 
@@ -588,34 +661,49 @@ export async function getHistoricalPayrollData(
     const employeeForCalculation: User = {
       ...employee,
       roles: employee.roles as User['roles'],
-      rateJunkCaptain: employee.rateJunkCaptain ? Number(employee.rateJunkCaptain) : undefined,
-      rateJunkWingman: employee.rateJunkWingman ? Number(employee.rateJunkWingman) : undefined,
-      rateMoveCaptain: employee.rateMoveCaptain ? Number(employee.rateMoveCaptain) : undefined,
-      rateMoveWingman: employee.rateMoveWingman ? Number(employee.rateMoveWingman) : undefined,
+      rateJunkCaptain: employee.rateJunkCaptain
+        ? Number(employee.rateJunkCaptain)
+        : undefined,
+      rateJunkWingman: employee.rateJunkWingman
+        ? Number(employee.rateJunkWingman)
+        : undefined,
+      rateMoveCaptain: employee.rateMoveCaptain
+        ? Number(employee.rateMoveCaptain)
+        : undefined,
+      rateMoveWingman: employee.rateMoveWingman
+        ? Number(employee.rateMoveWingman)
+        : undefined,
       rateZigma: employee.rateZigma ? Number(employee.rateZigma) : undefined,
-      rateTraining: employee.rateTraining ? Number(employee.rateTraining) : undefined,
-      rateEstimating: employee.rateEstimating ? Number(employee.rateEstimating) : undefined,
-      rateWarehouse: employee.rateWarehouse ? Number(employee.rateWarehouse) : undefined,
+      rateTraining: employee.rateTraining
+        ? Number(employee.rateTraining)
+        : undefined,
+      rateEstimating: employee.rateEstimating
+        ? Number(employee.rateEstimating)
+        : undefined,
+      rateWarehouse: employee.rateWarehouse
+        ? Number(employee.rateWarehouse)
+        : undefined,
       rateAdmin: employee.rateAdmin ? Number(employee.rateAdmin) : undefined,
-      salaryAmount: employee.salaryAmount ? Number(employee.salaryAmount) : undefined,
+      salaryAmount: employee.salaryAmount
+        ? Number(employee.salaryAmount)
+        : undefined,
       salaryFrequency: employee.salaryFrequency as User['salaryFrequency'],
       salaryType: employee.salaryType as User['salaryType'],
-      commissionRate: employee.commissionRate ? Number(employee.commissionRate) : undefined,
+      commissionRate: employee.commissionRate
+        ? Number(employee.commissionRate)
+        : undefined,
       junkBonusGoal: Number(employee.junkBonusGoal),
       moveBonusGoal: Number(employee.moveBonusGoal),
     };
 
     // Get payroll data for each period
     const historicalData: PayrollPeriodData[] = [];
-    
+
     for (const period of payPeriods) {
-      const periodData = await getPayrollPeriodData(
-        employeeForCalculation,
-        {
-          ...period,
-          status: period.status as PayPeriodStatus,
-        }
-      );
+      const periodData = await getPayrollPeriodData(employeeForCalculation, {
+        ...period,
+        status: period.status as PayPeriodStatus,
+      });
       historicalData.push(periodData);
     }
 
@@ -624,7 +712,10 @@ export async function getHistoricalPayrollData(
     // Error fetching historical payroll data
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch historical payroll data',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch historical payroll data',
     };
   }
 }
@@ -635,7 +726,11 @@ export async function getHistoricalPayrollData(
 export async function getCachedPayPeriodComparison(
   employeeId: string,
   currentPeriodId: string,
-  comparisonType: 'previous' | 'same-last-month' | 'best-period' | 'average' = 'previous'
+  comparisonType:
+    | 'previous'
+    | 'same-last-month'
+    | 'best-period'
+    | 'average' = 'previous'
 ) {
   const cacheKey = `pay-period-comparison-${employeeId}-${currentPeriodId}-${comparisonType}`;
 

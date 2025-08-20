@@ -1,6 +1,6 @@
-import { SmartBreadcrumbsDemo } from "@/components/layout/smart-breadcrumbs-demo"
+import { SmartBreadcrumbsDemo } from '@/components/layout/smart-breadcrumbs-demo';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default function BreadcrumbsPage() {
   return (
@@ -19,5 +19,5 @@ export default function BreadcrumbsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

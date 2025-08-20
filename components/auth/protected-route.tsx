@@ -31,15 +31,17 @@ export function ProtectedRoute({
   useEffect(() => {
     const error = searchParams.get('error');
     const reason = searchParams.get('reason');
-    
+
     if (error === 'access_denied' && reason) {
       const errorMessages = {
         admin_required: 'Administrator access required for this page.',
         manager_required: 'Manager access required for this page.',
         sales_required: 'Sales access required for this page.',
       };
-      
-      setAccessError(errorMessages[reason as keyof typeof errorMessages] || 'Access denied.');
+
+      setAccessError(
+        errorMessages[reason as keyof typeof errorMessages] || 'Access denied.'
+      );
     }
   }, [searchParams]);
 
@@ -56,9 +58,10 @@ export function ProtectedRoute({
 
   // Handle authentication errors
   if (status === 'unauthenticated' || !isAuthenticated || !user) {
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const currentPath =
+      typeof window !== 'undefined' ? window.location.pathname : '/';
     const loginUrl = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`;
-    
+
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center space-y-4">
@@ -85,8 +88,8 @@ export function ProtectedRoute({
           <BrandButton asChild variant="outline">
             <Link href="/dashboard">Return to Dashboard</Link>
           </BrandButton>
-          <BrandButton 
-            variant="ghost" 
+          <BrandButton
+            variant="ghost"
             onClick={() => {
               setAccessError(null);
               router.replace(window.location.pathname);

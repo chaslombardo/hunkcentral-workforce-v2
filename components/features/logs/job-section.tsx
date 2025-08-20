@@ -49,15 +49,28 @@ interface JobSectionProps {
   employees?: User[];
 }
 
-export function JobSection({ jobType, title, description, employees = [] }: JobSectionProps) {
+export function JobSection({
+  jobType,
+  title,
+  description,
+  employees = [],
+}: JobSectionProps) {
   const { control, watch, setValue } = useFormContext<DailyLogFormData>();
-  
-  const { fields: jobFields, append: appendJob, remove: removeJob } = useFieldArray({
+
+  const {
+    fields: jobFields,
+    append: appendJob,
+    remove: removeJob,
+  } = useFieldArray({
     control,
     name: 'jobs',
   });
 
-  const { fields: hourFields, append: appendHour, remove: removeHour } = useFieldArray({
+  const {
+    fields: hourFields,
+    append: appendHour,
+    remove: removeHour,
+  } = useFieldArray({
     control,
     name: 'hours',
   });
@@ -188,14 +201,18 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                   <Separator />
                   <Card className="bg-muted/30">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Section Totals</CardTitle>
+                      <CardTitle className="text-base">
+                        Section Totals
+                      </CardTitle>
                       <CardDescription>
                         Disposal costs apply to all junk jobs in this section
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="max-w-xs">
-                        <Label htmlFor="disposal-cost">Total Disposal Cost</Label>
+                        <Label htmlFor="disposal-cost">
+                          Total Disposal Cost
+                        </Label>
                         <div className="relative mt-1">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                             $
@@ -207,7 +224,9 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                             min="0"
                             placeholder="0.00"
                             value={disposalCost}
-                            onChange={(e) => setDisposalCost(parseFloat(e.target.value) || 0)}
+                            onChange={(e) =>
+                              setDisposalCost(parseFloat(e.target.value) || 0)
+                            }
                             className="pl-8 focus-visible:ring-hunks-green"
                           />
                         </div>
@@ -248,12 +267,17 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
               <Accordion type="multiple" className="w-full">
                 {sectionHourIndices.map((globalIndex, localIndex) => {
                   const employeeId = watch(`hours.${globalIndex}.employeeId`);
-                  const employee = employees.find(emp => emp.id === employeeId);
+                  const employee = employees.find(
+                    (emp) => emp.id === employeeId
+                  );
                   const hours = watch(`hours.${globalIndex}.hours`);
                   const isCoCaptain = watch(`hours.${globalIndex}.isCoCaptain`);
-                  
+
                   return (
-                    <AccordionItem key={`${jobType}-hour-${globalIndex}-${hourFields[globalIndex]?.id || localIndex}`} value={`item-${globalIndex}`}>
+                    <AccordionItem
+                      key={`${jobType}-hour-${globalIndex}-${hourFields[globalIndex]?.id || localIndex}`}
+                      value={`item-${globalIndex}`}
+                    >
                       <AccordionTrigger className="hover:no-underline">
                         <div className="flex items-center justify-between w-full mr-4">
                           <div className="flex items-center gap-3">
@@ -267,7 +291,9 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                             )}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{jobType === 'junk' ? 'Junk Removal' : 'Moving'}</span>
+                            <span>
+                              {jobType === 'junk' ? 'Junk Removal' : 'Moving'}
+                            </span>
                             <span>{hours}h</span>
                           </div>
                         </div>
@@ -281,7 +307,10 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Employee</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                >
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select employee" />
@@ -289,7 +318,10 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                                   </FormControl>
                                   <SelectContent>
                                     {employees.map((employee) => (
-                                      <SelectItem key={employee.id} value={employee.id}>
+                                      <SelectItem
+                                        key={employee.id}
+                                        value={employee.id}
+                                      >
                                         {employee.fullName}
                                       </SelectItem>
                                     ))}
@@ -317,7 +349,9 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                                     value={field.value || ''}
                                     onChange={(e) => {
                                       const value = e.target.value;
-                                      field.onChange(value === '' ? 0 : parseFloat(value));
+                                      field.onChange(
+                                        value === '' ? 0 : parseFloat(value)
+                                      );
                                     }}
                                     className="focus-visible:ring-hunks-green"
                                   />
@@ -342,7 +376,7 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                                       className="data-[state=checked]:border-hunks-orange data-[state=checked]:bg-hunks-orange data-[state=checked]:text-white"
                                     />
                                   </FormControl>
-                                  <Label 
+                                  <Label
                                     htmlFor={`co-captain-${globalIndex}`}
                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                   >
@@ -350,7 +384,8 @@ export function JobSection({ jobType, title, description, employees = [] }: JobS
                                   </Label>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                  Check if this employee served as co-captain for this section
+                                  Check if this employee served as co-captain
+                                  for this section
                                 </p>
                                 <FormMessage />
                               </FormItem>

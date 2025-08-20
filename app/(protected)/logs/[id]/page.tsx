@@ -78,7 +78,7 @@ export default async function LogDetailPage({ params }: LogDetailPageProps) {
     // Log the error with comprehensive context
     const userId = (session as Session | null)?.user?.id;
     const userRoles = (session as Session | null)?.user?.roles || [];
-    
+
     await logPageError(error, {
       page: 'logs_detail',
       userId,
@@ -92,14 +92,18 @@ export default async function LogDetailPage({ params }: LogDetailPageProps) {
         errorType: error instanceof Error ? error.constructor.name : 'Unknown',
       },
     });
-    
+
     // Return user-friendly error fallback
-    return <LogDetailErrorFallback 
-      error={error instanceof Error ? error : new Error('Unknown error occurred')}
-      context={{
-        page: 'logs_detail',
-        userId,
-      }}
-    />;
+    return (
+      <LogDetailErrorFallback
+        error={
+          error instanceof Error ? error : new Error('Unknown error occurred')
+        }
+        context={{
+          page: 'logs_detail',
+          userId,
+        }}
+      />
+    );
   }
 }

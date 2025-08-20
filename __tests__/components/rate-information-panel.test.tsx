@@ -81,7 +81,7 @@ describe('RateInformationPanel', () => {
     // Check summary statistics
     expect(screen.getByText('3')).toBeInTheDocument(); // Active departments
     expect(screen.getByText('7')).toBeInTheDocument(); // Total departments
-    
+
     // Average rate calculation: (20 + 18 + 19) / 3 = 19
     expect(screen.getByText('$19.00')).toBeInTheDocument();
   });
@@ -96,14 +96,16 @@ describe('RateInformationPanel', () => {
 
     // Check if user roles are displayed
     expect(screen.getByText('Your Roles: captain')).toBeInTheDocument();
-    
+
     // Check role description
-    expect(screen.getByText(/As a captain, you earn captain rates when leading jobs/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/As a captain, you earn captain rates when leading jobs/)
+    ).toBeInTheDocument();
   });
 
   it('handles wingman user correctly', () => {
     const wingmanUser = { ...mockUser, roles: ['wingman'] };
-    
+
     render(
       <RateInformationPanel
         user={wingmanUser}
@@ -112,6 +114,8 @@ describe('RateInformationPanel', () => {
     );
 
     // Check wingman role description
-    expect(screen.getByText(/You earn wingman rates for junk and move departments/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You earn wingman rates for junk and move departments/)
+    ).toBeInTheDocument();
   });
 });

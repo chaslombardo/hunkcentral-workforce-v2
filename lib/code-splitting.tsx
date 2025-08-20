@@ -18,21 +18,23 @@ const LoadingFallback = ({ className }: { className?: string }) => (
  * Create a lazy-loaded component with performance tracking
  */
 export function createLazyComponent(
-  importFn: () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>,
+  importFn: () => Promise<{
+    default: React.ComponentType<Record<string, unknown>>;
+  }>,
   componentName: string,
   fallback?: React.ComponentType<Record<string, unknown>>
 ) {
   const LazyComponent = React.lazy(async () => {
     const startTime = performance.now();
-    
+
     try {
       const moduleResult = await importFn();
       const loadTime = performance.now() - startTime;
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.warn(`📦 Loaded ${componentName} in ${loadTime.toFixed(2)}ms`);
       }
-      
+
       bundleAnalyzer.trackComponentUsage(componentName, 'lazy-loaded');
       return moduleResult;
     } catch (error) {
@@ -40,10 +42,10 @@ export function createLazyComponent(
       throw error;
     }
   });
-  
+
   return {
     Component: LazyComponent,
-    Fallback: fallback || LoadingFallback
+    Fallback: fallback || LoadingFallback,
   };
 }
 
@@ -55,10 +57,10 @@ export function usePreloadOnInteraction<T>(
   trigger: 'hover' | 'focus' | 'click' = 'hover'
 ) {
   const [isPreloaded, setIsPreloaded] = React.useState(false);
-  
+
   const preload = React.useCallback(async () => {
     if (isPreloaded) return;
-    
+
     try {
       await importFn();
       setIsPreloaded(true);
@@ -72,15 +74,15 @@ export function usePreloadOnInteraction<T>(
       case 'hover':
         return {
           onMouseEnter: preload,
-          onFocus: preload
+          onFocus: preload,
         };
       case 'focus':
         return {
-          onFocus: preload
+          onFocus: preload,
         };
       case 'click':
         return {
-          onClick: preload
+          onClick: preload,
         };
       default:
         return {};
@@ -106,7 +108,7 @@ export function useRoutePreload(
           // Ignore preload failures
         });
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [routes, currentRoute]);
@@ -125,21 +127,18 @@ export function useIntersectionPreload<T>(
   React.useEffect(() => {
     if (!ref || isPreloaded) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            importFn()
-              .then(() => setIsPreloaded(true))
-              .catch(() => {
-                // Ignore preload failures
-              });
-            observer.disconnect();
-          }
-        });
-      },
-      options
-    );
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          importFn()
+            .then(() => setIsPreloaded(true))
+            .catch(() => {
+              // Ignore preload failures
+            });
+          observer.disconnect();
+        }
+      });
+    }, options);
 
     observer.observe(ref);
     return () => observer.disconnect();
@@ -161,7 +160,7 @@ const codeSplittingUtils = {
   usePreloadOnInteraction,
   useRoutePreload,
   useIntersectionPreload,
-  lazyLoadingExamples
+  lazyLoadingExamples,
 };
 
 export default codeSplittingUtils;

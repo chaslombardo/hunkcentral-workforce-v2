@@ -49,8 +49,9 @@ export default async function LogReviewPage() {
 
     // Check user permissions
     const userRoles = session.user.roles || [];
-    const canReviewLogs = userRoles.includes('manager') || userRoles.includes('admin');
-    
+    const canReviewLogs =
+      userRoles.includes('manager') || userRoles.includes('admin');
+
     if (!canReviewLogs) {
       await logAuthError(new Error('Insufficient permissions'), {
         action: 'permission_check',
@@ -98,15 +99,19 @@ export default async function LogReviewPage() {
         errorType: error instanceof Error ? error.constructor.name : 'Unknown',
       },
     });
-    
+
     // Return user-friendly error fallback
-    return <LogReviewErrorFallback 
-      error={error instanceof Error ? error : new Error('Unknown error occurred')}
-      context={{
-        page: 'logs_review',
-        userId: session?.user?.id,
-      }}
-    />;
+    return (
+      <LogReviewErrorFallback
+        error={
+          error instanceof Error ? error : new Error('Unknown error occurred')
+        }
+        context={{
+          page: 'logs_review',
+          userId: session?.user?.id,
+        }}
+      />
+    );
   }
 }
 

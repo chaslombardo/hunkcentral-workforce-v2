@@ -34,12 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { JobSection } from './job-section';
@@ -55,21 +50,21 @@ import { DailyLogFormSchema, type DailyLogFormData } from '@/lib/validations';
 import { calculateOverallTotals } from '@/lib/logCalculations';
 import { submitLog } from '@/lib/actions/logs';
 
-
-
-
 interface CaptainLogFormProps {
   initialLogId?: string | null;
   initialData?: Partial<DailyLogFormData>;
 }
 
-export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogFormProps) {
+export function CaptainLogForm({
+  initialLogId = null,
+  initialData,
+}: CaptainLogFormProps) {
   const { user } = useSession();
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Fetch real user data
   const { captains, loading: captainsLoading } = useCaptains();
   const { employees, loading: employeesLoading } = useEmployees();
@@ -98,7 +93,12 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
   }, [user?.id, form, initialData?.captainId]);
 
   // Manual save functionality (auto-save disabled to prevent sync issues)
-  const { status: saveStatus, lastSaved, saveNow, error: saveError } = useAutoSave({
+  const {
+    status: saveStatus,
+    lastSaved,
+    saveNow,
+    error: saveError,
+  } = useAutoSave({
     watch: form.watch,
     logId: initialLogId,
     interval: 30000, // 30 seconds
@@ -140,7 +140,8 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
       if (data.jobs.length === 0 && data.hours.length === 0) {
         toast({
           title: 'Cannot Submit Empty Log',
-          description: 'Please add at least one job or hour entry before submitting.',
+          description:
+            'Please add at least one job or hour entry before submitting.',
           variant: 'destructive',
         });
         return;
@@ -153,7 +154,7 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
           title: 'Log Submitted Successfully',
           description: 'Your daily log has been submitted for review.',
         });
-        
+
         // Use a timeout to ensure toast is shown before navigation
         setTimeout(() => {
           try {
@@ -167,7 +168,8 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
       } else {
         toast({
           title: 'Submission Failed',
-          description: result.error || 'Unable to submit your log. Please try again.',
+          description:
+            result.error || 'Unable to submit your log. Please try again.',
           variant: 'destructive',
         });
       }
@@ -183,7 +185,10 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
     }
   };
 
-  const handleSectionToggle = (section: keyof typeof watchedSections, checked: boolean) => {
+  const handleSectionToggle = (
+    section: keyof typeof watchedSections,
+    checked: boolean
+  ) => {
     form.setValue(`sections.${section}`, checked);
   };
 
@@ -199,9 +204,12 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
           {/* Header Card with Captain Selection and Section Toggles */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-hunks-green">Log Information</CardTitle>
+              <CardTitle className="text-hunks-green">
+                Log Information
+              </CardTitle>
               <CardDescription>
-                Select the captain and configure which sections to include in this log.
+                Select the captain and configure which sections to include in
+                this log.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -212,7 +220,10 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Captain</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a captain" />
@@ -228,7 +239,8 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Select the captain responsible for this log. Defaults to you if you have captain permissions.
+                      Select the captain responsible for this log. Defaults to
+                      you if you have captain permissions.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -245,18 +257,22 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                     Choose which sections to include in this daily log.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Junk Section Toggle */}
                   <Label className="flex items-start gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent/50 has-[[aria-checked=true]]:border-hunks-green has-[[aria-checked=true]]:bg-hunks-green/5">
                     <Checkbox
                       id="section-junk"
                       checked={watchedSections.junk}
-                      onCheckedChange={(checked) => handleSectionToggle('junk', checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleSectionToggle('junk', checked as boolean)
+                      }
                       className="data-[state=checked]:border-hunks-green data-[state=checked]:bg-hunks-green data-[state=checked]:text-white"
                     />
                     <div className="grid gap-1.5 font-normal">
-                      <p className="text-sm leading-none font-medium">Junk Jobs</p>
+                      <p className="text-sm leading-none font-medium">
+                        Junk Jobs
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         Record junk removal jobs and disposal costs
                       </p>
@@ -268,11 +284,15 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                     <Checkbox
                       id="section-move"
                       checked={watchedSections.move}
-                      onCheckedChange={(checked) => handleSectionToggle('move', checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleSectionToggle('move', checked as boolean)
+                      }
                       className="data-[state=checked]:border-hunks-green data-[state=checked]:bg-hunks-green data-[state=checked]:text-white"
                     />
                     <div className="grid gap-1.5 font-normal">
-                      <p className="text-sm leading-none font-medium">Move Jobs</p>
+                      <p className="text-sm leading-none font-medium">
+                        Move Jobs
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         Record moving jobs and upsells
                       </p>
@@ -284,11 +304,15 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                     <Checkbox
                       id="section-other"
                       checked={watchedSections.otherHours}
-                      onCheckedChange={(checked) => handleSectionToggle('otherHours', checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleSectionToggle('otherHours', checked as boolean)
+                      }
                       className="data-[state=checked]:border-hunks-green data-[state=checked]:bg-hunks-green data-[state=checked]:text-white"
                     />
                     <div className="grid gap-1.5 font-normal">
-                      <p className="text-sm leading-none font-medium">Other Hours</p>
+                      <p className="text-sm leading-none font-medium">
+                        Other Hours
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         Record training, admin, and other activities
                       </p>
@@ -302,7 +326,9 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
           {/* Main Log Sections */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-hunks-green">Daily Log Entry</CardTitle>
+              <CardTitle className="text-hunks-green">
+                Daily Log Entry
+              </CardTitle>
               <CardDescription>
                 Log Date: {format(form.watch('logDate'), 'EEEE, MMMM d, yyyy')}
               </CardDescription>
@@ -310,22 +336,22 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
             <CardContent>
               <Tabs defaultValue="junk" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger 
-                    value="junk" 
+                  <TabsTrigger
+                    value="junk"
                     disabled={!watchedSections.junk}
                     className="data-[state=active]:bg-hunks-green data-[state=active]:text-white"
                   >
                     Junk Jobs
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="move" 
+                  <TabsTrigger
+                    value="move"
                     disabled={!watchedSections.move}
                     className="data-[state=active]:bg-hunks-green data-[state=active]:text-white"
                   >
                     Move Jobs
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="other" 
+                  <TabsTrigger
+                    value="other"
                     disabled={!watchedSections.otherHours}
                     className="data-[state=active]:bg-hunks-green data-[state=active]:text-white"
                   >
@@ -366,7 +392,8 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
           </Card>
 
           {/* Overall Log Totals - only show if there's data */}
-          {(overallCalculation.totalRevenue > 0 || overallCalculation.totalHours > 0) && (
+          {(overallCalculation.totalRevenue > 0 ||
+            overallCalculation.totalHours > 0) && (
             <LogTotals calculation={overallCalculation} />
           )}
 
@@ -405,8 +432,8 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                   )}
                 </div>
                 <div className="flex gap-3">
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={handleManualSave}
                     disabled={saveStatus === 'saving'}
@@ -424,7 +451,7 @@ export function CaptainLogForm({ initialLogId = null, initialData }: CaptainLogF
                       </>
                     )}
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
                     disabled={isSubmitting || saveStatus === 'saving'}
                     className="bg-hunks-green hover:bg-hunks-green/90 text-white"

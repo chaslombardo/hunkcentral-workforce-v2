@@ -1,9 +1,15 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
-export const dynamic = 'force-dynamic'
-import { Separator } from "@/components/ui/separator"
+export const dynamic = 'force-dynamic';
+import { Separator } from '@/components/ui/separator';
 import {
   NoLogsEmptyState,
   NoLogResultsEmptyState,
@@ -16,16 +22,19 @@ import {
   NoDashboardDataEmptyState,
   NoAuditDataEmptyState,
   GenericEmptyState,
-  LoadingEmptyState
-} from "@/components/features/empty-states"
+  LoadingEmptyState,
+} from '@/components/features/empty-states';
 
 export default function EmptyStatesPage() {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-hunks-green">Empty State Components</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-hunks-green">
+          Empty State Components
+        </h1>
         <p className="text-muted-foreground">
-          Showcase of all empty state components with engaging illustrations and helpful messaging.
+          Showcase of all empty state components with engaging illustrations and
+          helpful messaging.
         </p>
       </div>
 
@@ -64,7 +73,9 @@ export default function EmptyStatesPage() {
           <Card>
             <CardHeader>
               <CardTitle>No Commissions</CardTitle>
-              <CardDescription>Sales consultant first experience</CardDescription>
+              <CardDescription>
+                Sales consultant first experience
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <NoCommissionsEmptyState />
@@ -74,7 +85,9 @@ export default function EmptyStatesPage() {
           <Card>
             <CardHeader>
               <CardTitle>No Commission Matches</CardTitle>
-              <CardDescription>When no automatic matches are found</CardDescription>
+              <CardDescription>
+                When no automatic matches are found
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <NoCommissionMatchesEmptyState />
@@ -90,7 +103,9 @@ export default function EmptyStatesPage() {
           <Card>
             <CardHeader>
               <CardTitle>No Payroll Data</CardTitle>
-              <CardDescription>When no data exists for pay period</CardDescription>
+              <CardDescription>
+                When no data exists for pay period
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <NoPayrollDataEmptyState />
@@ -137,7 +152,9 @@ export default function EmptyStatesPage() {
 
       {/* Dashboard & General Empty States */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">Dashboard & General Empty States</h2>
+        <h2 className="text-2xl font-semibold">
+          Dashboard & General Empty States
+        </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
@@ -222,5 +239,5 @@ export default function EmptyStatesPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

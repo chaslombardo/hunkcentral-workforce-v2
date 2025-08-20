@@ -15,22 +15,33 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  HelpCircle, 
-  Calculator, 
-  Clock, 
-  DollarSign, 
+import {
+  HelpCircle,
+  Calculator,
+  Clock,
+  DollarSign,
   Award,
   Users,
   TrendingUp,
-  Info
+  Info,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import type { Department } from '@/types';
 
 interface CalculationTooltipProps {
-  type: 'labor-cost' | 'bonus' | 'tips' | 'department-rate' | 'efficiency' | 'tip-distribution';
-  data?: LaborCostData | BonusData | TipDistributionData | DepartmentRateData | null;
+  type:
+    | 'labor-cost'
+    | 'bonus'
+    | 'tips'
+    | 'department-rate'
+    | 'efficiency'
+    | 'tip-distribution';
+  data?:
+    | LaborCostData
+    | BonusData
+    | TipDistributionData
+    | DepartmentRateData
+    | null;
   children: React.ReactNode;
   side?: 'top' | 'right' | 'bottom' | 'left';
 }
@@ -74,11 +85,11 @@ interface DepartmentRateData {
   explanation: string;
 }
 
-export function CalculationTooltip({ 
-  type, 
-  data, 
-  children, 
-  side = 'top' 
+export function CalculationTooltip({
+  type,
+  data,
+  children,
+  side = 'top',
 }: CalculationTooltipProps) {
   const renderContent = () => {
     switch (type) {
@@ -93,21 +104,26 @@ export function CalculationTooltip({
       case 'efficiency':
         return <EfficiencyExplanation data={data as LaborCostData} />;
       case 'tip-distribution':
-        return <TipDistributionExplanation data={data as TipDistributionData} />;
+        return (
+          <TipDistributionExplanation data={data as TipDistributionData} />
+        );
       default:
         return <div>No explanation available</div>;
     }
   };
 
   // Use HoverCard for complex content, Tooltip for simple content
-  const isComplexContent = ['labor-cost', 'bonus', 'tip-distribution', 'department-rate'].includes(type);
+  const isComplexContent = [
+    'labor-cost',
+    'bonus',
+    'tip-distribution',
+    'department-rate',
+  ].includes(type);
 
   if (isComplexContent) {
     return (
       <HoverCard>
-        <HoverCardTrigger asChild>
-          {children}
-        </HoverCardTrigger>
+        <HoverCardTrigger asChild>{children}</HoverCardTrigger>
         <HoverCardContent className="w-80" side={side}>
           {renderContent()}
         </HoverCardContent>
@@ -118,9 +134,7 @@ export function CalculationTooltip({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {children}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent side={side} className="max-w-xs">
           {renderContent()}
         </TooltipContent>
@@ -140,7 +154,7 @@ function LaborCostExplanation({ data }: { data: LaborCostData }) {
         <Calculator className="h-4 w-4" />
         <h4 className="font-semibold">Labor Cost Calculation</h4>
       </div>
-      
+
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Hours Worked:</span>
@@ -152,14 +166,16 @@ function LaborCostExplanation({ data }: { data: LaborCostData }) {
         </div>
         <div className="flex justify-between">
           <span>Department:</span>
-          <Badge variant="outline" className="capitalize">{data.department}</Badge>
+          <Badge variant="outline" className="capitalize">
+            {data.department}
+          </Badge>
         </div>
         <Separator />
         <div className="flex justify-between font-medium">
           <span>Labor Cost:</span>
           <span className="font-mono">{formatCurrency(laborCost)}</span>
         </div>
-        
+
         {data.revenue > 0 && (
           <>
             <div className="flex justify-between">
@@ -168,11 +184,15 @@ function LaborCostExplanation({ data }: { data: LaborCostData }) {
             </div>
             <div className="flex justify-between">
               <span>Labor Percentage:</span>
-              <span className="font-mono">{data.actualPercentage.toFixed(1)}%</span>
+              <span className="font-mono">
+                {data.actualPercentage.toFixed(1)}%
+              </span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Target Goal:</span>
-              <span className="font-mono">{data.goalPercentage.toFixed(1)}%</span>
+              <span className="font-mono">
+                {data.goalPercentage.toFixed(1)}%
+              </span>
             </div>
           </>
         )}
@@ -198,7 +218,7 @@ function BonusExplanation({ data }: { data: BonusData }) {
         <Award className="h-4 w-4" />
         <h4 className="font-semibold">Labor Efficiency Bonus</h4>
       </div>
-      
+
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Target Goal:</span>
@@ -210,8 +230,11 @@ function BonusExplanation({ data }: { data: BonusData }) {
         </div>
         <div className="flex justify-between">
           <span>Efficiency Gain:</span>
-          <span className={`font-mono ${isEligible ? 'text-green-600' : 'text-red-600'}`}>
-            {isEligible ? '+' : ''}{efficiency.toFixed(1)}%
+          <span
+            className={`font-mono ${isEligible ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {isEligible ? '+' : ''}
+            {efficiency.toFixed(1)}%
           </span>
         </div>
         <div className="flex justify-between">
@@ -221,7 +244,9 @@ function BonusExplanation({ data }: { data: BonusData }) {
         <Separator />
         <div className="flex justify-between font-medium">
           <span>Bonus Amount:</span>
-          <span className={`font-mono ${isEligible ? 'text-green-600' : 'text-muted-foreground'}`}>
+          <span
+            className={`font-mono ${isEligible ? 'text-green-600' : 'text-muted-foreground'}`}
+          >
             {formatCurrency(data.bonusAmount)}
           </span>
         </div>
@@ -229,7 +254,8 @@ function BonusExplanation({ data }: { data: BonusData }) {
 
       <div className="text-xs text-muted-foreground">
         <Info className="h-3 w-3 inline mr-1" />
-        Bonus = (Goal% - Actual%) × Revenue. Only captains earn efficiency bonuses.
+        Bonus = (Goal% - Actual%) × Revenue. Only captains earn efficiency
+        bonuses.
       </div>
     </div>
   );
@@ -240,11 +266,16 @@ function TipsExplanation() {
     <div className="space-y-2" data-testid="tips-explanation">
       <div className="flex items-center gap-2">
         <DollarSign className="h-4 w-4" />
-        <h4 className="font-semibold text-sm" data-testid="tips-distribution-heading">Tips Distribution</h4>
+        <h4
+          className="font-semibold text-sm"
+          data-testid="tips-distribution-heading"
+        >
+          Tips Distribution
+        </h4>
       </div>
       <p className="text-xs text-muted-foreground">
-        Tips are divided equally among all team members working on a job. 
-        This includes captains, co-captains, and wingmen.
+        Tips are divided equally among all team members working on a job. This
+        includes captains, co-captains, and wingmen.
       </p>
       <div className="text-xs">
         <strong>Formula:</strong> Total Tips ÷ Team Members = Your Share
@@ -262,24 +293,32 @@ function DepartmentRateExplanation({ data }: { data: DepartmentRateData }) {
         <Clock className="h-4 w-4" />
         <h4 className="font-semibold">Department Rate</h4>
       </div>
-      
+
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Department:</span>
-          <Badge variant="outline" className="capitalize">{data.department}</Badge>
+          <Badge variant="outline" className="capitalize">
+            {data.department}
+          </Badge>
         </div>
         <div className="flex justify-between">
           <span>Captain Rate:</span>
-          <span className="font-mono">{formatCurrency(data.captainRate)}/hr</span>
+          <span className="font-mono">
+            {formatCurrency(data.captainRate)}/hr
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Wingman Rate:</span>
-          <span className="font-mono">{formatCurrency(data.wingmanRate)}/hr</span>
+          <span className="font-mono">
+            {formatCurrency(data.wingmanRate)}/hr
+          </span>
         </div>
         <Separator />
         <div className="flex justify-between font-medium">
           <span>Your Rate ({data.role}):</span>
-          <span className="font-mono text-green-600">{formatCurrency(data.currentRate)}/hr</span>
+          <span className="font-mono text-green-600">
+            {formatCurrency(data.currentRate)}/hr
+          </span>
         </div>
       </div>
 
@@ -300,12 +339,19 @@ function EfficiencyExplanation({ data }: { data: LaborCostData }) {
     <div className="space-y-2" data-testid="efficiency-explanation">
       <div className="flex items-center gap-2">
         <TrendingUp className="h-4 w-4" />
-        <h4 className="font-semibold text-sm" data-testid="labor-efficiency-heading">Labor Efficiency</h4>
+        <h4
+          className="font-semibold text-sm"
+          data-testid="labor-efficiency-heading"
+        >
+          Labor Efficiency
+        </h4>
       </div>
       <div className="text-xs space-y-1">
         <div className="flex justify-between">
           <span>Current:</span>
-          <span className={`font-mono ${isEfficient ? 'text-green-600' : 'text-red-600'}`}>
+          <span
+            className={`font-mono ${isEfficient ? 'text-green-600' : 'text-red-600'}`}
+          >
             {data.actualPercentage.toFixed(1)}%
           </span>
         </div>
@@ -315,10 +361,9 @@ function EfficiencyExplanation({ data }: { data: LaborCostData }) {
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {isEfficient 
-          ? 'Great job! You\'re operating efficiently.' 
-          : 'Focus on completing jobs faster to improve efficiency.'
-        }
+        {isEfficient
+          ? "Great job! You're operating efficiently."
+          : 'Focus on completing jobs faster to improve efficiency.'}
       </p>
     </div>
   );
@@ -331,9 +376,11 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
     <div className="space-y-3" data-testid="tip-distribution-explanation">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4" />
-        <h4 className="font-semibold" data-testid="tip-distribution-heading">Tip Distribution</h4>
+        <h4 className="font-semibold" data-testid="tip-distribution-heading">
+          Tip Distribution
+        </h4>
       </div>
-      
+
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Job ID:</span>
@@ -350,7 +397,9 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
         <Separator />
         <div className="flex justify-between font-medium">
           <span>Your Share:</span>
-          <span className="font-mono text-green-600">{formatCurrency(data.myShare)}</span>
+          <span className="font-mono text-green-600">
+            {formatCurrency(data.myShare)}
+          </span>
         </div>
       </div>
 
@@ -362,8 +411,12 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
             <div className="space-y-1">
               {data.distribution.map((member, index) => (
                 <div key={index} className="flex justify-between text-xs">
-                  <span>{member.name} ({member.role})</span>
-                  <span className="font-mono">{formatCurrency(member.share)}</span>
+                  <span>
+                    {member.name} ({member.role})
+                  </span>
+                  <span className="font-mono">
+                    {formatCurrency(member.share)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -380,7 +433,17 @@ function TipDistributionExplanation({ data }: { data: TipDistributionData }) {
 }
 
 // Helper component for quick calculation help
-export function QuickCalculationHelp({ type = 'tips' }: { type?: 'labor-cost' | 'bonus' | 'tips' | 'department-rate' | 'efficiency' | 'tip-distribution' }) {
+export function QuickCalculationHelp({
+  type = 'tips',
+}: {
+  type?:
+    | 'labor-cost'
+    | 'bonus'
+    | 'tips'
+    | 'department-rate'
+    | 'efficiency'
+    | 'tip-distribution';
+}) {
   return (
     <CalculationTooltip type={type}>
       <Button variant="ghost" size="sm" className="h-6 w-6 p-0">

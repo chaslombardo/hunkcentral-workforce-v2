@@ -5,6 +5,7 @@
 This document outlines the complete rebuild of HUNKCentral, a digital workforce management system for College Hunks Hauling Junk & Moving. The current system suffers from performance issues, poor user experience, architectural bloat, and misaligned dashboards that don't serve each role effectively. This rebuild will create a modern, performant, and user-centric application from scratch.
 
 **Key Problems with Current System:**
+
 - Slow loading times due to multiple sequential database queries
 - Basic dashboard blocks that don't align with role-specific needs
 - Heavy calculations performed on every page load instead of pre-computation
@@ -13,6 +14,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Architectural bloat not suited for complex business operations
 
 **Rebuild Goals:**
+
 - Modern, smooth, and crisp UI using shadcn/ui blocks with New York theme
 - Optimized performance with pre-computed metrics and efficient queries
 - Role-specific dashboards that align with job responsibilities
@@ -270,6 +272,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 ## Technical Implementation Requirements
 
 ### Technology Stack
+
 - **Framework**: Next.js 15 with App Router and TypeScript (strict mode)
 - **UI Library**: Shadcn/ui with New York theme (use blocks where available)
 - **Styling**: Tailwind CSS v4 with College Hunks brand colors
@@ -283,6 +286,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - **Performance**: Lighthouse score > 95
 
 ### Development Standards
+
 - TypeScript strict mode enabled, no `any` types
 - ESLint and TSC checks after each task completion
 - Comprehensive unit tests for business logic
@@ -292,6 +296,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Performance targets: < 500ms page loads, < 100ms interactions
 
 ### Architecture Patterns
+
 - Server Components for data-heavy pages
 - Server Actions for form submissions and mutations
 - Client Components only for interactive UI elements
@@ -303,6 +308,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 ## Success Metrics
 
 ### Performance Targets
+
 - Page load time: < 1 second
 - Time to interactive: < 2 seconds
 - Dashboard load time: < 1 second
@@ -310,6 +316,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Database query optimization for single queries instead of multiple sequential queries
 
 ### User Experience Targets
+
 - Captain log submission: < 2 minutes
 - Manager log review: < 30 seconds per log
 - Clean currency input fields without pre-filled zeros
@@ -317,6 +324,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Mobile-responsive design for all screen sizes
 
 ### Business Impact Targets
+
 - Faster dashboard loading with pre-computed metrics
 - Elimination of slow sequential database queries
 - Better role-specific dashboards that align with job responsibilities
@@ -326,6 +334,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 ## Implementation Phases
 
 ### Phase 1: Foundation and Architecture (Weeks 1-2)
+
 - Set up Next.js 15 project with TypeScript strict mode
 - Configure Shadcn/ui with New York theme and brand colors
 - Set up Tailwind CSS v4 with custom color scheme
@@ -334,6 +343,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Create basic layouts using shadcn/ui blocks
 
 ### Phase 2: Core Dashboard and Navigation (Weeks 3-4)
+
 - Implement role-specific dashboards using dashboard-01 block
 - Create optimized navigation using sidebar-07 block
 - Build pre-computed metrics system with background jobs
@@ -342,6 +352,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Add smooth animations and transitions
 
 ### Phase 3: Log Management System (Weeks 5-6)
+
 - Build optimized log creation form with intelligent defaults
 - Implement real-time calculations with caching
 - Create streamlined manager review interface
@@ -350,6 +361,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Implement mobile-optimized input methods
 
 ### Phase 4: Commission and Reporting (Weeks 7-8)
+
 - Build intelligent commission tracking system
 - Implement fuzzy matching algorithms for job matching
 - Create pre-computed analytics and reporting system
@@ -358,6 +370,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Add export capabilities in multiple formats
 
 ### Phase 5: User Management and Admin Tools (Weeks 9-10)
+
 - Build comprehensive user management interface
 - Implement granular role-based permissions
 - Create bulk operations for user management
@@ -366,6 +379,7 @@ This document outlines the complete rebuild of HUNKCentral, a digital workforce 
 - Add system monitoring and performance tracking
 
 ### Phase 6: Testing, Migration, and Launch (Weeks 11-12)
+
 - Comprehensive testing (unit, integration, E2E)
 - Data migration from existing system
 - User training and documentation

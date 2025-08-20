@@ -128,7 +128,7 @@ describe('Payroll Integration Tests', () => {
     expect(payroll).toHaveLength(2);
 
     // Captain should have wages, tips, and bonus
-    const captainPayroll = payroll.find(p => p.employeeId === 'user-1')!;
+    const captainPayroll = payroll.find((p) => p.employeeId === 'user-1')!;
     expect(captainPayroll).toBeDefined();
     expect(captainPayroll.totalHours).toBe(8);
     expect(captainPayroll.grossWages).toBe(200); // 8 hours * $25 captain rate
@@ -137,7 +137,7 @@ describe('Payroll Integration Tests', () => {
     expect(captainPayroll.commission).toBe(0);
 
     // Sales person should have commission and supplemental salary
-    const salesPayroll = payroll.find(p => p.employeeId === 'user-2')!;
+    const salesPayroll = payroll.find((p) => p.employeeId === 'user-2')!;
     expect(salesPayroll).toBeDefined();
     expect(salesPayroll.totalHours).toBe(0);
     expect(salesPayroll.grossWages).toBe(0);
@@ -170,7 +170,7 @@ describe('Payroll Integration Tests', () => {
     ];
 
     const payroll = calculatePayroll(users, [], [], new Date(), new Date());
-    
+
     expect(payroll).toHaveLength(1);
     expect(payroll[0].totalHours).toBe(0);
     expect(payroll[0].totalPay).toBe(0);

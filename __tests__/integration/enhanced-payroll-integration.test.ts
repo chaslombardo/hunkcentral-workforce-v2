@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { prisma } from '@/lib/prisma';
-import { 
+import {
   getDetailedPayrollBreakdown,
   getPayrollSummary,
-  getEmployeePayPeriods
+  getEmployeePayPeriods,
 } from '@/lib/actions/payroll';
 // Database query functions are tested separately
 
@@ -35,15 +35,15 @@ describe('Enhanced Payroll Integration Tests', () => {
         password: 'hashed-password',
         fullName: 'Integration Test User',
         roles: ['captain'],
-        rateJunkCaptain: 20.00,
-        rateJunkWingman: 18.00,
-        rateMoveCaptain: 22.00,
-        rateMoveWingman: 20.00,
-        rateZigma: 25.00,
-        rateTraining: 15.00,
-        rateEstimating: 30.00,
-        rateWarehouse: 16.00,
-        rateAdmin: 18.00,
+        rateJunkCaptain: 20.0,
+        rateJunkWingman: 18.0,
+        rateMoveCaptain: 22.0,
+        rateMoveWingman: 20.0,
+        rateZigma: 25.0,
+        rateTraining: 15.0,
+        rateEstimating: 30.0,
+        rateWarehouse: 16.0,
+        rateAdmin: 18.0,
         junkBonusGoal: 0.14,
         moveBonusGoal: 0.24,
       },
@@ -174,20 +174,25 @@ describe('Enhanced Payroll Integration Tests', () => {
     });
 
     it('should get detailed payroll breakdown successfully', async () => {
-      const result = await getDetailedPayrollBreakdown(testUserId, testPayPeriodId);
+      const result = await getDetailedPayrollBreakdown(
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      
+
       const data = result.data!;
       expect(data.employeeId).toBe(testUserId);
       expect(Number(data.totalHours)).toBe(8);
       expect(data.grossWages).toBe(168);
       expect(data.commission).toBe(25);
-      
+
       // Check department breakdown
       expect(data.departmentBreakdown).toHaveLength(2);
-      const junkDept = data.departmentBreakdown.find(d => d.department === 'junk');
+      const junkDept = data.departmentBreakdown.find(
+        (d) => d.department === 'junk'
+      );
       expect(junkDept).toBeDefined();
       expect(junkDept!.hours).toBe(4);
       expect(junkDept!.rate).toBe(20);
@@ -212,8 +217,8 @@ describe('Enhanced Payroll Integration Tests', () => {
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
       expect(result.data!.length).toBeGreaterThan(0);
-      
-      const testPeriod = result.data!.find(p => p.id === testPayPeriodId);
+
+      const testPeriod = result.data!.find((p) => p.id === testPayPeriodId);
       expect(testPeriod).toBeDefined();
       expect(testPeriod!.name).toBe('Test Period');
     });
@@ -224,7 +229,10 @@ describe('Enhanced Payroll Integration Tests', () => {
       mockSession.user.id = 'different-user';
       mockSession.user.roles = ['wingman']; // No admin/manager role
 
-      const result = await getDetailedPayrollBreakdown(testUserId, testPayPeriodId);
+      const result = await getDetailedPayrollBreakdown(
+        testUserId,
+        testPayPeriodId
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Unauthorized');

@@ -6,7 +6,7 @@
 **Version**: 1.0  
 **Date**: August 2025  
 **Status**: Final  
-**Owner**: Development Team  
+**Owner**: Development Team
 
 ## Executive Summary
 
@@ -19,12 +19,14 @@ Create a modern, high-performance workforce management platform that transforms 
 ## Business Objectives
 
 ### Primary Objectives
+
 1. **Performance Improvement**: Achieve page load times under 1 second (from current 5-10 seconds)
 2. **User Experience Enhancement**: Reduce task completion times by 75% through optimized workflows
 3. **Mobile Optimization**: Provide 100% feature parity across all devices for field workers
 4. **Operational Efficiency**: Streamline daily processes to reduce administrative overhead
 
 ### Secondary Objectives
+
 1. **Scalability**: Build architecture that supports business growth and expansion
 2. **Maintainability**: Implement clean code standards for long-term system health
 3. **Security**: Ensure comprehensive data protection and audit capabilities
@@ -35,24 +37,28 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Primary Users
 
 #### Captain (Team Leader)
+
 - **Demographics**: Field supervisors, 25-45 years old, moderate technical skills
 - **Goals**: Complete daily logs quickly, track team performance, maximize earnings
 - **Pain Points**: Slow system response, complex data entry, unclear performance metrics
 - **Usage Patterns**: Daily log submission, frequent performance checking, mobile-heavy usage
 
 #### Manager (Operations Supervisor)
+
 - **Demographics**: Office-based supervisors, 30-50 years old, high technical skills
 - **Goals**: Efficient team oversight, accurate payroll processing, performance optimization
 - **Pain Points**: Time-consuming log reviews, limited analytics, manual report generation
 - **Usage Patterns**: Bulk operations, detailed analytics, desktop-focused usage
 
 #### Sales Consultant
+
 - **Demographics**: Sales professionals, 25-40 years old, moderate technical skills
 - **Goals**: Track commission earnings, monitor booking performance, maximize sales
 - **Pain Points**: Manual commission tracking, unclear job matching, delayed payments
 - **Usage Patterns**: Commission entry, performance tracking, mobile and desktop usage
 
 #### Administrator
+
 - **Demographics**: IT/HR professionals, 30-55 years old, high technical skills
 - **Goals**: System management, user administration, compliance monitoring
 - **Pain Points**: Limited configuration options, poor audit trails, manual user management
@@ -61,6 +67,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Secondary Users
 
 #### Wingman (Crew Member)
+
 - **Demographics**: Field workers, 20-35 years old, basic technical skills
 - **Goals**: View personal performance, access payroll information, understand earnings
 - **Pain Points**: Limited system access, unclear performance metrics
@@ -71,6 +78,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-1: Authentication and Authorization
 
 #### FR-1.1: User Authentication
+
 - **Requirement**: Secure login system with session management
 - **Acceptance Criteria**:
   - Users can log in with username/password credentials
@@ -80,6 +88,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Password reset functionality via email
 
 #### FR-1.2: Role-Based Access Control
+
 - **Requirement**: Granular permission system based on user roles
 - **Acceptance Criteria**:
   - Five primary roles: Admin, Manager, Captain, Wingman, Sales
@@ -91,6 +100,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-2: Dashboard and Navigation
 
 #### FR-2.1: Role-Specific Dashboards
+
 - **Requirement**: Customized dashboard views for each user role
 - **Acceptance Criteria**:
   - Captain dashboard: personal metrics, job statistics, earnings breakdown
@@ -100,6 +110,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Wingman dashboard: personal performance, schedule, earnings summary
 
 #### FR-2.2: Navigation System
+
 - **Requirement**: Intuitive navigation with role-based menu structure
 - **Acceptance Criteria**:
   - Collapsible sidebar navigation with role-appropriate menu items
@@ -109,6 +120,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Search functionality across all accessible data
 
 #### FR-2.3: Theme Support
+
 - **Requirement**: Multiple theme options with persistent user preferences
 - **Acceptance Criteria**:
   - Light, Dark, and System theme options
@@ -120,6 +132,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-3: Log Management System
 
 #### FR-3.1: Daily Log Creation
+
 - **Requirement**: Streamlined log creation interface for captains
 - **Acceptance Criteria**:
   - Multi-section form with tabs for Junk, Move, and Other Hours
@@ -130,6 +143,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Mobile-optimized input methods with appropriate keyboards
 
 #### FR-3.2: Real-Time Calculations
+
 - **Requirement**: Live calculation engine for payroll and performance metrics
 - **Acceptance Criteria**:
   - Labor cost percentage calculations updated in real-time
@@ -140,6 +154,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Calculation explanations available via tooltips
 
 #### FR-3.3: Log Review and Approval
+
 - **Requirement**: Efficient review interface for managers
 - **Acceptance Criteria**:
   - Queue-based system showing pending logs by priority
@@ -150,6 +165,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Approval workflow with audit trail
 
 #### FR-3.4: Log History and Search
+
 - **Requirement**: Comprehensive log history with advanced search capabilities
 - **Acceptance Criteria**:
   - Searchable log history with multiple filter options
@@ -161,6 +177,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-4: Commission Tracking System
 
 #### FR-4.1: Commission Entry
+
 - **Requirement**: Simple commission entry interface for sales consultants
 - **Acceptance Criteria**:
   - Clean form with job ID, client name, estimated amount, and target date
@@ -170,6 +187,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Duplicate booking detection and conflict resolution
 
 #### FR-4.2: Automatic Job Matching
+
 - **Requirement**: Intelligent matching of commission entries to completed jobs
 - **Acceptance Criteria**:
   - Automatic matching on log approval using job ID
@@ -179,6 +197,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Commission calculation based on actual revenue
 
 #### FR-4.3: Commission Tracking and Reporting
+
 - **Requirement**: Comprehensive commission status tracking and analytics
 - **Acceptance Criteria**:
   - Commission list with status indicators (pending, matched, approved)
@@ -190,6 +209,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-5: Payroll and Reporting System
 
 #### FR-5.1: Individual Payroll Access
+
 - **Requirement**: Self-service payroll access for all employees
 - **Acceptance Criteria**:
   - Detailed compensation breakdown by pay component
@@ -199,6 +219,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Mobile-optimized payroll viewing
 
 #### FR-5.2: Team Payroll Management
+
 - **Requirement**: Comprehensive payroll management for managers and admins
 - **Acceptance Criteria**:
   - Team payroll overview with advanced filtering
@@ -208,6 +229,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Exception handling and error resolution
 
 #### FR-5.3: Report Generation and Distribution
+
 - **Requirement**: Automated report generation with multiple output formats
 - **Acceptance Criteria**:
   - Standard reports: payroll, performance, commission, labor analytics
@@ -219,6 +241,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-6: User Management and Administration
 
 #### FR-6.1: User Account Management
+
 - **Requirement**: Comprehensive user management interface for administrators
 - **Acceptance Criteria**:
   - User creation, editing, and deactivation workflows
@@ -228,6 +251,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - User activity monitoring and analytics
 
 #### FR-6.2: System Configuration
+
 - **Requirement**: Configurable system settings and business rules
 - **Acceptance Criteria**:
   - Pay rate configuration by role and location
@@ -237,6 +261,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - System-wide settings and preferences
 
 #### FR-6.3: Audit Trail and Compliance
+
 - **Requirement**: Comprehensive audit logging for compliance and security
 - **Acceptance Criteria**:
   - Complete logging of all system changes and user activities
@@ -248,6 +273,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-7: Mobile Optimization
 
 #### FR-7.1: Responsive Design
+
 - **Requirement**: Mobile-first responsive design for all system functions
 - **Acceptance Criteria**:
   - 100% feature parity across desktop, tablet, and mobile devices
@@ -257,6 +283,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Performance optimization for mobile networks
 
 #### FR-7.2: Mobile-Specific Features
+
 - **Requirement**: Enhanced mobile functionality for field workers
 - **Acceptance Criteria**:
   - Context-appropriate keyboards for different input types
@@ -268,6 +295,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### FR-8: Performance and Scalability
 
 #### FR-8.1: Performance Optimization
+
 - **Requirement**: High-performance system with optimized response times
 - **Acceptance Criteria**:
   - Page load times under 1 second for all pages
@@ -277,6 +305,7 @@ Create a modern, high-performance workforce management platform that transforms 
   - Intelligent caching with proper invalidation
 
 #### FR-8.2: Scalability Architecture
+
 - **Requirement**: Scalable architecture supporting business growth
 - **Acceptance Criteria**:
   - Background job processing for heavy calculations
@@ -290,6 +319,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### NFR-1: Performance Requirements
 
 #### NFR-1.1: Response Time
+
 - **Page Load Time**: < 1 second for all pages
 - **Dashboard Load Time**: < 500ms for role-specific dashboards
 - **Form Submission Response**: < 500ms for all form submissions
@@ -297,6 +327,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **Report Generation**: < 5 seconds for standard reports
 
 #### NFR-1.2: Throughput
+
 - **Concurrent Users**: Support 100+ concurrent users without performance degradation
 - **Database Queries**: Optimized queries with response times < 100ms
 - **File Uploads**: Support files up to 10MB with progress indicators
@@ -305,12 +336,14 @@ Create a modern, high-performance workforce management platform that transforms 
 ### NFR-2: Reliability and Availability
 
 #### NFR-2.1: System Uptime
+
 - **Availability Target**: 99.9% uptime (less than 9 hours downtime per year)
 - **Planned Maintenance**: Maximum 4 hours per month during off-peak hours
 - **Disaster Recovery**: Recovery Time Objective (RTO) of 4 hours
 - **Data Backup**: Automated daily backups with 30-day retention
 
 #### NFR-2.2: Error Handling
+
 - **Graceful Degradation**: System continues to function with reduced capability during partial failures
 - **Error Recovery**: Automatic retry mechanisms for transient failures
 - **User Feedback**: Clear error messages with suggested recovery actions
@@ -319,12 +352,14 @@ Create a modern, high-performance workforce management platform that transforms 
 ### NFR-3: Security Requirements
 
 #### NFR-3.1: Data Protection
+
 - **Encryption**: Data encrypted at rest and in transit using industry standards
 - **Access Control**: Role-based access with principle of least privilege
 - **Session Security**: Secure session management with automatic timeout
 - **Input Validation**: Comprehensive validation to prevent injection attacks
 
 #### NFR-3.2: Compliance
+
 - **Audit Trail**: Complete logging of all data access and modifications
 - **Data Retention**: Configurable retention policies for compliance requirements
 - **Privacy Protection**: Personal data protection following privacy regulations
@@ -333,12 +368,14 @@ Create a modern, high-performance workforce management platform that transforms 
 ### NFR-4: Usability Requirements
 
 #### NFR-4.1: User Experience
+
 - **Learning Curve**: New users productive within 30 minutes of training
 - **Task Efficiency**: 75% reduction in task completion times
 - **Error Prevention**: Proactive validation and guidance to prevent user errors
 - **Accessibility**: WCAG 2.1 AA compliance for inclusive design
 
 #### NFR-4.2: Mobile Experience
+
 - **Touch Targets**: Minimum 44px touch targets for mobile interfaces
 - **Gesture Support**: Intuitive gestures for navigation and interaction
 - **Offline Capability**: Critical functions available without internet connection
@@ -347,12 +384,14 @@ Create a modern, high-performance workforce management platform that transforms 
 ### NFR-5: Maintainability Requirements
 
 #### NFR-5.1: Code Quality
+
 - **TypeScript**: Strict mode with no `any` types for complete type safety
 - **Testing**: Minimum 80% code coverage for business logic
 - **Documentation**: Comprehensive code documentation and user guides
 - **Standards**: Consistent coding standards enforced through automated tools
 
 #### NFR-5.2: System Maintenance
+
 - **Modularity**: Modular architecture supporting independent component updates
 - **Configuration**: System behavior configurable without code changes
 - **Monitoring**: Comprehensive monitoring and alerting for system health
@@ -363,6 +402,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### TR-1: Technology Stack
 
 #### TR-1.1: Frontend Technologies
+
 - **Framework**: Next.js 15 with App Router and TypeScript strict mode
 - **UI Library**: Shadcn/UI with New York theme and custom brand colors
 - **Styling**: Tailwind CSS v4 with responsive design utilities
@@ -370,6 +410,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **State Management**: Zustand for minimal client-side state management
 
 #### TR-1.2: Backend Technologies
+
 - **Database**: Supabase-hosted PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with secure session management
 - **API**: Next.js API routes with Server Actions for data mutations
@@ -377,6 +418,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **Caching**: Multi-layer caching with Redis for session and data caching
 
 #### TR-1.3: Infrastructure
+
 - **Hosting**: Vercel for frontend deployment with edge functions
 - **Database Hosting**: Supabase cloud with automated backups
 - **CDN**: Global content delivery network for optimal performance
@@ -386,6 +428,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### TR-2: Architecture Requirements
 
 #### TR-2.1: Application Architecture
+
 - **Pattern**: Server-side rendering with React Server Components
 - **API Design**: RESTful APIs with consistent response formats
 - **Data Flow**: Unidirectional data flow with server state management
@@ -393,6 +436,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **Error Boundaries**: Comprehensive error handling at component and application levels
 
 #### TR-2.2: Database Architecture
+
 - **Schema Design**: Normalized database schema with proper relationships
 - **Indexing**: Strategic indexing for query performance optimization
 - **Constraints**: Database constraints for data integrity
@@ -402,6 +446,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ### TR-3: Integration Requirements
 
 #### TR-3.1: External System Integration
+
 - **Payroll Systems**: ADP integration for payroll processing
 - **Email Services**: SMTP integration for notifications and reports
 - **File Storage**: Cloud storage for document and image uploads
@@ -409,6 +454,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **API Standards**: RESTful APIs with OpenAPI documentation
 
 #### TR-3.2: Data Exchange
+
 - **Export Formats**: Excel, CSV, PDF export capabilities
 - **Import Formats**: CSV and Excel import for bulk data operations
 - **Data Validation**: Comprehensive validation for imported data
@@ -420,11 +466,13 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Epic 1: Captain Daily Operations
 
 #### US-1.1: Quick Log Submission
+
 **As a** captain  
 **I want to** submit my daily log in under 2 minutes  
-**So that** I can focus on customer service and team management  
+**So that** I can focus on customer service and team management
 
 **Acceptance Criteria:**
+
 - Log form loads in under 1 second
 - Auto-populated fields reduce data entry by 50%
 - Real-time calculations provide immediate feedback
@@ -432,11 +480,13 @@ Create a modern, high-performance workforce management platform that transforms 
 - Mobile-optimized interface works on all devices
 
 #### US-1.2: Performance Tracking
+
 **As a** captain  
 **I want to** see my performance metrics and earnings in real-time  
-**So that** I can optimize my team's efficiency and maximize earnings  
+**So that** I can optimize my team's efficiency and maximize earnings
 
 **Acceptance Criteria:**
+
 - Dashboard shows current pay period metrics
 - Labor cost percentages displayed with goal comparisons
 - Bonus calculations updated in real-time
@@ -446,11 +496,13 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Epic 2: Manager Operations
 
 #### US-2.1: Efficient Log Review
+
 **As a** manager  
 **I want to** review and approve logs in under 30 seconds each  
-**So that** I can process payroll efficiently and focus on team development  
+**So that** I can process payroll efficiently and focus on team development
 
 **Acceptance Criteria:**
+
 - Pending logs displayed in priority order
 - Bulk approval operations available
 - Exception highlighting for anomalous values
@@ -458,11 +510,13 @@ Create a modern, high-performance workforce management platform that transforms 
 - Audit trail for all changes
 
 #### US-2.2: Team Performance Monitoring
+
 **As a** manager  
 **I want to** monitor team performance with comprehensive analytics  
-**So that** I can identify improvement opportunities and recognize top performers  
+**So that** I can identify improvement opportunities and recognize top performers
 
 **Acceptance Criteria:**
+
 - Team dashboard with comparative metrics
 - Performance trends and goal tracking
 - Exception alerts for performance issues
@@ -472,11 +526,13 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Epic 3: Sales Operations
 
 #### US-3.1: Commission Tracking
+
 **As a** sales consultant  
 **I want to** track my commission earnings automatically  
-**So that** I can focus on sales activities and accurately project my income  
+**So that** I can focus on sales activities and accurately project my income
 
 **Acceptance Criteria:**
+
 - Simple commission entry interface
 - Automatic job matching on completion
 - Real-time commission calculations
@@ -486,11 +542,13 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Epic 4: Administrative Functions
 
 #### US-4.1: User Management
+
 **As an** administrator  
 **I want to** manage users efficiently with bulk operations  
-**So that** I can maintain system security and user productivity  
+**So that** I can maintain system security and user productivity
 
 **Acceptance Criteria:**
+
 - Comprehensive user management interface
 - Bulk import/export capabilities
 - Granular permission management
@@ -500,6 +558,7 @@ Create a modern, high-performance workforce management platform that transforms 
 ## Success Metrics and KPIs
 
 ### User Experience Metrics
+
 - **Task Completion Time**: 75% reduction in average task completion times
 - **User Satisfaction**: > 4.5/5.0 rating in user satisfaction surveys
 - **Training Time**: 50% reduction in new user onboarding time
@@ -507,6 +566,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **Mobile Usage**: 80% of field workers using mobile interface daily
 
 ### Performance Metrics
+
 - **Page Load Time**: < 1 second for 95% of page loads
 - **System Uptime**: 99.9% availability target
 - **Response Time**: < 100ms for 95% of user interactions
@@ -514,6 +574,7 @@ Create a modern, high-performance workforce management platform that transforms 
 - **Mobile Performance**: Performance parity between mobile and desktop
 
 ### Business Impact Metrics
+
 - **Operational Efficiency**: 75% reduction in administrative overhead
 - **Data Accuracy**: 95% reduction in payroll discrepancies
 - **User Adoption**: 100% user adoption within 30 days
@@ -525,16 +586,19 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Technical Risks
 
 #### Risk: Performance Degradation
+
 - **Probability**: Medium
 - **Impact**: High
 - **Mitigation**: Comprehensive performance testing, monitoring, and optimization
 
 #### Risk: Data Migration Issues
+
 - **Probability**: Medium
 - **Impact**: High
 - **Mitigation**: Thorough testing, parallel system operation, rollback procedures
 
 #### Risk: Security Vulnerabilities
+
 - **Probability**: Low
 - **Impact**: High
 - **Mitigation**: Security audits, penetration testing, secure coding practices
@@ -542,11 +606,13 @@ Create a modern, high-performance workforce management platform that transforms 
 ### Business Risks
 
 #### Risk: User Adoption Resistance
+
 - **Probability**: Medium
 - **Impact**: Medium
 - **Mitigation**: User training, change management, feedback integration
 
 #### Risk: Integration Failures
+
 - **Probability**: Low
 - **Impact**: Medium
 - **Mitigation**: Early integration testing, fallback procedures, vendor coordination
@@ -554,21 +620,25 @@ Create a modern, high-performance workforce management platform that transforms 
 ## Implementation Timeline
 
 ### Phase 1: Foundation (Weeks 1-2)
+
 - Project setup and core architecture
 - Authentication and basic navigation
 - Database schema and initial data models
 
 ### Phase 2: Core Features (Weeks 3-6)
+
 - Role-specific dashboards
 - Log management system
 - Real-time calculations and performance optimization
 
 ### Phase 3: Advanced Features (Weeks 7-10)
+
 - Commission tracking system
 - Comprehensive reporting and analytics
 - User management and administration tools
 
 ### Phase 4: Launch Preparation (Weeks 11-12)
+
 - Comprehensive testing and quality assurance
 - Data migration and system integration
 - User training and production deployment

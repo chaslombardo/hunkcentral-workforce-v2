@@ -18,12 +18,18 @@ export async function POST(request: NextRequest) {
     // Process analytics events
     if (events && events.length > 0) {
       await prisma.analyticsEvent.createMany({
-        data: events.map((event: { eventType: string; metadata?: Record<string, unknown>; timestamp?: string }) => ({
-          eventType: event.eventType,
-          userId: session?.user?.id || null,
-          metadata: event.metadata || {},
-          timestamp: event.timestamp ? new Date(event.timestamp) : new Date(),
-        })),
+        data: events.map(
+          (event: {
+            eventType: string;
+            metadata?: Record<string, unknown>;
+            timestamp?: string;
+          }) => ({
+            eventType: event.eventType,
+            userId: session?.user?.id || null,
+            metadata: event.metadata || {},
+            timestamp: event.timestamp ? new Date(event.timestamp) : new Date(),
+          })
+        ),
         skipDuplicates: true,
       });
     }
@@ -31,14 +37,24 @@ export async function POST(request: NextRequest) {
     // Process performance metrics
     if (metrics && metrics.length > 0) {
       await prisma.performanceMetric.createMany({
-        data: metrics.map((metric: { metricType: string; value: number; page: string; metadata?: Record<string, unknown>; timestamp?: string }) => ({
-          metricType: metric.metricType,
-          value: metric.value,
-          page: metric.page,
-          userId: session?.user?.id || null,
-          metadata: metric.metadata || {},
-          timestamp: metric.timestamp ? new Date(metric.timestamp) : new Date(),
-        })),
+        data: metrics.map(
+          (metric: {
+            metricType: string;
+            value: number;
+            page: string;
+            metadata?: Record<string, unknown>;
+            timestamp?: string;
+          }) => ({
+            metricType: metric.metricType,
+            value: metric.value,
+            page: metric.page,
+            userId: session?.user?.id || null,
+            metadata: metric.metadata || {},
+            timestamp: metric.timestamp
+              ? new Date(metric.timestamp)
+              : new Date(),
+          })
+        ),
         skipDuplicates: true,
       });
     }

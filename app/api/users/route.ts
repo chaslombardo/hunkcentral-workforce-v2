@@ -5,19 +5,31 @@ import { auth } from '@/lib/auth';
 export async function GET() {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
     }
 
     // Check authorization
-    if (!session.user.roles?.includes('admin') && !session.user.roles?.includes('manager')) {
-      return NextResponse.json({ error: 'Unauthorized: Admin or Manager access required' }, { status: 403 });
+    if (
+      !session.user.roles?.includes('admin') &&
+      !session.user.roles?.includes('manager')
+    ) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin or Manager access required' },
+        { status: 403 }
+      );
     }
 
     // Build where clause for manager filtering
     let where = {};
-    if (session.user.roles?.includes('manager') && !session.user.roles?.includes('admin')) {
+    if (
+      session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
       where = {
         roles: { hasSome: ['captain', 'wingman'] },
       };
@@ -50,12 +62,20 @@ export async function GET() {
     });
 
     // Convert Decimal fields to numbers for JSON serialization
-    const serializedUsers = users.map(user => ({
+    const serializedUsers = users.map((user) => ({
       ...user,
-      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : null,
-      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : null,
-      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : null,
-      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : null,
+      rateJunkCaptain: user.rateJunkCaptain
+        ? Number(user.rateJunkCaptain)
+        : null,
+      rateJunkWingman: user.rateJunkWingman
+        ? Number(user.rateJunkWingman)
+        : null,
+      rateMoveCaptain: user.rateMoveCaptain
+        ? Number(user.rateMoveCaptain)
+        : null,
+      rateMoveWingman: user.rateMoveWingman
+        ? Number(user.rateMoveWingman)
+        : null,
       rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
       rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
       rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,

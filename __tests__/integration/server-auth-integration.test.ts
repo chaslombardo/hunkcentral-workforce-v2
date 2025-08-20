@@ -7,12 +7,12 @@ vi.mock('@/lib/errorLogger');
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     user: {
-      findUnique: vi.fn()
-    }
-  }
+      findUnique: vi.fn(),
+    },
+  },
 }));
 vi.mock('next-auth/next', () => ({
-  getServerSession: vi.fn()
+  getServerSession: vi.fn(),
 }));
 
 const mockLogAuthError = vi.mocked(logAuthError);
@@ -25,18 +25,20 @@ describe('Server Authentication Integration', () => {
   describe('validateServerSession', () => {
     it('should handle authentication errors with proper logging', async () => {
       const { getServerSession } = await import('next-auth/next');
-      vi.mocked(getServerSession).mockRejectedValue(new Error('Database connection failed'));
+      vi.mocked(getServerSession).mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       const mockRequest = {
         url: 'http://localhost:3000/admin',
         headers: {
-          get: vi.fn().mockReturnValue('test-user-agent')
-        }
+          get: vi.fn().mockReturnValue('test-user-agent'),
+        },
       } as any;
 
       const result = await validateServerSession(mockRequest, {
         requireAuth: true,
-        redirectOnFailure: true
+        redirectOnFailure: true,
       });
 
       expect(result.isValid).toBe(false);
@@ -47,7 +49,7 @@ describe('Server Authentication Integration', () => {
         expect.objectContaining({
           action: 'session_validation',
           url: 'http://localhost:3000/admin',
-          userAgent: 'test-user-agent'
+          userAgent: 'test-user-agent',
         })
       );
     });
@@ -58,8 +60,8 @@ describe('Server Authentication Integration', () => {
           id: '1',
           email: 'test@example.com',
           fullName: 'Test User',
-          roles: ['captain']
-        }
+          roles: ['captain'],
+        },
       };
 
       const { getServerSession } = await import('next-auth/next');
@@ -71,7 +73,7 @@ describe('Server Authentication Integration', () => {
 
       const result = await validateServerSession(undefined, {
         requireAuth: true,
-        redirectOnFailure: true
+        redirectOnFailure: true,
       });
 
       expect(result.isValid).toBe(false);
@@ -83,8 +85,8 @@ describe('Server Authentication Integration', () => {
           action: 'session_validation',
           userId: '1',
           additionalData: expect.objectContaining({
-            sessionEmail: 'test@example.com'
-          })
+            sessionEmail: 'test@example.com',
+          }),
         })
       );
     });
@@ -95,8 +97,8 @@ describe('Server Authentication Integration', () => {
           id: '1',
           email: 'test@example.com',
           fullName: 'Test User',
-          roles: ['captain']
-        }
+          roles: ['captain'],
+        },
       };
 
       const { getServerSession } = await import('next-auth/next');
@@ -104,24 +106,28 @@ describe('Server Authentication Integration', () => {
 
       const { prisma } = await import('@/lib/prisma');
       // Mock database error
-      vi.mocked(prisma.user.findUnique).mockRejectedValue(new Error('Database timeout'));
+      vi.mocked(prisma.user.findUnique).mockRejectedValue(
+        new Error('Database timeout')
+      );
 
       const result = await validateServerSession();
 
       // Should gracefully degrade and return session user
       expect(result.isValid).toBe(true);
-      expect(result.user).toEqual(expect.objectContaining({
-        id: '1',
-        email: 'test@example.com'
-      }));
+      expect(result.user).toEqual(
+        expect.objectContaining({
+          id: '1',
+          email: 'test@example.com',
+        })
+      );
       expect(mockLogAuthError).toHaveBeenCalledWith(
         expect.any(Error),
         expect.objectContaining({
           action: 'session_validation',
           userId: '1',
           additionalData: expect.objectContaining({
-            error: 'database_check_failed'
-          })
+            error: 'database_check_failed',
+          }),
         })
       );
     });
@@ -132,7 +138,9 @@ describe('Server Authentication Integration', () => {
       const { getServerSession } = await import('next-auth/next');
       vi.mocked(getServerSession).mockResolvedValue(null);
 
-      await expect(requireServerAuth()).rejects.toThrow('Authentication required');
+      await expect(requireServerAuth()).rejects.toThrow(
+        'Authentication required'
+      );
       expect(mockLogAuthError).toHaveBeenCalled();
     });
 
@@ -142,8 +150,8 @@ describe('Server Authentication Integration', () => {
           id: '1',
           email: 'test@example.com',
           fullName: 'Test User',
-          roles: ['admin']
-        }
+          roles: ['admin'],
+        },
       };
 
       const { getServerSession } = await import('next-auth/next');
@@ -154,18 +162,20 @@ describe('Server Authentication Integration', () => {
         id: '1',
         email: 'test@example.com',
         fullName: 'Test User',
-        roles: ['admin']
+        roles: ['admin'],
       } as any);
 
       const user = await requireServerAuth(undefined, {
-        requiredRoles: ['admin']
+        requiredRoles: ['admin'],
       });
 
-      expect(user).toEqual(expect.objectContaining({
-        id: '1',
-        email: 'test@example.com',
-        roles: ['admin']
-      }));
+      expect(user).toEqual(
+        expect.objectContaining({
+          id: '1',
+          email: 'test@example.com',
+          roles: ['admin'],
+        })
+      );
     });
   });
 
@@ -177,15 +187,16 @@ describe('Server Authentication Integration', () => {
       const mockRequest = {
         url: 'http://localhost:3000/reports/payroll',
         headers: {
-          get: vi.fn()
+          get: vi
+            .fn()
             .mockReturnValueOnce('Mozilla/5.0 (test browser)')
-            .mockReturnValue(null)
-        }
+            .mockReturnValue(null),
+        },
       } as any;
 
       await validateServerSession(mockRequest, {
         requireAuth: true,
-        requiredRoles: ['manager']
+        requiredRoles: ['manager'],
       });
 
       expect(mockLogAuthError).toHaveBeenCalledWith(
@@ -196,8 +207,8 @@ describe('Server Authentication Integration', () => {
           userAgent: 'Mozilla/5.0 (test browser)',
           additionalData: expect.objectContaining({
             requireAuth: true,
-            requiredRoles: ['manager']
-          })
+            requiredRoles: ['manager'],
+          }),
         })
       );
     });

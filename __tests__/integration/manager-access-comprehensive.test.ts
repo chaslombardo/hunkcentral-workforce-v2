@@ -1,7 +1,7 @@
-import { 
-  canManagerAccessUser, 
-  getManagerAccessibleRoles, 
-  shouldFilterUsersForManager 
+import {
+  canManagerAccessUser,
+  getManagerAccessibleRoles,
+  shouldFilterUsersForManager,
 } from '@/lib/auth';
 import type { User, UserRole } from '@/types';
 
@@ -25,12 +25,15 @@ describe('Manager Access Control Comprehensive', () => {
     const wingmanUser = createMockUser('wingman1', ['wingman']);
     const salesUser = createMockUser('sales1', ['sales']);
     const otherManagerUser = createMockUser('manager2', ['manager']);
-    const adminManagerUser = createMockUser('adminmanager1', ['admin', 'manager']);
+    const adminManagerUser = createMockUser('adminmanager1', [
+      'admin',
+      'manager',
+    ]);
 
     it('should satisfy requirement 2.1: managers can view all captain information', () => {
       // Requirement 2.1: WHEN I am logged in as a manager THEN the system SHALL allow me to view all information about captains
       expect(canManagerAccessUser(managerUser, captainUser)).toBe(true);
-      
+
       // Admin-manager should also have access
       expect(canManagerAccessUser(adminManagerUser, captainUser)).toBe(true);
     });
@@ -38,20 +41,20 @@ describe('Manager Access Control Comprehensive', () => {
     it('should satisfy requirement 2.2: managers can view all wingman information', () => {
       // Requirement 2.2: WHEN I am logged in as a manager THEN the system SHALL allow me to view all information about wingmen
       expect(canManagerAccessUser(managerUser, wingmanUser)).toBe(true);
-      
+
       // Admin-manager should also have access
       expect(canManagerAccessUser(adminManagerUser, wingmanUser)).toBe(true);
     });
 
     it('should satisfy requirement 2.3: managers cannot view other sales consultants, managers, or admins', () => {
       // Requirement 2.3: WHEN I am logged in as a manager THEN the system SHALL NOT allow me to view information about other sales consultants, managers, or system admin users
-      
+
       // Cannot view sales consultants
       expect(canManagerAccessUser(managerUser, salesUser)).toBe(false);
-      
+
       // Cannot view other managers
       expect(canManagerAccessUser(managerUser, otherManagerUser)).toBe(false);
-      
+
       // Cannot view admins
       expect(canManagerAccessUser(managerUser, adminUser)).toBe(false);
     });
@@ -65,7 +68,7 @@ describe('Manager Access Control Comprehensive', () => {
     it('should satisfy requirement 4.5: permissions enforced at both UI and API levels', () => {
       // UI level: RoleGuard component (tested in component tests)
       // API level: filtering in getUsers and getUserById (tested in integration tests)
-      
+
       // Test that filtering logic is applied correctly
       expect(shouldFilterUsersForManager(managerUser)).toBe(true);
       expect(shouldFilterUsersForManager(adminUser)).toBe(false);
@@ -75,13 +78,19 @@ describe('Manager Access Control Comprehensive', () => {
 
   describe('Edge Cases', () => {
     it('should handle users with multiple roles correctly', () => {
-      const captainSalesUser = createMockUser('captainsales1', ['captain', 'sales']);
-      const wingmanManagerUser = createMockUser('wingmanmanager1', ['wingman', 'manager']);
+      const captainSalesUser = createMockUser('captainsales1', [
+        'captain',
+        'sales',
+      ]);
+      const wingmanManagerUser = createMockUser('wingmanmanager1', [
+        'wingman',
+        'manager',
+      ]);
       const managerUser = createMockUser('manager1', ['manager']);
 
       // Should allow access to users with captain role (even if they have other roles)
       expect(canManagerAccessUser(managerUser, captainSalesUser)).toBe(true);
-      
+
       // Should allow access to users with wingman role (even if they have other roles)
       expect(canManagerAccessUser(managerUser, wingmanManagerUser)).toBe(true);
     });
@@ -108,7 +117,7 @@ describe('Manager Access Control Comprehensive', () => {
 
       // Manager cannot access admin
       expect(canManagerAccessUser(managerUser, adminUser)).toBe(false);
-      
+
       // Manager cannot access other managers
       expect(canManagerAccessUser(managerUser, otherManagerUser)).toBe(false);
     });

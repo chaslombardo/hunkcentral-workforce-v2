@@ -1,30 +1,30 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function checkDatabase() {
   try {
     // eslint-disable-next-line no-console
-    console.log('🔍 Checking database connection...')
-    
+    console.log('🔍 Checking database connection...');
+
     // Test basic connection
-    await prisma.$connect()
+    await prisma.$connect();
     // eslint-disable-next-line no-console
-    console.log('✅ Database connection successful')
-    
+    console.log('✅ Database connection successful');
+
     // Check if tables exist and have data
-    const userCount = await prisma.user.count()
+    const userCount = await prisma.user.count();
     // eslint-disable-next-line no-console
-    console.log(`👥 Users in database: ${userCount}`)
-    
-    const logCount = await prisma.dailyLog.count()
+    console.log(`👥 Users in database: ${userCount}`);
+
+    const logCount = await prisma.dailyLog.count();
     // eslint-disable-next-line no-console
-    console.log(`📋 Daily logs in database: ${logCount}`)
-    
-    const commissionCount = await prisma.commissionEntry.count()
+    console.log(`📋 Daily logs in database: ${logCount}`);
+
+    const commissionCount = await prisma.commissionEntry.count();
     // eslint-disable-next-line no-console
-    console.log(`💰 Commission entries in database: ${commissionCount}`)
-    
+    console.log(`💰 Commission entries in database: ${commissionCount}`);
+
     // List all users
     if (userCount > 0) {
       const users = await prisma.user.findMany({
@@ -33,26 +33,27 @@ async function checkDatabase() {
           email: true,
           fullName: true,
           roles: true,
-          createdAt: true
-        }
-      })
+          createdAt: true,
+        },
+      });
       // eslint-disable-next-line no-console
-      console.log('\n👤 Users:')
-      users.forEach(user => {
+      console.log('\n👤 Users:');
+      users.forEach((user) => {
         // eslint-disable-next-line no-console
-        console.log(`  - ${user.fullName} (${user.email}) - Roles: ${user.roles.join(', ')}`)
-      })
+        console.log(
+          `  - ${user.fullName} (${user.email}) - Roles: ${user.roles.join(', ')}`
+        );
+      });
     }
-    
+
     // eslint-disable-next-line no-console
-    console.log('\n✅ Database check completed successfully')
-    
+    console.log('\n✅ Database check completed successfully');
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('❌ Database check failed:', error)
+    console.error('❌ Database check failed:', error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
-checkDatabase()
+checkDatabase();

@@ -48,7 +48,15 @@ const mockPayrollData: PayrollCalculation = {
   employeeId: '1',
   employee: mockUser,
   totalHours: 40,
-  hoursByDepartment: { junk: 30, move: 8, zigma: 2, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+  hoursByDepartment: {
+    junk: 30,
+    move: 8,
+    zigma: 2,
+    training: 0,
+    estimating: 0,
+    warehouse: 0,
+    admin: 0,
+  },
   grossWages: 720,
   tips: 150,
   bonuses: 85,
@@ -90,9 +98,7 @@ const mockDailyWorkHistory: DailyWorkEntry[] = [
   {
     date: new Date('2025-01-02'),
     logId: 'log-1',
-    departments: [
-      { department: 'junk', hours: 6, rate: 20, role: 'captain' },
-    ],
+    departments: [{ department: 'junk', hours: 6, rate: 20, role: 'captain' }],
     tips: 45,
     totalHours: 6,
     grossPay: 120,
@@ -131,7 +137,7 @@ describe('PayrollExportDialog', () => {
 
   it('renders the export dialog with all tabs', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     expect(screen.getByText('Export Payroll Report')).toBeInTheDocument();
     expect(screen.getByText('Basic Options')).toBeInTheDocument();
     expect(screen.getByText('Content & Data')).toBeInTheDocument();
@@ -140,7 +146,7 @@ describe('PayrollExportDialog', () => {
 
   it('shows correct default options', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Should default to PDF paystub for current user
     expect(screen.getByText('PDF Document (.pdf)')).toBeInTheDocument();
     expect(screen.getByText('Personal Paystub')).toBeInTheDocument();
@@ -150,38 +156,40 @@ describe('PayrollExportDialog', () => {
   it('allows changing export format', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Click on format selector
     const formatSelect = screen.getByText('PDF Document (.pdf)');
     await user.click(formatSelect);
-    
+
     // Select Excel format
     await user.click(screen.getByText('Excel Spreadsheet (.xlsx)'));
-    
-    expect(screen.getByDisplayValue('Excel Spreadsheet (.xlsx)')).toBeInTheDocument();
+
+    expect(
+      screen.getByDisplayValue('Excel Spreadsheet (.xlsx)')
+    ).toBeInTheDocument();
   });
 
   it('allows changing export type', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Click on type selector
     const typeSelect = screen.getByText('Personal Paystub');
     await user.click(typeSelect);
-    
+
     // Select detailed breakdown
     await user.click(screen.getByText('Detailed Breakdown'));
-    
+
     expect(screen.getByDisplayValue('Detailed Breakdown')).toBeInTheDocument();
   });
 
   it('shows content options in the second tab', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Click on Content & Data tab
     await user.click(screen.getByText('Content & Data'));
-    
+
     // Check that content options are visible
     expect(screen.getByText('Pay Components')).toBeInTheDocument();
     expect(screen.getByText('Detailed Information')).toBeInTheDocument();
@@ -194,14 +202,14 @@ describe('PayrollExportDialog', () => {
   it('allows toggling content options', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to Content & Data tab
     await user.click(screen.getByText('Content & Data'));
-    
+
     // Toggle department breakdown off
     const deptBreakdownCheckbox = screen.getByLabelText('Department Breakdown');
     expect(deptBreakdownCheckbox).toBeChecked();
-    
+
     await user.click(deptBreakdownCheckbox);
     expect(deptBreakdownCheckbox).not.toBeChecked();
   });
@@ -209,10 +217,10 @@ describe('PayrollExportDialog', () => {
   it('shows export preview in the third tab', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Click on Preview & Export tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Check that preview information is visible
     expect(screen.getByText('Export Preview')).toBeInTheDocument();
     expect(screen.getByText('Format:')).toBeInTheDocument();
@@ -225,10 +233,10 @@ describe('PayrollExportDialog', () => {
   it('shows included content badges in preview', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Check that content badges are shown
     expect(screen.getByText('Hours')).toBeInTheDocument();
     expect(screen.getByText('Tips')).toBeInTheDocument();
@@ -239,16 +247,18 @@ describe('PayrollExportDialog', () => {
   it('allows adding notes', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to Content & Data tab
     await user.click(screen.getByText('Content & Data'));
-    
+
     // Find and type in notes textarea
-    const notesTextarea = screen.getByPlaceholderText('Add any notes or comments for this export...');
+    const notesTextarea = screen.getByPlaceholderText(
+      'Add any notes or comments for this export...'
+    );
     await user.type(notesTextarea, 'Test export notes');
-    
+
     expect(notesTextarea).toHaveValue('Test export notes');
-    
+
     // Go to preview tab and check notes are shown
     await user.click(screen.getByText('Preview & Export'));
     expect(screen.getByText('Test export notes')).toBeInTheDocument();
@@ -257,46 +267,49 @@ describe('PayrollExportDialog', () => {
   it('handles export process', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Click export button
     const exportButton = screen.getByRole('button', { name: /export/i });
     await user.click(exportButton);
-    
+
     // Should show loading state
     expect(screen.getByText('Exporting...')).toBeInTheDocument();
     expect(screen.getByText('Generating export...')).toBeInTheDocument();
-    
+
     // Wait for export to complete
-    await waitFor(() => {
-      expect(screen.queryByText('Exporting...')).not.toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Exporting...')).not.toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('shows department filter only for appropriate scopes', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Initially should not show department filter (current-user scope)
     expect(screen.queryByText('Department Filter')).not.toBeInTheDocument();
-    
+
     // Change to department scope
     const scopeSelect = screen.getByText('My Payroll Only');
     await user.click(scopeSelect);
     await user.click(screen.getByText('My Department'));
-    
+
     // Now should show department filter
     expect(screen.getByText('Department Filter')).toBeInTheDocument();
   });
 
   it('calculates correct employee count', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     fireEvent.click(screen.getByText('Preview & Export'));
-    
+
     // Should show 1 employee for current user scope
     expect(screen.getAllByText('1')[0]).toBeInTheDocument();
   });
@@ -304,38 +317,42 @@ describe('PayrollExportDialog', () => {
   it('shows help information', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Should show export tips
     expect(screen.getByText('Export Tips:')).toBeInTheDocument();
-    expect(screen.getByText(/PDF format is recommended for paystubs/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/PDF format is recommended for paystubs/)
+    ).toBeInTheDocument();
   });
 
   it('handles dialog close', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
-    
-    render(<PayrollExportDialog {...defaultProps} onOpenChange={onOpenChange} />);
-    
+
+    render(
+      <PayrollExportDialog {...defaultProps} onOpenChange={onOpenChange} />
+    );
+
     // Click cancel button
     await user.click(screen.getByText('Cancel'));
-    
+
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('disables export during processing', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Click export button
     const exportButton = screen.getByRole('button', { name: /export/i });
     await user.click(exportButton);
-    
+
     // Export button should be disabled during processing
     expect(exportButton).toBeDisabled();
     expect(screen.getByText('Cancel')).toBeDisabled();
@@ -344,16 +361,18 @@ describe('PayrollExportDialog', () => {
   it('shows progress messages during export', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Go to preview tab
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Click export button
     await user.click(screen.getByRole('button', { name: /export/i }));
-    
+
     // Should show progress messages
     await waitFor(() => {
-      expect(screen.getByText('Collecting payroll data...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Collecting payroll data...')
+      ).toBeInTheDocument();
     });
   });
 });
@@ -361,7 +380,7 @@ describe('PayrollExportDialog', () => {
 describe('PayrollExportDialog Requirements Validation', () => {
   it('meets requirement 7.1: Implements PayrollExportDialog component', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     expect(screen.getByText('Export Payroll Report')).toBeInTheDocument();
     expect(screen.getByText('PDF Document (.pdf)')).toBeInTheDocument();
     expect(screen.getByText('Excel Spreadsheet (.xlsx)')).toBeInTheDocument();
@@ -370,10 +389,10 @@ describe('PayrollExportDialog Requirements Validation', () => {
   it('meets requirement 7.2: Adds detailed paystub generation', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Should have paystub option
     expect(screen.getByText('Personal Paystub')).toBeInTheDocument();
-    
+
     // Should include all breakdown information
     await user.click(screen.getByText('Content & Data'));
     expect(screen.getByLabelText('Department Breakdown')).toBeChecked();
@@ -383,15 +402,17 @@ describe('PayrollExportDialog Requirements Validation', () => {
 
   it('meets requirement 7.3: Creates calculation explanation tooltips', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Should have calculation details option
     fireEvent.click(screen.getByText('Content & Data'));
-    expect(screen.getByText('Calculation Details & Explanations')).toBeInTheDocument();
+    expect(
+      screen.getByText('Calculation Details & Explanations')
+    ).toBeInTheDocument();
   });
 
   it('meets requirement 7.4: Implements print-friendly layouts', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Should have print option
     fireEvent.click(screen.getByText('Preview'));
     expect(screen.getByText('Print Preview')).toBeInTheDocument();
@@ -399,7 +420,7 @@ describe('PayrollExportDialog Requirements Validation', () => {
 
   it('meets requirement 7.5: Provides multiple export formats', () => {
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     // Should have multiple format options
     expect(screen.getByText('PDF Document (.pdf)')).toBeInTheDocument();
     expect(screen.getByText('Excel Spreadsheet (.xlsx)')).toBeInTheDocument();
@@ -410,9 +431,9 @@ describe('PayrollExportDialog Requirements Validation', () => {
   it('meets requirement 7.6: Includes comprehensive data options', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     await user.click(screen.getByText('Content & Data'));
-    
+
     // Should have all data inclusion options
     expect(screen.getByLabelText('Hours Worked')).toBeInTheDocument();
     expect(screen.getByLabelText('Tips Earned')).toBeInTheDocument();
@@ -421,15 +442,17 @@ describe('PayrollExportDialog Requirements Validation', () => {
     expect(screen.getByLabelText('Department Breakdown')).toBeInTheDocument();
     expect(screen.getByLabelText('Daily Work History')).toBeInTheDocument();
     expect(screen.getByLabelText('Rate Information')).toBeInTheDocument();
-    expect(screen.getByLabelText('Audit Trail & Log References')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Audit Trail & Log References')
+    ).toBeInTheDocument();
   });
 
   it('meets requirement 7.7: Provides export preview and validation', async () => {
     const user = userEvent.setup();
     render(<PayrollExportDialog {...defaultProps} />);
-    
+
     await user.click(screen.getByText('Preview & Export'));
-    
+
     // Should show comprehensive preview
     expect(screen.getByText('Export Preview')).toBeInTheDocument();
     expect(screen.getByText('Format:')).toBeInTheDocument();

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -11,22 +11,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Send, Bug, Lightbulb, Zap, AlertTriangle } from "lucide-react";
-import { analytics } from "@/lib/analytics";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import {
+  MessageSquare,
+  Send,
+  Bug,
+  Lightbulb,
+  Zap,
+  AlertTriangle,
+} from 'lucide-react';
+import { analytics } from '@/lib/analytics';
 
 interface FeedbackFormData {
   type: string;
@@ -45,8 +52,8 @@ interface FeedbackFormData {
 export function FeedbackDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedbackType, setFeedbackType] = useState("general");
-  const [browserInfo, setBrowserInfo] = useState("");
+  const [feedbackType, setFeedbackType] = useState('general');
+  const [browserInfo, setBrowserInfo] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,17 +78,19 @@ export function FeedbackDialog() {
 
     const formData = new FormData(event.currentTarget);
     const feedback: FeedbackFormData = {
-      type: formData.get("type") as string,
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
+      type: formData.get('type') as string,
+      title: formData.get('title') as string,
+      description: formData.get('description') as string,
       page: window.location.pathname,
-      priority: formData.get("priority") as string,
-      email: formData.get("email") as string || undefined,
-      reproductionSteps: formData.get("reproductionSteps") as string || undefined,
-      expectedBehavior: formData.get("expectedBehavior") as string || undefined,
-      actualBehavior: formData.get("actualBehavior") as string || undefined,
+      priority: formData.get('priority') as string,
+      email: (formData.get('email') as string) || undefined,
+      reproductionSteps:
+        (formData.get('reproductionSteps') as string) || undefined,
+      expectedBehavior:
+        (formData.get('expectedBehavior') as string) || undefined,
+      actualBehavior: (formData.get('actualBehavior') as string) || undefined,
       browserInfo: browserInfo,
-      attachScreenshot: formData.get("attachScreenshot") === "on",
+      attachScreenshot: formData.get('attachScreenshot') === 'on',
     };
 
     try {
@@ -93,10 +102,10 @@ export function FeedbackDialog() {
         metadata: { feedbackType: feedback.type, priority: feedback.priority },
       });
 
-      const response = await fetch("/api/feedback", {
-        method: "POST",
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...feedback,
@@ -108,10 +117,10 @@ export function FeedbackDialog() {
 
       if (response.ok) {
         toast({
-          title: "Feedback submitted",
+          title: 'Feedback submitted',
           description: "Thank you for your feedback! We'll review it soon.",
         });
-        
+
         // Track successful submission
         analytics.trackInteraction({
           eventType: 'form_submit',
@@ -123,21 +132,26 @@ export function FeedbackDialog() {
         setOpen(false);
         // Reset form
         (event.target as HTMLFormElement).reset();
-        setFeedbackType("general");
+        setFeedbackType('general');
       } else {
-        throw new Error("Failed to submit feedback");
+        throw new Error('Failed to submit feedback');
       }
     } catch (error) {
       // Track error
-      analytics.trackError(error as Error, window.location.pathname, undefined, {
-        context: 'feedback_submission',
-        feedbackType: feedback.type,
-      });
+      analytics.trackError(
+        error as Error,
+        window.location.pathname,
+        undefined,
+        {
+          context: 'feedback_submission',
+          feedbackType: feedback.type,
+        }
+      );
 
       toast({
-        title: "Error",
-        description: "Failed to submit feedback. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to submit feedback. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -160,19 +174,34 @@ export function FeedbackDialog() {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {feedbackType === "bug" && <Bug className="h-5 w-5 text-red-500" />}
-              {feedbackType === "feature" && <Lightbulb className="h-5 w-5 text-yellow-500" />}
-              {feedbackType === "improvement" && <Zap className="h-5 w-5 text-blue-500" />}
-              {feedbackType === "performance" && <AlertTriangle className="h-5 w-5 text-orange-500" />}
-              {feedbackType === "general" && <MessageSquare className="h-5 w-5 text-hunks-green" />}
+              {feedbackType === 'bug' && (
+                <Bug className="h-5 w-5 text-red-500" />
+              )}
+              {feedbackType === 'feature' && (
+                <Lightbulb className="h-5 w-5 text-yellow-500" />
+              )}
+              {feedbackType === 'improvement' && (
+                <Zap className="h-5 w-5 text-blue-500" />
+              )}
+              {feedbackType === 'performance' && (
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
+              )}
+              {feedbackType === 'general' && (
+                <MessageSquare className="h-5 w-5 text-hunks-green" />
+              )}
               Share Your Feedback
             </DialogTitle>
             <DialogDescription>
-              Help us improve HUNKCentral by sharing your thoughts, reporting issues, or suggesting improvements.
+              Help us improve HUNKCentral by sharing your thoughts, reporting
+              issues, or suggesting improvements.
             </DialogDescription>
           </DialogHeader>
-          
-          <Tabs value={feedbackType} onValueChange={setFeedbackType} className="py-4">
+
+          <Tabs
+            value={feedbackType}
+            onValueChange={setFeedbackType}
+            className="py-4"
+          >
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="bug" className="text-xs">
                 <Bug className="h-3 w-3 mr-1" />
@@ -207,9 +236,13 @@ export function FeedbackDialog() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">Low - Nice to have</SelectItem>
-                    <SelectItem value="medium">Medium - Should be fixed</SelectItem>
+                    <SelectItem value="medium">
+                      Medium - Should be fixed
+                    </SelectItem>
                     <SelectItem value="high">High - Important issue</SelectItem>
-                    <SelectItem value="critical">Critical - Blocking work</SelectItem>
+                    <SelectItem value="critical">
+                      Critical - Blocking work
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -220,11 +253,15 @@ export function FeedbackDialog() {
                   id="title"
                   name="title"
                   placeholder={
-                    feedbackType === "bug" ? "Brief description of the bug" :
-                    feedbackType === "feature" ? "Feature you'd like to see" :
-                    feedbackType === "improvement" ? "What could be improved?" :
-                    feedbackType === "performance" ? "What's running slowly?" :
-                    "Brief description of your feedback"
+                    feedbackType === 'bug'
+                      ? 'Brief description of the bug'
+                      : feedbackType === 'feature'
+                        ? "Feature you'd like to see"
+                        : feedbackType === 'improvement'
+                          ? 'What could be improved?'
+                          : feedbackType === 'performance'
+                            ? "What's running slowly?"
+                            : 'Brief description of your feedback'
                   }
                   required
                 />
@@ -241,7 +278,9 @@ export function FeedbackDialog() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="expectedBehavior">What should have happened?</Label>
+                  <Label htmlFor="expectedBehavior">
+                    What should have happened?
+                  </Label>
                   <Textarea
                     id="expectedBehavior"
                     name="expectedBehavior"
@@ -321,7 +360,8 @@ export function FeedbackDialog() {
                   placeholder="your.email@example.com"
                 />
                 <p className="text-xs text-muted-foreground">
-                  We&apos;ll only use this to follow up on your feedback if needed.
+                  We&apos;ll only use this to follow up on your feedback if
+                  needed.
                 </p>
               </div>
 

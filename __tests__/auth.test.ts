@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { hasRole, hasAnyRole, requireAuth, requireRole, requireAnyRole } from '@/lib/auth';
+import {
+  hasRole,
+  hasAnyRole,
+  requireAuth,
+  requireRole,
+  requireAnyRole,
+} from '@/lib/auth';
 import type { User, UserRole } from '@/types';
 
 // Mock user data
@@ -65,7 +71,9 @@ describe('Authentication Utilities', () => {
     });
 
     it('should throw when user is undefined', () => {
-      expect(() => requireAuth(undefined as any)).toThrow('Authentication required');
+      expect(() => requireAuth(undefined as any)).toThrow(
+        'Authentication required'
+      );
     });
   });
 
@@ -76,19 +84,29 @@ describe('Authentication Utilities', () => {
     });
 
     it('should throw when user does not have the required role', () => {
-      expect(() => requireRole(mockUser, 'admin')).toThrow("Role 'admin' required");
-      expect(() => requireRole(mockUser, 'manager')).toThrow("Role 'manager' required");
+      expect(() => requireRole(mockUser, 'admin')).toThrow(
+        "Role 'admin' required"
+      );
+      expect(() => requireRole(mockUser, 'manager')).toThrow(
+        "Role 'manager' required"
+      );
     });
 
     it('should throw when user is null', () => {
-      expect(() => requireRole(null, 'captain')).toThrow('Authentication required');
+      expect(() => requireRole(null, 'captain')).toThrow(
+        'Authentication required'
+      );
     });
   });
 
   describe('requireAnyRole', () => {
     it('should not throw when user has at least one of the required roles', () => {
-      expect(() => requireAnyRole(mockUser, ['captain', 'admin'])).not.toThrow();
-      expect(() => requireAnyRole(mockUser, ['sales', 'manager'])).not.toThrow();
+      expect(() =>
+        requireAnyRole(mockUser, ['captain', 'admin'])
+      ).not.toThrow();
+      expect(() =>
+        requireAnyRole(mockUser, ['sales', 'manager'])
+      ).not.toThrow();
     });
 
     it('should throw when user has none of the required roles', () => {
@@ -98,7 +116,9 @@ describe('Authentication Utilities', () => {
     });
 
     it('should throw when user is null', () => {
-      expect(() => requireAnyRole(null, ['captain'])).toThrow('Authentication required');
+      expect(() => requireAnyRole(null, ['captain'])).toThrow(
+        'Authentication required'
+      );
     });
 
     it('should not throw for empty roles array when user is authenticated', () => {
@@ -117,7 +137,7 @@ describe('Authentication Utilities', () => {
     it('should handle multiple role checks', () => {
       const managerRoles: UserRole[] = ['manager', 'admin'];
       const captainRoles: UserRole[] = ['captain', 'wingman'];
-      
+
       expect(hasAnyRole(mockAdminUser, managerRoles)).toBe(true);
       expect(hasAnyRole(mockUser, captainRoles)).toBe(true);
       expect(hasAnyRole(mockUser, managerRoles)).toBe(false);

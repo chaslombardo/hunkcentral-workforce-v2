@@ -1,6 +1,18 @@
 import { calculatePayroll } from '@/lib/payCalculator';
-import { formatCurrency, formatHours, calculateLaborPercentage, calculateTrend } from '@/lib/formatters';
-import type { User, DailyLog, LogJob, LogHour, CommissionEntry, PayPeriod } from '@/types';
+import {
+  formatCurrency,
+  formatHours,
+  calculateLaborPercentage,
+  calculateTrend,
+} from '@/lib/formatters';
+import type {
+  User,
+  DailyLog,
+  LogJob,
+  LogHour,
+  CommissionEntry,
+  PayPeriod,
+} from '@/types';
 
 // Mock data helpers
 const createMockUser = (overrides: Partial<User> = {}): User => ({
@@ -24,7 +36,9 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
   ...overrides,
 });
 
-const createMockPayPeriod = (overrides: Partial<PayPeriod> = {}): PayPeriod => ({
+const createMockPayPeriod = (
+  overrides: Partial<PayPeriod> = {}
+): PayPeriod => ({
   id: 'period-1',
   name: 'January 2025 - Week 1',
   startDate: new Date('2025-01-01'),
@@ -39,7 +53,7 @@ describe('Payroll Report Generation', () => {
   describe('Report Data Aggregation', () => {
     it('should aggregate payroll data correctly for report generation', () => {
       const payPeriod = createMockPayPeriod();
-      
+
       const users = [
         createMockUser({
           id: 'captain-1',
@@ -57,7 +71,7 @@ describe('Payroll Report Generation', () => {
           id: 'sales-1',
           fullName: 'Bob Sales',
           roles: ['sales'],
-          commissionRate: 0.10,
+          commissionRate: 0.1,
         }),
       ];
 
@@ -75,9 +89,11 @@ describe('Payroll Report Generation', () => {
 
       // Verify report structure
       expect(payrollData).toHaveLength(3);
-      expect(payrollData.every(p => p.employeeId)).toBe(true);
-      expect(payrollData.every(p => p.employee)).toBe(true);
-      expect(payrollData.every(p => typeof p.totalPay === 'number')).toBe(true);
+      expect(payrollData.every((p) => p.employeeId)).toBe(true);
+      expect(payrollData.every((p) => p.employee)).toBe(true);
+      expect(payrollData.every((p) => typeof p.totalPay === 'number')).toBe(
+        true
+      );
     });
 
     it('should calculate summary metrics for dashboard cards', () => {
@@ -86,7 +102,15 @@ describe('Payroll Report Generation', () => {
           employeeId: 'emp-1',
           employee: createMockUser({ id: 'emp-1', fullName: 'Employee 1' }),
           totalHours: 40,
-          hoursByDepartment: { junk: 40, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+          hoursByDepartment: {
+            junk: 40,
+            move: 0,
+            zigma: 0,
+            training: 0,
+            estimating: 0,
+            warehouse: 0,
+            admin: 0,
+          },
           grossWages: 600,
           tips: 150,
           bonuses: 85,
@@ -108,7 +132,15 @@ describe('Payroll Report Generation', () => {
           employeeId: 'emp-2',
           employee: createMockUser({ id: 'emp-2', fullName: 'Employee 2' }),
           totalHours: 35,
-          hoursByDepartment: { junk: 0, move: 35, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+          hoursByDepartment: {
+            junk: 0,
+            move: 35,
+            zigma: 0,
+            training: 0,
+            estimating: 0,
+            warehouse: 0,
+            admin: 0,
+          },
           grossWages: 595,
           tips: 200,
           bonuses: 120,
@@ -130,10 +162,19 @@ describe('Payroll Report Generation', () => {
 
       // Calculate summary metrics
       const totalEmployees = payrollData.length;
-      const totalPayroll = payrollData.reduce((sum, calc) => sum + calc.totalPay, 0);
-      const totalHours = payrollData.reduce((sum, calc) => sum + calc.totalHours, 0);
+      const totalPayroll = payrollData.reduce(
+        (sum, calc) => sum + calc.totalPay,
+        0
+      );
+      const totalHours = payrollData.reduce(
+        (sum, calc) => sum + calc.totalHours,
+        0
+      );
       const totalTips = payrollData.reduce((sum, calc) => sum + calc.tips, 0);
-      const totalBonuses = payrollData.reduce((sum, calc) => sum + calc.bonuses, 0);
+      const totalBonuses = payrollData.reduce(
+        (sum, calc) => sum + calc.bonuses,
+        0
+      );
 
       expect(totalEmployees).toBe(2);
       expect(totalPayroll).toBe(1750); // 835 + 915
@@ -161,27 +202,52 @@ describe('Payroll Report Generation', () => {
         {
           employeeId: 'emp-1',
           employee: createMockUser({ id: 'emp-1' }),
-          hoursByDepartment: { junk: 40, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+          hoursByDepartment: {
+            junk: 40,
+            move: 0,
+            zigma: 0,
+            training: 0,
+            estimating: 0,
+            warehouse: 0,
+            admin: 0,
+          },
           totalPay: 835,
         },
         {
           employeeId: 'emp-2',
           employee: createMockUser({ id: 'emp-2' }),
-          hoursByDepartment: { junk: 0, move: 35, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+          hoursByDepartment: {
+            junk: 0,
+            move: 35,
+            zigma: 0,
+            training: 0,
+            estimating: 0,
+            warehouse: 0,
+            admin: 0,
+          },
           totalPay: 915,
         },
         {
           employeeId: 'emp-3',
           employee: createMockUser({ id: 'emp-3' }),
-          hoursByDepartment: { junk: 0, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 40 },
+          hoursByDepartment: {
+            junk: 0,
+            move: 0,
+            zigma: 0,
+            training: 0,
+            estimating: 0,
+            warehouse: 0,
+            admin: 40,
+          },
           totalPay: 800,
         },
       ];
 
       // Filter by junk department
-      const junkEmployees = payrollData.filter(emp => {
-        const primaryDept = Object.entries(emp.hoursByDepartment)
-          .find(([, hours]) => hours > 0)?.[0];
+      const junkEmployees = payrollData.filter((emp) => {
+        const primaryDept = Object.entries(emp.hoursByDepartment).find(
+          ([, hours]) => hours > 0
+        )?.[0];
         return primaryDept === 'junk';
       });
 
@@ -189,9 +255,10 @@ describe('Payroll Report Generation', () => {
       expect(junkEmployees[0].employeeId).toBe('emp-1');
 
       // Filter by move department
-      const moveEmployees = payrollData.filter(emp => {
-        const primaryDept = Object.entries(emp.hoursByDepartment)
-          .find(([, hours]) => hours > 0)?.[0];
+      const moveEmployees = payrollData.filter((emp) => {
+        const primaryDept = Object.entries(emp.hoursByDepartment).find(
+          ([, hours]) => hours > 0
+        )?.[0];
         return primaryDept === 'move';
       });
 
@@ -207,13 +274,17 @@ describe('Payroll Report Generation', () => {
       ];
 
       // Sort by total pay descending
-      const sortedDesc = [...payrollData].sort((a, b) => b.totalPay - a.totalPay);
+      const sortedDesc = [...payrollData].sort(
+        (a, b) => b.totalPay - a.totalPay
+      );
       expect(sortedDesc[0].employeeId).toBe('emp-2'); // 915
       expect(sortedDesc[1].employeeId).toBe('emp-1'); // 835
       expect(sortedDesc[2].employeeId).toBe('emp-3'); // 750
 
       // Sort by total pay ascending
-      const sortedAsc = [...payrollData].sort((a, b) => a.totalPay - b.totalPay);
+      const sortedAsc = [...payrollData].sort(
+        (a, b) => a.totalPay - b.totalPay
+      );
       expect(sortedAsc[0].employeeId).toBe('emp-3'); // 750
       expect(sortedAsc[1].employeeId).toBe('emp-1'); // 835
       expect(sortedAsc[2].employeeId).toBe('emp-2'); // 915
@@ -221,19 +292,28 @@ describe('Payroll Report Generation', () => {
 
     it('should search employees by name', () => {
       const payrollData = [
-        { employeeId: 'emp-1', employee: createMockUser({ fullName: 'John Smith' }) },
-        { employeeId: 'emp-2', employee: createMockUser({ fullName: 'Jane Doe' }) },
-        { employeeId: 'emp-3', employee: createMockUser({ fullName: 'Bob Johnson' }) },
+        {
+          employeeId: 'emp-1',
+          employee: createMockUser({ fullName: 'John Smith' }),
+        },
+        {
+          employeeId: 'emp-2',
+          employee: createMockUser({ fullName: 'Jane Doe' }),
+        },
+        {
+          employeeId: 'emp-3',
+          employee: createMockUser({ fullName: 'Bob Johnson' }),
+        },
       ];
 
       // Search for "John"
-      const johnResults = payrollData.filter(emp =>
+      const johnResults = payrollData.filter((emp) =>
         emp.employee.fullName.toLowerCase().includes('john')
       );
       expect(johnResults).toHaveLength(2); // John Smith and Bob Johnson
 
       // Search for "Jane"
-      const janeResults = payrollData.filter(emp =>
+      const janeResults = payrollData.filter((emp) =>
         emp.employee.fullName.toLowerCase().includes('jane')
       );
       expect(janeResults).toHaveLength(1);
@@ -246,10 +326,10 @@ describe('Payroll Report Generation', () => {
       const payrollData = [
         {
           employeeId: 'emp-1',
-          employee: createMockUser({ 
-            id: 'emp-1', 
+          employee: createMockUser({
+            id: 'emp-1',
             fullName: 'John Smith',
-            email: 'john@example.com'
+            email: 'john@example.com',
           }),
           totalHours: 40,
           grossWages: 600,
@@ -261,7 +341,7 @@ describe('Payroll Report Generation', () => {
       ];
 
       // Format for ADP (simplified example)
-      const adpFormat = payrollData.map(emp => ({
+      const adpFormat = payrollData.map((emp) => ({
         employeeId: emp.employeeId,
         employeeName: emp.employee.fullName,
         email: emp.employee.email,
@@ -287,18 +367,23 @@ describe('Payroll Report Generation', () => {
     });
 
     it('should calculate estimated file size for export', () => {
-      const payrollData = Array(50).fill(null).map((_, i) => ({
-        employeeId: `emp-${i}`,
-        employee: createMockUser({ id: `emp-${i}` }),
-        totalPay: 1000,
-      }));
+      const payrollData = Array(50)
+        .fill(null)
+        .map((_, i) => ({
+          employeeId: `emp-${i}`,
+          employee: createMockUser({ id: `emp-${i}` }),
+          totalPay: 1000,
+        }));
 
       // Estimate file size (simplified calculation)
       const baseSize = payrollData.length * 0.5; // KB per employee
       const detailedMultiplier = 2;
       const summaryMultiplier = 1;
 
-      const detailedSize = Math.max(1, Math.round(baseSize * detailedMultiplier));
+      const detailedSize = Math.max(
+        1,
+        Math.round(baseSize * detailedMultiplier)
+      );
       const summarySize = Math.max(1, Math.round(baseSize * summaryMultiplier));
 
       expect(detailedSize).toBe(50); // 50 employees * 0.5 KB * 2
@@ -316,17 +401,20 @@ describe('Payroll Report Generation', () => {
       ];
 
       // Filter data by time range
-      const filterByTimeRange = (data: typeof historicalData, range: string) => {
+      const filterByTimeRange = (
+        data: typeof historicalData,
+        range: string
+      ) => {
         const referenceDate = new Date('2025-01-15');
         let daysToSubtract = 90;
-        
+
         if (range === '30d') daysToSubtract = 30;
         else if (range === '7d') daysToSubtract = 7;
-        
+
         const startDate = new Date(referenceDate);
         startDate.setDate(startDate.getDate() - daysToSubtract);
-        
-        return data.filter(item => {
+
+        return data.filter((item) => {
           const itemDate = new Date(item.date);
           return itemDate >= startDate;
         });
@@ -369,7 +457,10 @@ describe('Payroll Report Generation', () => {
     });
 
     it('should determine performance status based on goals', () => {
-      const getPerformanceStatus = (actualPercent: number, goalPercent: number) => {
+      const getPerformanceStatus = (
+        actualPercent: number,
+        goalPercent: number
+      ) => {
         return actualPercent <= goalPercent ? 'good' : 'needs-improvement';
       };
 

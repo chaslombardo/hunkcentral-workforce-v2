@@ -18,18 +18,15 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
-          await logAuthError(
-            new Error('Missing credentials'),
-            {
-              action: 'login',
-              url: req?.headers?.referer || '/auth/login',
-              userAgent: req?.headers?.['user-agent'],
-              additionalData: { 
-                email: credentials?.email ? 'provided' : 'missing',
-                password: credentials?.password ? 'provided' : 'missing'
-              }
-            }
-          );
+          await logAuthError(new Error('Missing credentials'), {
+            action: 'login',
+            url: req?.headers?.referer || '/auth/login',
+            userAgent: req?.headers?.['user-agent'],
+            additionalData: {
+              email: credentials?.email ? 'provided' : 'missing',
+              password: credentials?.password ? 'provided' : 'missing',
+            },
+          });
           return null;
         }
 
@@ -39,15 +36,12 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
-            await logAuthError(
-              new Error('User not found'),
-              {
-                action: 'login',
-                url: req?.headers?.referer || '/auth/login',
-                userAgent: req?.headers?.['user-agent'],
-                additionalData: { email: credentials.email }
-              }
-            );
+            await logAuthError(new Error('User not found'), {
+              action: 'login',
+              url: req?.headers?.referer || '/auth/login',
+              userAgent: req?.headers?.['user-agent'],
+              additionalData: { email: credentials.email },
+            });
             return null;
           }
 
@@ -57,16 +51,13 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordValid) {
-            await logAuthError(
-              new Error('Invalid password'),
-              {
-                action: 'login',
-                userId: user.id,
-                url: req?.headers?.referer || '/auth/login',
-                userAgent: req?.headers?.['user-agent'],
-                additionalData: { email: credentials.email }
-              }
-            );
+            await logAuthError(new Error('Invalid password'), {
+              action: 'login',
+              userId: user.id,
+              url: req?.headers?.referer || '/auth/login',
+              userAgent: req?.headers?.['user-agent'],
+              additionalData: { email: credentials.email },
+            });
             return null;
           }
 
@@ -79,18 +70,17 @@ export const authOptions: NextAuthOptions = {
             name: user.fullName,
             fullName: user.fullName,
             roles: user.roles as UserRole[],
-            commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
+            commissionRate: user.commissionRate
+              ? Number(user.commissionRate)
+              : null,
           };
         } catch (error) {
-          await logAuthError(
-            error,
-            {
-              action: 'login',
-              url: req?.headers?.referer || '/auth/login',
-              userAgent: req?.headers?.['user-agent'],
-              additionalData: { email: credentials.email }
-            }
-          );
+          await logAuthError(error, {
+            action: 'login',
+            url: req?.headers?.referer || '/auth/login',
+            userAgent: req?.headers?.['user-agent'],
+            additionalData: { email: credentials.email },
+          });
           return null;
         }
       },
@@ -114,15 +104,12 @@ export const authOptions: NextAuthOptions = {
         }
         return session;
       } catch (error) {
-        await logAuthError(
-          error,
-          {
-            action: 'session_validation',
-            userId: token?.id as string,
-            url: '/session',
-            additionalData: { tokenExists: !!token, sessionExists: !!session }
-          }
-        );
+        await logAuthError(error, {
+          action: 'session_validation',
+          userId: token?.id as string,
+          url: '/session',
+          additionalData: { tokenExists: !!token, sessionExists: !!session },
+        });
         // Return session without modifications on error
         return session;
       }
@@ -145,19 +132,16 @@ export const authOptions: NextAuthOptions = {
             // Verify user still exists and is active
             const currentUser = await prisma.user.findUnique({
               where: { id: token.id as string },
-              select: { id: true, email: true, fullName: true, roles: true }
+              select: { id: true, email: true, fullName: true, roles: true },
             });
 
             if (!currentUser) {
-              await logAuthError(
-                new Error('User no longer exists'),
-                {
-                  action: 'session_validation',
-                  userId: token.id as string,
-                  url: '/token-validation',
-                  additionalData: { trigger }
-                }
-              );
+              await logAuthError(new Error('User no longer exists'), {
+                action: 'session_validation',
+                userId: token.id as string,
+                url: '/token-validation',
+                additionalData: { trigger },
+              });
               // Continue with existing token - session callback will handle invalid user
               return token;
             }
@@ -166,30 +150,24 @@ export const authOptions: NextAuthOptions = {
             token.fullName = currentUser.fullName;
             token.roles = currentUser.roles as UserRole[];
           } catch (dbError) {
-            await logAuthError(
-              dbError,
-              {
-                action: 'session_validation',
-                userId: token.id as string,
-                url: '/token-validation',
-                additionalData: { trigger, error: 'database_check_failed' }
-              }
-            );
+            await logAuthError(dbError, {
+              action: 'session_validation',
+              userId: token.id as string,
+              url: '/token-validation',
+              additionalData: { trigger, error: 'database_check_failed' },
+            });
             // Continue with existing token if database check fails
           }
         }
 
         return token;
       } catch (error) {
-        await logAuthError(
-          error,
-          {
-            action: 'session_validation',
-            userId: token?.id as string,
-            url: '/jwt',
-            additionalData: { trigger, userExists: !!user }
-          }
-        );
+        await logAuthError(error, {
+          action: 'session_validation',
+          userId: token?.id as string,
+          url: '/jwt',
+          additionalData: { trigger, userExists: !!user },
+        });
         // Return existing token to avoid breaking session
         return token;
       }

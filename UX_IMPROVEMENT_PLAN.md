@@ -22,13 +22,13 @@ interface EnhancedMetricCardProps {
   trend?: number[];
 }
 
-export function EnhancedMetricCard({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
+export function EnhancedMetricCard({
+  title,
+  value,
+  change,
+  icon: Icon,
   color,
-  trend 
+  trend,
 }: EnhancedMetricCardProps) {
   const colorClasses = {
     green: 'border-l-hunks-green text-hunks-green bg-hunks-green/5',
@@ -38,7 +38,9 @@ export function EnhancedMetricCard({
   };
 
   return (
-    <Card className={`border-l-4 ${colorClasses[color]} transition-all hover:shadow-md`}>
+    <Card
+      className={`border-l-4 ${colorClasses[color]} transition-all hover:shadow-md`}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4" />
@@ -52,8 +54,13 @@ export function EnhancedMetricCard({
             ) : (
               <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
             )}
-            <span className={change.type === 'increase' ? 'text-green-500' : 'text-red-500'}>
-              {change.value > 0 ? '+' : ''}{change.value}%
+            <span
+              className={
+                change.type === 'increase' ? 'text-green-500' : 'text-red-500'
+              }
+            >
+              {change.value > 0 ? '+' : ''}
+              {change.value}%
             </span>
             <span className="ml-1">from {change.period}</span>
           </div>
@@ -84,24 +91,23 @@ interface BrandButtonProps extends React.ComponentProps<typeof Button> {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function BrandButton({ 
-  variant = 'primary', 
-  className, 
-  children, 
-  ...props 
+export function BrandButton({
+  variant = 'primary',
+  className,
+  children,
+  ...props
 }: BrandButtonProps) {
   const variants = {
-    primary: 'bg-hunks-green hover:bg-hunks-green/90 text-white shadow-lg hover:shadow-xl transition-all',
-    secondary: 'bg-hunks-orange hover:bg-hunks-orange/90 text-white shadow-lg hover:shadow-xl transition-all',
+    primary:
+      'bg-hunks-green hover:bg-hunks-green/90 text-white shadow-lg hover:shadow-xl transition-all',
+    secondary:
+      'bg-hunks-orange hover:bg-hunks-orange/90 text-white shadow-lg hover:shadow-xl transition-all',
     success: 'bg-green-600 hover:bg-green-700 text-white',
     warning: 'bg-amber-500 hover:bg-amber-600 text-white',
   };
 
   return (
-    <Button 
-      className={cn(variants[variant], className)} 
-      {...props}
-    >
+    <Button className={cn(variants[variant], className)} {...props}>
       {children}
     </Button>
   );
@@ -121,27 +127,27 @@ interface BrandLoadingProps {
   variant?: 'spinner' | 'dots' | 'pulse';
 }
 
-export function BrandLoading({ 
-  size = 'md', 
-  text, 
-  variant = 'spinner' 
+export function BrandLoading({
+  size = 'md',
+  text,
+  variant = 'spinner',
 }: BrandLoadingProps) {
   const sizes = {
     sm: 'h-4 w-4',
-    md: 'h-6 w-6', 
-    lg: 'h-8 w-8'
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
   };
 
   if (variant === 'spinner') {
     return (
       <div className="flex items-center gap-2">
-        <div className={cn(
-          'animate-spin rounded-full border-2 border-hunks-green border-t-transparent',
-          sizes[size]
-        )} />
-        {text && (
-          <span className="text-hunks-green font-medium">{text}</span>
-        )}
+        <div
+          className={cn(
+            'animate-spin rounded-full border-2 border-hunks-green border-t-transparent',
+            sizes[size]
+          )}
+        />
+        {text && <span className="text-hunks-green font-medium">{text}</span>}
       </div>
     );
   }
@@ -163,7 +169,9 @@ export function BrandLoading({
 
   return (
     <div className="flex items-center gap-2">
-      <div className={cn('bg-hunks-green rounded-full animate-pulse', sizes[size])} />
+      <div
+        className={cn('bg-hunks-green rounded-full animate-pulse', sizes[size])}
+      />
       {text && <span className="text-hunks-green">{text}</span>}
     </div>
   );
@@ -187,29 +195,64 @@ interface NavGroup {
 
 const navigationGroups: NavGroup[] = [
   {
-    title: "Daily Operations",
+    title: 'Daily Operations',
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: Home },
-      { title: "Daily Logs", url: "/logs", icon: ClipboardList, roles: ['captain', 'manager', 'admin'] },
-      { title: "Commission", url: "/commission", icon: DollarSign, roles: ['sales', 'admin'] },
-    ]
+      { title: 'Dashboard', url: '/dashboard', icon: Home },
+      {
+        title: 'Daily Logs',
+        url: '/logs',
+        icon: ClipboardList,
+        roles: ['captain', 'manager', 'admin'],
+      },
+      {
+        title: 'Commission',
+        url: '/commission',
+        icon: DollarSign,
+        roles: ['sales', 'admin'],
+      },
+    ],
   },
   {
-    title: "Reports & Analytics",
+    title: 'Reports & Analytics',
     items: [
-      { title: "My Payroll", url: "/reports/my-payroll", icon: TrendingUp },
-      { title: "Team Reports", url: "/reports/payroll", icon: BarChart3, roles: ['manager', 'admin'] },
-      { title: "Analytics", url: "/reports/analytics", icon: PieChart, roles: ['manager', 'admin'] },
-    ]
+      { title: 'My Payroll', url: '/reports/my-payroll', icon: TrendingUp },
+      {
+        title: 'Team Reports',
+        url: '/reports/payroll',
+        icon: BarChart3,
+        roles: ['manager', 'admin'],
+      },
+      {
+        title: 'Analytics',
+        url: '/reports/analytics',
+        icon: PieChart,
+        roles: ['manager', 'admin'],
+      },
+    ],
   },
   {
-    title: "Administration",
+    title: 'Administration',
     items: [
-      { title: "User Management", url: "/admin/users", icon: Users, roles: ['admin'] },
-      { title: "Pay Periods", url: "/admin/pay-periods", icon: Calendar, roles: ['admin'] },
-      { title: "Audit Trail", url: "/admin/audit", icon: Shield, roles: ['admin'] },
-    ]
-  }
+      {
+        title: 'User Management',
+        url: '/admin/users',
+        icon: Users,
+        roles: ['admin'],
+      },
+      {
+        title: 'Pay Periods',
+        url: '/admin/pay-periods',
+        icon: Calendar,
+        roles: ['admin'],
+      },
+      {
+        title: 'Audit Trail',
+        url: '/admin/audit',
+        icon: Shield,
+        roles: ['admin'],
+      },
+    ],
+  },
 ];
 
 export function EnhancedSidebar() {
@@ -228,7 +271,7 @@ export function EnhancedSidebar() {
             </h4>
             <div className="space-y-1">
               {group.items
-                .filter(item => !item.roles || hasAnyRole(item.roles))
+                .filter((item) => !item.roles || hasAnyRole(item.roles))
                 .map((item) => (
                   <SidebarNavItem key={item.url} item={item} />
                 ))}
@@ -260,33 +303,35 @@ interface BreadcrumbConfig {
 }
 
 const breadcrumbConfig: BreadcrumbConfig = {
-  dashboard: { label: "Dashboard", icon: Home },
-  logs: { label: "Daily Logs", icon: ClipboardList },
-  "logs/create": { label: "Create Log", icon: Plus },
-  "logs/[id]": { 
-    label: "Log Details", 
-    dynamic: (params) => `Log #${params.id.slice(0, 8)}` 
+  dashboard: { label: 'Dashboard', icon: Home },
+  logs: { label: 'Daily Logs', icon: ClipboardList },
+  'logs/create': { label: 'Create Log', icon: Plus },
+  'logs/[id]': {
+    label: 'Log Details',
+    dynamic: (params) => `Log #${params.id.slice(0, 8)}`,
   },
-  commission: { label: "Commission", icon: DollarSign },
-  reports: { label: "Reports", icon: BarChart3 },
-  "reports/payroll": { label: "Payroll Reports" },
-  admin: { label: "Administration", icon: Settings },
+  commission: { label: 'Commission', icon: DollarSign },
+  reports: { label: 'Reports', icon: BarChart3 },
+  'reports/payroll': { label: 'Payroll Reports' },
+  admin: { label: 'Administration', icon: Settings },
 };
 
 export function SmartBreadcrumbs() {
   const pathname = usePathname();
   const params = useParams();
-  
+
   const pathSegments = pathname.split('/').filter(Boolean);
   const breadcrumbs = pathSegments.map((segment, index) => {
     const path = pathSegments.slice(0, index + 1).join('/');
     const config = breadcrumbConfig[path] || breadcrumbConfig[segment];
-    
+
     return {
-      label: config?.dynamic ? config.dynamic(params) : config?.label || segment,
+      label: config?.dynamic
+        ? config.dynamic(params)
+        : config?.label || segment,
       href: `/${path}`,
       icon: config?.icon,
-      isLast: index === pathSegments.length - 1
+      isLast: index === pathSegments.length - 1,
     };
   });
 
@@ -302,7 +347,10 @@ export function SmartBreadcrumbs() {
                   {crumb.label}
                 </BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={crumb.href} className="flex items-center gap-1">
+                <BreadcrumbLink
+                  href={crumb.href}
+                  className="flex items-center gap-1"
+                >
                   {crumb.icon && <crumb.icon className="h-4 w-4" />}
                   {crumb.label}
                 </BreadcrumbLink>
@@ -353,12 +401,12 @@ export function SmartInput({
 
   return (
     <div className="space-y-2">
-      <Label 
+      <Label
         htmlFor={props.id}
         className={cn(
-          "text-sm font-medium transition-colors",
-          showError && "text-destructive",
-          showSuccess && "text-hunks-green"
+          'text-sm font-medium transition-colors',
+          showError && 'text-destructive',
+          showSuccess && 'text-hunks-green'
         )}
       >
         {label}
@@ -366,10 +414,10 @@ export function SmartInput({
       <div className="relative">
         <Input
           className={cn(
-            "transition-all duration-200",
-            focused && "ring-2 ring-hunks-green/20 border-hunks-green",
-            showError && "border-destructive focus:border-destructive",
-            showSuccess && "border-hunks-green",
+            'transition-all duration-200',
+            focused && 'ring-2 ring-hunks-green/20 border-hunks-green',
+            showError && 'border-destructive focus:border-destructive',
+            showSuccess && 'border-hunks-green',
             className
           )}
           onFocus={() => setFocused(true)}
@@ -414,7 +462,13 @@ export function SmartInput({
 ```tsx
 // components/ui/status-indicator.tsx
 interface StatusIndicatorProps {
-  status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'pending' | 'matched';
+  status:
+    | 'draft'
+    | 'submitted'
+    | 'approved'
+    | 'rejected'
+    | 'pending'
+    | 'matched';
   size?: 'sm' | 'md' | 'lg';
   showIcon?: boolean;
   showPulse?: boolean;
@@ -425,45 +479,45 @@ const statusConfig = {
     label: 'Draft',
     color: 'bg-gray-100 text-gray-800 border-gray-200',
     icon: Edit3,
-    pulse: false
+    pulse: false,
   },
   submitted: {
     label: 'Submitted',
     color: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: Send,
-    pulse: true
+    pulse: true,
   },
   approved: {
     label: 'Approved',
     color: 'bg-hunks-green/10 text-hunks-green border-hunks-green/20',
     icon: CheckCircle,
-    pulse: false
+    pulse: false,
   },
   rejected: {
     label: 'Rejected',
     color: 'bg-red-100 text-red-800 border-red-200',
     icon: XCircle,
-    pulse: false
+    pulse: false,
   },
   pending: {
     label: 'Pending',
     color: 'bg-hunks-orange/10 text-hunks-orange border-hunks-orange/20',
     icon: Clock,
-    pulse: true
+    pulse: true,
   },
   matched: {
     label: 'Matched',
     color: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: Link,
-    pulse: false
-  }
+    pulse: false,
+  },
 };
 
-export function StatusIndicator({ 
-  status, 
-  size = 'md', 
-  showIcon = true, 
-  showPulse = true 
+export function StatusIndicator({
+  status,
+  size = 'md',
+  showIcon = true,
+  showPulse = true,
 }: StatusIndicatorProps) {
   const config = statusConfig[status];
   const Icon = config.icon;
@@ -471,11 +525,11 @@ export function StatusIndicator({
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-1 text-sm',
-    lg: 'px-4 py-2 text-base'
+    lg: 'px-4 py-2 text-base',
   };
 
   return (
-    <Badge 
+    <Badge
       className={cn(
         'inline-flex items-center gap-1 font-medium border transition-all',
         config.color,
@@ -505,32 +559,40 @@ export function UnifiedMobileNav() {
       label: 'Dashboard',
       href: '/dashboard',
       icon: Home,
-      active: pathname === '/dashboard'
+      active: pathname === '/dashboard',
     },
-    ...(hasAnyRole(['captain', 'admin']) ? [{
-      label: 'Create Log',
-      href: '/logs/create',
-      icon: Plus,
-      active: pathname.startsWith('/logs/create')
-    }] : []),
-    ...(hasAnyRole(['sales', 'admin']) ? [{
-      label: 'Commission',
-      href: '/commission/create',
-      icon: DollarSign,
-      active: pathname.startsWith('/commission')
-    }] : []),
+    ...(hasAnyRole(['captain', 'admin'])
+      ? [
+          {
+            label: 'Create Log',
+            href: '/logs/create',
+            icon: Plus,
+            active: pathname.startsWith('/logs/create'),
+          },
+        ]
+      : []),
+    ...(hasAnyRole(['sales', 'admin'])
+      ? [
+          {
+            label: 'Commission',
+            href: '/commission/create',
+            icon: DollarSign,
+            active: pathname.startsWith('/commission'),
+          },
+        ]
+      : []),
     {
       label: 'My Payroll',
       href: '/reports/my-payroll',
       icon: TrendingUp,
-      active: pathname.startsWith('/reports/my-payroll')
+      active: pathname.startsWith('/reports/my-payroll'),
     },
     {
       label: 'Menu',
       href: '#',
       icon: Menu,
-      action: 'menu'
-    }
+      action: 'menu',
+    },
   ];
 
   return (
@@ -548,18 +610,21 @@ export function UnifiedMobileNav() {
 ## 🎨 **Implementation Priority**
 
 ### **Week 1: Visual Impact**
+
 1. ✅ Enhanced dashboard cards with brand styling
 2. ✅ Brand-consistent button system
 3. ✅ Improved loading states
 4. ✅ Status indicator enhancements
 
 ### **Week 2: Navigation**
+
 1. ✅ Simplified sidebar structure
 2. ✅ Smart breadcrumb system
 3. ✅ Mobile navigation unification
 4. ✅ Role-based menu optimization
 
 ### **Week 3: Interactions**
+
 1. ✅ Smart form components
 2. ✅ Progressive validation
 3. ✅ Micro-interactions

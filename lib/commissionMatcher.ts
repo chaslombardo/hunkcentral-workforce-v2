@@ -134,7 +134,7 @@ export async function processCommissionMatching(
   approvedLogId: string
 ): Promise<MatchResult> {
   const { prisma } = await import('@/lib/prisma');
-  
+
   // Get the approved log with its jobs
   const approvedLogData = await prisma.dailyLog.findUnique({
     where: { id: approvedLogId },
@@ -175,19 +175,39 @@ export async function processCommissionMatching(
   // Transform to match DailyLog type - use type assertion for database compatibility
   const approvedLog = {
     ...approvedLogData,
-    captain: approvedLogData.captain ? {
-      ...approvedLogData.captain,
-      junkBonusGoal: Number(approvedLogData.captain.junkBonusGoal || 0.14),
-      moveBonusGoal: Number(approvedLogData.captain.moveBonusGoal || 0.24),
-      roles: approvedLogData.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-    } : null,
-    createdBy: approvedLogData.createdBy ? {
-      ...approvedLogData.createdBy,
-      junkBonusGoal: Number(approvedLogData.createdBy.junkBonusGoal || 0.14),
-      moveBonusGoal: Number(approvedLogData.createdBy.moveBonusGoal || 0.24),
-      roles: approvedLogData.createdBy.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-    } : null,
-    jobs: (approvedLogData.jobs || []).map(job => ({
+    captain: approvedLogData.captain
+      ? {
+          ...approvedLogData.captain,
+          junkBonusGoal: Number(approvedLogData.captain.junkBonusGoal || 0.14),
+          moveBonusGoal: Number(approvedLogData.captain.moveBonusGoal || 0.24),
+          roles: approvedLogData.captain.roles as (
+            | 'admin'
+            | 'manager'
+            | 'captain'
+            | 'sales'
+            | 'wingman'
+          )[],
+        }
+      : null,
+    createdBy: approvedLogData.createdBy
+      ? {
+          ...approvedLogData.createdBy,
+          junkBonusGoal: Number(
+            approvedLogData.createdBy.junkBonusGoal || 0.14
+          ),
+          moveBonusGoal: Number(
+            approvedLogData.createdBy.moveBonusGoal || 0.24
+          ),
+          roles: approvedLogData.createdBy.roles as (
+            | 'admin'
+            | 'manager'
+            | 'captain'
+            | 'sales'
+            | 'wingman'
+          )[],
+        }
+      : null,
+    jobs: (approvedLogData.jobs || []).map((job) => ({
       ...job,
       revenue: Number(job.revenue),
       tips: Number(job.tips),
@@ -198,32 +218,61 @@ export async function processCommissionMatching(
       jobType: job.jobType as 'junk' | 'move',
       log: {} as DailyLog, // Will be set after creation
     })),
-    hours: (approvedLogData.hours || []).map(hour => ({
+    hours: (approvedLogData.hours || []).map((hour) => ({
       ...hour,
       hours: Number(hour.hours),
-      department: hour.department as 'junk' | 'move' | 'zigma' | 'training' | 'estimating' | 'warehouse' | 'admin',
+      department: hour.department as
+        | 'junk'
+        | 'move'
+        | 'zigma'
+        | 'training'
+        | 'estimating'
+        | 'warehouse'
+        | 'admin',
       log: {} as DailyLog, // Will be set after creation
-      employee: approvedLogData.captain ? {
-        ...approvedLogData.captain,
-        junkBonusGoal: Number(approvedLogData.captain.junkBonusGoal || 0.14),
-        moveBonusGoal: Number(approvedLogData.captain.moveBonusGoal || 0.24),
-        roles: approvedLogData.captain.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-      } : {
-        id: 'unknown',
-        email: 'unknown@example.com',
-        fullName: 'Unknown User',
-        roles: ['wingman'] as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-        junkBonusGoal: 0.14,
-        moveBonusGoal: 0.24,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      employee: approvedLogData.captain
+        ? {
+            ...approvedLogData.captain,
+            junkBonusGoal: Number(
+              approvedLogData.captain.junkBonusGoal || 0.14
+            ),
+            moveBonusGoal: Number(
+              approvedLogData.captain.moveBonusGoal || 0.24
+            ),
+            roles: approvedLogData.captain.roles as (
+              | 'admin'
+              | 'manager'
+              | 'captain'
+              | 'sales'
+              | 'wingman'
+            )[],
+          }
+        : {
+            id: 'unknown',
+            email: 'unknown@example.com',
+            fullName: 'Unknown User',
+            roles: ['wingman'] as (
+              | 'admin'
+              | 'manager'
+              | 'captain'
+              | 'sales'
+              | 'wingman'
+            )[],
+            junkBonusGoal: 0.14,
+            moveBonusGoal: 0.24,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
     })),
   } as DailyLog;
 
   // Set circular references
-  approvedLog.jobs.forEach(job => { job.log = approvedLog; });
-  approvedLog.hours.forEach(hour => { hour.log = approvedLog; });
+  approvedLog.jobs.forEach((job) => {
+    job.log = approvedLog;
+  });
+  approvedLog.hours.forEach((hour) => {
+    hour.log = approvedLog;
+  });
 
   // Get all pending commission entries
   const allCommissionEntriesData = await prisma.commissionEntry.findMany({
@@ -246,29 +295,47 @@ export async function processCommissionMatching(
   });
 
   // Transform to match CommissionEntry type
-  const allCommissionEntries = allCommissionEntriesData.map(entry => ({
+  const allCommissionEntries = allCommissionEntriesData.map((entry) => ({
     ...entry,
     estimatedRevenue: Number(entry.estimatedRevenue),
     actualRevenue: entry.actualRevenue ? Number(entry.actualRevenue) : null,
-    commissionAmount: entry.commissionAmount ? Number(entry.commissionAmount) : null,
+    commissionAmount: entry.commissionAmount
+      ? Number(entry.commissionAmount)
+      : null,
     status: entry.status as 'pending' | 'matched' | 'approved',
     jobType: entry.jobType as 'junk' | 'move',
-    sales: entry.sales ? {
-      ...entry.sales,
-      junkBonusGoal: Number(entry.sales.junkBonusGoal || 0.14),
-      moveBonusGoal: Number(entry.sales.moveBonusGoal || 0.24),
-      roles: entry.sales.roles as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-      commissionRate: entry.sales.commissionRate ? Number(entry.sales.commissionRate) : undefined,
-    } : {
-      id: 'unknown',
-      email: 'unknown@example.com',
-      fullName: 'Unknown Sales',
-      roles: ['sales'] as ('admin' | 'manager' | 'captain' | 'sales' | 'wingman')[],
-      junkBonusGoal: 0.14,
-      moveBonusGoal: 0.24,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
+    sales: entry.sales
+      ? {
+          ...entry.sales,
+          junkBonusGoal: Number(entry.sales.junkBonusGoal || 0.14),
+          moveBonusGoal: Number(entry.sales.moveBonusGoal || 0.24),
+          roles: entry.sales.roles as (
+            | 'admin'
+            | 'manager'
+            | 'captain'
+            | 'sales'
+            | 'wingman'
+          )[],
+          commissionRate: entry.sales.commissionRate
+            ? Number(entry.sales.commissionRate)
+            : undefined,
+        }
+      : {
+          id: 'unknown',
+          email: 'unknown@example.com',
+          fullName: 'Unknown Sales',
+          roles: ['sales'] as (
+            | 'admin'
+            | 'manager'
+            | 'captain'
+            | 'sales'
+            | 'wingman'
+          )[],
+          junkBonusGoal: 0.14,
+          moveBonusGoal: 0.24,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
   })) as CommissionEntry[];
 
   // Match commissions using the existing logic
@@ -276,7 +343,9 @@ export async function processCommissionMatching(
 
   // Process successful matches
   for (const match of matchResult.matches) {
-    const commissionRate = Number(match.commissionEntry.sales.commissionRate || 0);
+    const commissionRate = Number(
+      match.commissionEntry.sales.commissionRate || 0
+    );
     const commissionAmount = calculateCommissionAmount(
       Number(match.logJob.revenue),
       commissionRate

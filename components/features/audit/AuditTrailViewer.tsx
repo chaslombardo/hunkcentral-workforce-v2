@@ -29,10 +29,10 @@ interface AuditTrailViewerProps {
   limit?: number;
 }
 
-export function AuditTrailViewer({ 
-  entityId, 
-  entityType, 
-  limit = 50 
+export function AuditTrailViewer({
+  entityId,
+  entityType,
+  limit = 50,
 }: AuditTrailViewerProps) {
   const searchParams = useSearchParams();
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -112,9 +112,10 @@ export function AuditTrailViewer({
   };
 
   const formatEntityType = (entityType: string) => {
-    return entityType.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    return entityType
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   const renderChanges = (changes: Record<string, unknown>) => {
@@ -125,7 +126,10 @@ export function AuditTrailViewer({
         {Object.entries(changes).map(([key, value]: [string, unknown]) => (
           <div key={key} className="text-xs">
             <div className="font-medium text-muted-foreground">{key}:</div>
-            {typeof value === 'object' && value !== null && 'from' in value && 'to' in value ? (
+            {typeof value === 'object' &&
+            value !== null &&
+            'from' in value &&
+            'to' in value ? (
               <div className="space-y-1">
                 <div className="text-red-600 dark:text-red-400">
                   From: {String((value as { from: unknown }).from)}
@@ -175,7 +179,10 @@ export function AuditTrailViewer({
           <TableBody>
             {auditLogs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No audit logs found
                 </TableCell>
               </TableRow>
@@ -183,28 +190,39 @@ export function AuditTrailViewer({
               auditLogs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-mono text-sm">
-                    {log.createdAt ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss') : 'N/A'}
+                    {log.createdAt
+                      ? format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm:ss')
+                      : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback className="text-xs">
-                          {log.user?.fullName ? log.user.fullName.split(' ').map(n => n[0]).join('') : 'U'}
+                          {log.user?.fullName
+                            ? log.user.fullName
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                            : 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{log.user?.fullName || 'Unknown User'}</span>
+                      <span className="text-sm">
+                        {log.user?.fullName || 'Unknown User'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={getEntityTypeColor(log.entityType)}
                       >
                         {formatEntityType(log.entityType)}
                       </Badge>
                       <div className="text-xs text-muted-foreground font-mono">
-                        {log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'}
+                        {log.entityId
+                          ? `${log.entityId.slice(0, 8)}...`
+                          : 'N/A'}
                       </div>
                     </div>
                   </TableCell>
@@ -229,7 +247,9 @@ export function AuditTrailViewer({
                         </HoverCardContent>
                       </HoverCard>
                     ) : (
-                      <span className="text-muted-foreground text-sm">No changes</span>
+                      <span className="text-muted-foreground text-sm">
+                        No changes
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -257,7 +277,7 @@ export function AuditTrailViewer({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
               <ChevronLeftIcon className="h-4 w-4" />
@@ -266,7 +286,7 @@ export function AuditTrailViewer({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
             >
               Next

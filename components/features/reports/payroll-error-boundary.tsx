@@ -3,7 +3,13 @@
 import * as React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertTriangle, RefreshCw, Home, HelpCircle } from 'lucide-react';
 
@@ -54,7 +60,7 @@ export class PayrollErrorBoundary extends React.Component<
 
     // Log error for debugging
     // PayrollErrorBoundary caught an error
-    
+
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
   }
@@ -71,8 +77,8 @@ export class PayrollErrorBoundary extends React.Component<
     if (this.state.hasError && this.state.error) {
       const FallbackComponent = this.props.fallback || PayrollErrorFallback;
       return (
-        <FallbackComponent 
-          error={this.state.error} 
+        <FallbackComponent
+          error={this.state.error}
           resetError={this.resetError}
           hasOfflineCapability={true}
         />
@@ -83,10 +89,10 @@ export class PayrollErrorBoundary extends React.Component<
   }
 }
 
-function PayrollErrorFallback({ 
-  error, 
-  resetError, 
-  hasOfflineCapability = false 
+function PayrollErrorFallback({
+  error,
+  resetError,
+  hasOfflineCapability = false,
 }: PayrollErrorFallbackProps) {
   const [isRetrying, setIsRetrying] = React.useState(false);
   const [retryCount, setRetryCount] = React.useState(0);
@@ -94,13 +100,13 @@ function PayrollErrorFallback({
 
   const handleRetry = async () => {
     setIsRetrying(true);
-    setRetryCount(prev => prev + 1);
+    setRetryCount((prev) => prev + 1);
     setLastRetryAt(new Date());
-    
+
     // Add exponential backoff delay based on retry count
     const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
-    await new Promise(resolve => setTimeout(resolve, delay));
-    
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
     try {
       resetError();
     } catch {
@@ -113,33 +119,35 @@ function PayrollErrorFallback({
   const handleReload = () => {
     // Clear any corrupted cache before reload
     try {
-      const keys = Object.keys(localStorage).filter(key => 
-        key.startsWith('payroll-summary-') || 
-        key.startsWith('payroll-details-')
+      const keys = Object.keys(localStorage).filter(
+        (key) =>
+          key.startsWith('payroll-summary-') ||
+          key.startsWith('payroll-details-')
       );
-      keys.forEach(key => localStorage.removeItem(key));
+      keys.forEach((key) => localStorage.removeItem(key));
     } catch {
       // Failed to clear cache before reload
     }
-    
+
     window.location.reload();
   };
 
   const handleClearCache = () => {
     try {
-      const keys = Object.keys(localStorage).filter(key => 
-        key.startsWith('payroll-summary-') || 
-        key.startsWith('payroll-details-')
+      const keys = Object.keys(localStorage).filter(
+        (key) =>
+          key.startsWith('payroll-summary-') ||
+          key.startsWith('payroll-details-')
       );
-      keys.forEach(key => localStorage.removeItem(key));
-      
+      keys.forEach((key) => localStorage.removeItem(key));
+
       // Show success message briefly
       const originalTitle = document.title;
       document.title = 'Cache Cleared - ' + originalTitle;
       setTimeout(() => {
         document.title = originalTitle;
       }, 2000);
-      
+
       // Attempt retry after clearing cache
       handleRetry();
     } catch {
@@ -148,22 +156,26 @@ function PayrollErrorFallback({
   };
 
   // Enhanced error categorization
-  const isNetworkError = error.message.includes('fetch') || 
-                        error.message.includes('network') ||
-                        error.message.includes('offline') ||
-                        error.message.includes('Failed to load');
+  const isNetworkError =
+    error.message.includes('fetch') ||
+    error.message.includes('network') ||
+    error.message.includes('offline') ||
+    error.message.includes('Failed to load');
 
-  const isDataError = error.message.includes('payroll') ||
-                     error.message.includes('calculation') ||
-                     error.message.includes('breakdown');
+  const isDataError =
+    error.message.includes('payroll') ||
+    error.message.includes('calculation') ||
+    error.message.includes('breakdown');
 
-  const isCacheError = error.message.includes('cached data corrupted') ||
-                      error.message.includes('parse') ||
-                      error.message.includes('JSON');
+  const isCacheError =
+    error.message.includes('cached data corrupted') ||
+    error.message.includes('parse') ||
+    error.message.includes('JSON');
 
-  const isValidationError = error.message.includes('validation') ||
-                           error.message.includes('unauthorized') ||
-                           error.message.includes('permission');
+  const isValidationError =
+    error.message.includes('validation') ||
+    error.message.includes('unauthorized') ||
+    error.message.includes('permission');
 
   const getErrorCategory = () => {
     if (isNetworkError) return 'Network';
@@ -186,37 +198,53 @@ function PayrollErrorFallback({
   return (
     <div className="space-y-6 p-4">
       {/* Main Error Alert */}
-      <Alert className={
-        severity === 'critical' 
-          ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
-          : severity === 'warning'
-          ? "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950"
-          : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
-      }>
-        <AlertTriangle className={`h-4 w-4 ${
-          severity === 'critical' ? 'text-red-600' :
-          severity === 'warning' ? 'text-yellow-600' : 'text-red-600'
-        }`} />
-        <AlertTitle className={
-          severity === 'critical' ? 'text-red-800 dark:text-red-200' :
-          severity === 'warning' ? 'text-yellow-800 dark:text-yellow-200' : 'text-red-800 dark:text-red-200'
-        }>
+      <Alert
+        className={
+          severity === 'critical'
+            ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950'
+            : severity === 'warning'
+              ? 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950'
+              : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950'
+        }
+      >
+        <AlertTriangle
+          className={`h-4 w-4 ${
+            severity === 'critical'
+              ? 'text-red-600'
+              : severity === 'warning'
+                ? 'text-yellow-600'
+                : 'text-red-600'
+          }`}
+        />
+        <AlertTitle
+          className={
+            severity === 'critical'
+              ? 'text-red-800 dark:text-red-200'
+              : severity === 'warning'
+                ? 'text-yellow-800 dark:text-yellow-200'
+                : 'text-red-800 dark:text-red-200'
+          }
+        >
           {category} Error - Payroll Data Unavailable
         </AlertTitle>
-        <AlertDescription className={
-          severity === 'critical' ? 'text-red-700 dark:text-red-300' :
-          severity === 'warning' ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'
-        }>
-          {isNetworkError 
+        <AlertDescription
+          className={
+            severity === 'critical'
+              ? 'text-red-700 dark:text-red-300'
+              : severity === 'warning'
+                ? 'text-yellow-700 dark:text-yellow-300'
+                : 'text-red-700 dark:text-red-300'
+          }
+        >
+          {isNetworkError
             ? "We're having trouble connecting to our servers. Your data may be temporarily unavailable."
             : isCacheError
-            ? "There's an issue with cached data. Clearing the cache may resolve this problem."
-            : isValidationError
-            ? "You don't have permission to access this payroll data, or your session has expired."
-            : isDataError
-            ? "There was an issue loading your payroll breakdown. Your summary data may still be available."
-            : "An unexpected error occurred while loading your payroll information."
-          }
+              ? "There's an issue with cached data. Clearing the cache may resolve this problem."
+              : isValidationError
+                ? "You don't have permission to access this payroll data, or your session has expired."
+                : isDataError
+                  ? 'There was an issue loading your payroll breakdown. Your summary data may still be available.'
+                  : 'An unexpected error occurred while loading your payroll information.'}
         </AlertDescription>
       </Alert>
 
@@ -238,7 +266,7 @@ function PayrollErrorFallback({
               {error.name || 'Unknown Error'}
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="text-sm font-medium">Description:</div>
             <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
@@ -251,9 +279,9 @@ function PayrollErrorFallback({
           {/* Recovery Actions */}
           <div className="space-y-3">
             <div className="text-sm font-medium">Recovery Options:</div>
-            
+
             <div className="grid gap-2 sm:grid-cols-2">
-              <Button 
+              <Button
                 onClick={handleRetry}
                 disabled={isRetrying || retryCount >= 5}
                 className="w-full"
@@ -277,8 +305,8 @@ function PayrollErrorFallback({
               </Button>
 
               {isCacheError && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleClearCache}
                   className="w-full"
                 >
@@ -287,8 +315,8 @@ function PayrollErrorFallback({
                 </Button>
               )}
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleReload}
                 className="w-full"
               >
@@ -297,9 +325,9 @@ function PayrollErrorFallback({
               </Button>
             </div>
 
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = '/dashboard'}
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = '/dashboard')}
               className="w-full"
             >
               <Home className="mr-2 h-4 w-4" />
@@ -309,7 +337,8 @@ function PayrollErrorFallback({
             {/* Show retry history if there have been attempts */}
             {retryCount > 0 && lastRetryAt && (
               <div className="text-xs text-muted-foreground">
-                Last retry: {lastRetryAt.toLocaleTimeString()} ({retryCount} attempts)
+                Last retry: {lastRetryAt.toLocaleTimeString()} ({retryCount}{' '}
+                attempts)
               </div>
             )}
           </div>
@@ -322,8 +351,9 @@ function PayrollErrorFallback({
                 <HelpCircle className="h-4 w-4" />
                 <AlertTitle>Offline Mode Available</AlertTitle>
                 <AlertDescription>
-                  Some of your payroll data may be cached and available offline. 
-                  Try refreshing the page or check back when your connection is restored.
+                  Some of your payroll data may be cached and available offline.
+                  Try refreshing the page or check back when your connection is
+                  restored.
                 </AlertDescription>
               </Alert>
             </>
@@ -331,8 +361,9 @@ function PayrollErrorFallback({
 
           {/* Help Text */}
           <div className="text-xs text-muted-foreground">
-            If this problem persists, please contact your system administrator or IT support. 
-            Include the error details above when reporting the issue.
+            If this problem persists, please contact your system administrator
+            or IT support. Include the error details above when reporting the
+            issue.
           </div>
         </CardContent>
       </Card>
@@ -341,11 +372,11 @@ function PayrollErrorFallback({
 }
 
 // Specialized error boundary for payroll components
-export function PayrollComponentErrorBoundary({ 
-  children, 
-  componentName 
-}: { 
-  children: React.ReactNode; 
+export function PayrollComponentErrorBoundary({
+  children,
+  componentName,
+}: {
+  children: React.ReactNode;
   componentName: string;
 }) {
   return (
@@ -361,13 +392,14 @@ export function PayrollComponentErrorBoundary({
                     {componentName} Unavailable
                   </div>
                   <div className="text-sm text-red-700 dark:text-red-300 mt-1">
-                    This section couldn&apos;t load due to a technical issue. Your other payroll data should still be available.
+                    This section couldn&apos;t load due to a technical issue.
+                    Your other payroll data should still be available.
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={resetError}
                     className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900"

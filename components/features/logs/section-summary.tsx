@@ -1,6 +1,12 @@
 'use client';
 
-import { TrendingDown, TrendingUp, Users, Clock, DollarSign } from 'lucide-react';
+import {
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Clock,
+  DollarSign,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -58,11 +64,11 @@ export function SectionSummary({
         <CardTitle className="text-base flex items-center justify-between">
           {title}
           <Badge
-            variant={isUnderGoal ? "default" : "destructive"}
+            variant={isUnderGoal ? 'default' : 'destructive'}
             className={
               isUnderGoal
-                ? "bg-hunks-green hover:bg-hunks-green/90 text-white"
-                : ""
+                ? 'bg-hunks-green hover:bg-hunks-green/90 text-white'
+                : ''
             }
           >
             {isUnderGoal ? (
@@ -70,7 +76,7 @@ export function SectionSummary({
             ) : (
               <TrendingUp className="h-3 w-3 mr-1" />
             )}
-            {isUnderGoal ? "Under Goal" : "Over Goal"}
+            {isUnderGoal ? 'Under Goal' : 'Over Goal'}
           </Badge>
         </CardTitle>
         <CardDescription>
@@ -82,7 +88,9 @@ export function SectionSummary({
         {totalRevenue > 0 && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Revenue</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Revenue
+              </p>
               <p className="text-lg font-semibold text-hunks-green">
                 {formatCurrency(totalRevenue)}
               </p>
@@ -108,32 +116,45 @@ export function SectionSummary({
                 </HoverCardTrigger>
                 <HoverCardContent className="w-80">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold">Labor Cost Calculation</h4>
+                    <h4 className="text-sm font-semibold">
+                      Labor Cost Calculation
+                    </h4>
                     <div className="text-xs space-y-1">
                       <p>Total Labor Cost: {formatCurrency(totalLaborCost)}</p>
                       <p>Total Revenue: {formatCurrency(totalRevenue)}</p>
-                      <p>Percentage: {formatCurrency(totalLaborCost)} ÷ {formatCurrency(totalRevenue)} = {formatPercentage(laborCostPercentage)}</p>
+                      <p>
+                        Percentage: {formatCurrency(totalLaborCost)} ÷{' '}
+                        {formatCurrency(totalRevenue)} ={' '}
+                        {formatPercentage(laborCostPercentage)}
+                      </p>
                       <Separator className="my-2" />
                       <p className="font-medium">
                         Goal: {formatPercentage(goal)} or less
                       </p>
-                      <p className={isUnderGoal ? "text-hunks-green" : "text-destructive"}>
-                        Status: {isUnderGoal ? "Under goal ✓" : "Over goal ⚠"}
+                      <p
+                        className={
+                          isUnderGoal ? 'text-hunks-green' : 'text-destructive'
+                        }
+                      >
+                        Status: {isUnderGoal ? 'Under goal ✓' : 'Over goal ⚠'}
                       </p>
                     </div>
                   </div>
                 </HoverCardContent>
               </HoverCard>
-              <span className={`text-sm font-semibold ${isUnderGoal ? "text-hunks-green" : "text-destructive"}`}>
-                {formatPercentage(laborCostPercentage)} / {formatPercentage(goal)}
+              <span
+                className={`text-sm font-semibold ${isUnderGoal ? 'text-hunks-green' : 'text-destructive'}`}
+              >
+                {formatPercentage(laborCostPercentage)} /{' '}
+                {formatPercentage(goal)}
               </span>
             </div>
             <Progress
               value={progressValue}
               className={`h-3 ${
                 isUnderGoal
-                  ? "[&>div]:bg-hunks-green"
-                  : "[&>div]:bg-destructive"
+                  ? '[&>div]:bg-hunks-green'
+                  : '[&>div]:bg-destructive'
               }`}
             />
           </div>
@@ -155,16 +176,23 @@ export function SectionSummary({
                   <div className="text-xs space-y-1">
                     <p>Total Tips: {formatCurrency(totalTips)}</p>
                     <p>Number of HUNKs: {employeeCount}</p>
-                    <p>Per HUNK: {formatCurrency(totalTips)} ÷ {employeeCount} = {formatCurrency(tipsPerHunk)}</p>
+                    <p>
+                      Per HUNK: {formatCurrency(totalTips)} ÷ {employeeCount} ={' '}
+                      {formatCurrency(tipsPerHunk)}
+                    </p>
                     <Separator className="my-2" />
                     <p className="text-muted-foreground">
-                      Tips are distributed equally among all team members in this section.
+                      Tips are distributed equally among all team members in
+                      this section.
                     </p>
                   </div>
                 </div>
               </HoverCardContent>
             </HoverCard>
-            <Badge variant="secondary" className="bg-hunks-orange/10 text-hunks-orange border-hunks-orange/20">
+            <Badge
+              variant="secondary"
+              className="bg-hunks-orange/10 text-hunks-orange border-hunks-orange/20"
+            >
               {formatCurrency(tipsPerHunk)}
             </Badge>
           </div>
@@ -189,32 +217,36 @@ export function SectionSummary({
         </div>
 
         {/* Disposal Cost Percentage (Junk only) */}
-        {showDisposalCost && disposalCostPercentage !== undefined && totalRevenue > 0 && (
-          <>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                    Disposal Cost %
-                  </button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold">Disposal Cost Percentage</h4>
-                    <div className="text-xs space-y-1">
-                      <p>Disposal costs as a percentage of junk revenue</p>
-                      <p>Lower percentages indicate better profitability</p>
+        {showDisposalCost &&
+          disposalCostPercentage !== undefined &&
+          totalRevenue > 0 && (
+            <>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                      Disposal Cost %
+                    </button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold">
+                        Disposal Cost Percentage
+                      </h4>
+                      <div className="text-xs space-y-1">
+                        <p>Disposal costs as a percentage of junk revenue</p>
+                        <p>Lower percentages indicate better profitability</p>
+                      </div>
                     </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-              <Badge variant="outline">
-                {formatPercentage(disposalCostPercentage)}
-              </Badge>
-            </div>
-          </>
-        )}
+                  </HoverCardContent>
+                </HoverCard>
+                <Badge variant="outline">
+                  {formatPercentage(disposalCostPercentage)}
+                </Badge>
+              </div>
+            </>
+          )}
 
         {/* Upsell Percentage (Move only) */}
         {showUpsells && upsellPercentage !== undefined && totalRevenue > 0 && (
@@ -230,9 +262,13 @@ export function SectionSummary({
                   </HoverCardTrigger>
                   <HoverCardContent className="w-80">
                     <div className="space-y-2">
-                      <h4 className="text-sm font-semibold">Upsell Calculation</h4>
+                      <h4 className="text-sm font-semibold">
+                        Upsell Calculation
+                      </h4>
                       <div className="text-xs space-y-1">
-                        <p>Total Upsells: {formatCurrency(totalUpsells || 0)}</p>
+                        <p>
+                          Total Upsells: {formatCurrency(totalUpsells || 0)}
+                        </p>
                         <p>Move Revenue: {formatCurrency(totalRevenue)}</p>
                         <p>Upsell %: {formatPercentage(upsellPercentage)}</p>
                         <Separator className="my-2" />
@@ -243,7 +279,10 @@ export function SectionSummary({
                     </div>
                   </HoverCardContent>
                 </HoverCard>
-                <Badge variant="outline" className="border-hunks-green text-hunks-green">
+                <Badge
+                  variant="outline"
+                  className="border-hunks-green text-hunks-green"
+                >
                   {formatPercentage(upsellPercentage)}
                 </Badge>
               </div>

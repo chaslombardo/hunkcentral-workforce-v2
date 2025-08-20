@@ -77,7 +77,7 @@ describe('Calculation Edge Cases', () => {
 
     it('should handle invalid department gracefully', () => {
       const user = createMockUser();
-      
+
       expect(calculateHourlyWage(user, 'invalid' as Department, false)).toBe(0);
     });
   });
@@ -91,10 +91,10 @@ describe('Calculation Edge Cases', () => {
 
       // Exactly at goal - no bonus
       expect(calculateLaborBonus(captain, 0.14, 0.14, 1000)).toBe(0);
-      
+
       // Just under goal - should get bonus
       expect(calculateLaborBonus(captain, 0.139, 0.14, 1000)).toBeCloseTo(1, 2);
-      
+
       // Just over goal - no bonus
       expect(calculateLaborBonus(captain, 0.141, 0.14, 1000)).toBe(0);
     });
@@ -105,7 +105,7 @@ describe('Calculation Edge Cases', () => {
         junkBonusGoal: 0.14,
       });
 
-      expect(calculateLaborBonus(captain, 0.10, 0.14, 0)).toBe(0);
+      expect(calculateLaborBonus(captain, 0.1, 0.14, 0)).toBe(0);
     });
 
     it('should handle negative percentages', () => {
@@ -125,7 +125,7 @@ describe('Calculation Edge Cases', () => {
       });
 
       const largeRevenue = 10000000; // $10 million
-      const bonus = calculateLaborBonus(captain, 0.10, 0.14, largeRevenue);
+      const bonus = calculateLaborBonus(captain, 0.1, 0.14, largeRevenue);
       expect(bonus).toBeCloseTo(400000, 2); // 4% of 10M
     });
 
@@ -241,13 +241,18 @@ describe('Calculation Edge Cases', () => {
     it('should handle very large salary amounts', () => {
       const largeSalary = 1000000;
       expect(convertSalaryToWeekly(largeSalary, 'weekly')).toBe(largeSalary);
-      expect(convertSalaryToWeekly(largeSalary, 'bi-weekly')).toBe(largeSalary / 2);
-      expect(convertSalaryToWeekly(largeSalary, 'monthly')).toBeCloseTo(largeSalary / 4.33, 2);
+      expect(convertSalaryToWeekly(largeSalary, 'bi-weekly')).toBe(
+        largeSalary / 2
+      );
+      expect(convertSalaryToWeekly(largeSalary, 'monthly')).toBeCloseTo(
+        largeSalary / 4.33,
+        2
+      );
     });
 
     it('should handle fractional salary amounts', () => {
-      expect(convertSalaryToWeekly(1000.50, 'bi-weekly')).toBe(500.25);
-      expect(convertSalaryToWeekly(4330.50, 'monthly')).toBeCloseTo(1000.12, 2);
+      expect(convertSalaryToWeekly(1000.5, 'bi-weekly')).toBe(500.25);
+      expect(convertSalaryToWeekly(4330.5, 'monthly')).toBeCloseTo(1000.12, 2);
     });
 
     it('should handle invalid frequency gracefully', () => {
@@ -264,7 +269,7 @@ describe('Calculation Edge Cases', () => {
       });
 
       const result = applySalaryRules(user, 0, 0, 0, 0);
-      
+
       expect(result.hourlyWages).toBe(0);
       expect(result.salaryAmount).toBe(1000);
       expect(result.finalPay).toBe(1000);
@@ -279,7 +284,7 @@ describe('Calculation Edge Cases', () => {
 
       // Calculated pay exactly equals guarantee
       const result = applySalaryRules(user, 800, 100, 50, 50);
-      
+
       expect(result.finalPay).toBe(1000); // Should use guarantee
       expect(result.salaryAmount).toBe(0); // No salary supplement needed when calculated equals guarantee
     });
@@ -293,7 +298,7 @@ describe('Calculation Edge Cases', () => {
 
       // This shouldn't happen in practice, but test robustness
       const result = applySalaryRules(user, -100, 0, 0, 0);
-      
+
       expect(result.finalPay).toBe(100); // -100 + 200
       expect(result.salaryAmount).toBe(200);
     });
@@ -306,7 +311,7 @@ describe('Calculation Edge Cases', () => {
       });
 
       const result = applySalaryRules(user, 800, 100, 50, 25);
-      
+
       expect(result.hourlyWages).toBe(800);
       expect(result.salaryAmount).toBe(0);
       expect(result.salaryType).toBeNull();
@@ -332,18 +337,20 @@ describe('Calculation Edge Cases', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         jobs: [], // No jobs
-        hours: [{
-          id: 'hour-1',
-          logId: 'log-1',
-          log: {} as DailyLog,
-          employeeId: 'emp-1',
-          employee: createMockUser(),
-          department: 'junk',
-          hours: 8,
-          isCoCaptain: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
+        hours: [
+          {
+            id: 'hour-1',
+            logId: 'log-1',
+            log: {} as DailyLog,
+            employeeId: 'emp-1',
+            employee: createMockUser(),
+            department: 'junk',
+            hours: 8,
+            isCoCaptain: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       };
 
       const tipDistribution = calculateTipDistribution([log]);
@@ -366,18 +373,20 @@ describe('Calculation Edge Cases', () => {
         lastEditedBy: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        jobs: [{
-          id: 'job-1',
-          logId: 'log-1',
-          log: {} as DailyLog,
-          jobType: 'junk',
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 1000,
-          tips: 100,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
+        jobs: [
+          {
+            id: 'job-1',
+            logId: 'log-1',
+            log: {} as DailyLog,
+            jobType: 'junk',
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 1000,
+            tips: 100,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
         hours: [], // No hours
       };
 
@@ -401,30 +410,34 @@ describe('Calculation Edge Cases', () => {
         lastEditedBy: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        jobs: [{
-          id: 'job-1',
-          logId: 'log-1',
-          log: {} as DailyLog,
-          jobType: 'junk',
-          jobId: 'JOB123',
-          clientName: 'Test Client',
-          revenue: 1000,
-          tips: 150,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
-        hours: [{
-          id: 'hour-1',
-          logId: 'log-1',
-          log: {} as DailyLog,
-          employeeId: 'emp-1',
-          employee: createMockUser(),
-          department: 'junk',
-          hours: 8,
-          isCoCaptain: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }],
+        jobs: [
+          {
+            id: 'job-1',
+            logId: 'log-1',
+            log: {} as DailyLog,
+            jobType: 'junk',
+            jobId: 'JOB123',
+            clientName: 'Test Client',
+            revenue: 1000,
+            tips: 150,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+        hours: [
+          {
+            id: 'hour-1',
+            logId: 'log-1',
+            log: {} as DailyLog,
+            employeeId: 'emp-1',
+            employee: createMockUser(),
+            department: 'junk',
+            hours: 8,
+            isCoCaptain: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
       };
 
       const tipDistribution = calculateTipDistribution([log]);
@@ -497,7 +510,7 @@ describe('Calculation Edge Cases', () => {
 
     it('should handle users with no activity', () => {
       const users = [createMockUser({ id: 'inactive-user' })];
-      
+
       const payroll = calculatePayroll(
         users,
         [],
@@ -513,7 +526,7 @@ describe('Calculation Edge Cases', () => {
 
     it('should handle pay period with no approved logs', () => {
       const users = [createMockUser()];
-      
+
       const payroll = calculatePayroll(
         users,
         [], // No logs
@@ -529,8 +542,8 @@ describe('Calculation Edge Cases', () => {
 
     it('should handle very large payroll calculations', () => {
       // Create 100 users
-      const users = Array.from({ length: 100 }, (_, i) => 
-        createMockUser({ 
+      const users = Array.from({ length: 100 }, (_, i) =>
+        createMockUser({
           id: `user-${i}`,
           email: `user${i}@test.com`,
           fullName: `User ${i}`,
@@ -539,7 +552,7 @@ describe('Calculation Edge Cases', () => {
 
       // This should complete without performance issues
       const startTime = Date.now();
-      
+
       const payroll = calculatePayroll(
         users,
         [],

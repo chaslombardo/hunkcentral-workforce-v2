@@ -82,7 +82,7 @@ class TestRunner {
       'coverage',
     ];
 
-    directories.forEach(dir => {
+    directories.forEach((dir) => {
       if (!existsSync(dir)) {
         mkdirSync(dir, { recursive: true });
       }
@@ -103,14 +103,13 @@ class TestRunner {
       const command = `npx vitest run ${suite.pattern} ${timeout} --reporter=json --coverage`;
 
       // Run tests
-      const output = execSync(command, { 
+      const output = execSync(command, {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       // Parse results
       result = this.parseTestOutput(output, suite.name);
-      
     } catch (error: any) {
       // Handle test failures
       result = this.parseTestOutput(error.stdout || '', suite.name);
@@ -137,18 +136,21 @@ class TestRunner {
     try {
       // Try to parse JSON output from vitest
       const lines = output.split('\n');
-      const jsonLine = lines.find(line => line.trim().startsWith('{'));
-      
+      const jsonLine = lines.find((line) => line.trim().startsWith('{'));
+
       if (jsonLine) {
         const testResult = JSON.parse(jsonLine);
-        
+
         return {
           suite: suiteName,
           passed: testResult.numPassedTests || 0,
           failed: testResult.numFailedTests || 0,
           skipped: testResult.numPendingTests || 0,
-          duration: testResult.testResults?.reduce((sum: number, test: any) => 
-            sum + (test.perfStats?.runtime || 0), 0) || 0,
+          duration:
+            testResult.testResults?.reduce(
+              (sum: number, test: any) => sum + (test.perfStats?.runtime || 0),
+              0
+            ) || 0,
         };
       }
     } catch (error) {
@@ -171,16 +173,19 @@ class TestRunner {
 
   private printSuiteResults(result: TestResults): void {
     const total = result.passed + result.failed + result.skipped;
-    const passRate = total > 0 ? ((result.passed / total) * 100).toFixed(1) : '0.0';
-    
+    const passRate =
+      total > 0 ? ((result.passed / total) * 100).toFixed(1) : '0.0';
+
     console.log(`✅ Passed: ${result.passed}`);
     console.log(`❌ Failed: ${result.failed}`);
     console.log(`⏭️  Skipped: ${result.skipped}`);
     console.log(`📊 Pass Rate: ${passRate}%`);
     console.log(`⏱️  Duration: ${(result.duration / 1000).toFixed(2)}s`);
-    
+
     if (result.coverage) {
-      console.log(`📈 Coverage: ${result.coverage.lines}% lines, ${result.coverage.functions}% functions`);
+      console.log(
+        `📈 Coverage: ${result.coverage.lines}% lines, ${result.coverage.functions}% functions`
+      );
     }
   }
 
@@ -190,19 +195,23 @@ class TestRunner {
     const totalFailed = this.results.reduce((sum, r) => sum + r.failed, 0);
     const totalSkipped = this.results.reduce((sum, r) => sum + r.skipped, 0);
     const totalTests = totalPassed + totalFailed + totalSkipped;
-    const overallPassRate = totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : '0.0';
+    const overallPassRate =
+      totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : '0.0';
 
     console.log('\n' + '='.repeat(60));
     console.log('📊 COMPREHENSIVE TEST SUITE RESULTS');
     console.log('='.repeat(60));
 
     // Suite breakdown
-    this.results.forEach(result => {
+    this.results.forEach((result) => {
       const total = result.passed + result.failed + result.skipped;
-      const rate = total > 0 ? ((result.passed / total) * 100).toFixed(1) : '0.0';
+      const rate =
+        total > 0 ? ((result.passed / total) * 100).toFixed(1) : '0.0';
       const status = result.failed === 0 ? '✅' : '❌';
-      
-      console.log(`${status} ${result.suite.padEnd(20)} ${result.passed}/${total} (${rate}%)`);
+
+      console.log(
+        `${status} ${result.suite.padEnd(20)} ${result.passed}/${total} (${rate}%)`
+      );
     });
 
     console.log('\n' + '-'.repeat(60));
@@ -220,7 +229,9 @@ class TestRunner {
     if (totalFailed === 0) {
       console.log('\n🎉 ALL TESTS PASSED! System is ready for production.');
     } else {
-      console.log(`\n⚠️  ${totalFailed} tests failed. Please review and fix before deployment.`);
+      console.log(
+        `\n⚠️  ${totalFailed} tests failed. Please review and fix before deployment.`
+      );
       process.exit(1);
     }
   }
@@ -229,7 +240,10 @@ class TestRunner {
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
-        totalTests: this.results.reduce((sum, r) => sum + r.passed + r.failed + r.skipped, 0),
+        totalTests: this.results.reduce(
+          (sum, r) => sum + r.passed + r.failed + r.skipped,
+          0
+        ),
         passed: this.results.reduce((sum, r) => sum + r.passed, 0),
         failed: this.results.reduce((sum, r) => sum + r.failed, 0),
         skipped: this.results.reduce((sum, r) => sum + r.skipped, 0),
@@ -237,16 +251,21 @@ class TestRunner {
       },
       suites: this.results,
       requirements: {
-        'Integration Tests': this.results.find(r => r.suite === 'Integration Tests')?.passed || 0,
-        'E2E Tests': this.results.find(r => r.suite === 'E2E Tests')?.passed || 0,
-        'Edge Cases': this.results.find(r => r.suite === 'Edge Cases')?.passed || 0,
-        'Business Logic': this.results.find(r => r.suite === 'Unit Tests')?.passed || 0,
+        'Integration Tests':
+          this.results.find((r) => r.suite === 'Integration Tests')?.passed ||
+          0,
+        'E2E Tests':
+          this.results.find((r) => r.suite === 'E2E Tests')?.passed || 0,
+        'Edge Cases':
+          this.results.find((r) => r.suite === 'Edge Cases')?.passed || 0,
+        'Business Logic':
+          this.results.find((r) => r.suite === 'Unit Tests')?.passed || 0,
       },
     };
 
     const reportPath = join('coverage', 'test-report.json');
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     console.log(`\n📄 Detailed report saved to: ${reportPath}`);
   }
 }
@@ -254,7 +273,7 @@ class TestRunner {
 // Run tests if this file is executed directly
 if (require.main === module) {
   const runner = new TestRunner();
-  runner.runAllTests().catch(error => {
+  runner.runAllTests().catch((error) => {
     console.error('Test runner failed:', error);
     process.exit(1);
   });

@@ -21,7 +21,7 @@ export function useMobilePayrollLoading<T>(
   const {
     enableProgressiveLoading = true,
     prioritizeVisible = true,
-    cacheStrategy = 'normal'
+    cacheStrategy = 'normal',
   } = options;
 
   const [data, setData] = React.useState<T | null>(null);
@@ -31,11 +31,13 @@ export function useMobilePayrollLoading<T>(
   const [loadingStage, setLoadingStage] = React.useState<string>('');
 
   // Cache for loaded data
-  const cacheRef = React.useRef<Map<string, { data: T; timestamp: number }>>(new Map());
-  
+  const cacheRef = React.useRef<Map<string, { data: T; timestamp: number }>>(
+    new Map()
+  );
+
   // Generate cache key from dependencies
-  const cacheKey = React.useMemo(() => 
-    JSON.stringify(dependencies), 
+  const cacheKey = React.useMemo(
+    () => JSON.stringify(dependencies),
     dependencies
   );
 
@@ -43,8 +45,8 @@ export function useMobilePayrollLoading<T>(
   const getCacheTTL = () => {
     const baseTTL = {
       aggressive: 30 * 60 * 1000, // 30 minutes
-      normal: 10 * 60 * 1000,     // 10 minutes
-      minimal: 2 * 60 * 1000      // 2 minutes
+      normal: 10 * 60 * 1000, // 10 minutes
+      minimal: 2 * 60 * 1000, // 2 minutes
     }[cacheStrategy];
 
     // Extend cache time on slow connections
@@ -57,7 +59,7 @@ export function useMobilePayrollLoading<T>(
     const now = Date.now();
     const cacheTTL = getCacheTTL();
 
-    if (cached && (now - cached.timestamp) < cacheTTL) {
+    if (cached && now - cached.timestamp < cacheTTL) {
       setData(cached.data);
       return;
     }
@@ -65,7 +67,7 @@ export function useMobilePayrollLoading<T>(
     setIsLoading(true);
     setError(null);
     setProgress(0);
-    
+
     const measureApi = measureApiCall('payroll-data-load');
 
     try {
@@ -73,28 +75,28 @@ export function useMobilePayrollLoading<T>(
       if (enableProgressiveLoading && isMobile) {
         setLoadingStage('Connecting...');
         setProgress(10);
-        
+
         // Small delay to show initial loading state
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         setLoadingStage('Loading data...');
         setProgress(30);
       }
 
       const result = await loadingFunction();
-      
+
       if (enableProgressiveLoading && isMobile) {
         setLoadingStage('Processing...');
         setProgress(80);
-        
+
         // Small delay to show processing state
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       // Cache the result
       cacheRef.current.set(cacheKey, {
         data: result,
-        timestamp: now
+        timestamp: now,
       });
 
       // Clean up old cache entries (keep last 10)
@@ -110,13 +112,14 @@ export function useMobilePayrollLoading<T>(
       setData(result);
       setProgress(100);
       setLoadingStage('Complete');
-      
+
       measureApi(true);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load data';
       setError(errorMessage);
       measureApi(false);
-      
+
       // On mobile with slow connection, try to use stale cache
       if (isMobile && isSlowConnection && cached) {
         setData(cached.data);
@@ -130,7 +133,15 @@ export function useMobilePayrollLoading<T>(
         setLoadingStage('');
       }, 500);
     }
-  }, [loadingFunction, cacheKey, enableProgressiveLoading, isMobile, isSlowConnection, measureApiCall, getCacheTTL]);
+  }, [
+    loadingFunction,
+    cacheKey,
+    enableProgressiveLoading,
+    isMobile,
+    isSlowConnection,
+    measureApiCall,
+    getCacheTTL,
+  ]);
 
   React.useEffect(() => {
     loadData();
@@ -138,7 +149,7 @@ export function useMobilePayrollLoading<T>(
 
   // Preload data when component becomes visible (mobile optimization)
   const intersectionRef = React.useRef<HTMLDivElement>(null);
-  
+
   React.useEffect(() => {
     if (!prioritizeVisible || !isMobile || !intersectionRef.current) return;
 
@@ -182,14 +193,11 @@ export function useMobilePayrollLoading<T>(
 }
 
 // Specialized hook for payroll summary data
-export function useMobilePayrollSummary(
-  userId: string,
-  payPeriodId: string
-) {
+export function useMobilePayrollSummary(userId: string, payPeriodId: string) {
   return useMobilePayrollLoading(
     async () => {
       // Mock API call - replace with actual implementation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       return {
         totalPay: 955,
         totalHours: 40,
@@ -214,7 +222,7 @@ export function useMobilePayrollDetails(
   return useMobilePayrollLoading(
     async () => {
       // Mock API call - replace with actual implementation
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       return {
         departmentBreakdown: [],
         dailyWorkHistory: [],

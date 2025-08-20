@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -25,14 +24,16 @@ const errorMessages = {
   invalid_session: 'Your session has expired. Please sign in again.',
   middleware_error: 'A system error occurred. Please try signing in again.',
   access_denied: 'Access denied. Please contact your administrator.',
-  session_recovery_failed: 'Unable to recover your session. Please sign in again.',
+  session_recovery_failed:
+    'Unable to recover your session. Please sign in again.',
   authentication_failed: 'Authentication failed. Please try again.',
   signout_failed: 'There was a problem signing out. Please try again.',
-  account_deactivated: 'Your account has been deactivated. Contact your administrator.',
+  account_deactivated:
+    'Your account has been deactivated. Contact your administrator.',
   system_error: 'A system error occurred. Please try again.',
   session_error: 'There was a problem with your session. Please sign in again.',
   CredentialsSignin: 'Invalid email or password. Please try again.',
-  default: 'An unexpected error occurred. Please try again.'
+  default: 'An unexpected error occurred. Please try again.',
 };
 
 export function LoginForm({
@@ -56,7 +57,9 @@ export function LoginForm({
   useEffect(() => {
     const urlError = searchParams.get('error');
     if (urlError) {
-      const errorMessage = errorMessages[urlError as keyof typeof errorMessages] || errorMessages.default;
+      const errorMessage =
+        errorMessages[urlError as keyof typeof errorMessages] ||
+        errorMessages.default;
       setError(errorMessage);
     }
   }, [searchParams]);
@@ -67,7 +70,7 @@ export function LoginForm({
 
     try {
       const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-      
+
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
@@ -76,14 +79,16 @@ export function LoginForm({
       });
 
       if (result?.error) {
-        const errorMessage = errorMessages[result.error as keyof typeof errorMessages] || errorMessages.default;
+        const errorMessage =
+          errorMessages[result.error as keyof typeof errorMessages] ||
+          errorMessages.default;
         setError(errorMessage);
       } else if (result?.ok) {
         // Clear any URL error parameters
         const cleanUrl = new URL(window.location.href);
         cleanUrl.searchParams.delete('error');
         cleanUrl.searchParams.delete('callbackUrl');
-        
+
         // Redirect to intended page or dashboard
         router.push(callbackUrl);
         router.refresh();
@@ -145,11 +150,18 @@ export function LoginForm({
             disabled={isLoading}
           />
           {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
+            <p className="text-sm text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
-        <BrandButton type="submit" variant="primary" className="w-full" loading={isLoading}>
+        <BrandButton
+          type="submit"
+          variant="primary"
+          className="w-full"
+          loading={isLoading}
+        >
           {isLoading ? 'Signing in...' : 'Sign In'}
         </BrandButton>
       </div>

@@ -19,7 +19,11 @@ interface AuthErrorBoundaryState {
 
 interface AuthErrorBoundaryProps {
   children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; retry: () => void; recover: () => void }>;
+  fallback?: React.ComponentType<{
+    error: Error;
+    retry: () => void;
+    recover: () => void;
+  }>;
   enableAutoRecovery?: boolean;
   maxRetries?: number;
 }
@@ -33,14 +37,16 @@ export class AuthErrorBoundary extends React.Component<
 
   constructor(props: AuthErrorBoundaryProps) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      retryCount: 0, 
-      isRecovering: false 
+    this.state = {
+      hasError: false,
+      retryCount: 0,
+      isRecovering: false,
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<AuthErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<AuthErrorBoundaryState> {
     return {
       hasError: true,
       error,
@@ -62,7 +68,8 @@ export class AuthErrorBoundary extends React.Component<
       componentStack: errorInfo.componentStack || 'Not available',
       timestamp: new Date().toISOString(),
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
+      userAgent:
+        typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
       errorCode: this.determineErrorCode(error),
       isAuthError: this.isAuthenticationError(error),
     };
@@ -91,7 +98,7 @@ export class AuthErrorBoundary extends React.Component<
 
   private determineErrorCode(error: Error): string {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('session') && message.includes('expired')) {
       return 'SESSION_EXPIRED';
     }
@@ -110,28 +117,38 @@ export class AuthErrorBoundary extends React.Component<
     if (message.includes('session') && message.includes('invalid')) {
       return 'INVALID_SESSION';
     }
-    
+
     return 'UNKNOWN_AUTH_ERROR';
   }
 
   private isAuthenticationError(error: Error): boolean {
     const authKeywords = [
-      'authentication', 'session', 'token', 'unauthorized', 
-      'permission', 'access denied', 'forbidden', 'signin'
+      'authentication',
+      'session',
+      'token',
+      'unauthorized',
+      'permission',
+      'access denied',
+      'forbidden',
+      'signin',
     ];
-    
-    return authKeywords.some(keyword => 
+
+    return authKeywords.some((keyword) =>
       error.message.toLowerCase().includes(keyword)
     );
   }
 
   private shouldAutoRecover(error: Error): boolean {
     const recoverableErrors = [
-      'SESSION_EXPIRED', 'INVALID_SESSION', 'NETWORK_ERROR'
+      'SESSION_EXPIRED',
+      'INVALID_SESSION',
+      'NETWORK_ERROR',
     ];
-    
-    return recoverableErrors.includes(this.determineErrorCode(error)) &&
-           this.state.retryCount < (this.props.maxRetries || 3);
+
+    return (
+      recoverableErrors.includes(this.determineErrorCode(error)) &&
+      this.state.retryCount < (this.props.maxRetries || 3)
+    );
   }
 
   private scheduleAutoRecovery() {
@@ -140,7 +157,7 @@ export class AuthErrorBoundary extends React.Component<
     }
 
     const delay = Math.min(1000 * Math.pow(2, this.state.retryCount), 10000); // Max 10 seconds
-    
+
     this.recoveryTimeout = setTimeout(() => {
       this.handleRecovery();
     }, delay);
@@ -171,9 +188,9 @@ export class AuthErrorBoundary extends React.Component<
   }
 
   handleRetry = () => {
-    this.setState(prev => ({ 
-      hasError: false, 
-      error: undefined, 
+    this.setState((prev) => ({
+      hasError: false,
+      error: undefined,
       errorInfo: undefined,
       errorCode: undefined,
       retryCount: prev.retryCount + 1,
@@ -189,7 +206,7 @@ export class AuthErrorBoundary extends React.Component<
       const response = await fetch('/api/auth/session', {
         method: 'GET',
         credentials: 'include',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: { 'Cache-Control': 'no-cache' },
       });
 
       if (response.ok) {
@@ -216,7 +233,9 @@ export class AuthErrorBoundary extends React.Component<
 
   handleSignOut = async () => {
     try {
-      await signOut({ callbackUrl: '/auth/login?error=session_recovery_failed' });
+      await signOut({
+        callbackUrl: '/auth/login?error=session_recovery_failed',
+      });
     } catch (error) {
       console.error('Error during sign out:', error);
       // Force redirect if signOut fails
@@ -260,7 +279,7 @@ export class AuthErrorBoundary extends React.Component<
       case 'AUTH_REQUIRED':
         return 'Authentication is required to access this page.';
       case 'PERMISSION_DENIED':
-        return 'You don\'t have permission to access this resource.';
+        return "You don't have permission to access this resource.";
       case 'NETWORK_ERROR':
         return 'Unable to connect to the server. Please check your internet connection.';
       case 'INVALID_TOKEN':
@@ -276,24 +295,30 @@ export class AuthErrorBoundary extends React.Component<
     const maxRetries = this.props.maxRetries || 3;
     const canRetry = retryCount < maxRetries;
     const isNetworkError = errorCode === 'NETWORK_ERROR';
-    const isRecoverableError = ['SESSION_EXPIRED', 'INVALID_SESSION', 'NETWORK_ERROR'].includes(errorCode || '');
+    const isRecoverableError = [
+      'SESSION_EXPIRED',
+      'INVALID_SESSION',
+      'NETWORK_ERROR',
+    ].includes(errorCode || '');
 
     return (
       <div className="flex flex-col space-y-2">
         {canRetry && (
-          <BrandButton 
+          <BrandButton
             onClick={this.handleRetry}
             variant="primary"
             className="w-full"
             disabled={isRecovering}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRecovering ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isRecovering ? 'animate-spin' : ''}`}
+            />
             {isRecovering ? 'Recovering...' : 'Try Again'}
           </BrandButton>
         )}
-        
+
         {isRecoverableError && canRetry && (
-          <BrandButton 
+          <BrandButton
             onClick={this.handleRecovery}
             variant="outline"
             className="w-full"
@@ -303,10 +328,10 @@ export class AuthErrorBoundary extends React.Component<
             {isNetworkError ? 'Check Connection' : 'Recover Session'}
           </BrandButton>
         )}
-        
-        <BrandButton 
+
+        <BrandButton
           onClick={this.handleSignOut}
-          variant={canRetry ? "ghost" : "outline"}
+          variant={canRetry ? 'ghost' : 'outline'}
           className="w-full"
           disabled={isRecovering}
         >
@@ -319,14 +344,14 @@ export class AuthErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       const { error } = this.state;
-      
+
       // Use custom fallback if provided
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
         return (
-          <FallbackComponent 
-            error={error!} 
-            retry={this.handleRetry} 
+          <FallbackComponent
+            error={error!}
+            retry={this.handleRetry}
             recover={this.handleRecovery}
           />
         );
@@ -343,15 +368,14 @@ export class AuthErrorBoundary extends React.Component<
             </div>
 
             <Alert variant="destructive">
-              <AlertDescription>
-                {this.getErrorMessage()}
-              </AlertDescription>
+              <AlertDescription>{this.getErrorMessage()}</AlertDescription>
             </Alert>
 
             {this.state.retryCount > 0 && (
               <Alert>
                 <AlertDescription className="text-sm">
-                  Retry attempt {this.state.retryCount} of {this.props.maxRetries || 3}
+                  Retry attempt {this.state.retryCount} of{' '}
+                  {this.props.maxRetries || 3}
                 </AlertDescription>
               </Alert>
             )}
@@ -378,16 +402,20 @@ export class AuthErrorBoundary extends React.Component<
 
 // Enhanced hook version for functional components
 export function useAuthErrorHandler() {
-  const { handleAuthError: productionHandleAuthError, recoverSession } = useProductionAuth();
+  const { handleAuthError: productionHandleAuthError, recoverSession } =
+    useProductionAuth();
 
-  const handleAuthError = async (error: Error, context?: Record<string, unknown>) => {
+  const handleAuthError = async (
+    error: Error,
+    context?: Record<string, unknown>
+  ) => {
     console.error('Authentication error:', error, context);
-    
+
     // Use production auth error handler
     productionHandleAuthError(error, context);
-    
+
     // Check if this is a recoverable authentication error
-    const isRecoverableAuthError = 
+    const isRecoverableAuthError =
       error.message.includes('Session') ||
       error.message.includes('Token') ||
       error.message.includes('expired');
@@ -397,7 +425,9 @@ export function useAuthErrorHandler() {
       const recovered = await recoverSession();
       if (!recovered) {
         // If recovery fails, force sign out
-        await signOut({ callbackUrl: '/auth/login?error=session_recovery_failed' });
+        await signOut({
+          callbackUrl: '/auth/login?error=session_recovery_failed',
+        });
       }
     } else if (
       error.message.includes('Authentication') ||

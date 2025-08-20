@@ -1,52 +1,52 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { Calendar, Clock, FileText, TrendingUp } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from 'react';
+import { Calendar, Clock, FileText, TrendingUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { getPayPeriodStats } from "@/lib/actions/pay-periods"
+} from '@/components/ui/card';
+import { getPayPeriodStats } from '@/lib/actions/pay-periods';
 
 interface PayPeriodStats {
   currentPeriod: {
-    name: string
-    status: string
-    daysRemaining: number
-    pendingLogs: number
-  }
+    name: string;
+    status: string;
+    daysRemaining: number;
+    pendingLogs: number;
+  };
   totals: {
-    total: number
-    open: number
-    locked: number
-    closed: number
-  }
+    total: number;
+    open: number;
+    locked: number;
+    closed: number;
+  };
 }
 
 export function PayPeriodSummaryTiles() {
-  const [stats, setStats] = useState<PayPeriodStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<PayPeriodStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const result = await getPayPeriodStats()
+        const result = await getPayPeriodStats();
         if (result.success && result.data) {
-          setStats(result.data)
+          setStats(result.data);
         }
       } catch (error) {
-        console.error('Failed to load pay period stats:', error)
+        console.error('Failed to load pay period stats:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadStats()
-  }, [])
+    loadStats();
+  }, []);
 
   if (loading) {
     return (
@@ -63,25 +63,25 @@ export function PayPeriodSummaryTiles() {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (!stats) {
-    return null
+    return null;
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "locked":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-      case "closed":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+      case 'open':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'locked':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      case 'closed':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -95,19 +95,23 @@ export function PayPeriodSummaryTiles() {
           <CardTitle className="text-xl font-semibold">
             {stats.currentPeriod.name}
           </CardTitle>
-          <Badge className={`w-fit ${getStatusColor(stats.currentPeriod.status)}`}>
-            {stats.currentPeriod.status === 'none' ? 'No Active Period' : stats.currentPeriod.status.charAt(0).toUpperCase() + stats.currentPeriod.status.slice(1)}
+          <Badge
+            className={`w-fit ${getStatusColor(stats.currentPeriod.status)}`}
+          >
+            {stats.currentPeriod.status === 'none'
+              ? 'No Active Period'
+              : stats.currentPeriod.status.charAt(0).toUpperCase() +
+                stats.currentPeriod.status.slice(1)}
           </Badge>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            {stats.currentPeriod.daysRemaining > 0 
+            {stats.currentPeriod.daysRemaining > 0
               ? `${stats.currentPeriod.daysRemaining} days remaining`
-              : stats.currentPeriod.status === 'none' 
+              : stats.currentPeriod.status === 'none'
                 ? 'No active period'
-                : 'Period ended'
-            }
+                : 'Period ended'}
           </div>
         </CardContent>
       </Card>
@@ -129,10 +133,9 @@ export function PayPeriodSummaryTiles() {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="text-sm text-muted-foreground">
-            {stats.currentPeriod.pendingLogs === 0 
+            {stats.currentPeriod.pendingLogs === 0
               ? 'All logs approved'
-              : `${stats.currentPeriod.pendingLogs} log${stats.currentPeriod.pendingLogs === 1 ? '' : 's'} awaiting review`
-            }
+              : `${stats.currentPeriod.pendingLogs} log${stats.currentPeriod.pendingLogs === 1 ? '' : 's'} awaiting review`}
           </div>
         </CardContent>
       </Card>
@@ -166,5 +169,5 @@ export function PayPeriodSummaryTiles() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

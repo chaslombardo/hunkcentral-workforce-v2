@@ -22,21 +22,27 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Download, 
-  FileSpreadsheet, 
-  FileText, 
-  Loader2, 
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Loader2,
   Printer,
   Settings,
   HelpCircle,
   Calendar,
-  Users
+  Users,
 } from 'lucide-react';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation, TipEntry } from '@/lib/payCalculator';
@@ -56,7 +62,12 @@ interface PayrollExportDialogProps {
 }
 
 type ExportFormat = 'csv' | 'xlsx' | 'pdf' | 'adp' | 'print';
-type ExportType = 'summary' | 'detailed' | 'paystub' | 'breakdown' | 'adp-import';
+type ExportType =
+  | 'summary'
+  | 'detailed'
+  | 'paystub'
+  | 'breakdown'
+  | 'adp-import';
 type ExportScope = 'current-user' | 'all-employees' | 'department';
 
 interface ExportOptions {
@@ -109,25 +120,82 @@ export function PayrollExportDialog({
   });
 
   const formatOptions = [
-    { value: 'pdf', label: 'PDF Document (.pdf)', icon: FileText, description: 'Professional paystub format' },
-    { value: 'xlsx', label: 'Excel Spreadsheet (.xlsx)', icon: FileSpreadsheet, description: 'Detailed data analysis' },
-    { value: 'csv', label: 'CSV Data (.csv)', icon: FileText, description: 'Raw data export' },
-    { value: 'print', label: 'Print Preview', icon: Printer, description: 'Browser print dialog' },
-    { value: 'adp', label: 'ADP Import (.csv)', icon: FileSpreadsheet, description: 'Payroll system import' },
+    {
+      value: 'pdf',
+      label: 'PDF Document (.pdf)',
+      icon: FileText,
+      description: 'Professional paystub format',
+    },
+    {
+      value: 'xlsx',
+      label: 'Excel Spreadsheet (.xlsx)',
+      icon: FileSpreadsheet,
+      description: 'Detailed data analysis',
+    },
+    {
+      value: 'csv',
+      label: 'CSV Data (.csv)',
+      icon: FileText,
+      description: 'Raw data export',
+    },
+    {
+      value: 'print',
+      label: 'Print Preview',
+      icon: Printer,
+      description: 'Browser print dialog',
+    },
+    {
+      value: 'adp',
+      label: 'ADP Import (.csv)',
+      icon: FileSpreadsheet,
+      description: 'Payroll system import',
+    },
   ] as const;
 
   const typeOptions = [
-    { value: 'paystub', label: 'Personal Paystub', description: 'Individual employee paystub with full breakdown' },
-    { value: 'breakdown', label: 'Detailed Breakdown', description: 'Department, daily, and tips analysis' },
-    { value: 'summary', label: 'Summary Report', description: 'High-level payroll totals only' },
-    { value: 'detailed', label: 'Complete Report', description: 'All data with calculations and audit trail' },
-    { value: 'adp-import', label: 'ADP Import File', description: 'Formatted for ADP payroll system' },
+    {
+      value: 'paystub',
+      label: 'Personal Paystub',
+      description: 'Individual employee paystub with full breakdown',
+    },
+    {
+      value: 'breakdown',
+      label: 'Detailed Breakdown',
+      description: 'Department, daily, and tips analysis',
+    },
+    {
+      value: 'summary',
+      label: 'Summary Report',
+      description: 'High-level payroll totals only',
+    },
+    {
+      value: 'detailed',
+      label: 'Complete Report',
+      description: 'All data with calculations and audit trail',
+    },
+    {
+      value: 'adp-import',
+      label: 'ADP Import File',
+      description: 'Formatted for ADP payroll system',
+    },
   ] as const;
 
   const scopeOptions = [
-    { value: 'current-user', label: 'My Payroll Only', description: 'Export only your payroll data' },
-    { value: 'department', label: 'My Department', description: 'Export department team data' },
-    { value: 'all-employees', label: 'All Employees', description: 'Complete payroll export (admin only)' },
+    {
+      value: 'current-user',
+      label: 'My Payroll Only',
+      description: 'Export only your payroll data',
+    },
+    {
+      value: 'department',
+      label: 'My Department',
+      description: 'Export department team data',
+    },
+    {
+      value: 'all-employees',
+      label: 'All Employees',
+      description: 'Complete payroll export (admin only)',
+    },
   ] as const;
 
   const departmentOptions = [
@@ -179,7 +247,6 @@ export function PayrollExportDialog({
         setExportProgress(0);
         onOpenChange(false);
       }, 1000);
-
     } catch {
       toast({
         title: 'Export Failed',
@@ -208,9 +275,11 @@ export function PayrollExportDialog({
     if (options.departmentFilter === 'all') {
       return payrollData.length;
     }
-    return payrollData.filter(emp => {
-      const primaryDept = Object.entries(emp.hoursByDepartment)
-        .find(([, hours]) => hours > 0)?.[0] || 'admin';
+    return payrollData.filter((emp) => {
+      const primaryDept =
+        Object.entries(emp.hoursByDepartment).find(
+          ([, hours]) => hours > 0
+        )?.[0] || 'admin';
       return primaryDept === options.departmentFilter;
     }).length;
   };
@@ -219,20 +288,33 @@ export function PayrollExportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2" data-testid="export-dialog-title">
+          <DialogTitle
+            className="flex items-center gap-2"
+            data-testid="export-dialog-title"
+          >
             <Download className="h-5 w-5" />
             Export Payroll Report
           </DialogTitle>
           <DialogDescription data-testid="export-dialog-description">
-            Export payroll data for {selectedPeriod?.name || 'the current pay period'}
+            Export payroll data for{' '}
+            {selectedPeriod?.name || 'the current pay period'}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full" data-testid="export-tabs">
-          <TabsList className="grid w-full grid-cols-3" data-testid="export-tabs-list">
-            <TabsTrigger value="basic" data-testid="basic-options-tab">Basic Options</TabsTrigger>
-            <TabsTrigger value="content" data-testid="content-data-tab">Content & Data</TabsTrigger>
-            <TabsTrigger value="preview" data-testid="preview-export-tab">Preview & Export</TabsTrigger>
+          <TabsList
+            className="grid w-full grid-cols-3"
+            data-testid="export-tabs-list"
+          >
+            <TabsTrigger value="basic" data-testid="basic-options-tab">
+              Basic Options
+            </TabsTrigger>
+            <TabsTrigger value="content" data-testid="content-data-tab">
+              Content & Data
+            </TabsTrigger>
+            <TabsTrigger value="preview" data-testid="preview-export-tab">
+              Preview & Export
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="space-y-6 mt-6">
@@ -241,7 +323,9 @@ export function PayrollExportDialog({
               <Label className="text-sm font-medium">Export Format</Label>
               <Select
                 value={options.format}
-                onValueChange={(value: ExportFormat) => updateOption('format', value)}
+                onValueChange={(value: ExportFormat) =>
+                  updateOption('format', value)
+                }
               >
                 <SelectTrigger data-testid="format-select">
                   <SelectValue />
@@ -269,7 +353,9 @@ export function PayrollExportDialog({
               <Label className="text-sm font-medium">Report Type</Label>
               <Select
                 value={options.type}
-                onValueChange={(value: ExportType) => updateOption('type', value)}
+                onValueChange={(value: ExportType) =>
+                  updateOption('type', value)
+                }
               >
                 <SelectTrigger data-testid="type-select">
                   <SelectValue />
@@ -294,7 +380,9 @@ export function PayrollExportDialog({
               <Label className="text-sm font-medium">Export Scope</Label>
               <Select
                 value={options.scope}
-                onValueChange={(value: ExportScope) => updateOption('scope', value)}
+                onValueChange={(value: ExportScope) =>
+                  updateOption('scope', value)
+                }
               >
                 <SelectTrigger data-testid="scope-select">
                   <SelectValue />
@@ -315,12 +403,15 @@ export function PayrollExportDialog({
             </div>
 
             {/* Department Filter (only show if scope is department or all) */}
-            {(options.scope === 'department' || options.scope === 'all-employees') && (
+            {(options.scope === 'department' ||
+              options.scope === 'all-employees') && (
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Department Filter</Label>
                 <Select
                   value={options.departmentFilter}
-                  onValueChange={(value: string) => updateOption('departmentFilter', value)}
+                  onValueChange={(value: string) =>
+                    updateOption('departmentFilter', value)
+                  }
                 >
                   <SelectTrigger data-testid="department-filter-select">
                     <SelectValue />
@@ -346,7 +437,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeHours"
                     checked={options.includeHours}
-                    onCheckedChange={(checked) => updateOption('includeHours', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeHours', !!checked)
+                    }
                   />
                   <Label htmlFor="includeHours" className="text-sm">
                     Hours Worked
@@ -356,7 +449,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeTips"
                     checked={options.includeTips}
-                    onCheckedChange={(checked) => updateOption('includeTips', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeTips', !!checked)
+                    }
                   />
                   <Label htmlFor="includeTips" className="text-sm">
                     Tips Earned
@@ -366,7 +461,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeBonuses"
                     checked={options.includeBonuses}
-                    onCheckedChange={(checked) => updateOption('includeBonuses', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeBonuses', !!checked)
+                    }
                   />
                   <Label htmlFor="includeBonuses" className="text-sm">
                     Bonuses
@@ -376,7 +473,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeCommission"
                     checked={options.includeCommission}
-                    onCheckedChange={(checked) => updateOption('includeCommission', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeCommission', !!checked)
+                    }
                   />
                   <Label htmlFor="includeCommission" className="text-sm">
                     Commission
@@ -386,7 +485,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeSalary"
                     checked={options.includeSalary}
-                    onCheckedChange={(checked) => updateOption('includeSalary', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeSalary', !!checked)
+                    }
                   />
                   <Label htmlFor="includeSalary" className="text-sm">
                     Salary
@@ -399,15 +500,22 @@ export function PayrollExportDialog({
 
             {/* Detailed Breakdown Options */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Detailed Information</Label>
+              <Label className="text-sm font-medium">
+                Detailed Information
+              </Label>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="includeDepartmentBreakdown"
                     checked={options.includeDepartmentBreakdown}
-                    onCheckedChange={(checked) => updateOption('includeDepartmentBreakdown', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeDepartmentBreakdown', !!checked)
+                    }
                   />
-                  <Label htmlFor="includeDepartmentBreakdown" className="text-sm">
+                  <Label
+                    htmlFor="includeDepartmentBreakdown"
+                    className="text-sm"
+                  >
                     Department Breakdown
                   </Label>
                 </div>
@@ -415,7 +523,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeDailyHistory"
                     checked={options.includeDailyHistory}
-                    onCheckedChange={(checked) => updateOption('includeDailyHistory', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeDailyHistory', !!checked)
+                    }
                   />
                   <Label htmlFor="includeDailyHistory" className="text-sm">
                     Daily Work History
@@ -425,7 +535,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeRateInformation"
                     checked={options.includeRateInformation}
-                    onCheckedChange={(checked) => updateOption('includeRateInformation', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeRateInformation', !!checked)
+                    }
                   />
                   <Label htmlFor="includeRateInformation" className="text-sm">
                     Rate Information
@@ -435,9 +547,14 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeCalculationDetails"
                     checked={options.includeCalculationDetails}
-                    onCheckedChange={(checked) => updateOption('includeCalculationDetails', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeCalculationDetails', !!checked)
+                    }
                   />
-                  <Label htmlFor="includeCalculationDetails" className="text-sm">
+                  <Label
+                    htmlFor="includeCalculationDetails"
+                    className="text-sm"
+                  >
                     Calculation Details & Explanations
                   </Label>
                 </div>
@@ -445,7 +562,9 @@ export function PayrollExportDialog({
                   <Checkbox
                     id="includeAuditTrail"
                     checked={options.includeAuditTrail}
-                    onCheckedChange={(checked) => updateOption('includeAuditTrail', !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateOption('includeAuditTrail', !!checked)
+                    }
                   />
                   <Label htmlFor="includeAuditTrail" className="text-sm">
                     Audit Trail & Log References
@@ -476,7 +595,10 @@ export function PayrollExportDialog({
             {/* Export Preview */}
             <Card data-testid="export-preview-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2" data-testid="export-preview-title">
+                <CardTitle
+                  className="flex items-center gap-2"
+                  data-testid="export-preview-title"
+                >
                   <FileText className="h-5 w-5" />
                   Export Preview
                 </CardTitle>
@@ -491,21 +613,30 @@ export function PayrollExportDialog({
                       <FileText className="h-4 w-4" />
                       <span className="font-medium">Format:</span>
                       <Badge variant="outline">
-                        {formatOptions.find(f => f.value === options.format)?.label}
+                        {
+                          formatOptions.find((f) => f.value === options.format)
+                            ?.label
+                        }
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4" />
                       <span className="font-medium">Type:</span>
                       <Badge variant="outline">
-                        {typeOptions.find(t => t.value === options.type)?.label}
+                        {
+                          typeOptions.find((t) => t.value === options.type)
+                            ?.label
+                        }
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span className="font-medium">Scope:</span>
                       <Badge variant="outline">
-                        {scopeOptions.find(s => s.value === options.scope)?.label}
+                        {
+                          scopeOptions.find((s) => s.value === options.scope)
+                            ?.label
+                        }
                       </Badge>
                     </div>
                   </div>
@@ -520,12 +651,16 @@ export function PayrollExportDialog({
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span className="font-medium">Employees:</span>
-                      <span className="text-muted-foreground">{getEmployeeCount()}</span>
+                      <span className="text-muted-foreground">
+                        {getEmployeeCount()}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       <span className="font-medium">Est. Size:</span>
-                      <span className="text-muted-foreground">{getEstimatedFileSize()}</span>
+                      <span className="text-muted-foreground">
+                        {getEstimatedFileSize()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -536,16 +671,36 @@ export function PayrollExportDialog({
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Included Content:</h4>
                   <div className="flex flex-wrap gap-2">
-                    {options.includeHours && <Badge variant="secondary">Hours</Badge>}
-                    {options.includeTips && <Badge variant="secondary">Tips</Badge>}
-                    {options.includeBonuses && <Badge variant="secondary">Bonuses</Badge>}
-                    {options.includeCommission && <Badge variant="secondary">Commission</Badge>}
-                    {options.includeSalary && <Badge variant="secondary">Salary</Badge>}
-                    {options.includeDepartmentBreakdown && <Badge variant="secondary">Dept. Breakdown</Badge>}
-                    {options.includeDailyHistory && <Badge variant="secondary">Daily History</Badge>}
-                    {options.includeRateInformation && <Badge variant="secondary">Rate Info</Badge>}
-                    {options.includeCalculationDetails && <Badge variant="secondary">Calculations</Badge>}
-                    {options.includeAuditTrail && <Badge variant="secondary">Audit Trail</Badge>}
+                    {options.includeHours && (
+                      <Badge variant="secondary">Hours</Badge>
+                    )}
+                    {options.includeTips && (
+                      <Badge variant="secondary">Tips</Badge>
+                    )}
+                    {options.includeBonuses && (
+                      <Badge variant="secondary">Bonuses</Badge>
+                    )}
+                    {options.includeCommission && (
+                      <Badge variant="secondary">Commission</Badge>
+                    )}
+                    {options.includeSalary && (
+                      <Badge variant="secondary">Salary</Badge>
+                    )}
+                    {options.includeDepartmentBreakdown && (
+                      <Badge variant="secondary">Dept. Breakdown</Badge>
+                    )}
+                    {options.includeDailyHistory && (
+                      <Badge variant="secondary">Daily History</Badge>
+                    )}
+                    {options.includeRateInformation && (
+                      <Badge variant="secondary">Rate Info</Badge>
+                    )}
+                    {options.includeCalculationDetails && (
+                      <Badge variant="secondary">Calculations</Badge>
+                    )}
+                    {options.includeAuditTrail && (
+                      <Badge variant="secondary">Audit Trail</Badge>
+                    )}
                   </div>
                 </div>
 
@@ -569,14 +724,29 @@ export function PayrollExportDialog({
                 <CardContent className="pt-6">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span data-testid="export-progress-label">Generating export...</span>
-                      <span data-testid="export-progress-percentage">{exportProgress}%</span>
+                      <span data-testid="export-progress-label">
+                        Generating export...
+                      </span>
+                      <span data-testid="export-progress-percentage">
+                        {exportProgress}%
+                      </span>
                     </div>
-                    <Progress value={exportProgress} className="h-2" data-testid="export-progress-bar" />
-                    <p className="text-xs text-muted-foreground" data-testid="export-progress-message">
+                    <Progress
+                      value={exportProgress}
+                      className="h-2"
+                      data-testid="export-progress-bar"
+                    />
+                    <p
+                      className="text-xs text-muted-foreground"
+                      data-testid="export-progress-message"
+                    >
                       {exportProgress < 30 && 'Collecting payroll data...'}
-                      {exportProgress >= 30 && exportProgress < 60 && 'Processing department breakdowns...'}
-                      {exportProgress >= 60 && exportProgress < 90 && 'Generating document...'}
+                      {exportProgress >= 30 &&
+                        exportProgress < 60 &&
+                        'Processing department breakdowns...'}
+                      {exportProgress >= 60 &&
+                        exportProgress < 90 &&
+                        'Generating document...'}
                       {exportProgress >= 90 && 'Finalizing export...'}
                     </p>
                   </div>
@@ -588,9 +758,11 @@ export function PayrollExportDialog({
             <Alert>
               <HelpCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Export Tips:</strong> PDF format is recommended for paystubs and official records. 
-                Excel format is best for data analysis. Print preview allows you to review before printing.
-                {options.type === 'paystub' && ' Paystubs include all breakdown information and calculation explanations.'}
+                <strong>Export Tips:</strong> PDF format is recommended for
+                paystubs and official records. Excel format is best for data
+                analysis. Print preview allows you to review before printing.
+                {options.type === 'paystub' &&
+                  ' Paystubs include all breakdown information and calculation explanations.'}
               </AlertDescription>
             </Alert>
           </TabsContent>

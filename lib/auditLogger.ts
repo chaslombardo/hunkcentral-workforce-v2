@@ -30,11 +30,18 @@ export async function createAuditLog(data: AuditLogData) {
   }
 }
 
-export function trackChanges(before: Record<string, unknown>, after: Record<string, unknown>): Record<string, unknown> {
+export function trackChanges(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>
+): Record<string, unknown> {
   const changes: Record<string, unknown> = {};
 
   // Handle primitive values and objects
-  const compareValues = (beforeVal: unknown, afterVal: unknown, key: string) => {
+  const compareValues = (
+    beforeVal: unknown,
+    afterVal: unknown,
+    key: string
+  ) => {
     if (beforeVal !== afterVal) {
       if (beforeVal === null || beforeVal === undefined) {
         changes[key] = { to: afterVal };
@@ -75,7 +82,9 @@ export function trackChanges(before: Record<string, unknown>, after: Record<stri
         // Check for changes in array items
         let hasChanges = false;
         for (let i = 0; i < beforeArray.length; i++) {
-          if (JSON.stringify(beforeArray[i]) !== JSON.stringify(afterArray[i])) {
+          if (
+            JSON.stringify(beforeArray[i]) !== JSON.stringify(afterArray[i])
+          ) {
             hasChanges = true;
             break;
           }
@@ -87,9 +96,17 @@ export function trackChanges(before: Record<string, unknown>, after: Record<stri
           };
         }
       }
-    } else if (typeof beforeVal === 'object' && typeof afterVal === 'object' && beforeVal !== null && afterVal !== null) {
+    } else if (
+      typeof beforeVal === 'object' &&
+      typeof afterVal === 'object' &&
+      beforeVal !== null &&
+      afterVal !== null
+    ) {
       // Handle nested objects
-      const nestedChanges = trackChanges(beforeVal as Record<string, unknown>, afterVal as Record<string, unknown>);
+      const nestedChanges = trackChanges(
+        beforeVal as Record<string, unknown>,
+        afterVal as Record<string, unknown>
+      );
       if (Object.keys(nestedChanges).length > 0) {
         changes[key] = nestedChanges;
       }

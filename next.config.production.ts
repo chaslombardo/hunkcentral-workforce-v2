@@ -2,7 +2,10 @@ import type { NextConfig } from 'next';
 
 // Production-specific webpack optimizations
 // This file is used only for production builds to avoid Turbopack conflicts
-export const productionWebpackConfig = (config: any, { isServer }: { isServer: boolean }) => {
+export const productionWebpackConfig = (
+  config: any,
+  { isServer }: { isServer: boolean }
+) => {
   // Enable tree-shaking in production
   if (!isServer) {
     config.optimization = {

@@ -1,12 +1,16 @@
 /**
  * Color Contrast Testing Utilities
- * 
+ *
  * Comprehensive utilities for testing and ensuring WCAG color contrast compliance
  * across all brand color combinations and UI states.
  */
 
-import * as React from "react";
-import { getContrastRatio, meetsContrastRequirement, BRAND_COLORS } from './accessibility-utils';
+import * as React from 'react';
+import {
+  getContrastRatio,
+  meetsContrastRequirement,
+  BRAND_COLORS,
+} from './accessibility-utils';
 
 // Extended color palette for testing
 const EXTENDED_COLORS = {
@@ -17,10 +21,10 @@ const EXTENDED_COLORS = {
   'hunks-orange': BRAND_COLORS['hunks-orange'].DEFAULT,
   'hunks-orange-light': BRAND_COLORS['hunks-orange'][400],
   'hunks-orange-dark': BRAND_COLORS['hunks-orange'][700],
-  
+
   // System colors
-  'white': '#ffffff',
-  'black': '#000000',
+  white: '#ffffff',
+  black: '#000000',
   'gray-50': '#f9fafb',
   'gray-100': '#f3f4f6',
   'gray-200': '#e5e7eb',
@@ -31,7 +35,7 @@ const EXTENDED_COLORS = {
   'gray-700': '#374151',
   'gray-800': '#1f2937',
   'gray-900': '#111827',
-  
+
   // Status colors
   'red-500': '#ef4444',
   'red-600': '#dc2626',
@@ -61,7 +65,7 @@ interface ContrastTestResult {
  */
 export function testBrandColorContrast(): ContrastTestResult[] {
   const results: ContrastTestResult[] = [];
-  
+
   // Define critical color combinations to test
   const combinations = [
     // Primary brand combinations
@@ -69,53 +73,93 @@ export function testBrandColorContrast(): ContrastTestResult[] {
     { name: 'White on Hunks Green', fg: 'white', bg: 'hunks-green' },
     { name: 'Hunks Orange on White', fg: 'hunks-orange', bg: 'white' },
     { name: 'White on Hunks Orange', fg: 'white', bg: 'hunks-orange' },
-    
+
     // Light variants
-    { name: 'Hunks Green Light on White', fg: 'hunks-green-light', bg: 'white' },
-    { name: 'Hunks Orange Light on White', fg: 'hunks-orange-light', bg: 'white' },
-    
+    {
+      name: 'Hunks Green Light on White',
+      fg: 'hunks-green-light',
+      bg: 'white',
+    },
+    {
+      name: 'Hunks Orange Light on White',
+      fg: 'hunks-orange-light',
+      bg: 'white',
+    },
+
     // Dark variants
     { name: 'Hunks Green Dark on White', fg: 'hunks-green-dark', bg: 'white' },
-    { name: 'Hunks Orange Dark on White', fg: 'hunks-orange-dark', bg: 'white' },
-    
+    {
+      name: 'Hunks Orange Dark on White',
+      fg: 'hunks-orange-dark',
+      bg: 'white',
+    },
+
     // Dark mode combinations
-    { name: 'Hunks Green Light on Dark', fg: 'hunks-green-light', bg: 'gray-900' },
-    { name: 'Hunks Orange Light on Dark', fg: 'hunks-orange-light', bg: 'gray-900' },
-    
+    {
+      name: 'Hunks Green Light on Dark',
+      fg: 'hunks-green-light',
+      bg: 'gray-900',
+    },
+    {
+      name: 'Hunks Orange Light on Dark',
+      fg: 'hunks-orange-light',
+      bg: 'gray-900',
+    },
+
     // Status combinations
     { name: 'Error Red on White', fg: 'red-600', bg: 'white' },
     { name: 'Warning Yellow on White', fg: 'yellow-600', bg: 'white' },
     { name: 'Success Green on White', fg: 'green-600', bg: 'white' },
     { name: 'Info Blue on White', fg: 'blue-600', bg: 'white' },
-    
+
     // Gray combinations for text
     { name: 'Dark Gray on White', fg: 'gray-700', bg: 'white' },
     { name: 'Medium Gray on White', fg: 'gray-600', bg: 'white' },
     { name: 'Light Gray on White', fg: 'gray-500', bg: 'white' },
-    
+
     // Reverse combinations
     { name: 'White on Dark Gray', fg: 'white', bg: 'gray-800' },
     { name: 'Light Gray on Dark', fg: 'gray-300', bg: 'gray-900' },
   ];
-  
+
   combinations.forEach(({ name, fg, bg }) => {
     const foregroundColor = EXTENDED_COLORS[fg as keyof typeof EXTENDED_COLORS];
     const backgroundColor = EXTENDED_COLORS[bg as keyof typeof EXTENDED_COLORS];
-    
+
     if (!foregroundColor || !backgroundColor) {
       console.warn(`Color not found: ${fg} or ${bg}`);
       return;
     }
-    
+
     const ratio = getContrastRatio(foregroundColor, backgroundColor);
-    const wcagAA = meetsContrastRequirement(foregroundColor, backgroundColor, 'AA', false);
-    const wcagAAA = meetsContrastRequirement(foregroundColor, backgroundColor, 'AAA', false);
-    const wcagAALarge = meetsContrastRequirement(foregroundColor, backgroundColor, 'AA', true);
-    const wcagAAALarge = meetsContrastRequirement(foregroundColor, backgroundColor, 'AAA', true);
-    
+    const wcagAA = meetsContrastRequirement(
+      foregroundColor,
+      backgroundColor,
+      'AA',
+      false
+    );
+    const wcagAAA = meetsContrastRequirement(
+      foregroundColor,
+      backgroundColor,
+      'AAA',
+      false
+    );
+    const wcagAALarge = meetsContrastRequirement(
+      foregroundColor,
+      backgroundColor,
+      'AA',
+      true
+    );
+    const wcagAAALarge = meetsContrastRequirement(
+      foregroundColor,
+      backgroundColor,
+      'AAA',
+      true
+    );
+
     let recommendation: 'pass' | 'warning' | 'fail' = 'fail';
     const suggestions: string[] = [];
-    
+
     if (wcagAAA) {
       recommendation = 'pass';
     } else if (wcagAA) {
@@ -127,16 +171,22 @@ export function testBrandColorContrast(): ContrastTestResult[] {
     } else {
       recommendation = 'fail';
       suggestions.push('Does not meet WCAG contrast requirements');
-      suggestions.push(`Current ratio: ${ratio.toFixed(2)}:1, minimum needed: 4.5:1`);
-      
+      suggestions.push(
+        `Current ratio: ${ratio.toFixed(2)}:1, minimum needed: 4.5:1`
+      );
+
       // Suggest alternatives
       if (ratio < 3.0) {
-        suggestions.push('Consider using a darker foreground or lighter background');
+        suggestions.push(
+          'Consider using a darker foreground or lighter background'
+        );
       } else if (ratio < 4.5) {
-        suggestions.push('Consider adjusting colors slightly to meet AA standards');
+        suggestions.push(
+          'Consider adjusting colors slightly to meet AA standards'
+        );
       }
     }
-    
+
     results.push({
       combination: name,
       foreground: foregroundColor,
@@ -147,10 +197,10 @@ export function testBrandColorContrast(): ContrastTestResult[] {
       wcagAALarge,
       wcagAAALarge,
       recommendation,
-      suggestions: suggestions.length > 0 ? suggestions : undefined
+      suggestions: suggestions.length > 0 ? suggestions : undefined,
     });
   });
-  
+
   return results;
 }
 
@@ -159,32 +209,36 @@ export function testBrandColorContrast(): ContrastTestResult[] {
  */
 export function generateContrastReport(): void {
   if (process.env.NODE_ENV !== 'development') return;
-  
+
   const results = testBrandColorContrast();
-  
+
   console.warn('🎨 Color Contrast Report');
-  
-  const passed = results.filter(r => r.recommendation === 'pass');
-  const warnings = results.filter(r => r.recommendation === 'warning');
-  const failed = results.filter(r => r.recommendation === 'fail');
-  
+
+  const passed = results.filter((r) => r.recommendation === 'pass');
+  const warnings = results.filter((r) => r.recommendation === 'warning');
+  const failed = results.filter((r) => r.recommendation === 'fail');
+
   console.warn(`✅ Passed: ${passed.length}`);
   console.warn(`⚠️  Warnings: ${warnings.length}`);
   console.warn(`❌ Failed: ${failed.length}`);
-  
+
   if (failed.length > 0) {
     console.warn('❌ Failed Combinations');
-    failed.forEach(result => {
+    failed.forEach((result) => {
       console.warn(`${result.combination}: ${result.ratio.toFixed(2)}:1`);
-      result.suggestions?.forEach(suggestion => console.warn(`  - ${suggestion}`));
+      result.suggestions?.forEach((suggestion) =>
+        console.warn(`  - ${suggestion}`)
+      );
     });
   }
-  
+
   if (warnings.length > 0) {
     console.warn('⚠️  Warning Combinations');
-    warnings.forEach(result => {
+    warnings.forEach((result) => {
       console.warn(`${result.combination}: ${result.ratio.toFixed(2)}:1`);
-      result.suggestions?.forEach(suggestion => console.warn(`  - ${suggestion}`));
+      result.suggestions?.forEach((suggestion) =>
+        console.warn(`  - ${suggestion}`)
+      );
     });
   }
 }
@@ -192,38 +246,63 @@ export function generateContrastReport(): void {
 /**
  * Test contrast of a specific element
  */
-export function testElementContrast(element: HTMLElement): ContrastTestResult | null {
+export function testElementContrast(
+  element: HTMLElement
+): ContrastTestResult | null {
   const styles = window.getComputedStyle(element);
   const color = styles.color;
   const backgroundColor = styles.backgroundColor;
-  
+
   // Skip if we can't determine colors
   if (!color || !backgroundColor || backgroundColor === 'rgba(0, 0, 0, 0)') {
     return null;
   }
-  
+
   try {
     // Convert computed colors to hex (simplified - would need full color parsing in production)
     const foregroundHex = rgbToHex(color);
     const backgroundHex = rgbToHex(backgroundColor);
-    
+
     if (!foregroundHex || !backgroundHex) {
       return null;
     }
-    
+
     const ratio = getContrastRatio(foregroundHex, backgroundHex);
     const fontSize = parseFloat(styles.fontSize);
     const fontWeight = styles.fontWeight;
-    const isLargeText = fontSize >= 18 || (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight) >= 700));
-    
-    const wcagAA = meetsContrastRequirement(foregroundHex, backgroundHex, 'AA', isLargeText);
-    const wcagAAA = meetsContrastRequirement(foregroundHex, backgroundHex, 'AAA', isLargeText);
-    const wcagAALarge = meetsContrastRequirement(foregroundHex, backgroundHex, 'AA', true);
-    const wcagAAALarge = meetsContrastRequirement(foregroundHex, backgroundHex, 'AAA', true);
-    
+    const isLargeText =
+      fontSize >= 18 ||
+      (fontSize >= 14 &&
+        (fontWeight === 'bold' || parseInt(fontWeight) >= 700));
+
+    const wcagAA = meetsContrastRequirement(
+      foregroundHex,
+      backgroundHex,
+      'AA',
+      isLargeText
+    );
+    const wcagAAA = meetsContrastRequirement(
+      foregroundHex,
+      backgroundHex,
+      'AAA',
+      isLargeText
+    );
+    const wcagAALarge = meetsContrastRequirement(
+      foregroundHex,
+      backgroundHex,
+      'AA',
+      true
+    );
+    const wcagAAALarge = meetsContrastRequirement(
+      foregroundHex,
+      backgroundHex,
+      'AAA',
+      true
+    );
+
     let recommendation: 'pass' | 'warning' | 'fail' = 'fail';
     const suggestions: string[] = [];
-    
+
     if (wcagAAA) {
       recommendation = 'pass';
     } else if (wcagAA) {
@@ -233,7 +312,7 @@ export function testElementContrast(element: HTMLElement): ContrastTestResult | 
       recommendation = 'fail';
       suggestions.push('Does not meet WCAG contrast requirements');
     }
-    
+
     return {
       combination: `Element contrast test`,
       foreground: foregroundHex,
@@ -244,7 +323,7 @@ export function testElementContrast(element: HTMLElement): ContrastTestResult | 
       wcagAALarge,
       wcagAAALarge,
       recommendation,
-      suggestions: suggestions.length > 0 ? suggestions : undefined
+      suggestions: suggestions.length > 0 ? suggestions : undefined,
     };
   } catch (error) {
     console.warn('Could not test element contrast:', error);
@@ -264,7 +343,7 @@ function rgbToHex(rgb: string): string | null {
     const b = parseInt(rgbMatch[3]);
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
-  
+
   // Handle rgba() format
   const rgbaMatch = rgb.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/);
   if (rgbaMatch) {
@@ -273,22 +352,25 @@ function rgbToHex(rgb: string): string | null {
     const b = parseInt(rgbaMatch[3]);
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
-  
+
   // Handle hex format
   if (rgb.startsWith('#')) {
     return rgb;
   }
-  
+
   return null;
 }
 
 /**
  * React hook for testing component contrast in development
  */
-export function useContrastTesting(ref: React.RefObject<HTMLElement>, enabled = process.env.NODE_ENV === 'development') {
+export function useContrastTesting(
+  ref: React.RefObject<HTMLElement>,
+  enabled = process.env.NODE_ENV === 'development'
+) {
   React.useEffect(() => {
     if (!enabled || !ref.current) return;
-    
+
     const result = testElementContrast(ref.current);
     if (result && result.recommendation === 'fail') {
       console.warn('Contrast issue detected:', result);

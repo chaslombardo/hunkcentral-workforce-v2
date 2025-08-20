@@ -94,9 +94,11 @@ describe('Payroll Error Recovery Integration', () => {
     mockLocalStorage.getItem.mockReturnValue(null);
     mockLocalStorage.setItem.mockImplementation(() => {});
     mockLocalStorage.removeItem.mockImplementation(() => {});
-    
+
     // Reset offline detection to online by default
-    const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
+    const { useOfflineDetection } = await vi.importMock(
+      '@/hooks/useOfflineDetection'
+    );
     useOfflineDetection.mockReturnValue({
       isOnline: true,
       isOffline: false,
@@ -115,7 +117,7 @@ describe('Payroll Error Recovery Integration', () => {
       // Set up cached data
       const cachedData = {
         data: mockSummaryData,
-        timestamp: Date.now() - (30 * 60 * 1000), // 30 minutes ago
+        timestamp: Date.now() - 30 * 60 * 1000, // 30 minutes ago
         version: '1.0.0',
         payPeriodId: testPayPeriod.id,
         userId: testUserId,
@@ -130,10 +132,7 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should show cached data with warning
@@ -152,38 +151,40 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should show error fallback
       await waitFor(() => {
-        expect(screen.getByText(/Payroll Summary Unavailable/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Payroll Summary Unavailable/)
+        ).toBeInTheDocument();
       });
 
       // Should provide retry option
-      expect(screen.getByRole('button', { name: /Try Again/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Try Again/ })
+      ).toBeInTheDocument();
     });
 
     it('should handle corrupted cache data', async () => {
       mockLocalStorage.getItem.mockReturnValue('invalid json data');
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should handle corrupted cache gracefully
       await waitFor(() => {
-        expect(screen.getByText(/Payroll Summary Unavailable/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Payroll Summary Unavailable/)
+        ).toBeInTheDocument();
       });
 
       // Should show clear cache option
-      expect(screen.getByRole('button', { name: /Clear Cache/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Clear Cache/ })
+      ).toBeInTheDocument();
     });
   });
 
@@ -205,10 +206,7 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Wait for summary to load
@@ -222,7 +220,9 @@ describe('Payroll Error Recovery Integration', () => {
 
       // Should show fallback for detailed data
       await waitFor(() => {
-        expect(screen.getByText(/Department Breakdown Unavailable/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Department Breakdown Unavailable/)
+        ).toBeInTheDocument();
       });
     });
 
@@ -233,10 +233,7 @@ describe('Payroll Error Recovery Integration', () => {
       );
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Navigate to validation tab
@@ -259,8 +256,10 @@ describe('Payroll Error Recovery Integration', () => {
 
   describe('Offline Mode Recovery', () => {
     it('should handle offline to online transition', async () => {
-      const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
-      
+      const { useOfflineDetection } = await vi.importMock(
+        '@/hooks/useOfflineDetection'
+      );
+
       // Start offline
       useOfflineDetection.mockReturnValue({
         isOnline: false,
@@ -275,7 +274,7 @@ describe('Payroll Error Recovery Integration', () => {
         if (key.includes('payroll-summary')) {
           return JSON.stringify({
             data: mockSummaryData,
-            timestamp: Date.now() - (60 * 60 * 1000), // 1 hour ago
+            timestamp: Date.now() - 60 * 60 * 1000, // 1 hour ago
             version: '1.0.0',
             payPeriodId: testPayPeriod.id,
             userId: testUserId,
@@ -286,15 +285,14 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       const { rerender } = render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should show offline notice
       await waitFor(() => {
-        expect(screen.getByText(/You're currently offline/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/You're currently offline/)
+        ).toBeInTheDocument();
       });
 
       // Should show cached data
@@ -310,21 +308,22 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       rerender(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should attempt to refresh data when back online
       await waitFor(() => {
-        expect(screen.queryByText(/You're currently offline/)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/You're currently offline/)
+        ).not.toBeInTheDocument();
       });
     });
 
     it('should provide offline-specific error messages', async () => {
-      const { useOfflineDetection } = await vi.importMock('@/hooks/useOfflineDetection');
-      
+      const { useOfflineDetection } = await vi.importMock(
+        '@/hooks/useOfflineDetection'
+      );
+
       useOfflineDetection.mockReturnValue({
         isOnline: false,
         isOffline: true,
@@ -337,15 +336,14 @@ describe('Payroll Error Recovery Integration', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       await waitFor(() => {
         expect(screen.getByText(/Offline Mode/)).toBeInTheDocument();
-        expect(screen.getByText(/You're currently offline/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/You're currently offline/)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -364,15 +362,14 @@ describe('Payroll Error Recovery Integration', () => {
       global.setTimeout = mockSetTimeout;
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should show error state
       await waitFor(() => {
-        expect(screen.getByText(/Payroll Summary Unavailable/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Payroll Summary Unavailable/)
+        ).toBeInTheDocument();
       });
 
       const retryButton = screen.getByRole('button', { name: /Try Again/ });
@@ -381,7 +378,7 @@ describe('Payroll Error Recovery Integration', () => {
       for (let i = 0; i < 3; i++) {
         attemptCount = i;
         fireEvent.click(retryButton);
-        
+
         await waitFor(() => {
           expect(screen.getByText(/Try Again \(\d+\)/)).toBeInTheDocument();
         });
@@ -392,14 +389,13 @@ describe('Payroll Error Recovery Integration', () => {
 
     it('should limit maximum retry attempts', async () => {
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/Payroll Summary Unavailable/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Payroll Summary Unavailable/)
+        ).toBeInTheDocument();
       });
 
       const retryButton = screen.getByRole('button', { name: /Try Again/ });
@@ -415,7 +411,9 @@ describe('Payroll Error Recovery Integration', () => {
       // Should disable retry after max attempts
       await waitFor(() => {
         expect(screen.getByText(/Max Retries/)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Max Retries/ })).toBeDisabled();
+        expect(
+          screen.getByRole('button', { name: /Max Retries/ })
+        ).toBeDisabled();
       });
     });
   });
@@ -426,17 +424,16 @@ describe('Payroll Error Recovery Integration', () => {
       mockLocalStorage.getItem.mockReturnValue('corrupted json');
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       await waitFor(() => {
         expect(screen.getByText(/cached data corrupted/)).toBeInTheDocument();
       });
 
-      const clearCacheButton = screen.getByRole('button', { name: /Clear Cache/ });
+      const clearCacheButton = screen.getByRole('button', {
+        name: /Clear Cache/,
+      });
       fireEvent.click(clearCacheButton);
 
       // Should call localStorage.removeItem for payroll cache keys
@@ -453,10 +450,7 @@ describe('Payroll Error Recovery Integration', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should attempt to get cached data
@@ -478,13 +472,12 @@ describe('Payroll Error Recovery Integration', () => {
       };
 
       // Suppress console.error for this test
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod}
-        >
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod}>
           <ErrorComponent />
         </MyPayrollView>
       );
@@ -506,21 +499,18 @@ describe('Payroll Error Recovery Integration', () => {
     it('should not block UI when cache operations fail', async () => {
       // Mock localStorage operations to be slow
       mockLocalStorage.getItem.mockImplementation(() => {
-        return new Promise(resolve => setTimeout(() => resolve(null), 100));
+        return new Promise((resolve) => setTimeout(() => resolve(null), 100));
       });
 
       const startTime = Date.now();
-      
+
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // UI should render quickly even if cache is slow
       expect(screen.getByText(/My Payroll/)).toBeInTheDocument();
-      
+
       const renderTime = Date.now() - startTime;
       expect(renderTime).toBeLessThan(50); // Should render in under 50ms
     });
@@ -532,10 +522,7 @@ describe('Payroll Error Recovery Integration', () => {
       });
 
       render(
-        <MyPayrollView 
-          userId={testUserId} 
-          initialPayPeriod={testPayPeriod} 
-        />
+        <MyPayrollView userId={testUserId} initialPayPeriod={testPayPeriod} />
       );
 
       // Should not crash when cache storage fails

@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { useThemeDebug } from "@/hooks/useThemeDebug"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { AlertTriangle, CheckCircle, RefreshCw } from "lucide-react"
+import * as React from 'react';
+import { useThemeDebug } from '@/hooks/useThemeDebug';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface ThemeDebugProps {
-  enabled?: boolean
+  enabled?: boolean;
 }
 
 export function ThemeDebug({ enabled = false }: ThemeDebugProps) {
@@ -19,12 +19,12 @@ export function ThemeDebug({ enabled = false }: ThemeDebugProps) {
     systemTheme,
     debugInfo,
     validateThemeConsistency,
-    refreshTheme
-  } = useThemeDebug()
+    refreshTheme,
+  } = useThemeDebug();
 
-  if (!enabled || !mounted) return null
+  if (!enabled || !mounted) return null;
 
-  const { isConsistent, issues } = validateThemeConsistency()
+  const { isConsistent, issues } = validateThemeConsistency();
 
   return (
     <Card className="fixed bottom-4 right-4 w-80 z-50 bg-background/95 backdrop-blur-sm border-2">
@@ -42,22 +42,30 @@ export function ThemeDebug({ enabled = false }: ThemeDebugProps) {
         <div className="grid grid-cols-2 gap-2">
           <div>
             <span className="font-medium">Theme:</span>
-            <Badge variant="outline" className="ml-1">{theme}</Badge>
+            <Badge variant="outline" className="ml-1">
+              {theme}
+            </Badge>
           </div>
           <div>
             <span className="font-medium">Resolved:</span>
-            <Badge variant="outline" className="ml-1">{resolvedTheme}</Badge>
+            <Badge variant="outline" className="ml-1">
+              {resolvedTheme}
+            </Badge>
           </div>
           <div>
             <span className="font-medium">System:</span>
-            <Badge variant="outline" className="ml-1">{systemTheme}</Badge>
+            <Badge variant="outline" className="ml-1">
+              {systemTheme}
+            </Badge>
           </div>
           <div>
             <span className="font-medium">Stored:</span>
-            <Badge variant="outline" className="ml-1">{debugInfo.storedTheme || 'null'}</Badge>
+            <Badge variant="outline" className="ml-1">
+              {debugInfo.storedTheme || 'null'}
+            </Badge>
           </div>
         </div>
-        
+
         <div>
           <span className="font-medium">Document Class:</span>
           <div className="text-muted-foreground break-all">
@@ -67,7 +75,9 @@ export function ThemeDebug({ enabled = false }: ThemeDebugProps) {
 
         <div>
           <span className="font-medium">System Preference:</span>
-          <Badge variant="outline" className="ml-1">{debugInfo.systemPreference}</Badge>
+          <Badge variant="outline" className="ml-1">
+            {debugInfo.systemPreference}
+          </Badge>
         </div>
 
         {issues.length > 0 && (
@@ -92,5 +102,5 @@ export function ThemeDebug({ enabled = false }: ThemeDebugProps) {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 /**
  * Brand Color Utility Functions
- * 
+ *
  * This module provides utility functions for consistent usage of College Hunks brand colors
  * throughout the HUNKCentral application. It includes functions for getting color values,
  * generating color variants, and ensuring accessibility compliance.
@@ -19,7 +19,7 @@ export const BRAND_COLORS = {
     700: '#1e5a32',
     800: '#1a4a2a',
     900: '#163d24',
-    950: '#0b2214'
+    950: '#0b2214',
   },
   hunksOrange: {
     50: '#fef7ed',
@@ -32,8 +32,8 @@ export const BRAND_COLORS = {
     700: '#b64906',
     800: '#92390c',
     900: '#78300d',
-    950: '#411703'
-  }
+    950: '#411703',
+  },
 } as const;
 
 // Semantic color mappings
@@ -47,17 +47,37 @@ export const SEMANTIC_COLORS = {
   success: BRAND_COLORS.hunksGreen[600],
   warning: BRAND_COLORS.hunksOrange[500],
   error: '#dc2626', // Standard error red
-  info: '#3b82f6'   // Standard info blue
+  info: '#3b82f6', // Standard info blue
 } as const;
 
 // Color variant types
-export type ColorVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
-export type ColorShade = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950;
+export type ColorVariant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info';
+export type ColorShade =
+  | 50
+  | 100
+  | 200
+  | 300
+  | 400
+  | 500
+  | 600
+  | 700
+  | 800
+  | 900
+  | 950;
 
 /**
  * Get a brand color by name and shade
  */
-export function getBrandColor(color: 'hunksGreen' | 'hunksOrange', shade: ColorShade): string {
+export function getBrandColor(
+  color: 'hunksGreen' | 'hunksOrange',
+  shade: ColorShade
+): string {
   return BRAND_COLORS[color][shade];
 }
 
@@ -86,7 +106,10 @@ export function getSemanticColor(variant: ColorVariant): string {
 /**
  * Get CSS custom property name for brand colors
  */
-export function getBrandCSSVar(variant: 'primary' | 'secondary', modifier?: 'light' | 'dark' | 'foreground'): string {
+export function getBrandCSSVar(
+  variant: 'primary' | 'secondary',
+  modifier?: 'light' | 'dark' | 'foreground'
+): string {
   const base = `--brand-${variant}`;
   if (modifier) {
     return `${base}-${modifier}`;
@@ -102,7 +125,9 @@ export function getBrandTailwindClass(
   variant: 'primary' | 'secondary' | 'success' | 'warning',
   modifier?: 'light' | 'dark' | 'foreground'
 ): string {
-  const colorName = modifier ? `brand-${variant}-${modifier}` : `brand-${variant}`;
+  const colorName = modifier
+    ? `brand-${variant}-${modifier}`
+    : `brand-${variant}`;
   return `${property}-${colorName}`;
 }
 
@@ -119,14 +144,17 @@ export function generateColorVariants(baseColor: string): {
   return {
     light: baseColor, // Would be lightened version
     base: baseColor,
-    dark: baseColor   // Would be darkened version
+    dark: baseColor, // Would be darkened version
   };
 }
 
 /**
  * Check if a color meets WCAG contrast requirements
  */
-export function checkContrast(foreground: string, background: string): {
+export function checkContrast(
+  foreground: string,
+  background: string
+): {
   aa: boolean;
   aaa: boolean;
   ratio: number;
@@ -138,7 +166,7 @@ export function checkContrast(foreground: string, background: string): {
   return {
     aa: true,
     aaa: true,
-    ratio: 4.5
+    ratio: 4.5,
   };
 }
 
@@ -157,9 +185,9 @@ export function getContrastingTextColor(backgroundColor: string): string {
     BRAND_COLORS.hunksOrange[700],
     BRAND_COLORS.hunksOrange[800],
     BRAND_COLORS.hunksOrange[900],
-    BRAND_COLORS.hunksOrange[950]
+    BRAND_COLORS.hunksOrange[950],
   ];
-  
+
   return darkBackgrounds.includes(backgroundColor) ? '#ffffff' : '#000000';
 }
 
@@ -172,37 +200,37 @@ export const BRAND_PRESETS = {
       background: getBrandTailwindClass('bg', 'primary'),
       text: getBrandTailwindClass('text', 'primary', 'foreground'),
       hover: 'hover:bg-brand-primary-dark',
-      focus: 'focus:ring-brand-primary'
+      focus: 'focus:ring-brand-primary',
     },
     secondary: {
       background: getBrandTailwindClass('bg', 'secondary'),
       text: getBrandTailwindClass('text', 'secondary', 'foreground'),
       hover: 'hover:bg-brand-secondary-dark',
-      focus: 'focus:ring-brand-secondary'
-    }
+      focus: 'focus:ring-brand-secondary',
+    },
   },
   card: {
     primary: {
       border: getBrandTailwindClass('border', 'primary'),
-      accent: 'border-l-4 border-l-brand-primary'
+      accent: 'border-l-4 border-l-brand-primary',
     },
     secondary: {
       border: getBrandTailwindClass('border', 'secondary'),
-      accent: 'border-l-4 border-l-brand-secondary'
-    }
+      accent: 'border-l-4 border-l-brand-secondary',
+    },
   },
   status: {
     success: {
       background: 'bg-brand-success/10',
       text: getBrandTailwindClass('text', 'success'),
-      border: getBrandTailwindClass('border', 'success')
+      border: getBrandTailwindClass('border', 'success'),
     },
     warning: {
       background: 'bg-brand-warning/10',
       text: getBrandTailwindClass('text', 'warning'),
-      border: getBrandTailwindClass('border', 'warning')
-    }
-  }
+      border: getBrandTailwindClass('border', 'warning'),
+    },
+  },
 } as const;
 
 /**
@@ -214,5 +242,5 @@ export const COLOR_COMBINATIONS = {
   primaryCard: `${BRAND_PRESETS.card.primary.accent}`,
   secondaryCard: `${BRAND_PRESETS.card.secondary.accent}`,
   successStatus: `${BRAND_PRESETS.status.success.background} ${BRAND_PRESETS.status.success.text} ${BRAND_PRESETS.status.success.border}`,
-  warningStatus: `${BRAND_PRESETS.status.warning.background} ${BRAND_PRESETS.status.warning.text} ${BRAND_PRESETS.status.warning.border}`
+  warningStatus: `${BRAND_PRESETS.status.warning.background} ${BRAND_PRESETS.status.warning.text} ${BRAND_PRESETS.status.warning.border}`,
 } as const;

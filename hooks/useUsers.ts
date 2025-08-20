@@ -32,10 +32,8 @@ export function useUsers() {
 
 export function useCaptains() {
   const { users, loading, error } = useUsers();
-  
-  const captains = users.filter(user => 
-    user.roles.includes('captain')
-  );
+
+  const captains = users.filter((user) => user.roles.includes('captain'));
 
   return { captains, loading, error };
 }
@@ -55,7 +53,9 @@ export function useEmployees() {
         const data = await response.json();
         setEmployees(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch employees');
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch employees'
+        );
       } finally {
         setLoading(false);
       }

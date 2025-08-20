@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { format } from "date-fns"
-import { toast } from "sonner"
-import Link from "next/link"
+import * as React from 'react';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import Link from 'next/link';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -17,7 +17,7 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table';
 import {
   IconChevronDown,
   IconChevronLeft,
@@ -33,12 +33,15 @@ import {
   IconLoader,
   IconSearch,
   IconX,
-} from "@tabler/icons-react"
+} from '@tabler/icons-react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { NoLogsEmptyState, NoLogResultsEmptyState } from "@/components/features/empty-states"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  NoLogsEmptyState,
+  NoLogResultsEmptyState,
+} from '@/components/features/empty-states';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,15 +49,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -62,33 +65,58 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } from '@/components/ui/responsive-table'
-import { SortableHeader, getSortDirection } from '@/components/ui/sortable-header'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { LogDetailDialog } from "./log-detail-dialog"
-import { getLogsForReview, bulkApproveLogs, bulkDeleteLogs, approveLog, deleteLog, unapproveLog } from "@/lib/actions/logs"
-import { getUsers } from "@/lib/actions/users"
-import { getPayPeriods } from "@/lib/actions/pay-periods"
-import { LogReviewTableSkeleton } from "@/components/ui/skeleton-components"
-import { useSession } from "@/hooks/useSession"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/table';
+import {
+  ResponsiveTable,
+  MobileTableCard,
+  MobileTableItem,
+  MobileTableField,
+} from '@/components/ui/responsive-table';
+import {
+  SortableHeader,
+  getSortDirection,
+} from '@/components/ui/sortable-header';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { LogDetailDialog } from './log-detail-dialog';
+import {
+  getLogsForReview,
+  bulkApproveLogs,
+  bulkDeleteLogs,
+  approveLog,
+  deleteLog,
+  unapproveLog,
+} from '@/lib/actions/logs';
+import { getUsers } from '@/lib/actions/users';
+import { getPayPeriods } from '@/lib/actions/pay-periods';
+import { LogReviewTableSkeleton } from '@/components/ui/skeleton-components';
+import { useSession } from '@/hooks/useSession';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export type LogReviewData = {
-  id: string
-  captainName: string
-  logDate: Date
-  status: 'submitted' | 'approved'
-  totalRevenue: number
-  totalHours: number
-  jobCount: number
-  submittedAt: Date
-  approvedAt?: Date
-  approvedBy?: string
-}
+  id: string;
+  captainName: string;
+  logDate: Date;
+  status: 'submitted' | 'approved';
+  totalRevenue: number;
+  totalHours: number;
+  jobCount: number;
+  submittedAt: Date;
+  approvedAt?: Date;
+  approvedBy?: string;
+};
 
 function createColumns(
   onApprove: (logId: string) => Promise<void>,
@@ -98,15 +126,17 @@ function createColumns(
 ): ColumnDef<LogReviewData>[] {
   return [
     {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <div className="flex items-center justify-center">
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
             }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
             aria-label="Select all"
           />
         </div>
@@ -124,7 +154,7 @@ function createColumns(
       enableHiding: false,
     },
     {
-      accessorKey: "captainName",
+      accessorKey: 'captainName',
       header: ({ column }) => (
         <SortableHeader
           sortDirection={getSortDirection(column.getIsSorted())}
@@ -135,7 +165,7 @@ function createColumns(
         </SortableHeader>
       ),
       cell: ({ row }) => (
-        <Link 
+        <Link
           href={`/logs/${row.original.id}`}
           className="font-medium text-hunks-green-600 hover:text-hunks-green-800 hover:underline"
         >
@@ -144,7 +174,7 @@ function createColumns(
       ),
     },
     {
-      accessorKey: "logDate",
+      accessorKey: 'logDate',
       header: ({ column }) => (
         <SortableHeader
           sortDirection={getSortDirection(column.getIsSorted())}
@@ -155,11 +185,11 @@ function createColumns(
         </SortableHeader>
       ),
       cell: ({ row }) => (
-        <div>{format(row.original.logDate, "MMM dd, yyyy")}</div>
+        <div>{format(row.original.logDate, 'MMM dd, yyyy')}</div>
       ),
     },
     {
-      accessorKey: "status",
+      accessorKey: 'status',
       header: ({ column }) => (
         <SortableHeader
           sortDirection={getSortDirection(column.getIsSorted())}
@@ -170,24 +200,27 @@ function createColumns(
         </SortableHeader>
       ),
       cell: ({ row }) => {
-        const status = row.original.status
+        const status = row.original.status;
         return (
-          <Badge 
-            variant={status === "approved" ? "default" : "secondary"}
+          <Badge
+            variant={status === 'approved' ? 'default' : 'secondary'}
             className={`capitalize ${
-              status === "approved" ? "bg-hunks-green hover:bg-hunks-green/90" : 
-              "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+              status === 'approved'
+                ? 'bg-hunks-green hover:bg-hunks-green/90'
+                : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
             }`}
           >
-            {status === "approved" && <IconCircleCheckFilled className="w-3 h-3 mr-1" />}
-            {status === "submitted" && <IconLoader className="w-3 h-3 mr-1" />}
+            {status === 'approved' && (
+              <IconCircleCheckFilled className="w-3 h-3 mr-1" />
+            )}
+            {status === 'submitted' && <IconLoader className="w-3 h-3 mr-1" />}
             {status}
           </Badge>
-        )
+        );
       },
     },
     {
-      accessorKey: "totalRevenue",
+      accessorKey: 'totalRevenue',
       header: ({ column }) => (
         <div className="text-right">
           <SortableHeader
@@ -206,30 +239,30 @@ function createColumns(
       ),
     },
     {
-      accessorKey: "totalHours",
+      accessorKey: 'totalHours',
       header: () => <div className="text-right">Hours</div>,
       cell: ({ row }) => (
         <div className="text-right">{row.original.totalHours}</div>
       ),
     },
     {
-      accessorKey: "jobCount",
+      accessorKey: 'jobCount',
       header: () => <div className="text-right">Jobs</div>,
       cell: ({ row }) => (
         <div className="text-right">{row.original.jobCount}</div>
       ),
     },
     {
-      accessorKey: "submittedAt",
-      header: "Submitted",
+      accessorKey: 'submittedAt',
+      header: 'Submitted',
       cell: ({ row }) => (
         <div className="text-sm text-muted-foreground">
-          {format(row.original.submittedAt, "MMM dd, h:mm a")}
+          {format(row.original.submittedAt, 'MMM dd, h:mm a')}
         </div>
       ),
     },
     {
-      id: "actions",
+      id: 'actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Link href={`/logs/${row.original.id}`}>
@@ -246,10 +279,7 @@ function createColumns(
           </LogDetailDialog>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
-              >
+              <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <IconDotsVertical className="h-4 w-4" />
               </Button>
@@ -265,7 +295,7 @@ function createColumns(
                 <IconEye className="mr-2 h-4 w-4" />
                 Quick View
               </DropdownMenuItem>
-              {row.original.status === "submitted" && (
+              {row.original.status === 'submitted' && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -274,7 +304,7 @@ function createColumns(
                       Edit Log
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="text-green-600"
                     onClick={() => onApprove(row.original.id)}
                   >
@@ -282,7 +312,7 @@ function createColumns(
                     Approve
                   </DropdownMenuItem>
                   {userRoles.includes('admin') && (
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="text-red-600"
                       onClick={() => onDelete(row.original.id)}
                     >
@@ -292,352 +322,442 @@ function createColumns(
                   )}
                 </>
               )}
-              {row.original.status === "approved" && (userRoles.includes('manager') || userRoles.includes('admin')) && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="text-orange-600"
-                    onClick={() => onUnapprove(row.original.id)}
-                  >
-                    <IconLoader className="mr-2 h-4 w-4" />
-                    Unapprove
-                  </DropdownMenuItem>
-                  {userRoles.includes('admin') && (
-                    <DropdownMenuItem 
-                      className="text-red-600"
-                      onClick={() => onDelete(row.original.id)}
+              {row.original.status === 'approved' &&
+                (userRoles.includes('manager') ||
+                  userRoles.includes('admin')) && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-orange-600"
+                      onClick={() => onUnapprove(row.original.id)}
                     >
-                      <IconX className="mr-2 h-4 w-4" />
-                      Delete
+                      <IconLoader className="mr-2 h-4 w-4" />
+                      Unapprove
                     </DropdownMenuItem>
-                  )}
-                </>
-              )}
+                    {userRoles.includes('admin') && (
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => onDelete(row.original.id)}
+                      >
+                        <IconX className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       ),
     },
-  ]
+  ];
 }
 
 export function LogReviewQueue() {
-  const { session } = useSession()
-  const [data, setData] = React.useState<LogReviewData[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const { session } = useSession();
+  const [data, setData] = React.useState<LogReviewData[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [sorting, setSorting] = React.useState<SortingState>([
-    { id: "submittedAt", desc: true }
-  ])
+    { id: 'submittedAt', desc: true },
+  ]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
   // Mobile responsiveness will be implemented in future iteration
   // const { isMobile } = useResponsiveTable()
-  
+
   // New state for filters
-  const [captains, setCaptains] = React.useState<Array<{ id: string; fullName: string }>>([])
-  const [payPeriods, setPayPeriods] = React.useState<Array<{ id: string; name: string; startDate: Date; endDate: Date }>>([])
-  const [selectedCaptain, setSelectedCaptain] = React.useState<string>("all")
-  const [selectedPayPeriod, setSelectedPayPeriod] = React.useState<string>("all")
-  const [customDateRange, setCustomDateRange] = React.useState<{ from?: Date; to?: Date }>({})
-  const [dateFilterType, setDateFilterType] = React.useState<"all" | "pay-period" | "custom">("all")
-  
-  const userRoles = React.useMemo(() => session?.user?.roles || [], [session?.user?.roles])
+  const [captains, setCaptains] = React.useState<
+    Array<{ id: string; fullName: string }>
+  >([]);
+  const [payPeriods, setPayPeriods] = React.useState<
+    Array<{ id: string; name: string; startDate: Date; endDate: Date }>
+  >([]);
+  const [selectedCaptain, setSelectedCaptain] = React.useState<string>('all');
+  const [selectedPayPeriod, setSelectedPayPeriod] =
+    React.useState<string>('all');
+  const [customDateRange, setCustomDateRange] = React.useState<{
+    from?: Date;
+    to?: Date;
+  }>({});
+  const [dateFilterType, setDateFilterType] = React.useState<
+    'all' | 'pay-period' | 'custom'
+  >('all');
+
+  const userRoles = React.useMemo(
+    () => session?.user?.roles || [],
+    [session?.user?.roles]
+  );
 
   // Load initial data
   React.useEffect(() => {
     async function loadInitialData() {
-      setLoading(true)
+      setLoading(true);
       try {
         // Load logs
-        const logsResult = await getLogsForReview()
-        if (logsResult.success && logsResult.data && Array.isArray(logsResult.data)) {
-          setData(logsResult.data as LogReviewData[])
+        const logsResult = await getLogsForReview();
+        if (
+          logsResult.success &&
+          logsResult.data &&
+          Array.isArray(logsResult.data)
+        ) {
+          setData(logsResult.data as LogReviewData[]);
         } else {
           if (logsResult.error?.includes('Database connection')) {
-            toast.error('Database connection issue. Please try again in a moment.')
+            toast.error(
+              'Database connection issue. Please try again in a moment.'
+            );
           } else if (logsResult.error?.includes('Authentication')) {
-            toast.error('Please log in again to continue.')
+            toast.error('Please log in again to continue.');
           } else if (logsResult.error?.includes('Manager access')) {
-            toast.error('Manager access is required to view logs for review.')
+            toast.error('Manager access is required to view logs for review.');
           } else {
-            toast.error(logsResult.error || 'Failed to load logs')
+            toast.error(logsResult.error || 'Failed to load logs');
           }
         }
 
         // Load captains (users with captain role)
-        const usersResult = await getUsers({ roles: ['captain'] })
+        const usersResult = await getUsers({ roles: ['captain'] });
         if (usersResult.success && usersResult.data?.users) {
-          setCaptains(usersResult.data.users.map(user => ({
-            id: user.id,
-            fullName: user.fullName
-          })))
+          setCaptains(
+            usersResult.data.users.map((user) => ({
+              id: user.id,
+              fullName: user.fullName,
+            }))
+          );
         }
 
         // Load pay periods
-        const payPeriodsResult = await getPayPeriods()
+        const payPeriodsResult = await getPayPeriods();
         if (payPeriodsResult.success && payPeriodsResult.data) {
-          setPayPeriods(payPeriodsResult.data.map(period => ({
-            id: period.id,
-            name: period.name,
-            startDate: period.startDate,
-            endDate: period.endDate
-          })))
+          setPayPeriods(
+            payPeriodsResult.data.map((period) => ({
+              id: period.id,
+              name: period.name,
+              startDate: period.startDate,
+              endDate: period.endDate,
+            }))
+          );
         }
       } catch (error) {
-        console.error('Error loading initial data:', error)
-        toast.error('An unexpected error occurred while loading data')
+        console.error('Error loading initial data:', error);
+        toast.error('An unexpected error occurred while loading data');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    loadInitialData()
-  }, [])
+    loadInitialData();
+  }, []);
 
   const handleApprove = async (logId: string) => {
     try {
-      const result = await approveLog(logId)
+      const result = await approveLog(logId);
       if (result.success) {
-        toast.success('Log approved successfully')
-        
+        toast.success('Log approved successfully');
+
         // Show commission matching notifications if available
         if (result.data?.commissionMatching) {
-          const { matchCount, conflictCount } = result.data.commissionMatching
-          
+          const { matchCount, conflictCount } = result.data.commissionMatching;
+
           if (matchCount > 0) {
             toast.success(`${matchCount} commission(s) automatically matched`, {
-              description: conflictCount > 0 ? `${conflictCount} conflict(s) need manual resolution` : undefined,
-            })
+              description:
+                conflictCount > 0
+                  ? `${conflictCount} conflict(s) need manual resolution`
+                  : undefined,
+            });
           }
-          
+
           if (conflictCount > 0) {
             toast.warning(`${conflictCount} commission conflict(s) detected`, {
-              description: 'Check the Commission Conflicts tab for manual resolution',
-            })
+              description:
+                'Check the Commission Conflicts tab for manual resolution',
+            });
           }
         }
-        
+
         // Refresh data
-        const refreshResult = await getLogsForReview()
+        const refreshResult = await getLogsForReview();
         if (refreshResult.success && refreshResult.data) {
-          setData(refreshResult.data as LogReviewData[])
+          setData(refreshResult.data as LogReviewData[]);
         }
       } else {
         if (result.error?.includes('Database connection')) {
-          toast.error('Database connection issue. Please try again.')
+          toast.error('Database connection issue. Please try again.');
         } else if (result.error?.includes('Authentication')) {
-          toast.error('Please log in again to continue.')
+          toast.error('Please log in again to continue.');
         } else if (result.error?.includes('Manager access')) {
-          toast.error('Manager access is required to approve logs.')
+          toast.error('Manager access is required to approve logs.');
         } else if (result.error?.includes('Only submitted logs')) {
-          toast.error('This log has already been processed.')
+          toast.error('This log has already been processed.');
         } else {
-          toast.error(result.error || 'Failed to approve log')
+          toast.error(result.error || 'Failed to approve log');
         }
       }
     } catch (error) {
-      console.error('Error approving log:', error)
-      toast.error('An unexpected error occurred while approving the log')
+      console.error('Error approving log:', error);
+      toast.error('An unexpected error occurred while approving the log');
     }
-  }
+  };
 
   const handleUnapprove = async (logId: string) => {
     // Show confirmation dialog before unapproving
-    if (!confirm('Are you sure you want to unapprove this log? It will be returned to submitted status for editing.')) {
-      return
+    if (
+      !confirm(
+        'Are you sure you want to unapprove this log? It will be returned to submitted status for editing.'
+      )
+    ) {
+      return;
     }
 
     try {
-      const result = await unapproveLog(logId)
+      const result = await unapproveLog(logId);
       if (result.success) {
-        toast.success('Log unapproved successfully and returned to submitted status')
+        toast.success(
+          'Log unapproved successfully and returned to submitted status'
+        );
         // Refresh data
-        const refreshResult = await getLogsForReview()
+        const refreshResult = await getLogsForReview();
         if (refreshResult.success && refreshResult.data) {
-          setData(refreshResult.data as LogReviewData[])
+          setData(refreshResult.data as LogReviewData[]);
         }
       } else {
         if (result.error?.includes('Database connection')) {
-          toast.error('Database connection issue. Please try again.')
+          toast.error('Database connection issue. Please try again.');
         } else if (result.error?.includes('Authentication')) {
-          toast.error('Please log in again to continue.')
+          toast.error('Please log in again to continue.');
         } else if (result.error?.includes('Manager access')) {
-          toast.error('Manager access is required to unapprove logs.')
+          toast.error('Manager access is required to unapprove logs.');
         } else if (result.error?.includes('pay period is locked')) {
-          toast.error('Cannot unapprove log - the pay period is locked or closed.')
+          toast.error(
+            'Cannot unapprove log - the pay period is locked or closed.'
+          );
         } else if (result.error?.includes('Only approved logs')) {
-          toast.error('This log is not in approved status.')
+          toast.error('This log is not in approved status.');
         } else {
-          toast.error(result.error || 'Failed to unapprove log')
+          toast.error(result.error || 'Failed to unapprove log');
         }
       }
     } catch (error) {
-      console.error('Error unapproving log:', error)
-      toast.error('An unexpected error occurred while unapproving the log')
+      console.error('Error unapproving log:', error);
+      toast.error('An unexpected error occurred while unapproving the log');
     }
-  }
+  };
 
   const handleDelete = async (logId: string) => {
     // Show confirmation dialog before deleting
-    if (!confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
-      return
+    if (
+      !confirm(
+        'Are you sure you want to delete this log? This action cannot be undone.'
+      )
+    ) {
+      return;
     }
 
     try {
-      const result = await deleteLog(logId)
+      const result = await deleteLog(logId);
       if (result.success) {
-        toast.success('Log deleted successfully')
+        toast.success('Log deleted successfully');
         // Refresh data
-        const refreshResult = await getLogsForReview()
+        const refreshResult = await getLogsForReview();
         if (refreshResult.success && refreshResult.data) {
-          setData(refreshResult.data as LogReviewData[])
+          setData(refreshResult.data as LogReviewData[]);
         }
       } else {
         if (result.error?.includes('Database connection')) {
-          toast.error('Database connection issue. Please try again.')
+          toast.error('Database connection issue. Please try again.');
         } else if (result.error?.includes('Authentication')) {
-          toast.error('Please log in again to continue.')
+          toast.error('Please log in again to continue.');
         } else if (result.error?.includes('System administrator access')) {
-          toast.error('Only system administrators can delete logs.')
+          toast.error('Only system administrators can delete logs.');
         } else if (result.error?.includes('Cannot delete approved')) {
-          toast.error('Cannot delete approved logs.')
+          toast.error('Cannot delete approved logs.');
         } else {
-          toast.error(result.error || 'Failed to delete log')
+          toast.error(result.error || 'Failed to delete log');
         }
       }
     } catch (error) {
-      console.error('Error deleting log:', error)
-      toast.error('An unexpected error occurred while deleting the log')
+      console.error('Error deleting log:', error);
+      toast.error('An unexpected error occurred while deleting the log');
     }
-  }
+  };
 
   const handleBulkApprove = async () => {
     const selectedLogIds = selectedRows
-      .filter(row => row.original.status === "submitted")
-      .map(row => row.original.id)
-    
+      .filter((row) => row.original.status === 'submitted')
+      .map((row) => row.original.id);
+
     if (selectedLogIds.length === 0) {
-      toast.error('No submitted logs selected')
-      return
+      toast.error('No submitted logs selected');
+      return;
     }
 
     try {
-      const result = await bulkApproveLogs(selectedLogIds)
+      const result = await bulkApproveLogs(selectedLogIds);
       if (result.success) {
-        toast.success(`${selectedLogIds.length} logs approved successfully`)
-        
+        toast.success(`${selectedLogIds.length} logs approved successfully`);
+
         // Show commission matching summary for bulk operations
         if (result.data?.results) {
-          let totalMatches = 0
-          let totalConflicts = 0
-          
-          result.data.results.forEach((logResult: { success: boolean; data?: { commissionMatching?: { matchCount?: number; conflictCount?: number } } }) => {
-            if (logResult.success && logResult.data?.commissionMatching) {
-              totalMatches += logResult.data.commissionMatching.matchCount || 0
-              totalConflicts += logResult.data.commissionMatching.conflictCount || 0
+          let totalMatches = 0;
+          let totalConflicts = 0;
+
+          result.data.results.forEach(
+            (logResult: {
+              success: boolean;
+              data?: {
+                commissionMatching?: {
+                  matchCount?: number;
+                  conflictCount?: number;
+                };
+              };
+            }) => {
+              if (logResult.success && logResult.data?.commissionMatching) {
+                totalMatches +=
+                  logResult.data.commissionMatching.matchCount || 0;
+                totalConflicts +=
+                  logResult.data.commissionMatching.conflictCount || 0;
+              }
             }
-          })
-          
+          );
+
           if (totalMatches > 0) {
-            toast.success(`${totalMatches} commission(s) automatically matched`, {
-              description: totalConflicts > 0 ? `${totalConflicts} conflict(s) need manual resolution` : undefined,
-            })
+            toast.success(
+              `${totalMatches} commission(s) automatically matched`,
+              {
+                description:
+                  totalConflicts > 0
+                    ? `${totalConflicts} conflict(s) need manual resolution`
+                    : undefined,
+              }
+            );
           }
-          
+
           if (totalConflicts > 0) {
             toast.warning(`${totalConflicts} commission conflict(s) detected`, {
-              description: 'Check the Commission Conflicts tab for manual resolution',
-            })
+              description:
+                'Check the Commission Conflicts tab for manual resolution',
+            });
           }
         }
-        
-        setRowSelection({})
+
+        setRowSelection({});
         // Refresh data
-        const refreshResult = await getLogsForReview()
+        const refreshResult = await getLogsForReview();
         if (refreshResult.success && refreshResult.data) {
-          setData(refreshResult.data as LogReviewData[])
+          setData(refreshResult.data as LogReviewData[]);
         }
       } else {
-        toast.error(result.error || 'Failed to approve logs')
+        toast.error(result.error || 'Failed to approve logs');
       }
     } catch {
-      toast.error('Failed to approve logs')
+      toast.error('Failed to approve logs');
       // Error bulk approving logs
     }
-  }
+  };
 
   const handleBulkDelete = async () => {
     const selectedLogIds = selectedRows
-      .filter(row => row.original.status !== "approved") // Don't allow deleting approved logs
-      .map(row => row.original.id)
-    
+      .filter((row) => row.original.status !== 'approved') // Don't allow deleting approved logs
+      .map((row) => row.original.id);
+
     if (selectedLogIds.length === 0) {
-      toast.error('No deletable logs selected')
-      return
+      toast.error('No deletable logs selected');
+      return;
     }
 
     // Show confirmation dialog before bulk deleting
-    if (!confirm(`Are you sure you want to delete ${selectedLogIds.length} logs? This action cannot be undone.`)) {
-      return
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedLogIds.length} logs? This action cannot be undone.`
+      )
+    ) {
+      return;
     }
 
     try {
-      const result = await bulkDeleteLogs(selectedLogIds)
+      const result = await bulkDeleteLogs(selectedLogIds);
       if (result.success) {
-        toast.success(`${selectedLogIds.length} logs deleted successfully`)
-        setRowSelection({})
+        toast.success(`${selectedLogIds.length} logs deleted successfully`);
+        setRowSelection({});
         // Refresh data
-        const refreshResult = await getLogsForReview()
+        const refreshResult = await getLogsForReview();
         if (refreshResult.success && refreshResult.data) {
-          setData(refreshResult.data as LogReviewData[])
+          setData(refreshResult.data as LogReviewData[]);
         }
       } else {
-        toast.error(result.error || 'Failed to delete logs')
+        toast.error(result.error || 'Failed to delete logs');
       }
     } catch (error) {
-      console.error('Error bulk deleting logs:', error)
-      toast.error('Failed to delete logs')
+      console.error('Error bulk deleting logs:', error);
+      toast.error('Failed to delete logs');
     }
-  }
+  };
 
   // Filter data based on selected filters
   const filteredData = React.useMemo(() => {
-    let filtered = [...data]
+    let filtered = [...data];
 
     // Filter by captain
-    if (selectedCaptain !== "all") {
-      const selectedCaptainName = captains.find(c => c.id === selectedCaptain)?.fullName
+    if (selectedCaptain !== 'all') {
+      const selectedCaptainName = captains.find(
+        (c) => c.id === selectedCaptain
+      )?.fullName;
       if (selectedCaptainName) {
-        filtered = filtered.filter(log => log.captainName === selectedCaptainName)
+        filtered = filtered.filter(
+          (log) => log.captainName === selectedCaptainName
+        );
       }
     }
 
     // Filter by date
-    if (dateFilterType === "pay-period" && selectedPayPeriod !== "all") {
-      const selectedPeriod = payPeriods.find(p => p.id === selectedPayPeriod)
+    if (dateFilterType === 'pay-period' && selectedPayPeriod !== 'all') {
+      const selectedPeriod = payPeriods.find((p) => p.id === selectedPayPeriod);
       if (selectedPeriod) {
-        filtered = filtered.filter(log => {
-          const logDate = new Date(log.logDate)
-          return logDate >= selectedPeriod.startDate && logDate <= selectedPeriod.endDate
-        })
+        filtered = filtered.filter((log) => {
+          const logDate = new Date(log.logDate);
+          return (
+            logDate >= selectedPeriod.startDate &&
+            logDate <= selectedPeriod.endDate
+          );
+        });
       }
-    } else if (dateFilterType === "custom" && (customDateRange.from || customDateRange.to)) {
-      filtered = filtered.filter(log => {
-        const logDate = new Date(log.logDate)
-        if (customDateRange.from && logDate < customDateRange.from) return false
-        if (customDateRange.to && logDate > customDateRange.to) return false
-        return true
-      })
+    } else if (
+      dateFilterType === 'custom' &&
+      (customDateRange.from || customDateRange.to)
+    ) {
+      filtered = filtered.filter((log) => {
+        const logDate = new Date(log.logDate);
+        if (customDateRange.from && logDate < customDateRange.from)
+          return false;
+        if (customDateRange.to && logDate > customDateRange.to) return false;
+        return true;
+      });
     }
 
-    return filtered
-  }, [data, selectedCaptain, captains, dateFilterType, selectedPayPeriod, payPeriods, customDateRange])
+    return filtered;
+  }, [
+    data,
+    selectedCaptain,
+    captains,
+    dateFilterType,
+    selectedPayPeriod,
+    payPeriods,
+    customDateRange,
+  ]);
 
-  const columns = React.useMemo(() => createColumns(handleApprove, handleUnapprove, handleDelete, userRoles), [userRoles])
+  const columns = React.useMemo(
+    () =>
+      createColumns(handleApprove, handleUnapprove, handleDelete, userRoles),
+    [userRoles]
+  );
 
   const table = useReactTable({
     data: filteredData,
@@ -661,19 +781,23 @@ export function LogReviewQueue() {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  })
+  });
 
-  const selectedRows = table.getFilteredSelectedRowModel().rows
-  const hasSubmittedLogs = selectedRows.some(row => row.original.status === "submitted")
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const hasSubmittedLogs = selectedRows.some(
+    (row) => row.original.status === 'submitted'
+  );
 
   if (loading) {
-    return <LogReviewTableSkeleton />
+    return <LogReviewTableSkeleton />;
   }
 
   return (
     <Card className="border-hunks-green-200">
       <CardHeader>
-        <CardTitle className="text-hunks-green-800">Daily Log Review Queue</CardTitle>
+        <CardTitle className="text-hunks-green-800">
+          Daily Log Review Queue
+        </CardTitle>
         <CardDescription>
           Review and approve submitted daily logs from captains
         </CardDescription>
@@ -687,14 +811,20 @@ export function LogReviewQueue() {
                 <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by captain name..."
-                  value={(table.getColumn("captainName")?.getFilterValue() as string) ?? ""}
+                  value={
+                    (table
+                      .getColumn('captainName')
+                      ?.getFilterValue() as string) ?? ''
+                  }
                   onChange={(event) =>
-                    table.getColumn("captainName")?.setFilterValue(event.target.value)
+                    table
+                      .getColumn('captainName')
+                      ?.setFilterValue(event.target.value)
                   }
                   className="pl-8 w-full sm:w-[250px]"
                 />
               </div>
-              
+
               {/* Captain Filter */}
               <Select
                 value={selectedCaptain}
@@ -715,9 +845,14 @@ export function LogReviewQueue() {
 
               {/* Status Filter */}
               <Select
-                value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
+                value={
+                  (table.getColumn('status')?.getFilterValue() as string) ??
+                  'all'
+                }
                 onValueChange={(value) =>
-                  table.getColumn("status")?.setFilterValue(value === "all" ? undefined : value)
+                  table
+                    .getColumn('status')
+                    ?.setFilterValue(value === 'all' ? undefined : value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[150px]">
@@ -733,11 +868,11 @@ export function LogReviewQueue() {
               {/* Date Filter Type */}
               <Select
                 value={dateFilterType}
-                onValueChange={(value: "all" | "pay-period" | "custom") => {
-                  setDateFilterType(value)
-                  if (value === "all") {
-                    setSelectedPayPeriod("all")
-                    setCustomDateRange({})
+                onValueChange={(value: 'all' | 'pay-period' | 'custom') => {
+                  setDateFilterType(value);
+                  if (value === 'all') {
+                    setSelectedPayPeriod('all');
+                    setCustomDateRange({});
                   }
                 }}
               >
@@ -752,7 +887,7 @@ export function LogReviewQueue() {
               </Select>
 
               {/* Pay Period Filter */}
-              {dateFilterType === "pay-period" && (
+              {dateFilterType === 'pay-period' && (
                 <Select
                   value={selectedPayPeriod}
                   onValueChange={setSelectedPayPeriod}
@@ -772,30 +907,33 @@ export function LogReviewQueue() {
               )}
 
               {/* Custom Date Range Filter */}
-              {dateFilterType === "custom" && (
+              {dateFilterType === 'custom' && (
                 <div className="flex gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-[140px] justify-start text-left font-normal",
-                          !customDateRange.from && "text-muted-foreground"
+                          'w-[140px] justify-start text-left font-normal',
+                          !customDateRange.from && 'text-muted-foreground'
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customDateRange.from ? (
-                          format(customDateRange.from, "MMM dd, yyyy")
-                        ) : (
-                          "From date"
-                        )}
+                        {customDateRange.from
+                          ? format(customDateRange.from, 'MMM dd, yyyy')
+                          : 'From date'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={customDateRange.from}
-                        onSelect={(date) => setCustomDateRange(prev => ({ ...prev, from: date }))}
+                        onSelect={(date) =>
+                          setCustomDateRange((prev) => ({
+                            ...prev,
+                            from: date,
+                          }))
+                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -805,23 +943,23 @@ export function LogReviewQueue() {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-[140px] justify-start text-left font-normal",
-                          !customDateRange.to && "text-muted-foreground"
+                          'w-[140px] justify-start text-left font-normal',
+                          !customDateRange.to && 'text-muted-foreground'
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customDateRange.to ? (
-                          format(customDateRange.to, "MMM dd, yyyy")
-                        ) : (
-                          "To date"
-                        )}
+                        {customDateRange.to
+                          ? format(customDateRange.to, 'MMM dd, yyyy')
+                          : 'To date'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={customDateRange.to}
-                        onSelect={(date) => setCustomDateRange(prev => ({ ...prev, to: date }))}
+                        onSelect={(date) =>
+                          setCustomDateRange((prev) => ({ ...prev, to: date }))
+                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -832,17 +970,23 @@ export function LogReviewQueue() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
               {selectedRows.length > 0 && hasSubmittedLogs && (
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="bg-hunks-green hover:bg-hunks-green/90"
                     onClick={handleBulkApprove}
                   >
                     <IconCircleCheckFilled className="w-4 h-4 mr-2" />
-                    Approve Selected ({selectedRows.filter(row => row.original.status === "submitted").length})
+                    Approve Selected (
+                    {
+                      selectedRows.filter(
+                        (row) => row.original.status === 'submitted'
+                      ).length
+                    }
+                    )
                   </Button>
                   {userRoles.includes('admin') && (
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={handleBulkDelete}
                     >
@@ -854,7 +998,11 @@ export function LogReviewQueue() {
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-hunks-green-200 hover:bg-hunks-green-50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-hunks-green-200 hover:bg-hunks-green-50"
+                  >
                     <IconLayoutColumns className="w-4 h-4 mr-2" />
                     Columns
                     <IconChevronDown className="w-4 h-4 ml-2" />
@@ -865,7 +1013,7 @@ export function LogReviewQueue() {
                     .getAllColumns()
                     .filter(
                       (column) =>
-                        typeof column.accessorFn !== "undefined" &&
+                        typeof column.accessorFn !== 'undefined' &&
                         column.getCanHide()
                     )
                     .map((column) => {
@@ -880,7 +1028,7 @@ export function LogReviewQueue() {
                         >
                           {column.id}
                         </DropdownMenuCheckboxItem>
-                      )
+                      );
                     })}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -896,7 +1044,11 @@ export function LogReviewQueue() {
                     <TableRow key={headerGroup.id} variant="branded">
                       {headerGroup.headers.map((header) => {
                         return (
-                          <TableHead key={header.id} colSpan={header.colSpan} variant="branded">
+                          <TableHead
+                            key={header.id}
+                            colSpan={header.colSpan}
+                            variant="branded"
+                          >
                             {header.isPlaceholder
                               ? null
                               : flexRender(
@@ -904,7 +1056,7 @@ export function LogReviewQueue() {
                                   header.getContext()
                                 )}
                           </TableHead>
-                        )
+                        );
                       })}
                     </TableRow>
                   ))}
@@ -915,7 +1067,7 @@ export function LogReviewQueue() {
                       <TableRow
                         key={row.id}
                         variant="branded"
-                        data-state={row.getIsSelected() && "selected"}
+                        data-state={row.getIsSelected() && 'selected'}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
@@ -929,17 +1081,16 @@ export function LogReviewQueue() {
                     ))
                   ) : (
                     <TableRow variant="branded">
-                      <TableCell
-                        colSpan={columns.length}
-                        className="p-0"
-                      >
+                      <TableCell colSpan={columns.length} className="p-0">
                         <div className="py-8">
                           {data.length === 0 ? (
                             <NoLogsEmptyState />
                           ) : (
-                            <NoLogResultsEmptyState onClearFilters={() => {
-                              table.resetColumnFilters()
-                            }} />
+                            <NoLogResultsEmptyState
+                              onClearFilters={() => {
+                                table.resetColumnFilters();
+                              }}
+                            />
                           )}
                         </div>
                       </TableCell>
@@ -955,52 +1106,65 @@ export function LogReviewQueue() {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <MobileTableItem key={row.id} branded>
-                  <MobileTableField 
-                    label="Captain" 
+                  <MobileTableField
+                    label="Captain"
                     value={
-                      <Link 
+                      <Link
                         href={`/logs/${row.original.id}`}
                         className="font-medium text-hunks-green-600 hover:text-hunks-green-800 hover:underline"
                       >
                         {row.original.captainName}
                       </Link>
-                    } 
+                    }
                   />
-                  <MobileTableField 
-                    label="Log Date" 
-                    value={format(row.original.logDate, "MMM dd, yyyy")} 
+                  <MobileTableField
+                    label="Log Date"
+                    value={format(row.original.logDate, 'MMM dd, yyyy')}
                   />
-                  <MobileTableField 
-                    label="Status" 
+                  <MobileTableField
+                    label="Status"
                     value={
-                      <Badge 
-                        variant={row.original.status === "approved" ? "default" : "secondary"}
+                      <Badge
+                        variant={
+                          row.original.status === 'approved'
+                            ? 'default'
+                            : 'secondary'
+                        }
                         className={`capitalize ${
-                          row.original.status === "approved" ? "bg-hunks-green hover:bg-hunks-green/90" : 
-                          "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                          row.original.status === 'approved'
+                            ? 'bg-hunks-green hover:bg-hunks-green/90'
+                            : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                         }`}
                       >
-                        {row.original.status === "approved" && <IconCircleCheckFilled className="w-3 h-3 mr-1" />}
-                        {row.original.status === "submitted" && <IconLoader className="w-3 h-3 mr-1" />}
+                        {row.original.status === 'approved' && (
+                          <IconCircleCheckFilled className="w-3 h-3 mr-1" />
+                        )}
+                        {row.original.status === 'submitted' && (
+                          <IconLoader className="w-3 h-3 mr-1" />
+                        )}
                         {row.original.status}
                       </Badge>
-                    } 
+                    }
                   />
-                  <MobileTableField 
-                    label="Revenue" 
-                    value={<span className="font-medium text-hunks-green-700">${row.original.totalRevenue.toFixed(2)}</span>} 
+                  <MobileTableField
+                    label="Revenue"
+                    value={
+                      <span className="font-medium text-hunks-green-700">
+                        ${row.original.totalRevenue.toFixed(2)}
+                      </span>
+                    }
                   />
-                  <MobileTableField 
-                    label="Hours" 
-                    value={row.original.totalHours} 
+                  <MobileTableField
+                    label="Hours"
+                    value={row.original.totalHours}
                   />
-                  <MobileTableField 
-                    label="Jobs" 
-                    value={row.original.jobCount} 
+                  <MobileTableField
+                    label="Jobs"
+                    value={row.original.jobCount}
                   />
-                  <MobileTableField 
-                    label="Submitted" 
-                    value={format(row.original.submittedAt, "MMM dd, h:mm a")} 
+                  <MobileTableField
+                    label="Submitted"
+                    value={format(row.original.submittedAt, 'MMM dd, h:mm a')}
                   />
                   <div className="flex justify-between items-center pt-2 border-t border-hunks-green-200">
                     <Checkbox
@@ -1019,23 +1183,23 @@ export function LogReviewQueue() {
                           <IconEye className="w-4 h-4" />
                         </Button>
                       </LogDetailDialog>
-                      {row.original.status === "submitted" && (
+                      {row.original.status === 'submitted' && (
                         <>
                           <Link href={`/logs/${row.original.id}/edit`}>
                             <Button variant="ghost" size="sm">
                               <IconEdit className="w-4 h-4" />
                             </Button>
                           </Link>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             className="bg-hunks-green hover:bg-hunks-green/90"
                             onClick={() => handleApprove(row.original.id)}
                           >
                             <IconCircleCheckFilled className="w-4 h-4" />
                           </Button>
                           {userRoles.includes('admin') && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="destructive"
                               onClick={() => handleDelete(row.original.id)}
                             >
@@ -1053,9 +1217,11 @@ export function LogReviewQueue() {
                 {data.length === 0 ? (
                   <NoLogsEmptyState />
                 ) : (
-                  <NoLogResultsEmptyState onClearFilters={() => {
-                    table.resetColumnFilters()
-                  }} />
+                  <NoLogResultsEmptyState
+                    onClearFilters={() => {
+                      table.resetColumnFilters();
+                    }}
+                  />
                 )}
               </div>
             )}
@@ -1064,7 +1230,7 @@ export function LogReviewQueue() {
           {/* Pagination */}
           <div className="flex items-center justify-between px-2">
             <div className="flex-1 text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredSelectedRowModel().rows.length} of{' '}
               {table.getFilteredRowModel().rows.length} row(s) selected.
             </div>
             <div className="flex items-center space-x-6 lg:space-x-8">
@@ -1073,11 +1239,13 @@ export function LogReviewQueue() {
                 <Select
                   value={`${table.getState().pagination.pageSize}`}
                   onValueChange={(value) => {
-                    table.setPageSize(Number(value))
+                    table.setPageSize(Number(value));
                   }}
                 >
                   <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                    <SelectValue
+                      placeholder={table.getState().pagination.pageSize}
+                    />
                   </SelectTrigger>
                   <SelectContent side="top">
                     {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -1089,7 +1257,7 @@ export function LogReviewQueue() {
                 </Select>
               </div>
               <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                Page {table.getState().pagination.pageIndex + 1} of{' '}
                 {table.getPageCount()}
               </div>
               <div className="flex items-center space-x-2">
@@ -1135,5 +1303,5 @@ export function LogReviewQueue() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

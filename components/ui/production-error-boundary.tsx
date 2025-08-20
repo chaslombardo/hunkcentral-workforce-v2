@@ -1,15 +1,36 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, Bug, RefreshCw, Home, Send, Copy, Check } from 'lucide-react';
+import {
+  AlertTriangle,
+  Bug,
+  RefreshCw,
+  Home,
+  Send,
+  Copy,
+  Check,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { reportComponentError, createUserFriendlyErrorMessage } from '@/lib/error-reporting';
+import {
+  reportComponentError,
+  createUserFriendlyErrorMessage,
+} from '@/lib/error-reporting';
 import { logClientComponentError } from '@/lib/client-error-logger';
 
 interface ProductionErrorBoundaryState {
@@ -24,9 +45,9 @@ interface ProductionErrorBoundaryState {
 
 interface ProductionErrorBoundaryProps {
   children: React.ReactNode;
-  fallback?: React.ComponentType<{ 
-    error: Error; 
-    resetError: () => void; 
+  fallback?: React.ComponentType<{
+    error: Error;
+    resetError: () => void;
     errorId?: string;
     onSendReport?: (feedback: string) => void;
   }>;
@@ -37,27 +58,29 @@ interface ProductionErrorBoundaryProps {
 }
 
 export class ProductionErrorBoundary extends React.Component<
-  ProductionErrorBoundaryProps, 
+  ProductionErrorBoundaryProps,
   ProductionErrorBoundaryState
 > {
   constructor(props: ProductionErrorBoundaryProps) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      reportSent: false, 
+    this.state = {
+      hasError: false,
+      reportSent: false,
       userFeedback: '',
       copied: false,
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ProductionErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<ProductionErrorBoundaryState> {
     const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     return { hasError: true, error, errorId };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const errorId = this.state.errorId;
-    
+
     // Enhanced error logging with comprehensive context
     logClientComponentError(error, {
       component: this.props.name || 'production_error_boundary',
@@ -108,13 +131,18 @@ export class ProductionErrorBoundary extends React.Component<
 
   getPerformanceInfo = () => {
     if ('performance' in window && 'getEntriesByType' in performance) {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         return {
           loadTime: navigation.loadEventEnd - navigation.fetchStart,
-          domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+          domContentLoaded:
+            navigation.domContentLoadedEventEnd - navigation.fetchStart,
           firstPaint: performance.getEntriesByName('first-paint')[0]?.startTime,
-          firstContentfulPaint: performance.getEntriesByName('first-contentful-paint')[0]?.startTime,
+          firstContentfulPaint: performance.getEntriesByName(
+            'first-contentful-paint'
+          )[0]?.startTime,
         };
       }
     }
@@ -123,11 +151,15 @@ export class ProductionErrorBoundary extends React.Component<
 
   getMemoryInfo = () => {
     if ('memory' in performance) {
-      const memory = (performance as { memory: {
-        usedJSHeapSize: number;
-        totalJSHeapSize: number;
-        jsHeapSizeLimit: number;
-      } }).memory;
+      const memory = (
+        performance as {
+          memory: {
+            usedJSHeapSize: number;
+            totalJSHeapSize: number;
+            jsHeapSizeLimit: number;
+          };
+        }
+      ).memory;
       return {
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
@@ -141,7 +173,7 @@ export class ProductionErrorBoundary extends React.Component<
   isCriticalError = (error: Error): boolean => {
     const message = error.message.toLowerCase();
     const stack = error.stack?.toLowerCase() || '';
-    
+
     const criticalKeywords = [
       'database',
       'authentication',
@@ -153,16 +185,16 @@ export class ProductionErrorBoundary extends React.Component<
       'network error',
       'server error',
     ];
-    
-    return criticalKeywords.some(keyword => 
-      message.includes(keyword) || stack.includes(keyword)
+
+    return criticalKeywords.some(
+      (keyword) => message.includes(keyword) || stack.includes(keyword)
     );
   };
 
   resetError = () => {
-    this.setState({ 
-      hasError: false, 
-      error: undefined, 
+    this.setState({
+      hasError: false,
+      error: undefined,
       errorInfo: undefined,
       reportSent: false,
       userFeedback: '',
@@ -212,33 +244,39 @@ export class ProductionErrorBoundary extends React.Component<
     if (this.state.hasError) {
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
-        return <FallbackComponent 
-          error={this.state.error!} 
-          resetError={this.resetError} 
-          errorId={this.state.errorId}
-          onSendReport={this.sendErrorReport}
-        />;
+        return (
+          <FallbackComponent
+            error={this.state.error!}
+            resetError={this.resetError}
+            errorId={this.state.errorId}
+            onSendReport={this.sendErrorReport}
+          />
+        );
       }
 
       const isPageLevel = this.props.level === 'page';
       const errorTitle = isPageLevel ? 'Page Error' : 'Component Error';
-      const errorDescription = isPageLevel 
+      const errorDescription = isPageLevel
         ? 'This page encountered an error and cannot be displayed properly.'
         : 'A component on this page encountered an error.';
 
-      const userFriendlyMessage = this.state.error 
+      const userFriendlyMessage = this.state.error
         ? createUserFriendlyErrorMessage(this.state.error, {
             type: 'component',
             component: this.props.name || 'unknown',
           })
         : 'An unexpected error occurred.';
 
-      const isCritical = this.state.error ? this.isCriticalError(this.state.error) : false;
+      const isCritical = this.state.error
+        ? this.isCriticalError(this.state.error)
+        : false;
 
       return (
-        <Card className={`${isPageLevel ? 'max-w-3xl mx-auto mt-8' : 'max-w-lg mx-auto mt-4'} ${
-          isCritical ? 'border-destructive' : 'border-destructive/20'
-        }`}>
+        <Card
+          className={`${isPageLevel ? 'max-w-3xl mx-auto mt-8' : 'max-w-lg mx-auto mt-4'} ${
+            isCritical ? 'border-destructive' : 'border-destructive/20'
+          }`}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
@@ -254,9 +292,7 @@ export class ProductionErrorBoundary extends React.Component<
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription>
-              {errorDescription}
-            </CardDescription>
+            <CardDescription>{errorDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -275,11 +311,17 @@ export class ProductionErrorBoundary extends React.Component<
                     Technical Details (Development):
                   </div>
                   <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded border">
-                    <div className="font-semibold">{this.state.error.name}: {this.state.error.message}</div>
+                    <div className="font-semibold">
+                      {this.state.error.name}: {this.state.error.message}
+                    </div>
                     {this.state.error.stack && (
                       <Collapsible>
                         <CollapsibleTrigger asChild>
-                          <Button variant="ghost" size="sm" className="mt-2 p-0 h-auto">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 p-0 h-auto"
+                          >
                             <Bug className="h-3 w-3 mr-1" />
                             Show Stack Trace
                           </Button>
@@ -296,21 +338,27 @@ export class ProductionErrorBoundary extends React.Component<
               )}
 
               {/* User feedback section */}
-              {this.props.enableUserFeedback && process.env.NODE_ENV === 'production' && (
-                <div className="space-y-2">
-                  <Label htmlFor="user-feedback" className="text-sm font-medium">
-                    Help us improve (optional):
-                  </Label>
-                  <Textarea
-                    id="user-feedback"
-                    placeholder="What were you trying to do when this error occurred?"
-                    value={this.state.userFeedback}
-                    onChange={(e) => this.setState({ userFeedback: e.target.value })}
-                    className="text-sm"
-                    rows={3}
-                  />
-                </div>
-              )}
+              {this.props.enableUserFeedback &&
+                process.env.NODE_ENV === 'production' && (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="user-feedback"
+                      className="text-sm font-medium"
+                    >
+                      Help us improve (optional):
+                    </Label>
+                    <Textarea
+                      id="user-feedback"
+                      placeholder="What were you trying to do when this error occurred?"
+                      value={this.state.userFeedback}
+                      onChange={(e) =>
+                        this.setState({ userFeedback: e.target.value })
+                      }
+                      className="text-sm"
+                      rows={3}
+                    />
+                  </div>
+                )}
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-2">
@@ -319,9 +367,9 @@ export class ProductionErrorBoundary extends React.Component<
                   Try Again
                 </Button>
                 {isPageLevel && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.href = '/dashboard'}
+                  <Button
+                    variant="outline"
+                    onClick={() => (window.location.href = '/dashboard')}
                     className="flex-1"
                   >
                     <Home className="h-4 w-4 mr-2" />
@@ -331,58 +379,61 @@ export class ProductionErrorBoundary extends React.Component<
               </div>
 
               {/* Error reporting section */}
-              {this.props.enableErrorReporting && process.env.NODE_ENV === 'production' && (
-                <div className="border-t pt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Error Reporting</span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={this.copyErrorInfo}
-                        disabled={this.state.copied}
-                      >
-                        {this.state.copied ? (
-                          <>
-                            <Check className="h-3 w-3 mr-1" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3 w-3 mr-1" />
-                            Copy Info
-                          </>
-                        )}
-                      </Button>
-                      {!this.state.reportSent ? (
+              {this.props.enableErrorReporting &&
+                process.env.NODE_ENV === 'production' && (
+                  <div className="border-t pt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Error Reporting
+                      </span>
+                      <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => this.sendErrorReport()}
+                          onClick={this.copyErrorInfo}
+                          disabled={this.state.copied}
                         >
-                          <Send className="h-3 w-3 mr-1" />
-                          Send Report
+                          {this.state.copied ? (
+                            <>
+                              <Check className="h-3 w-3 mr-1" />
+                              Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3 mr-1" />
+                              Copy Info
+                            </>
+                          )}
                         </Button>
-                      ) : (
-                        <Badge variant="outline" className="text-green-600">
-                          Report Sent
-                        </Badge>
-                      )}
+                        {!this.state.reportSent ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => this.sendErrorReport()}
+                          >
+                            <Send className="h-3 w-3 mr-1" />
+                            Send Report
+                          </Button>
+                        ) : (
+                          <Badge variant="outline" className="text-green-600">
+                            Report Sent
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      {this.state.reportSent
+                        ? 'Thank you! Your error report helps us identify and fix issues.'
+                        : 'Send an anonymous error report to help us identify and fix this issue.'}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {this.state.reportSent 
-                      ? 'Thank you! Your error report helps us identify and fix issues.'
-                      : 'Send an anonymous error report to help us identify and fix this issue.'
-                    }
-                  </p>
-                </div>
-              )}
+                )}
 
               {/* Error ID for support */}
               {this.state.errorId && process.env.NODE_ENV === 'production' && (
                 <div className="text-xs text-center text-muted-foreground border-t pt-4">
-                  Error ID: {this.state.errorId} - Reference this ID when contacting support
+                  Error ID: {this.state.errorId} - Reference this ID when
+                  contacting support
                 </div>
               )}
             </div>
@@ -405,24 +456,27 @@ export function useProductionErrorBoundary() {
     setErrorId(null);
   }, []);
 
-  const captureError = React.useCallback((error: Error, context?: Record<string, unknown>) => {
-    const id = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setErrorId(id);
-    
-    // Log the error with context
-    logClientComponentError(error, {
-      component: 'use_production_error_boundary',
-      action: 'capture_error',
-      additionalData: {
-        errorId: id,
-        hookUsage: true,
-        context,
-        timestamp: new Date().toISOString(),
-      },
-    });
-    
-    setError(error);
-  }, []);
+  const captureError = React.useCallback(
+    (error: Error, context?: Record<string, unknown>) => {
+      const id = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setErrorId(id);
+
+      // Log the error with context
+      logClientComponentError(error, {
+        component: 'use_production_error_boundary',
+        action: 'capture_error',
+        additionalData: {
+          errorId: id,
+          hookUsage: true,
+          context,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      setError(error);
+    },
+    []
+  );
 
   React.useEffect(() => {
     if (error) {

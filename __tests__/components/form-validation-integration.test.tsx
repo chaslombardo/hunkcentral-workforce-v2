@@ -2,29 +2,61 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { SmartInput, commonValidationRules } from '@/components/forms/smart-input';
-import { FormFeedback, useFormFeedback } from '@/components/forms/form-feedback';
-import { 
-  MobileFormValidation, 
-  useMobileFormValidation, 
-  mobileValidationRules 
+import {
+  SmartInput,
+  commonValidationRules,
+} from '@/components/forms/smart-input';
+import {
+  FormFeedback,
+  useFormFeedback,
+} from '@/components/forms/form-feedback';
+import {
+  MobileFormValidation,
+  useMobileFormValidation,
+  mobileValidationRules,
 } from '@/components/forms/mobile-form-validation';
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  Eye: ({ className }: { className?: string }) => <div data-testid="eye-icon" className={className} />,
-  EyeOff: ({ className }: { className?: string }) => <div data-testid="eye-off-icon" className={className} />,
-  Loader2: ({ className }: { className?: string }) => <div data-testid="loader-icon" className={className} />,
-  RefreshCw: ({ className }: { className?: string }) => <div data-testid="refresh-icon" className={className} />,
-  ExternalLink: ({ className }: { className?: string }) => <div data-testid="external-link-icon" className={className} />,
-  Lightbulb: ({ className }: { className?: string }) => <div data-testid="lightbulb-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  Eye: ({ className }: { className?: string }) => (
+    <div data-testid="eye-icon" className={className} />
+  ),
+  EyeOff: ({ className }: { className?: string }) => (
+    <div data-testid="eye-off-icon" className={className} />
+  ),
+  Loader2: ({ className }: { className?: string }) => (
+    <div data-testid="loader-icon" className={className} />
+  ),
+  RefreshCw: ({ className }: { className?: string }) => (
+    <div data-testid="refresh-icon" className={className} />
+  ),
+  ExternalLink: ({ className }: { className?: string }) => (
+    <div data-testid="external-link-icon" className={className} />
+  ),
+  Lightbulb: ({ className }: { className?: string }) => (
+    <div data-testid="lightbulb-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
 }));
 
 // Mock InlineSuccessCheck component
@@ -56,7 +88,7 @@ describe('Form Validation Integration Tests', () => {
 
         const handleSubmit = (e: React.FormEvent) => {
           e.preventDefault();
-          
+
           // Clear previous errors
           mobileValidation.clearErrors();
 
@@ -95,10 +127,13 @@ describe('Form Validation Integration Tests', () => {
               type: 'error',
             });
             hasErrors = true;
-          } else if (!commonValidationRules.strongPassword().test(formData.password)) {
+          } else if (
+            !commonValidationRules.strongPassword().test(formData.password)
+          ) {
             mobileValidation.addError({
               field: 'password',
-              message: 'Password must be at least 8 characters with mixed case, numbers, and special characters',
+              message:
+                'Password must be at least 8 characters with mixed case, numbers, and special characters',
               type: 'error',
             });
             hasErrors = true;
@@ -131,7 +166,9 @@ describe('Form Validation Integration Tests', () => {
             <SmartInput
               label="First Name"
               value={formData.firstName}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, firstName: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, firstName: value }))
+              }
               validationRules={[commonValidationRules.required()]}
               validateOnBlur={true}
             />
@@ -139,14 +176,18 @@ describe('Form Validation Integration Tests', () => {
             <SmartInput
               label="Last Name"
               value={formData.lastName}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, lastName: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, lastName: value }))
+              }
             />
 
             <SmartInput
               label="Email Address"
               type="email"
               value={formData.email}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, email: value }))
+              }
               validationRules={[
                 commonValidationRules.required(),
                 commonValidationRules.email(),
@@ -159,7 +200,9 @@ describe('Form Validation Integration Tests', () => {
               type="password"
               showPasswordToggle={true}
               value={formData.password}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, password: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, password: value }))
+              }
               validationRules={[
                 commonValidationRules.required(),
                 commonValidationRules.strongPassword(),
@@ -171,7 +214,9 @@ describe('Form Validation Integration Tests', () => {
               label="Confirm Password"
               type="password"
               value={formData.confirmPassword}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, confirmPassword: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, confirmPassword: value }))
+              }
               validationRules={[
                 commonValidationRules.required(),
                 {
@@ -188,7 +233,9 @@ describe('Form Validation Integration Tests', () => {
               <MobileFormValidation
                 errors={mobileValidation.errors}
                 onErrorClick={(field) => {
-                  const element = document.querySelector(`[name="${field}"]`) as HTMLElement;
+                  const element = document.querySelector(
+                    `[name="${field}"]`
+                  ) as HTMLElement;
                   element?.focus();
                 }}
                 onDismiss={mobileValidation.removeError}
@@ -199,7 +246,10 @@ describe('Form Validation Integration Tests', () => {
               <FormFeedback {...formFeedback.feedback} />
             )}
 
-            <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-2 rounded"
+            >
               Register
             </button>
           </form>
@@ -235,7 +285,9 @@ describe('Form Validation Integration Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Registration Successful')).toBeInTheDocument();
-        expect(screen.getByText('Your account has been created successfully.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your account has been created successfully.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -396,7 +448,9 @@ describe('Form Validation Integration Tests', () => {
       await user.type(emailInput, 'invalid-email');
 
       await waitFor(() => {
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
       });
 
       // Type valid email
@@ -404,7 +458,9 @@ describe('Form Validation Integration Tests', () => {
       await user.type(emailInput, 'valid@example.com');
 
       await waitFor(() => {
-        expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Please enter a valid email address')
+        ).not.toBeInTheDocument();
         expect(screen.queryByText('Email')).not.toBeInTheDocument(); // Should be removed from mobile validation
       });
     });
@@ -421,7 +477,7 @@ describe('Form Validation Integration Tests', () => {
 
         const handleSubmit = async (e: React.FormEvent) => {
           e.preventDefault();
-          
+
           // Clear previous state
           mobileValidation.clearErrors();
           formFeedback.clearFeedback();
@@ -433,7 +489,7 @@ describe('Form Validation Integration Tests', () => {
           });
 
           // Simulate async validation
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           let hasErrors = false;
 
@@ -518,7 +574,9 @@ describe('Form Validation Integration Tests', () => {
             <SmartInput
               label="Username"
               value={formData.username}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, username: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, username: value }))
+              }
               hint="At least 3 characters"
             />
 
@@ -526,14 +584,18 @@ describe('Form Validation Integration Tests', () => {
               label="Email Address"
               type="email"
               value={formData.email}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, email: value }))
+              }
             />
 
             <SmartInput
               label="Age"
               type="number"
               value={formData.age}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, age: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, age: value }))
+              }
               hint="Must be 18 or older"
             />
 
@@ -542,9 +604,13 @@ describe('Form Validation Integration Tests', () => {
                 errors={mobileValidation.errors}
                 onErrorClick={(field) => {
                   const input = screen.getByLabelText(
-                    field === 'username' ? 'Username' :
-                    field === 'email' ? 'Email Address' :
-                    field === 'age' ? 'Age' : field
+                    field === 'username'
+                      ? 'Username'
+                      : field === 'email'
+                        ? 'Email Address'
+                        : field === 'age'
+                          ? 'Age'
+                          : field
                   );
                   input.focus();
                 }}
@@ -555,7 +621,10 @@ describe('Form Validation Integration Tests', () => {
               <FormFeedback {...formFeedback.feedback} />
             )}
 
-            <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-2 rounded"
+            >
               Submit Form
             </button>
           </form>
@@ -571,13 +640,17 @@ describe('Form Validation Integration Tests', () => {
 
       // Should show loading first
       await waitFor(() => {
-        expect(screen.getByText('Validating your information...')).toBeInTheDocument();
+        expect(
+          screen.getByText('Validating your information...')
+        ).toBeInTheDocument();
       });
 
       // Then show validation errors
       await waitFor(() => {
         expect(screen.getByText('Validation Failed')).toBeInTheDocument();
-        expect(screen.getByText('Please fix 3 errors below.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please fix 3 errors below.')
+        ).toBeInTheDocument();
         expect(screen.getByText('Username is required')).toBeInTheDocument();
         expect(screen.getByText('Email is required')).toBeInTheDocument();
         expect(screen.getByText('Age is required')).toBeInTheDocument();
@@ -595,9 +668,15 @@ describe('Form Validation Integration Tests', () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Username must be at least 3 characters')).toBeInTheDocument();
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
-        expect(screen.getByText('You must be at least 18 years old')).toBeInTheDocument();
+        expect(
+          screen.getByText('Username must be at least 3 characters')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('You must be at least 18 years old')
+        ).toBeInTheDocument();
       });
 
       // Fill form with valid data
@@ -612,7 +691,9 @@ describe('Form Validation Integration Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Success!')).toBeInTheDocument();
-        expect(screen.getByText('Your form has been submitted successfully.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your form has been submitted successfully.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -627,7 +708,7 @@ describe('Form Validation Integration Tests', () => {
 
         const handleSubmit = async (e: React.FormEvent) => {
           e.preventDefault();
-          
+
           formFeedback.showInfo({
             message: 'Submitting form...',
             showAnimation: false,
@@ -679,7 +760,10 @@ describe('Form Validation Integration Tests', () => {
               <FormFeedback {...formFeedback.feedback} />
             )}
 
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded"
+            >
               Submit
             </button>
           </form>
@@ -702,7 +786,9 @@ describe('Form Validation Integration Tests', () => {
       // Should show network error
       await waitFor(() => {
         expect(screen.getByText('Network Error')).toBeInTheDocument();
-        expect(screen.getByText('Failed to submit form due to network issues.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Failed to submit form due to network issues.')
+        ).toBeInTheDocument();
         expect(screen.getByText('Try Again')).toBeInTheDocument();
       });
 
@@ -715,7 +801,9 @@ describe('Form Validation Integration Tests', () => {
 
       // Should show success
       await waitFor(() => {
-        expect(screen.getByText('Form submitted successfully!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Form submitted successfully!')
+        ).toBeInTheDocument();
       });
     });
 
@@ -768,15 +856,19 @@ describe('Form Validation Integration Tests', () => {
         };
 
         const handleFieldChange = (field: string, value: string) => {
-          setFormData(prev => ({ ...prev, [field]: value }));
+          setFormData((prev) => ({ ...prev, [field]: value }));
           validateField(field, value);
         };
 
         const handleErrorClick = (field: string) => {
           const input = screen.getByLabelText(
-            field === 'email' ? 'Email Address' :
-            field === 'phone' ? 'Phone Number' :
-            field === 'website' ? 'Website URL' : field
+            field === 'email'
+              ? 'Email Address'
+              : field === 'phone'
+                ? 'Phone Number'
+                : field === 'website'
+                  ? 'Website URL'
+                  : field
           );
           input.focus();
         };
@@ -785,7 +877,7 @@ describe('Form Validation Integration Tests', () => {
           mobileValidation.removeError(field);
           // Optionally clear the field or provide a default value
           if (field === 'email') {
-            setFormData(prev => ({ ...prev, email: '' }));
+            setFormData((prev) => ({ ...prev, email: '' }));
           }
         };
 
@@ -837,9 +929,15 @@ describe('Form Validation Integration Tests', () => {
 
       // Should show all errors
       await waitFor(() => {
-        expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
-        expect(screen.getByText('Please enter a valid phone number')).toBeInTheDocument();
-        expect(screen.getByText('Please enter a valid website URL')).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid email address')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid phone number')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Please enter a valid website URL')
+        ).toBeInTheDocument();
       });
 
       // Click on email error to focus field
@@ -852,7 +950,9 @@ describe('Form Validation Integration Tests', () => {
       await user.type(emailInput, 'valid@example.com');
 
       await waitFor(() => {
-        expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Please enter a valid email address')
+        ).not.toBeInTheDocument();
       });
 
       // Dismiss phone error
@@ -860,7 +960,9 @@ describe('Form Validation Integration Tests', () => {
       fireEvent.click(phoneErrorDismiss);
 
       await waitFor(() => {
-        expect(screen.queryByText('Please enter a valid phone number')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Please enter a valid phone number')
+        ).not.toBeInTheDocument();
       });
 
       // Fix website field
@@ -868,7 +970,9 @@ describe('Form Validation Integration Tests', () => {
       await user.type(websiteInput, 'https://example.com');
 
       await waitFor(() => {
-        expect(screen.queryByText('Please enter a valid website URL')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Please enter a valid website URL')
+        ).not.toBeInTheDocument();
       });
 
       // Should have no errors left

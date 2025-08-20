@@ -18,7 +18,7 @@
 
 ## Architecture Patterns
 
-*Server actions and server components should handle data and mutations where possible. Client components should be used for interactivity only.*
+_Server actions and server components should handle data and mutations where possible. Client components should be used for interactivity only._
 
 - **Server Components**: Use React Server Components for data-heavy pages
 - **Server Actions**: Handle form submissions and mutations

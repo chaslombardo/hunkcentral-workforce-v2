@@ -44,10 +44,23 @@ import type { ValidationError } from '@/lib/payrollValidation';
 
 const discrepancyReportSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'critical']),
-  category: z.enum(['calculation', 'data_integrity', 'rate_issue', 'hours_mismatch', 'tips_error', 'other']),
-  description: z.string().min(10, 'Please provide a detailed description (minimum 10 characters)'),
+  category: z.enum([
+    'calculation',
+    'data_integrity',
+    'rate_issue',
+    'hours_mismatch',
+    'tips_error',
+    'other',
+  ]),
+  description: z
+    .string()
+    .min(10, 'Please provide a detailed description (minimum 10 characters)'),
   expectedOutcome: z.string().optional(),
-  contactEmail: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+  contactEmail: z
+    .string()
+    .email('Please enter a valid email address')
+    .optional()
+    .or(z.literal('')),
   requestCallback: z.boolean(),
 });
 
@@ -59,7 +72,9 @@ interface DiscrepancyReportDialogProps {
   errors: ValidationError[];
   employeeId: string;
   payPeriodId: string;
-  onSubmit?: (report: DiscrepancyReportFormData & { errors: ValidationError[] }) => Promise<void>;
+  onSubmit?: (
+    report: DiscrepancyReportFormData & { errors: ValidationError[] }
+  ) => Promise<void>;
 }
 
 export function DiscrepancyReportDialog({
@@ -87,12 +102,18 @@ export function DiscrepancyReportDialog({
   React.useEffect(() => {
     if (errors.length === 0) return;
 
-    const criticalErrors = errors.filter(error => 
-      ['HOURS_MISMATCH', 'TIPS_MISMATCH', 'DEPARTMENT_PAY_MISMATCH', 'COMMISSION_MISMATCH'].includes(error.code)
+    const criticalErrors = errors.filter((error) =>
+      [
+        'HOURS_MISMATCH',
+        'TIPS_MISMATCH',
+        'DEPARTMENT_PAY_MISMATCH',
+        'COMMISSION_MISMATCH',
+      ].includes(error.code)
     );
-    
-    const rateErrors = errors.filter(error => 
-      error.code === 'RATE_INCONSISTENCY' || error.code === 'MISSING_RATE'
+
+    const rateErrors = errors.filter(
+      (error) =>
+        error.code === 'RATE_INCONSISTENCY' || error.code === 'MISSING_RATE'
     );
 
     let suggestedPriority: 'low' | 'medium' | 'high' | 'critical' = 'low';
@@ -104,10 +125,10 @@ export function DiscrepancyReportDialog({
     } else if (rateErrors.length > 0) {
       suggestedPriority = 'high';
       suggestedCategory = 'rate_issue';
-    } else if (errors.some(e => e.code.includes('HOURS'))) {
+    } else if (errors.some((e) => e.code.includes('HOURS'))) {
       suggestedPriority = 'medium';
       suggestedCategory = 'hours_mismatch';
-    } else if (errors.some(e => e.code.includes('TIPS'))) {
+    } else if (errors.some((e) => e.code.includes('TIPS'))) {
       suggestedPriority = 'medium';
       suggestedCategory = 'tips_error';
     } else if (errors.length > 2) {
@@ -119,15 +140,24 @@ export function DiscrepancyReportDialog({
     form.setValue('category', suggestedCategory);
 
     // Auto-generate description based on errors
-    const errorSummary = errors.slice(0, 3).map(error => `• ${error.message}`).join('\n');
-    const additionalCount = errors.length > 3 ? `\n\n...and ${errors.length - 3} additional issues` : '';
-    
-    form.setValue('description', `The following discrepancies were detected in my payroll calculation:\n\n${errorSummary}${additionalCount}\n\nPlease review and correct these issues.`);
+    const errorSummary = errors
+      .slice(0, 3)
+      .map((error) => `• ${error.message}`)
+      .join('\n');
+    const additionalCount =
+      errors.length > 3
+        ? `\n\n...and ${errors.length - 3} additional issues`
+        : '';
+
+    form.setValue(
+      'description',
+      `The following discrepancies were detected in my payroll calculation:\n\n${errorSummary}${additionalCount}\n\nPlease review and correct these issues.`
+    );
   }, [errors, form]);
 
   const handleSubmit = async (data: DiscrepancyReportFormData) => {
     setIsSubmitting(true);
-    
+
     try {
       if (onSubmit) {
         await onSubmit({ ...data, errors });
@@ -138,7 +168,8 @@ export function DiscrepancyReportDialog({
 
       toast({
         title: 'Report Submitted',
-        description: 'Your discrepancy report has been submitted successfully. You will receive a response within 24 hours.',
+        description:
+          'Your discrepancy report has been submitted successfully. You will receive a response within 24 hours.',
       });
 
       onOpenChange(false);
@@ -176,18 +207,25 @@ export function DiscrepancyReportDialog({
             Report Payroll Discrepancy
           </DialogTitle>
           <DialogDescription>
-            Report issues with your payroll calculation. Our team will review and respond within 24 hours.
+            Report issues with your payroll calculation. Our team will review
+            and respond within 24 hours.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Error Summary */}
             <div className="space-y-3">
               <h4 className="font-medium">Detected Issues ({errors.length})</h4>
               <div className="max-h-32 overflow-y-auto space-y-2">
                 {errors.slice(0, 5).map((error, index) => (
-                  <div key={index} className="flex items-start gap-2 p-2 border rounded text-sm">
+                  <div
+                    key={index}
+                    className="flex items-start gap-2 p-2 border rounded text-sm"
+                  >
                     {getErrorIcon(error.type)}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -220,7 +258,10 @@ export function DiscrepancyReportDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select priority" />
@@ -264,17 +305,26 @@ export function DiscrepancyReportDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="calculation">Calculation Error</SelectItem>
-                        <SelectItem value="data_integrity">Data Integrity</SelectItem>
+                        <SelectItem value="calculation">
+                          Calculation Error
+                        </SelectItem>
+                        <SelectItem value="data_integrity">
+                          Data Integrity
+                        </SelectItem>
                         <SelectItem value="rate_issue">Rate Issue</SelectItem>
-                        <SelectItem value="hours_mismatch">Hours Mismatch</SelectItem>
+                        <SelectItem value="hours_mismatch">
+                          Hours Mismatch
+                        </SelectItem>
                         <SelectItem value="tips_error">Tips Error</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
@@ -300,7 +350,8 @@ export function DiscrepancyReportDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide as much detail as possible to help us resolve the issue quickly.
+                    Provide as much detail as possible to help us resolve the
+                    issue quickly.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -322,7 +373,8 @@ export function DiscrepancyReportDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Help us understand what you believe the correct result should be.
+                    Help us understand what you believe the correct result
+                    should be.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

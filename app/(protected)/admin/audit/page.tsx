@@ -1,10 +1,16 @@
 import { Suspense } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { AuditTrailViewer } from '@/components/features/audit/AuditTrailViewer';
 import { AuditFilters } from '@/components/features/audit/AuditFilters';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default function AuditTrailPage() {
   return (
@@ -12,7 +18,8 @@ export default function AuditTrailPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Audit Trail</h1>
         <p className="text-muted-foreground">
-          Track all system activities and changes for accountability and investigation.
+          Track all system activities and changes for accountability and
+          investigation.
         </p>
       </div>
 

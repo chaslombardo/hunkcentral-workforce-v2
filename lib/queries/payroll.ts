@@ -13,13 +13,15 @@ export async function getDepartmentHoursAndRates(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  const result = await prisma.$queryRaw<Array<{
-    department: string;
-    total_hours: bigint;
-    captain_hours: bigint;
-    wingman_hours: bigint;
-    co_captain_hours: bigint;
-  }>>`
+  const result = await prisma.$queryRaw<
+    Array<{
+      department: string;
+      total_hours: bigint;
+      captain_hours: bigint;
+      wingman_hours: bigint;
+      co_captain_hours: bigint;
+    }>
+  >`
     SELECT 
       lh.department,
       SUM(lh.hours) as total_hours,
@@ -36,7 +38,7 @@ export async function getDepartmentHoursAndRates(
     ORDER BY total_hours DESC
   `;
 
-  return result.map(row => ({
+  return result.map((row) => ({
     department: row.department as Department,
     totalHours: Number(row.total_hours),
     captainHours: Number(row.captain_hours),
@@ -53,15 +55,17 @@ export async function getDailyWorkBreakdown(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  const result = await prisma.$queryRaw<Array<{
-    log_date: Date;
-    log_id: string;
-    department: string;
-    hours: bigint;
-    is_co_captain: boolean;
-    is_captain: boolean;
-    daily_tips: bigint;
-  }>>`
+  const result = await prisma.$queryRaw<
+    Array<{
+      log_date: Date;
+      log_id: string;
+      department: string;
+      hours: bigint;
+      is_co_captain: boolean;
+      is_captain: boolean;
+      daily_tips: bigint;
+    }>
+  >`
     SELECT 
       dl."logDate" as log_date,
       dl.id as log_id,
@@ -91,7 +95,7 @@ export async function getDailyWorkBreakdown(
     ORDER BY dl."logDate" DESC, lh.department
   `;
 
-  return result.map(row => ({
+  return result.map((row) => ({
     logDate: row.log_date,
     logId: row.log_id,
     department: row.department as Department,
@@ -110,16 +114,18 @@ export async function getTipsBreakdown(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  const result = await prisma.$queryRaw<Array<{
-    log_date: Date;
-    log_id: string;
-    job_id: string;
-    client_name: string;
-    job_type: string;
-    job_tips: bigint;
-    team_members: bigint;
-    my_share: bigint;
-  }>>`
+  const result = await prisma.$queryRaw<
+    Array<{
+      log_date: Date;
+      log_id: string;
+      job_id: string;
+      client_name: string;
+      job_type: string;
+      job_tips: bigint;
+      team_members: bigint;
+      my_share: bigint;
+    }>
+  >`
     WITH employee_jobs AS (
       SELECT DISTINCT
         dl."logDate" as log_date,
@@ -162,7 +168,7 @@ export async function getTipsBreakdown(
     ORDER BY ej.log_date DESC, ej.job_tips DESC
   `;
 
-  return result.map(row => ({
+  return result.map((row) => ({
     logDate: row.log_date,
     logId: row.log_id,
     jobId: row.job_id,
@@ -182,12 +188,14 @@ export async function getPayrollSummaryWithDepartments(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  const result = await prisma.$queryRaw<Array<{
-    department: string;
-    total_hours: bigint;
-    gross_pay: bigint;
-    tips: bigint;
-  }>>`
+  const result = await prisma.$queryRaw<
+    Array<{
+      department: string;
+      total_hours: bigint;
+      gross_pay: bigint;
+      tips: bigint;
+    }>
+  >`
     WITH department_hours AS (
       SELECT 
         lh.department,
@@ -249,7 +257,7 @@ export async function getPayrollSummaryWithDepartments(
     ORDER BY dh.total_hours DESC
   `;
 
-  return result.map(row => ({
+  return result.map((row) => ({
     department: row.department as Department,
     totalHours: Number(row.total_hours),
     grossPay: Number(row.gross_pay),
@@ -292,7 +300,7 @@ export async function getCommissionDetails(
     },
   });
 
-  return commissions.map(commission => ({
+  return commissions.map((commission) => ({
     id: commission.id,
     jobId: commission.jobId,
     clientName: commission.clientName,
@@ -373,14 +381,16 @@ export async function getBonusDetails(
     // Aggregate labor costs by department
     for (const hour of log.hours) {
       if (hour.department === 'junk') {
-        const rate = log.captainId === hour.employeeId || hour.isCoCaptain
-          ? Number(hour.employee.rateJunkCaptain || 0)
-          : Number(hour.employee.rateJunkWingman || 0);
+        const rate =
+          log.captainId === hour.employeeId || hour.isCoCaptain
+            ? Number(hour.employee.rateJunkCaptain || 0)
+            : Number(hour.employee.rateJunkWingman || 0);
         totalJunkLaborCost += Number(hour.hours) * rate;
       } else if (hour.department === 'move') {
-        const rate = log.captainId === hour.employeeId || hour.isCoCaptain
-          ? Number(hour.employee.rateMoveCaptain || 0)
-          : Number(hour.employee.rateMoveWingman || 0);
+        const rate =
+          log.captainId === hour.employeeId || hour.isCoCaptain
+            ? Number(hour.employee.rateMoveCaptain || 0)
+            : Number(hour.employee.rateMoveWingman || 0);
         totalMoveLaborCost += Number(hour.hours) * rate;
       }
     }
@@ -435,13 +445,15 @@ export async function getWorkPatternAnalysis(
   payPeriodStart: Date,
   payPeriodEnd: Date
 ) {
-  const result = await prisma.$queryRaw<Array<{
-    total_days_worked: bigint;
-    avg_hours_per_day: bigint;
-    most_common_department: string;
-    total_jobs_completed: bigint;
-    avg_tips_per_day: bigint;
-  }>>`
+  const result = await prisma.$queryRaw<
+    Array<{
+      total_days_worked: bigint;
+      avg_hours_per_day: bigint;
+      most_common_department: string;
+      total_jobs_completed: bigint;
+      avg_tips_per_day: bigint;
+    }>
+  >`
     WITH daily_stats AS (
       SELECT 
         dl."logDate" as log_date,
@@ -481,7 +493,8 @@ export async function getWorkPatternAnalysis(
   return {
     totalDaysWorked: Number(stats?.total_days_worked || 0),
     avgHoursPerDay: Number(stats?.avg_hours_per_day || 0),
-    mostCommonDepartment: stats?.most_common_department as Department || 'admin',
+    mostCommonDepartment:
+      (stats?.most_common_department as Department) || 'admin',
     totalJobsCompleted: Number(stats?.total_jobs_completed || 0),
     avgTipsPerDay: Number(stats?.avg_tips_per_day || 0),
   };

@@ -17,6 +17,12 @@ model User {
   password          String
   fullName          String
   roles             String[]  // Array of roles: 'captain', 'wingman', 'manager', 'sales', 'admin'
+  
+  // Theme and UI preferences
+  themePreference   String    @default("system") // 'light', 'dark', 'system'
+  
+  // Granular permissions (in addition to roles)
+  permissions       String[]  @default([]) // Array of specific permissions
 
   // Department-specific hourly rates
   rateJunkCaptain   Decimal?  @db.Decimal(6, 2)
@@ -55,6 +61,10 @@ model User {
   discrepancyReportsEmployee DiscrepancyReport[] @relation("DiscrepancyReportEmployee")
   discrepancyReportsReporter DiscrepancyReport[] @relation("DiscrepancyReportReporter")
   discrepancyReportsResolver DiscrepancyReport[] @relation("DiscrepancyReportResolver")
+
+  @@index([email])
+  @@index([roles])
+  @@index([createdAt])
 }
 
 // Daily Logs
@@ -83,6 +93,14 @@ model DailyLog {
   hours       LogHour[]
   commissions CommissionEntry[]
   auditLogs   AuditLog[]
+
+  @@index([captainId])
+  @@index([logDate])
+  @@index([status])
+  @@index([captainId, logDate])
+  @@index([status, submittedAt])
+  @@index([approvedById, approvedAt])
+  @@unique([captainId, logDate]) // One log per captain per day
 }
 
 // Log Jobs
@@ -106,6 +124,11 @@ model LogJob {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([logId])
+  @@index([jobType])
+  @@index([jobId])
+  @@index([logId, jobType])
 }
 
 // Log Hours
@@ -121,6 +144,12 @@ model LogHour {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([logId])
+  @@index([employeeId])
+  @@index([department])
+  @@index([logId, employeeId])
+  @@index([employeeId, department])
 }
 
 // Commission Entries
@@ -153,6 +182,14 @@ model CommissionEntry {
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  @@index([salesId])
+  @@index([jobId])
+  @@index([status])
+  @@index([targetDate])
+  @@index([salesId, status])
+  @@index([jobId, status])
+  @@index([matchedLogId])
 }
 
 // Pay Periods
@@ -168,6 +205,12 @@ model PayPeriod {
 
   // Relations
   discrepancyReports DiscrepancyReport[]
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@unique([name]) // Unique pay period names
 }
 
 // Discrepancy Reports
@@ -197,6 +240,12 @@ model DiscrepancyReport {
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([payPeriodId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
 }
 
 // Audit Log
@@ -214,6 +263,13 @@ model AuditLog {
   dailyLog    DailyLog? @relation(fields: [dailyLogId], references: [id])
 
   createdAt   DateTime @default(now())
+
+  @@index([entityType])
+  @@index([entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([dailyLogId])
 }
 
 // Analytics Events
@@ -225,6 +281,10 @@ model AnalyticsEvent {
   timestamp   DateTime @default(now())
 
   createdAt   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([timestamp])
 }
 
 // Performance Metrics
@@ -238,6 +298,11 @@ model PerformanceMetric {
   timestamp   DateTime @default(now())
 
   createdAt   DateTime @default(now())
+
+  @@index([metricType])
+  @@index([page])
+  @@index([userId])
+  @@index([timestamp])
 }
 
 // User Feedback
@@ -259,6 +324,12 @@ model UserFeedback {
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([priority])
+  @@index([userId])
+  @@index([timestamp])
 }
 
 // A/B Test Experiments
@@ -308,4 +379,32 @@ model ABTestEvent {
   timestamp    DateTime         @default(now())
 
   createdAt    DateTime         @default(now())
+}
+
+// Pre-computed Metrics for Performance Optimization
+model PrecomputedMetric {
+  id          String   @id @default(uuid())
+  metricType  String   // 'dashboard_captain', 'dashboard_manager', 'payroll_summary', 'labor_costs', etc.
+  entityType  String?  // 'user', 'pay_period', 'department', 'global'
+  entityId    String?  // ID of the entity (user ID, pay period ID, etc.)
+  
+  // Metric data
+  data        Json     // JSON object containing the computed metrics
+  
+  // Metadata
+  payPeriodId String?  // Associated pay period for time-based metrics
+  department  String?  // Department filter if applicable
+  
+  // Cache management
+  computedAt  DateTime @default(now())
+  expiresAt   DateTime? // Optional expiration time
+  version     Int      @default(1) // Version for cache invalidation
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([metricType, entityType, entityId, payPeriodId, department])
+  @@index([metricType, entityType, entityId])
+  @@index([payPeriodId])
+  @@index([expiresAt])
 }

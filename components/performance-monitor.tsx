@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { analytics } from "@/lib/analytics";
+import { useEffect, useRef } from 'react';
+import { analytics } from '@/lib/analytics';
 
 interface PerformanceMonitorProps {
   pageName: string;
@@ -23,8 +23,10 @@ export function PerformanceMonitor({
     // Track page load performance
     const trackPageLoad = () => {
       if (typeof window !== 'undefined' && window.performance) {
-        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-        
+        const navigation = performance.getEntriesByType(
+          'navigation'
+        )[0] as PerformanceNavigationTiming;
+
         if (navigation) {
           // Track various performance metrics
           analytics.trackPerformance({
@@ -33,7 +35,8 @@ export function PerformanceMonitor({
             page: pageName,
             userId,
             metadata: {
-              domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+              domContentLoaded:
+                navigation.domContentLoadedEventEnd - navigation.fetchStart,
               firstPaint: navigation.responseEnd - navigation.fetchStart,
               domInteractive: navigation.domInteractive - navigation.fetchStart,
             },
@@ -41,7 +44,9 @@ export function PerformanceMonitor({
 
           // Track First Contentful Paint if available
           const paintEntries = performance.getEntriesByType('paint');
-          const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+          const fcp = paintEntries.find(
+            (entry) => entry.name === 'first-contentful-paint'
+          );
           if (fcp) {
             analytics.trackPerformance({
               metricType: 'render_time',
@@ -71,9 +76,9 @@ export function PerformanceMonitor({
 
       const target = event.target as HTMLElement;
       const elementInfo = getElementInfo(target);
-      
+
       interactionCountRef.current++;
-      
+
       analytics.trackInteraction({
         eventType: 'click',
         element: elementInfo,
@@ -93,22 +98,17 @@ export function PerformanceMonitor({
 
       const form = event.target as HTMLFormElement;
       const formName = form.name || form.id || 'unnamed-form';
-      
+
       analytics.trackFormInteraction(formName, 'submit', pageName, userId);
     };
 
     // Track errors
     const handleError = (event: ErrorEvent) => {
-      analytics.trackError(
-        new Error(event.message),
-        pageName,
-        userId,
-        {
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-        }
-      );
+      analytics.trackError(new Error(event.message), pageName, userId, {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
     };
 
     // Track unhandled promise rejections
@@ -172,7 +172,10 @@ export function PerformanceMonitor({
         document.removeEventListener('submit', handleFormSubmit);
       }
       window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener(
+        'unhandledrejection',
+        handleUnhandledRejection
+      );
       window.removeEventListener('load', trackPageLoad);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
@@ -197,7 +200,7 @@ export function PerformanceMonitor({
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1];
-        
+
         analytics.trackPerformance({
           metricType: 'render_time',
           value: lastEntry.startTime,
@@ -210,27 +213,36 @@ export function PerformanceMonitor({
       // Track First Input Delay (FID)
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: PerformanceEntry & { processingStart?: number }) => {
-          analytics.trackPerformance({
-            metricType: 'interaction_delay',
-            value: (entry.processingStart || 0) - entry.startTime,
-            page: pageName,
-            userId,
-            metadata: { metric: 'first-input-delay' },
-          });
-        });
+        entries.forEach(
+          (entry: PerformanceEntry & { processingStart?: number }) => {
+            analytics.trackPerformance({
+              metricType: 'interaction_delay',
+              value: (entry.processingStart || 0) - entry.startTime,
+              page: pageName,
+              userId,
+              metadata: { metric: 'first-input-delay' },
+            });
+          }
+        );
       });
 
       // Track Cumulative Layout Shift (CLS)
       const clsObserver = new PerformanceObserver((list) => {
         let clsValue = 0;
         const entries = list.getEntries();
-        
-        entries.forEach((entry: PerformanceEntry & { hadRecentInput?: boolean; value?: number }) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value || 0;
+
+        entries.forEach(
+          (
+            entry: PerformanceEntry & {
+              hadRecentInput?: boolean;
+              value?: number;
+            }
+          ) => {
+            if (!entry.hadRecentInput) {
+              clsValue += entry.value || 0;
+            }
           }
-        });
+        );
 
         analytics.trackPerformance({
           metricType: 'render_time',
@@ -264,24 +276,31 @@ export function PerformanceMonitor({
 function getElementInfo(element: HTMLElement): string {
   const tagName = element.tagName.toLowerCase();
   const id = element.id ? `#${element.id}` : '';
-  const className = element.className && typeof element.className === 'string' ? `.${element.className.split(' ').join('.')}` : '';
+  const className =
+    element.className && typeof element.className === 'string'
+      ? `.${element.className.split(' ').join('.')}`
+      : '';
   const text = element.textContent?.trim().substring(0, 50) || '';
   const role = element.getAttribute('role') || '';
   const ariaLabel = element.getAttribute('aria-label') || '';
-  
+
   // Prioritize meaningful identifiers
   if (ariaLabel) return `${tagName}[aria-label="${ariaLabel}"]`;
   if (id) return `${tagName}${id}`;
   if (role) return `${tagName}[role="${role}"]`;
-  if (className && !className.includes('undefined')) return `${tagName}${className}`;
+  if (className && !className.includes('undefined'))
+    return `${tagName}${className}`;
   if (text) return `${tagName}:"${text}"`;
-  
+
   return tagName;
 }
 
 // Hook for manual performance tracking
 export function usePerformanceTracking(pageName: string, userId?: string) {
-  const trackInteraction = (element: string, metadata?: Record<string, unknown>) => {
+  const trackInteraction = (
+    element: string,
+    metadata?: Record<string, unknown>
+  ) => {
     analytics.trackInteraction({
       eventType: 'click',
       element,
@@ -291,7 +310,10 @@ export function usePerformanceTracking(pageName: string, userId?: string) {
     });
   };
 
-  const trackFormSubmission = (formName: string, metadata?: Record<string, unknown>) => {
+  const trackFormSubmission = (
+    formName: string,
+    metadata?: Record<string, unknown>
+  ) => {
     analytics.trackFormInteraction(formName, 'submit', pageName, userId);
     if (metadata) {
       analytics.trackInteraction({
@@ -304,9 +326,17 @@ export function usePerformanceTracking(pageName: string, userId?: string) {
     }
   };
 
-  const trackCustomMetric = (metricType: string, value: number, metadata?: Record<string, unknown>) => {
+  const trackCustomMetric = (
+    metricType: string,
+    value: number,
+    metadata?: Record<string, unknown>
+  ) => {
     analytics.trackPerformance({
-      metricType: metricType as 'page_load' | 'interaction_delay' | 'bundle_size' | 'render_time',
+      metricType: metricType as
+        | 'page_load'
+        | 'interaction_delay'
+        | 'bundle_size'
+        | 'render_time',
       value,
       page: pageName,
       userId,

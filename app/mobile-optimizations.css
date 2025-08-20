@@ -18,28 +18,28 @@
     --rdp-accent-color: var(--primary);
     --rdp-background-color: var(--primary);
   }
-  
+
   .rdp-button {
     min-height: 48px;
     min-width: 48px;
     font-size: 16px; /* Better readability */
     touch-action: manipulation;
   }
-  
+
   /* Mobile table improvements - from dashboard-01 data-table */
   .mobile-table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Touch-friendly form controls - following shadcn/ui input patterns */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="tel"],
-  input[type="url"],
-  input[type="search"],
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  input[type='tel'],
+  input[type='url'],
+  input[type='search'],
   select,
   textarea {
     min-height: 48px; /* Increased from 44px */
@@ -48,26 +48,26 @@
     /* Better focus states for mobile */
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   /* Specific iOS input optimizations */
-  input[type="email"] {
+  input[type='email'] {
     text-transform: none; /* Prevent auto-capitalization */
     autocapitalize: none;
     autocorrect: off;
   }
-  
-  input[type="tel"] {
+
+  input[type='tel'] {
     text-transform: none;
     autocapitalize: none;
     autocorrect: off;
   }
-  
-  input[type="url"] {
+
+  input[type='url'] {
     text-transform: none;
     autocapitalize: none;
     autocorrect: off;
   }
-  
+
   /* Button sizing from dashboard-01 patterns - enhanced */
   button {
     min-height: 48px; /* Increased from 44px */
@@ -75,14 +75,14 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   /* Form label optimizations */
   label {
     font-size: 16px; /* Consistent with inputs */
     line-height: 1.5;
     touch-action: manipulation;
   }
-  
+
   /* Select dropdown optimizations */
   select {
     appearance: none;
@@ -94,33 +94,33 @@
     background-size: 12px;
     padding-right: 40px;
   }
-  
+
   /* Textarea optimizations */
   textarea {
     resize: vertical;
     min-height: 96px; /* 2x input height */
     line-height: 1.5;
   }
-  
+
   /* Card optimizations for mobile */
   .mobile-card-optimization {
     min-height: 120px; /* Ensure cards have adequate height */
     touch-action: manipulation;
   }
-  
+
   /* Tab optimizations for mobile */
-  .mobile-tabs [role="tablist"] {
+  .mobile-tabs [role='tablist'] {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  
-  .mobile-tabs [role="tablist"]::-webkit-scrollbar {
+
+  .mobile-tabs [role='tablist']::-webkit-scrollbar {
     display: none;
   }
-  
-  .mobile-tabs [role="tab"] {
+
+  .mobile-tabs [role='tab'] {
     min-width: 80px;
     white-space: nowrap;
     touch-action: manipulation;
@@ -134,19 +134,19 @@
   .ios-safe-area {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  
+
   .ios-input-fix {
     font-size: 16px; /* Prevents zoom */
   }
-  
+
   /* Fix iOS input styling issues */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="tel"],
-  input[type="url"],
-  input[type="search"],
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  input[type='tel'],
+  input[type='url'],
+  input[type='search'],
   textarea {
     -webkit-appearance: none;
     -webkit-border-radius: 0;
@@ -164,7 +164,7 @@
 .mobile-form-optimization {
   /* Ensure forms are touch-friendly */
   touch-action: manipulation;
-  
+
   /* Better spacing for mobile */
   padding: 1rem;
 }
@@ -186,7 +186,7 @@
     /* Enhanced focus ring for mobile */
     box-shadow: 0 0 0 2px var(--ring);
   }
-  
+
   /* Remove default focus styles that interfere */
   button:focus,
   input:focus,
@@ -194,21 +194,21 @@
   textarea:focus {
     outline: none;
   }
-  
+
   /* Better tap targets for checkboxes and radio buttons */
-  input[type="checkbox"],
-  input[type="radio"] {
+  input[type='checkbox'],
+  input[type='radio'] {
     min-width: 20px;
     min-height: 20px;
     transform: scale(1.2);
   }
-  
+
   /* Label improvements for mobile */
   label {
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   /* Form validation message optimizations */
   .mobile-validation-message {
     font-size: 14px;
@@ -243,7 +243,7 @@
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height */
   }
-  
+
   /* Better spacing when keyboard is visible */
   .keyboard-visible .mobile-form-container {
     padding-bottom: 2rem;
@@ -257,19 +257,19 @@
     font-size: 16px;
     line-height: 1.5;
   }
-  
+
   /* Better contrast for mobile screens */
   .mobile-high-contrast {
     color: var(--foreground);
     background: var(--background);
   }
-  
+
   /* Improved button states for mobile */
   button:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
   }
-  
+
   /* Better disabled states */
   button:disabled,
   input:disabled,

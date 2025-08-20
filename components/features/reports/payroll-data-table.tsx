@@ -55,8 +55,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ResponsiveTable, MobileTableCard, MobileTableItem, MobileTableField } from '@/components/ui/responsive-table';
-import { SortableHeader, getSortDirection } from '@/components/ui/sortable-header';
+import {
+  ResponsiveTable,
+  MobileTableCard,
+  MobileTableItem,
+  MobileTableField,
+} from '@/components/ui/responsive-table';
+import {
+  SortableHeader,
+  getSortDirection,
+} from '@/components/ui/sortable-header';
 import { PayrollTableSkeleton } from '@/components/ui/skeleton-components';
 import type { PayPeriod, User } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
@@ -77,7 +85,15 @@ const mockPayrollData: PayrollCalculation[] = [
       roles: ['captain'],
     } as User,
     totalHours: 40,
-    hoursByDepartment: { junk: 40, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+    hoursByDepartment: {
+      junk: 40,
+      move: 0,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 0,
+    },
     grossWages: 720,
     tips: 150,
     bonuses: 85,
@@ -104,7 +120,15 @@ const mockPayrollData: PayrollCalculation[] = [
       roles: ['wingman'],
     } as User,
     totalHours: 38,
-    hoursByDepartment: { junk: 0, move: 38, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 0 },
+    hoursByDepartment: {
+      junk: 0,
+      move: 38,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 0,
+    },
     grossWages: 760,
     tips: 200,
     bonuses: 120,
@@ -131,7 +155,15 @@ const mockPayrollData: PayrollCalculation[] = [
       roles: ['sales'],
     } as User,
     totalHours: 40,
-    hoursByDepartment: { junk: 0, move: 0, zigma: 0, training: 0, estimating: 0, warehouse: 0, admin: 40 },
+    hoursByDepartment: {
+      junk: 0,
+      move: 0,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 40,
+    },
     grossWages: 640,
     tips: 0,
     bonuses: 0,
@@ -190,9 +222,11 @@ const columns: ColumnDef<PayrollCalculation>[] = [
       </SortableHeader>
     ),
     cell: ({ row }) => {
-      const primaryDept = Object.entries(row.original.hoursByDepartment)
-        .find(([, hours]) => hours > 0)?.[0] || 'admin';
-      
+      const primaryDept =
+        Object.entries(row.original.hoursByDepartment).find(
+          ([, hours]) => hours > 0
+        )?.[0] || 'admin';
+
       return (
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-hunks-green-100">
@@ -321,15 +355,18 @@ const columns: ColumnDef<PayrollCalculation>[] = [
     ),
     cell: ({ row }) => {
       // Calculate approximate labor percentage based on primary department
-      const primaryDept = Object.entries(row.original.hoursByDepartment)
-        .find(([, hours]) => hours > 0)?.[0] || 'admin';
-      
+      const primaryDept =
+        Object.entries(row.original.hoursByDepartment).find(
+          ([, hours]) => hours > 0
+        )?.[0] || 'admin';
+
       // Mock calculation - in real app this would come from log data
-      const mockPercentage = primaryDept === 'junk' ? 0.16 : primaryDept === 'move' ? 0.22 : 0;
+      const mockPercentage =
+        primaryDept === 'junk' ? 0.16 : primaryDept === 'move' ? 0.22 : 0;
       const isGood = mockPercentage <= 0.18;
-      
+
       return (
-        <Badge 
+        <Badge
           variant={isGood ? 'default' : 'destructive'}
           className={isGood ? 'bg-hunks-green hover:bg-hunks-green/90' : ''}
         >
@@ -363,10 +400,16 @@ const columns: ColumnDef<PayrollCalculation>[] = [
   },
 ];
 
-export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTableProps) {
+export function PayrollDataTable({
+  payrollData,
+  selectedPeriod,
+}: PayrollDataTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -412,23 +455,31 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
       {/* Header and Controls - Following dashboard-01 DataTable pattern */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-hunks-green-800">Employee Payroll</h2>
+          <h2 className="text-lg font-semibold text-hunks-green-800">
+            Employee Payroll
+          </h2>
           <p className="text-sm text-muted-foreground">
             {selectedPeriod ? selectedPeriod.name : 'Current pay period'}
           </p>
         </div>
-        
+
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
           {/* Search */}
           <Input
             placeholder="Search employees..."
-            value={(table.getColumn('employee.fullName')?.getFilterValue() as string) ?? ''}
+            value={
+              (table
+                .getColumn('employee.fullName')
+                ?.getFilterValue() as string) ?? ''
+            }
             onChange={(event) =>
-              table.getColumn('employee.fullName')?.setFilterValue(event.target.value)
+              table
+                .getColumn('employee.fullName')
+                ?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />
-          
+
           {/* Department Filter */}
           <Select
             defaultValue="all"
@@ -485,11 +536,15 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
           </DropdownMenu>
 
           {/* Export */}
-          <Button variant="outline" size="sm" className="border-hunks-green-200 hover:bg-hunks-green-50">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-hunks-green-200 hover:bg-hunks-green-50"
+          >
             <Plus className="mr-2 h-4 w-4" />
             <span className="hidden lg:inline">Add Employee</span>
           </Button>
-          
+
           <Button size="sm" className="bg-hunks-green hover:bg-hunks-green/90">
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -506,7 +561,11 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
                 <TableRow key={headerGroup.id} variant="branded">
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id} colSpan={header.colSpan} variant="branded">
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        variant="branded"
+                      >
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -557,30 +616,32 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
             <MobileTableItem key={row.id} branded>
-              <MobileTableField 
-                label="Employee" 
+              <MobileTableField
+                label="Employee"
                 value={
                   <div className="flex items-center gap-2">
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-hunks-green-100">
                       <UserIcon className="h-3 w-3 text-hunks-green-600" />
                     </div>
-                    <span className="font-medium">{row.original.employee.fullName}</span>
+                    <span className="font-medium">
+                      {row.original.employee.fullName}
+                    </span>
                   </div>
-                } 
+                }
               />
-              <MobileTableField 
-                label="Hours" 
-                value={`${row.original.totalHours.toFixed(1)}h`} 
+              <MobileTableField
+                label="Hours"
+                value={`${row.original.totalHours.toFixed(1)}h`}
               />
-              <MobileTableField 
-                label="Gross Wages" 
+              <MobileTableField
+                label="Gross Wages"
                 value={new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
-                }).format(row.original.grossWages)} 
+                }).format(row.original.grossWages)}
               />
-              <MobileTableField 
-                label="Total Pay" 
+              <MobileTableField
+                label="Total Pay"
                 value={
                   <span className="font-semibold text-hunks-green-700">
                     {new Intl.NumberFormat('en-US', {
@@ -588,7 +649,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
                       currency: 'USD',
                     }).format(row.original.totalPay)}
                   </span>
-                } 
+                }
               />
               <div className="flex justify-between items-center pt-2 border-t border-hunks-green-200">
                 <Checkbox
@@ -598,11 +659,7 @@ export function PayrollDataTable({ payrollData, selectedPeriod }: PayrollDataTab
                 />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-8 w-8 p-0"
-                      size="icon"
-                    >
+                    <Button variant="ghost" className="h-8 w-8 p-0" size="icon">
                       <MoreHorizontal className="h-4 w-4" />
                       <span className="sr-only">Open menu</span>
                     </Button>

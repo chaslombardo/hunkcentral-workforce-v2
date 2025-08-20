@@ -1,8 +1,14 @@
-'use client'
+'use client';
 
-import { Building2, WifiOff, RefreshCw } from 'lucide-react'
-import { BrandButton } from '@/components/brand/brand-button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Building2, WifiOff, RefreshCw } from 'lucide-react';
+import { BrandButton } from '@/components/brand/brand-button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function OfflinePage() {
   return (
@@ -34,19 +40,19 @@ export default function OfflinePage() {
               Your changes will automatically sync when you&apos;re back online.
             </p>
           </div>
-          
-          <BrandButton 
-            onClick={() => window.location.reload()} 
+
+          <BrandButton
+            onClick={() => window.location.reload()}
             variant="primary"
             className="w-full"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
           </BrandButton>
-          
+
           <div className="text-center">
-            <BrandButton 
-              variant="ghost" 
+            <BrandButton
+              variant="ghost"
               onClick={() => window.history.back()}
               className="text-sm"
             >
@@ -56,5 +62,5 @@ export default function OfflinePage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

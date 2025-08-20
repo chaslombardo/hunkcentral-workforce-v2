@@ -5,9 +5,12 @@ import { auth } from '@/lib/auth';
 export async function GET() {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
     }
 
     // Check authorization - captains, managers, and admins can access employees
@@ -16,9 +19,12 @@ export async function GET() {
       !session.user.roles?.includes('manager') &&
       !session.user.roles?.includes('admin')
     ) {
-      return NextResponse.json({ 
-        error: 'Unauthorized: Captain, Manager, or Admin access required' 
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: 'Unauthorized: Captain, Manager, or Admin access required',
+        },
+        { status: 403 }
+      );
     }
 
     // For captains, return all employees (they need to select team members for hours)
@@ -47,12 +53,20 @@ export async function GET() {
     });
 
     // Convert Decimal fields to numbers for JSON serialization
-    const serializedUsers = users.map(user => ({
+    const serializedUsers = users.map((user) => ({
       ...user,
-      rateJunkCaptain: user.rateJunkCaptain ? Number(user.rateJunkCaptain) : null,
-      rateJunkWingman: user.rateJunkWingman ? Number(user.rateJunkWingman) : null,
-      rateMoveCaptain: user.rateMoveCaptain ? Number(user.rateMoveCaptain) : null,
-      rateMoveWingman: user.rateMoveWingman ? Number(user.rateMoveWingman) : null,
+      rateJunkCaptain: user.rateJunkCaptain
+        ? Number(user.rateJunkCaptain)
+        : null,
+      rateJunkWingman: user.rateJunkWingman
+        ? Number(user.rateJunkWingman)
+        : null,
+      rateMoveCaptain: user.rateMoveCaptain
+        ? Number(user.rateMoveCaptain)
+        : null,
+      rateMoveWingman: user.rateMoveWingman
+        ? Number(user.rateMoveWingman)
+        : null,
       rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
       rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
       rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,

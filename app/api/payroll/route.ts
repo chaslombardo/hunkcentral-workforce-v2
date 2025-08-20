@@ -15,12 +15,9 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getPayrollSummary(employeeId, payPeriodId);
-    
+
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
     return NextResponse.json(result.data);

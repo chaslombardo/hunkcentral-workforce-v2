@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  AlertCircle, 
-  AlertTriangle, 
+import {
+  AlertCircle,
+  AlertTriangle,
   Info,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
 } from 'lucide-react';
 
 export interface ValidationError {
@@ -42,9 +42,9 @@ export function MobileFormValidation({
 
   const errorsByType = React.useMemo(() => {
     return {
-      error: errors.filter(e => e.type === 'error'),
-      warning: errors.filter(e => e.type === 'warning'),
-      info: errors.filter(e => e.type === 'info'),
+      error: errors.filter((e) => e.type === 'error'),
+      warning: errors.filter((e) => e.type === 'warning'),
+      info: errors.filter((e) => e.type === 'info'),
     };
   }, [errors]);
 
@@ -109,12 +109,18 @@ export function MobileFormValidation({
                 </Badge>
               )}
               {totalWarnings > 0 && (
-                <Badge variant="secondary" className="text-xs bg-hunks-orange/10 text-hunks-orange">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-hunks-orange/10 text-hunks-orange"
+                >
                   {totalWarnings} warning{totalWarnings !== 1 ? 's' : ''}
                 </Badge>
               )}
               {totalInfo > 0 && (
-                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-blue-100 text-blue-700"
+                >
                   {totalInfo} info
                 </Badge>
               )}
@@ -123,7 +129,7 @@ export function MobileFormValidation({
               Please review and fix the issues below
             </span>
           </div>
-          
+
           {collapsible && hasMore && (
             <Button
               variant="ghost"
@@ -163,12 +169,14 @@ export function MobileFormValidation({
             onClick={() => onErrorClick?.(error.field)}
           >
             {getIcon(error.type)}
-            
+
             <div className="flex-1 pr-8">
               <AlertDescription className="text-sm">
                 <div className="flex flex-col gap-1">
                   <span className="font-medium capitalize">
-                    {error.field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    {error.field
+                      .replace(/([A-Z])/g, ' $1')
+                      .replace(/^./, (str) => str.toUpperCase())}
                   </span>
                   <span>{error.message}</span>
                 </div>
@@ -203,7 +211,8 @@ export function MobileFormValidation({
           className="w-full h-12 touch-manipulation"
         >
           <ChevronDown className="h-4 w-4 mr-2" />
-          Show {errors.length - maxVisible} more issue{errors.length - maxVisible !== 1 ? 's' : ''}
+          Show {errors.length - maxVisible} more issue
+          {errors.length - maxVisible !== 1 ? 's' : ''}
         </Button>
       )}
     </div>
@@ -215,15 +224,15 @@ export function useMobileFormValidation() {
   const [errors, setErrors] = React.useState<ValidationError[]>([]);
 
   const addError = React.useCallback((error: ValidationError) => {
-    setErrors(prev => {
+    setErrors((prev) => {
       // Remove existing error for the same field
-      const filtered = prev.filter(e => e.field !== error.field);
+      const filtered = prev.filter((e) => e.field !== error.field);
       return [...filtered, error];
     });
   }, []);
 
   const removeError = React.useCallback((field: string) => {
-    setErrors(prev => prev.filter(e => e.field !== field));
+    setErrors((prev) => prev.filter((e) => e.field !== field));
   }, []);
 
   const clearErrors = React.useCallback(() => {
@@ -231,43 +240,49 @@ export function useMobileFormValidation() {
   }, []);
 
   const hasErrors = React.useMemo(() => {
-    return errors.some(e => e.type === 'error');
+    return errors.some((e) => e.type === 'error');
   }, [errors]);
 
   const hasWarnings = React.useMemo(() => {
-    return errors.some(e => e.type === 'warning');
+    return errors.some((e) => e.type === 'warning');
   }, [errors]);
 
-  const getFieldError = React.useCallback((field: string) => {
-    return errors.find(e => e.field === field);
-  }, [errors]);
+  const getFieldError = React.useCallback(
+    (field: string) => {
+      return errors.find((e) => e.field === field);
+    },
+    [errors]
+  );
 
-  const validateField = React.useCallback((
-    field: string,
-    value: unknown,
-    rules: Array<{
-      test: (value: unknown) => boolean;
-      message: string;
-      type?: ValidationError['type'];
-      severity?: ValidationError['severity'];
-    }>
-  ) => {
-    // Remove existing error for this field
-    removeError(field);
+  const validateField = React.useCallback(
+    (
+      field: string,
+      value: unknown,
+      rules: Array<{
+        test: (value: unknown) => boolean;
+        message: string;
+        type?: ValidationError['type'];
+        severity?: ValidationError['severity'];
+      }>
+    ) => {
+      // Remove existing error for this field
+      removeError(field);
 
-    // Run validation rules
-    for (const rule of rules) {
-      if (!rule.test(value)) {
-        addError({
-          field,
-          message: rule.message,
-          type: rule.type || 'error',
-          severity: rule.severity || 'medium',
-        });
-        break; // Stop at first failed rule
+      // Run validation rules
+      for (const rule of rules) {
+        if (!rule.test(value)) {
+          addError({
+            field,
+            message: rule.message,
+            type: rule.type || 'error',
+            severity: rule.severity || 'medium',
+          });
+          break; // Stop at first failed rule
+        }
       }
-    }
-  }, [addError, removeError]);
+    },
+    [addError, removeError]
+  );
 
   return {
     errors,

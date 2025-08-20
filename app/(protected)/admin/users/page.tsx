@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'Manage employee accounts, roles, and compensation settings',
 };
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default function UsersPage() {
   return <UserManagementDashboard />;

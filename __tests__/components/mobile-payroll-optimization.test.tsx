@@ -10,7 +10,9 @@ vi.mock('@/hooks/use-mobile', () => ({
 
 // Mock other hooks and dependencies
 vi.mock('@/lib/actions/payroll-validation', () => ({
-  validateEmployeePayroll: vi.fn().mockResolvedValue({ success: true, data: {} }),
+  validateEmployeePayroll: vi
+    .fn()
+    .mockResolvedValue({ success: true, data: {} }),
   submitDiscrepancyReport: vi.fn().mockResolvedValue({ success: true }),
 }));
 
@@ -26,12 +28,12 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should render mobile-optimized tabs with horizontal scroll', () => {
       render(<MyPayrollView />);
-      
+
       // Check for mobile tab layout
       const tabsList = screen.getByRole('tablist');
       expect(tabsList).toHaveClass('inline-flex');
       expect(tabsList).toHaveClass('w-max');
-      
+
       // Check for touch-optimized tab triggers
       const breakdownTab = screen.getByRole('tab', { name: /breakdown/i });
       expect(breakdownTab).toHaveClass('touch-manipulation');
@@ -40,7 +42,7 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should use mobile-optimized summary cards layout', () => {
       render(<MyPayrollView />);
-      
+
       // Check for mobile card optimizations by finding the grid container with summary cards
       const summaryCards = document.querySelector('.grid.grid-cols-1.gap-3');
       expect(summaryCards).toBeInTheDocument();
@@ -50,7 +52,7 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should render mobile-optimized buttons with larger touch targets', () => {
       render(<MyPayrollView />);
-      
+
       const downloadButton = screen.getByRole('button', { name: /download/i });
       expect(downloadButton).toHaveClass('min-h-[44px]');
       expect(downloadButton).toHaveClass('touch-manipulation');
@@ -58,7 +60,7 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should use mobile-optimized select components', () => {
       render(<MyPayrollView />);
-      
+
       const payPeriodSelect = screen.getByRole('combobox');
       expect(payPeriodSelect).toHaveClass('h-12');
       expect(payPeriodSelect).toHaveClass('touch-manipulation');
@@ -72,7 +74,7 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should render desktop tab layout when not mobile', () => {
       render(<MyPayrollView />);
-      
+
       const tabsList = screen.getByRole('tablist');
       expect(tabsList).toHaveClass('grid');
       expect(tabsList).toHaveClass('grid-cols-3');
@@ -81,8 +83,10 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should use standard button sizes on desktop', () => {
       render(<MyPayrollView />);
-      
-      const downloadButton = screen.getByRole('button', { name: /download paystub/i });
+
+      const downloadButton = screen.getByRole('button', {
+        name: /download paystub/i,
+      });
       expect(downloadButton).not.toHaveClass('h-12');
     });
   });
@@ -94,11 +98,11 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should show mobile-optimized loading text', async () => {
       render(<MyPayrollView userId="test-user" />);
-      
+
       // Switch to a tab that triggers detailed loading
       const dailyTab = screen.getByRole('tab', { name: /work/i });
       fireEvent.click(dailyTab);
-      
+
       // Should show mobile-optimized loading skeleton
       await waitFor(() => {
         const skeletonElements = document.querySelectorAll('.animate-pulse');
@@ -114,17 +118,17 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should apply touch-manipulation class to interactive elements', () => {
       render(<MyPayrollView />);
-      
+
       // Check tabs
       const tabs = screen.getAllByRole('tab');
-      tabs.forEach(tab => {
+      tabs.forEach((tab) => {
         expect(tab).toHaveClass('touch-manipulation');
       });
-      
+
       // Check main action buttons (download button)
       const downloadButton = screen.getByRole('button', { name: /download/i });
       expect(downloadButton).toHaveClass('touch-manipulation');
-      
+
       // Check select components
       const payPeriodSelect = screen.getByRole('combobox');
       expect(payPeriodSelect).toHaveClass('touch-manipulation');
@@ -132,12 +136,12 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should have minimum touch target sizes', () => {
       render(<MyPayrollView />);
-      
+
       const downloadButton = screen.getByRole('button', { name: /download/i });
       expect(downloadButton).toHaveClass('min-h-[44px]'); // 44px minimum
-      
+
       const tabs = screen.getAllByRole('tab');
-      tabs.forEach(tab => {
+      tabs.forEach((tab) => {
         expect(tab).toHaveClass('h-10'); // 40px minimum for tabs
       });
     });
@@ -147,15 +151,15 @@ describe('Mobile Payroll Optimizations', () => {
     it('should adapt layout based on mobile state changes', () => {
       mockIsMobile.mockReturnValue(false);
       const { rerender } = render(<MyPayrollView />);
-      
+
       // Initially desktop layout
       let tabsList = screen.getByRole('tablist');
       expect(tabsList).toHaveClass('grid');
-      
+
       // Switch to mobile
       mockIsMobile.mockReturnValue(true);
       rerender(<MyPayrollView />);
-      
+
       // Should now use mobile layout
       tabsList = screen.getByRole('tablist');
       expect(tabsList).toHaveClass('inline-flex');
@@ -169,14 +173,16 @@ describe('Mobile Payroll Optimizations', () => {
 
     it('should render mobile-optimized loading skeletons', async () => {
       render(<MyPayrollView userId="test-user" />);
-      
+
       // Switch to breakdown tab to trigger loading
       const breakdownTab = screen.getByRole('tab', { name: /breakdown/i });
       fireEvent.click(breakdownTab);
-      
+
       // Should show mobile loading text (shorter version)
       await waitFor(() => {
-        expect(screen.getByText(/You're currently offline/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/You're currently offline/)
+        ).toBeInTheDocument();
       });
     });
   });

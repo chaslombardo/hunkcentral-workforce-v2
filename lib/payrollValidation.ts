@@ -83,8 +83,9 @@ export function validatePayrollCalculation(
   );
 
   // Validate department hours match total hours
-  const departmentHoursSum = Object.values(payrollCalculation.hoursByDepartment)
-    .reduce((sum, hours) => sum + hours, 0);
+  const departmentHoursSum = Object.values(
+    payrollCalculation.hoursByDepartment
+  ).reduce((sum, hours) => sum + hours, 0);
 
   if (Math.abs(departmentHoursSum - payrollCalculation.totalHours) > 0.01) {
     errors.push({
@@ -99,7 +100,10 @@ export function validatePayrollCalculation(
   }
 
   // Validate tips breakdown matches total tips
-  const tipsSum = enhancedPayroll.tipsBreakdown.reduce((sum, tip) => sum + tip.myShare, 0);
+  const tipsSum = enhancedPayroll.tipsBreakdown.reduce(
+    (sum, tip) => sum + tip.myShare,
+    0
+  );
   if (Math.abs(tipsSum - payrollCalculation.tips) > 0.01) {
     errors.push({
       type: 'error',
@@ -113,8 +117,9 @@ export function validatePayrollCalculation(
   }
 
   // Validate department breakdown totals
-  const departmentGrossPaySum = Object.values(enhancedPayroll.departmentBreakdown)
-    .reduce((sum, dept) => sum + dept.grossPay, 0);
+  const departmentGrossPaySum = Object.values(
+    enhancedPayroll.departmentBreakdown
+  ).reduce((sum, dept) => sum + dept.grossPay, 0);
 
   if (Math.abs(departmentGrossPaySum - payrollCalculation.grossWages) > 0.01) {
     errors.push({
@@ -129,8 +134,10 @@ export function validatePayrollCalculation(
   }
 
   // Validate daily breakdown totals
-  const dailyHoursSum = Object.values(enhancedPayroll.dailyBreakdown)
-    .reduce((sum, day) => sum + day.totalHours, 0);
+  const dailyHoursSum = Object.values(enhancedPayroll.dailyBreakdown).reduce(
+    (sum, day) => sum + day.totalHours,
+    0
+  );
 
   if (Math.abs(dailyHoursSum - payrollCalculation.totalHours) > 0.01) {
     warnings.push({
@@ -145,9 +152,12 @@ export function validatePayrollCalculation(
   }
 
   // Validate rate consistency
-  for (const [department, breakdown] of Object.entries(enhancedPayroll.departmentBreakdown)) {
+  for (const [department, breakdown] of Object.entries(
+    enhancedPayroll.departmentBreakdown
+  )) {
     if (breakdown.hours > 0) {
-      const expectedRate = enhancedPayroll.rateSchedule[department as Department].currentRate;
+      const expectedRate =
+        enhancedPayroll.rateSchedule[department as Department].currentRate;
       if (Math.abs(breakdown.rate - expectedRate) > 0.01) {
         errors.push({
           type: 'error',
@@ -164,8 +174,10 @@ export function validatePayrollCalculation(
 
   // Validate commission calculations
   const expectedCommission = commissionEntries
-    .filter(entry => entry.status === 'matched' && entry.matchedLog?.approvedAt)
-    .filter(entry => {
+    .filter(
+      (entry) => entry.status === 'matched' && entry.matchedLog?.approvedAt
+    )
+    .filter((entry) => {
       const approvedDate = new Date(entry.matchedLog!.approvedAt!);
       return approvedDate >= payPeriodStart && approvedDate <= payPeriodEnd;
     })
@@ -192,7 +204,10 @@ export function validatePayrollCalculation(
   // Calculate accuracy percentage
   const totalChecks = 10; // Number of validation checks performed
   const failedChecks = errors.length;
-  const calculationAccuracy = Math.max(0, ((totalChecks - failedChecks) / totalChecks) * 100);
+  const calculationAccuracy = Math.max(
+    0,
+    ((totalChecks - failedChecks) / totalChecks) * 100
+  );
 
   return {
     isValid: errors.length === 0,
@@ -216,7 +231,9 @@ function validateDataIntegrity(
 ): void {
   for (const log of approvedLogs) {
     // Check for logs without hours for the employee
-    const employeeHours = log.hours.filter(hour => hour.employeeId === employee.id);
+    const employeeHours = log.hours.filter(
+      (hour) => hour.employeeId === employee.id
+    );
     if (employeeHours.length === 0) {
       info.push({
         type: 'info',
@@ -229,10 +246,14 @@ function validateDataIntegrity(
     }
 
     // Check for hours without corresponding jobs
-    const junkHours = employeeHours.filter(hour => hour.department === 'junk');
-    const moveHours = employeeHours.filter(hour => hour.department === 'move');
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const junkHours = employeeHours.filter(
+      (hour) => hour.department === 'junk'
+    );
+    const moveHours = employeeHours.filter(
+      (hour) => hour.department === 'move'
+    );
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
 
     if (junkHours.length > 0 && junkJobs.length === 0) {
       warnings.push({
@@ -255,7 +276,10 @@ function validateDataIntegrity(
     }
 
     // Check for excessive hours in a single day
-    const totalDailyHours = employeeHours.reduce((sum, hour) => sum + Number(hour.hours), 0);
+    const totalDailyHours = employeeHours.reduce(
+      (sum, hour) => sum + Number(hour.hours),
+      0
+    );
     if (totalDailyHours > 16) {
       warnings.push({
         type: 'warning',
@@ -284,7 +308,11 @@ function validateDataIntegrity(
 
     // Check for missing rates
     for (const hour of employeeHours) {
-      const rate = getRateForDepartment(employee, hour.department as Department, hour.isCoCaptain);
+      const rate = getRateForDepartment(
+        employee,
+        hour.department as Department,
+        hour.isCoCaptain
+      );
       if (rate === 0) {
         errors.push({
           type: 'error',
@@ -323,25 +351,38 @@ function buildAuditTrail(
   auditTrail: AuditTrailEntry[]
 ): void {
   for (const log of approvedLogs) {
-    const employeeHours = log.hours.filter(hour => hour.employeeId === employee.id);
-    
+    const employeeHours = log.hours.filter(
+      (hour) => hour.employeeId === employee.id
+    );
+
     for (const hour of employeeHours) {
-      const rate = getRateForDepartment(employee, hour.department as Department, hour.isCoCaptain);
-      const grossPay = Number(hour.hours) * rate;
-      
-      // Calculate tips for this department
-      const departmentJobs = log.jobs.filter(job => 
-        (job.jobType === 'junk' && hour.department === 'junk') ||
-        (job.jobType === 'move' && hour.department === 'move')
+      const rate = getRateForDepartment(
+        employee,
+        hour.department as Department,
+        hour.isCoCaptain
       );
-      
+      const grossPay = Number(hour.hours) * rate;
+
+      // Calculate tips for this department
+      const departmentJobs = log.jobs.filter(
+        (job) =>
+          (job.jobType === 'junk' && hour.department === 'junk') ||
+          (job.jobType === 'move' && hour.department === 'move')
+      );
+
       const departmentEmployees = log.hours
-        .filter(h => h.department === hour.department)
-        .map(h => h.employeeId);
-      
+        .filter((h) => h.department === hour.department)
+        .map((h) => h.employeeId);
+
       const uniqueEmployees = [...new Set(departmentEmployees)];
-      const departmentTips = departmentJobs.reduce((sum, job) => sum + Number(job.tips), 0);
-      const employeeTips = uniqueEmployees.length > 0 ? departmentTips / uniqueEmployees.length : 0;
+      const departmentTips = departmentJobs.reduce(
+        (sum, job) => sum + Number(job.tips),
+        0
+      );
+      const employeeTips =
+        uniqueEmployees.length > 0
+          ? departmentTips / uniqueEmployees.length
+          : 0;
 
       auditTrail.push({
         logId: log.id,
@@ -364,7 +405,11 @@ function buildAuditTrail(
 /**
  * Get rate for a specific department and role
  */
-function getRateForDepartment(user: User, department: Department, isCoCaptain: boolean): number {
+function getRateForDepartment(
+  user: User,
+  department: Department,
+  isCoCaptain: boolean
+): number {
   const usesCaptainRate = user.roles.includes('captain') || isCoCaptain;
 
   switch (department) {
@@ -400,23 +445,32 @@ export function createDiscrepancyReport(
   validationResult: PayrollValidationResult
 ): DiscrepancyReport {
   const allIssues = [...validationResult.errors, ...validationResult.warnings];
-  
+
   // Determine severity based on error types and count
   let severity: DiscrepancyReport['severity'] = 'low';
-  
-  const criticalErrors = validationResult.errors.filter(error => 
-    ['HOURS_MISMATCH', 'TIPS_MISMATCH', 'DEPARTMENT_PAY_MISMATCH', 'COMMISSION_MISMATCH'].includes(error.code)
+
+  const criticalErrors = validationResult.errors.filter((error) =>
+    [
+      'HOURS_MISMATCH',
+      'TIPS_MISMATCH',
+      'DEPARTMENT_PAY_MISMATCH',
+      'COMMISSION_MISMATCH',
+    ].includes(error.code)
   );
-  
-  const rateErrors = validationResult.errors.filter(error => 
-    error.code === 'RATE_INCONSISTENCY' || error.code === 'MISSING_RATE'
+
+  const rateErrors = validationResult.errors.filter(
+    (error) =>
+      error.code === 'RATE_INCONSISTENCY' || error.code === 'MISSING_RATE'
   );
 
   if (criticalErrors.length > 0) {
     severity = 'critical';
   } else if (rateErrors.length > 0 || validationResult.errors.length > 2) {
     severity = 'high';
-  } else if (validationResult.errors.length > 0 || validationResult.warnings.length > 3) {
+  } else if (
+    validationResult.errors.length > 0 ||
+    validationResult.warnings.length > 3
+  ) {
     severity = 'medium';
   }
 
@@ -441,8 +495,10 @@ export function validateDataAccuracy(
 
   // Verify that all log data is properly reflected in payroll
   for (const log of originalLogs) {
-    const employeeHours = log.hours.filter(hour => hour.employeeId === payrollCalculation.employeeId);
-    
+    const employeeHours = log.hours.filter(
+      (hour) => hour.employeeId === payrollCalculation.employeeId
+    );
+
     // Check if log is properly included in calculation
     if (employeeHours.length > 0 && !log.approvedAt) {
       errors.push({
@@ -455,10 +511,14 @@ export function validateDataAccuracy(
     }
 
     // Verify job-to-hours consistency
-    const junkHours = employeeHours.filter(hour => hour.department === 'junk');
-    const moveHours = employeeHours.filter(hour => hour.department === 'move');
-    const junkJobs = log.jobs.filter(job => job.jobType === 'junk');
-    const moveJobs = log.jobs.filter(job => job.jobType === 'move');
+    const junkHours = employeeHours.filter(
+      (hour) => hour.department === 'junk'
+    );
+    const moveHours = employeeHours.filter(
+      (hour) => hour.department === 'move'
+    );
+    const junkJobs = log.jobs.filter((job) => job.jobType === 'junk');
+    const moveJobs = log.jobs.filter((job) => job.jobType === 'move');
 
     if (junkHours.length > 0 && junkJobs.length === 0) {
       errors.push({

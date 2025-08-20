@@ -77,7 +77,9 @@ describe('RoleGuard Manager Access', () => {
     );
 
     expect(screen.queryByText('Admin Only Content')).not.toBeInTheDocument();
-    expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You don't have permission to view this content/)
+    ).toBeInTheDocument();
     expect(screen.getByText(/Required roles: admin/)).toBeInTheDocument();
   });
 
@@ -120,9 +122,15 @@ describe('RoleGuard Manager Access', () => {
       </RoleGuard>
     );
 
-    expect(screen.queryByText('Admin AND Manager Content')).not.toBeInTheDocument();
-    expect(screen.getByText(/You don't have permission to view this content/)).toBeInTheDocument();
-    expect(screen.getByText(/Required roles: admin and manager/)).toBeInTheDocument();
+    expect(
+      screen.queryByText('Admin AND Manager Content')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/You don't have permission to view this content/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Required roles: admin and manager/)
+    ).toBeInTheDocument();
   });
 
   it('should show loading state', () => {
@@ -149,7 +157,10 @@ describe('RoleGuard Manager Access', () => {
     });
 
     render(
-      <RoleGuard requiredRoles={['manager']} fallback={<div>Please log in</div>}>
+      <RoleGuard
+        requiredRoles={['manager']}
+        fallback={<div>Please log in</div>}
+      >
         <div>Manager Content</div>
       </RoleGuard>
     );

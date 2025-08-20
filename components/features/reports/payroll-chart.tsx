@@ -24,10 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/toggle-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 import type { PayPeriod } from '@/types';
 import { formatDateForChart } from '@/lib/formatters';
@@ -59,8 +56,6 @@ const chartConfig = {
     color: 'var(--primary)',
   },
 } satisfies ChartConfig;
-
-
 
 export function PayrollChart({ selectedPeriod }: PayrollChartProps) {
   const isMobile = useIsMobile();

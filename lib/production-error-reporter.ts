@@ -121,8 +121,13 @@ class ProductionErrorReporter {
           });
         });
 
-        this.performanceObserver.observe({ 
-          entryTypes: ['navigation', 'paint', 'largest-contentful-paint', 'first-input'] 
+        this.performanceObserver.observe({
+          entryTypes: [
+            'navigation',
+            'paint',
+            'largest-contentful-paint',
+            'first-input',
+          ],
         });
       } catch (error) {
         console.warn('Performance monitoring setup failed:', error);
@@ -200,9 +205,10 @@ class ProductionErrorReporter {
     // HTTP request breadcrumbs
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
-      const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
+      const url =
+        typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
       const method = args[1]?.method || 'GET';
-      
+
       this.addBreadcrumb({
         category: 'http',
         message: `${method} ${url}`,
@@ -212,14 +218,14 @@ class ProductionErrorReporter {
 
       try {
         const response = await originalFetch.apply(window, args);
-        
+
         this.addBreadcrumb({
           category: 'http',
           message: `${method} ${url} - ${response.status}`,
           level: response.ok ? 'info' : 'warning',
-          data: { 
-            url, 
-            method, 
+          data: {
+            url,
+            method,
             status: response.status,
             statusText: response.statusText,
           },
@@ -231,9 +237,9 @@ class ProductionErrorReporter {
           category: 'http',
           message: `${method} ${url} - Failed`,
           level: 'error',
-          data: { 
-            url, 
-            method, 
+          data: {
+            url,
+            method,
             error: error instanceof Error ? error.message : String(error),
           },
         });
@@ -259,7 +265,9 @@ class ProductionErrorReporter {
     // Unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
       this.reportError(
-        event.reason instanceof Error ? event.reason : new Error(String(event.reason)),
+        event.reason instanceof Error
+          ? event.reason
+          : new Error(String(event.reason)),
         {
           component: 'global',
           action: 'unhandled_promise_rejection',
@@ -292,10 +300,13 @@ class ProductionErrorReporter {
 
     if ('performance' in window) {
       // Navigation timing
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         metrics.loadTime = navigation.loadEventEnd - navigation.fetchStart;
-        metrics.domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart;
+        metrics.domContentLoaded =
+          navigation.domContentLoadedEventEnd - navigation.fetchStart;
       }
 
       // Paint timing
@@ -309,18 +320,25 @@ class ProductionErrorReporter {
       });
 
       // Largest Contentful Paint
-      const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+      const lcpEntries = performance.getEntriesByType(
+        'largest-contentful-paint'
+      );
       if (lcpEntries.length > 0) {
-        metrics.largestContentfulPaint = lcpEntries[lcpEntries.length - 1].startTime;
+        metrics.largestContentfulPaint =
+          lcpEntries[lcpEntries.length - 1].startTime;
       }
 
       // Memory usage
       if ('memory' in performance) {
-        const memory = (performance as { memory: {
-          usedJSHeapSize: number;
-          totalJSHeapSize: number;
-          jsHeapSizeLimit: number;
-        } }).memory;
+        const memory = (
+          performance as {
+            memory: {
+              usedJSHeapSize: number;
+              totalJSHeapSize: number;
+              jsHeapSizeLimit: number;
+            };
+          }
+        ).memory;
         metrics.memoryUsage = {
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,
@@ -332,24 +350,30 @@ class ProductionErrorReporter {
     return metrics;
   }
 
-  private createFingerprint(error: Error, context: Record<string, unknown>): string {
+  private createFingerprint(
+    error: Error,
+    context: Record<string, unknown>
+  ): string {
     const message = error.message || 'Unknown error';
     const component = context.component || 'unknown';
     const action = context.action || 'unknown';
-    
+
     // Extract the first few lines of stack trace for fingerprinting
     const stackLines = error.stack?.split('\n').slice(0, 3).join('|') || '';
-    
+
     // Create a hash-like fingerprint
     const fingerprint = `${component}:${action}:${message}:${stackLines}`
       .replace(/\d+/g, 'N') // Replace numbers with N for better grouping
       .replace(/['"]/g, '') // Remove quotes
       .toLowerCase();
-    
+
     return Buffer.from(fingerprint).toString('base64').substring(0, 32);
   }
 
-  private determineSeverity(error: Error, context: Record<string, unknown>): ErrorReport['severity'] {
+  private determineSeverity(
+    error: Error,
+    context: Record<string, unknown>
+  ): ErrorReport['severity'] {
     const message = error.message.toLowerCase();
     const component = String(context.component || '').toLowerCase();
 
@@ -383,15 +407,27 @@ class ProductionErrorReporter {
       'not found',
     ];
 
-    if (criticalKeywords.some(keyword => message.includes(keyword) || component.includes(keyword))) {
+    if (
+      criticalKeywords.some(
+        (keyword) => message.includes(keyword) || component.includes(keyword)
+      )
+    ) {
       return 'critical';
     }
 
-    if (highKeywords.some(keyword => message.includes(keyword) || component.includes(keyword))) {
+    if (
+      highKeywords.some(
+        (keyword) => message.includes(keyword) || component.includes(keyword)
+      )
+    ) {
       return 'high';
     }
 
-    if (mediumKeywords.some(keyword => message.includes(keyword) || component.includes(keyword))) {
+    if (
+      mediumKeywords.some(
+        (keyword) => message.includes(keyword) || component.includes(keyword)
+      )
+    ) {
       return 'medium';
     }
 
@@ -423,7 +459,9 @@ class ProductionErrorReporter {
       userId: context.userId,
       sessionId: this.sessionId,
       breadcrumbs: [...this.breadcrumbs],
-      performanceMetrics: this.config.enablePerformanceMetrics ? this.getPerformanceMetrics() : {},
+      performanceMetrics: this.config.enablePerformanceMetrics
+        ? this.getPerformanceMetrics()
+        : {},
       context: {
         component: context.component,
         action: context.action,
@@ -468,12 +506,14 @@ class ProductionErrorReporter {
 
   private async sendReport(report: ErrorReport): Promise<void> {
     const endpoint = this.config.reportingEndpoint || '/api/errors/client';
-    
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+        ...(this.config.apiKey && {
+          Authorization: `Bearer ${this.config.apiKey}`,
+        }),
       },
       body: JSON.stringify({
         level: 'error',
@@ -502,20 +542,24 @@ class ProductionErrorReporter {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to send report: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to send report: ${response.status} ${response.statusText}`
+      );
     }
   }
 
   private storeReportForRetry(report: ErrorReport): void {
     try {
-      const stored = JSON.parse(localStorage.getItem('pending_error_reports') || '[]');
+      const stored = JSON.parse(
+        localStorage.getItem('pending_error_reports') || '[]'
+      );
       stored.push(report);
-      
+
       // Keep only the last 10 reports
       if (stored.length > 10) {
         stored.splice(0, stored.length - 10);
       }
-      
+
       localStorage.setItem('pending_error_reports', JSON.stringify(stored));
     } catch (error) {
       console.error('Failed to store error report for retry:', error);
@@ -524,7 +568,9 @@ class ProductionErrorReporter {
 
   public async retryPendingReports(): Promise<void> {
     try {
-      const stored = JSON.parse(localStorage.getItem('pending_error_reports') || '[]');
+      const stored = JSON.parse(
+        localStorage.getItem('pending_error_reports') || '[]'
+      );
       if (stored.length === 0) return;
 
       for (const report of stored) {
@@ -546,7 +592,7 @@ class ProductionErrorReporter {
   public addTag(key: string, value: string): void {
     // Tags will be included in future error reports
     if (!this.config.enableBreadcrumbs) return;
-    
+
     this.addBreadcrumb({
       category: 'info',
       message: `Tag added: ${key}=${value}`,
@@ -564,7 +610,10 @@ class ProductionErrorReporter {
     });
   }
 
-  public captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info'): void {
+  public captureMessage(
+    message: string,
+    level: 'info' | 'warning' | 'error' = 'info'
+  ): void {
     this.addBreadcrumb({
       category: 'info',
       message,
@@ -583,11 +632,13 @@ class ProductionErrorReporter {
 // Global instance
 let globalReporter: ProductionErrorReporter | null = null;
 
-export function initializeErrorReporter(config?: Partial<ErrorReportConfig>): ProductionErrorReporter {
+export function initializeErrorReporter(
+  config?: Partial<ErrorReportConfig>
+): ProductionErrorReporter {
   if (typeof window === 'undefined') {
     // Return a no-op reporter for server-side
     return {
-      reportError: async () => ({} as ErrorReport),
+      reportError: async () => ({}) as ErrorReport,
       retryPendingReports: async () => {},
       addTag: () => {},
       setUser: () => {},
@@ -598,10 +649,10 @@ export function initializeErrorReporter(config?: Partial<ErrorReportConfig>): Pr
 
   if (!globalReporter) {
     globalReporter = new ProductionErrorReporter(config);
-    
+
     // Retry pending reports on initialization
     globalReporter.retryPendingReports();
-    
+
     // Retry pending reports when coming back online
     window.addEventListener('online', () => {
       globalReporter?.retryPendingReports();

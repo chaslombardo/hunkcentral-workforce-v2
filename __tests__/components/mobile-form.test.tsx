@@ -7,14 +7,30 @@ import { MobileFormValidation } from '@/components/forms/mobile-form-validation'
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
-  CheckCircle2: ({ className }: { className?: string }) => <div data-testid="check-icon" className={className} />,
-  AlertCircle: ({ className }: { className?: string }) => <div data-testid="alert-icon" className={className} />,
-  AlertTriangle: ({ className }: { className?: string }) => <div data-testid="warning-icon" className={className} />,
-  Info: ({ className }: { className?: string }) => <div data-testid="info-icon" className={className} />,
-  X: ({ className }: { className?: string }) => <div data-testid="x-icon" className={className} />,
-  ChevronDown: ({ className }: { className?: string }) => <div data-testid="chevron-down-icon" className={className} />,
-  ChevronUp: ({ className }: { className?: string }) => <div data-testid="chevron-up-icon" className={className} />,
-  Save: ({ className }: { className?: string }) => <div data-testid="save-icon" className={className} />,
+  CheckCircle2: ({ className }: { className?: string }) => (
+    <div data-testid="check-icon" className={className} />
+  ),
+  AlertCircle: ({ className }: { className?: string }) => (
+    <div data-testid="alert-icon" className={className} />
+  ),
+  AlertTriangle: ({ className }: { className?: string }) => (
+    <div data-testid="warning-icon" className={className} />
+  ),
+  Info: ({ className }: { className?: string }) => (
+    <div data-testid="info-icon" className={className} />
+  ),
+  X: ({ className }: { className?: string }) => (
+    <div data-testid="x-icon" className={className} />
+  ),
+  ChevronDown: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-down-icon" className={className} />
+  ),
+  ChevronUp: ({ className }: { className?: string }) => (
+    <div data-testid="chevron-up-icon" className={className} />
+  ),
+  Save: ({ className }: { className?: string }) => (
+    <div data-testid="save-icon" className={className} />
+  ),
 }));
 
 // Mock auto-save hook
@@ -66,7 +82,7 @@ describe('MobileForm', () => {
 
       const submitButton = screen.getByText('Submit');
       const buttonStyles = window.getComputedStyle(submitButton);
-      
+
       // Should have minimum 48px height for touch targets
       expect(submitButton).toHaveClass('h-12'); // 48px in Tailwind
     });
@@ -91,9 +107,18 @@ describe('MobileForm', () => {
         </MobileForm>
       );
 
-      expect(screen.getByTestId('email-input')).toHaveAttribute('inputMode', 'email');
-      expect(screen.getByTestId('number-input')).toHaveAttribute('inputMode', 'decimal');
-      expect(screen.getByTestId('tel-input')).toHaveAttribute('inputMode', 'tel');
+      expect(screen.getByTestId('email-input')).toHaveAttribute(
+        'inputMode',
+        'email'
+      );
+      expect(screen.getByTestId('number-input')).toHaveAttribute(
+        'inputMode',
+        'decimal'
+      );
+      expect(screen.getByTestId('tel-input')).toHaveAttribute(
+        'inputMode',
+        'tel'
+      );
     });
   });
 
@@ -112,7 +137,9 @@ describe('MobileForm', () => {
         save: vi.fn(),
       }));
 
-      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(mockUseAutoSave);
+      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(
+        mockUseAutoSave
+      );
 
       render(<MobileForm {...defaultProps} autoSave={true} />);
 
@@ -126,7 +153,9 @@ describe('MobileForm', () => {
         save: vi.fn(),
       }));
 
-      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(mockUseAutoSave);
+      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(
+        mockUseAutoSave
+      );
 
       render(<MobileForm {...defaultProps} autoSave={true} />);
 
@@ -149,7 +178,7 @@ describe('MobileForm', () => {
     it('shows loading state during submission', async () => {
       const handleSubmit = vi.fn((e) => {
         e.preventDefault();
-        return new Promise(resolve => setTimeout(resolve, 100));
+        return new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       render(<MobileForm {...defaultProps} onSubmit={handleSubmit} />);
@@ -177,14 +206,18 @@ describe('MobileForm', () => {
     it('integrates with mobile form validation', () => {
       const errors = [
         { field: 'email', message: 'Invalid email', type: 'error' as const },
-        { field: 'password', message: 'Password too short', type: 'error' as const },
+        {
+          field: 'password',
+          message: 'Password too short',
+          type: 'error' as const,
+        },
       ];
 
       render(
         <MobileForm {...defaultProps}>
           <input data-testid="email-input" />
           <input data-testid="password-input" />
-          <MobileFormValidation 
+          <MobileFormValidation
             errors={errors}
             onErrorClick={vi.fn()}
             onDismiss={vi.fn()}
@@ -199,12 +232,16 @@ describe('MobileForm', () => {
     it('shows validation summary when there are errors', () => {
       const errors = [
         { field: 'email', message: 'Invalid email', type: 'error' as const },
-        { field: 'password', message: 'Password too short', type: 'error' as const },
+        {
+          field: 'password',
+          message: 'Password too short',
+          type: 'error' as const,
+        },
       ];
 
       render(
         <MobileForm {...defaultProps}>
-          <MobileFormValidation 
+          <MobileFormValidation
             errors={errors}
             onErrorClick={vi.fn()}
             onDismiss={vi.fn()}
@@ -273,14 +310,19 @@ describe('MobileForm', () => {
         throw new Error('Submission failed');
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       render(<MobileForm {...defaultProps} onSubmit={handleSubmit} />);
 
       const submitButton = screen.getByText('Submit');
       await user.click(submitButton);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Form submission error:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Form submission error:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });
@@ -291,7 +333,13 @@ describe('MobileForm', () => {
         return Promise.reject(new Error('Network error'));
       });
 
-      render(<MobileForm {...defaultProps} onSubmit={handleSubmit} showRetry={true} />);
+      render(
+        <MobileForm
+          {...defaultProps}
+          onSubmit={handleSubmit}
+          showRetry={true}
+        />
+      );
 
       const submitButton = screen.getByText('Submit');
       await user.click(submitButton);
@@ -317,7 +365,9 @@ describe('MobileForm', () => {
         save: mockSave,
       }));
 
-      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(mockUseAutoSave);
+      vi.mocked(require('@/hooks/useAutoSave').useAutoSave).mockImplementation(
+        mockUseAutoSave
+      );
 
       render(
         <MobileForm {...defaultProps} autoSave={true}>
@@ -331,9 +381,12 @@ describe('MobileForm', () => {
       await user.type(input, 'rapid typing', { delay: 10 });
 
       // Should debounce save calls
-      await waitFor(() => {
-        expect(mockSave).toHaveBeenCalledTimes(1);
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockSave).toHaveBeenCalledTimes(1);
+        },
+        { timeout: 1000 }
+      );
     });
 
     it('cleans up event listeners on unmount', () => {
