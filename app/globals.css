@@ -23,6 +23,10 @@
     --accent-foreground: 210 20% 98%;
     --destructive: 0 84.2% 60.2%;
 
+    /* College Hunks Brand Colors */
+    --hunks-green: 152 95% 15%; /* #026937 */
+    --hunks-orange: 28 100% 46%; /* #ea7200 */
+
     /* Brand color mappings */
     --brand-primary: 152 95% 15%; /* hunks-green-600 in HSL */
     --brand-primary-foreground: 210 20% 98%;
@@ -72,6 +76,10 @@
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
 
+    /* College Hunks Brand Colors - Dark mode */
+    --hunks-green: 152 95% 20%; /* Lighter in dark mode */
+    --hunks-orange: 28 100% 52%; /* Lighter in dark mode */
+
     /* Brand color mappings - Dark mode */
     --brand-primary: 152 95% 20%; /* Lighter in dark mode */
     --brand-primary-foreground: 224 71.4% 4.1%;
@@ -111,5 +119,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .hunk-gradient-bg {
+    @apply bg-gradient-to-br from-hunks-green/5 via-background to-hunks-orange/5;
   }
 }

@@ -9,6 +9,7 @@ import {
   Settings,
   TrendingUp,
   Building2,
+  Trophy,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/layout/nav-main';
@@ -93,6 +94,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Reports & Analytics - Data and insights
   const reportsAnalytics = [];
+
+  // Performance Rankings (available to all users)
+  reportsAnalytics.push({
+    title: 'Rankings',
+    url: '/rankings',
+    icon: Trophy,
+    items: [],
+  });
 
   // Employee self-service payroll (always available)
   reportsAnalytics.push({
