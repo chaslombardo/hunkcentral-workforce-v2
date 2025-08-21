@@ -322,7 +322,7 @@ This implementation plan breaks down the complete rebuild of HUNKCentral into ma
   - Create chart filtering and interaction systems
   - _Requirements: Chart interaction requirements_
 
-- [-] 6. Role-Specific Dashboards using dashboard-01 Block
+- [x] 6. Role-Specific Dashboards using dashboard-01 Block
   - **AUDIT FIRST**: Verify existing dashboard implementation and structure
   - If already complete: verify dashboards use dashboard-01 block and migrate if needed
   - If missing: create role-specific dashboards using dashboard-01 block
@@ -333,7 +333,7 @@ This implementation plan breaks down the complete rebuild of HUNKCentral into ma
   - Add date range controls and interactive charts
   - _Requirements: Dashboard requirements_
 
-- [-] 6.1 Build Captain Dashboard with Job Statistics
+- [x] 6.1 Build Captain Dashboard with Job Statistics
   - **AUDIT**: Check if captain dashboard exists and uses dashboard-01 block structure
   - **VERIFY**: Confirm branded metric cards for jobs, revenue, tips, bonuses are present
   - **VERIFY**: Check if labor cost chart with interactive filtering is implemented
@@ -433,7 +433,7 @@ This implementation plan breaks down the complete rebuild of HUNKCentral into ma
   - Set up commission calculation and approval workflow
   - _Requirements: Commission tracking requirements_
 
-- [ ] 8.1 Build Commission Entry Form
+- [-] 8.1 Build Commission Entry Form
   - **AUDIT**: Check if commission entry form exists with proper validation
   - **VERIFY**: Confirm job ID validation (7-10 digits, numeric only) works correctly
   - **VERIFY**: Check if client name and estimated amount inputs are implemented

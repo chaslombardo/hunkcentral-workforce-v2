@@ -27,7 +27,13 @@ export const LoginSchema = z.object({
 // Job schema for daily logs
 export const LogJobSchema = z.object({
   jobType: z.enum(['junk', 'move']),
-  jobId: z.string().min(1, 'Job ID is required'),
+  jobId: z
+    .string()
+    .min(1, 'Job ID is required')
+    .refine(
+      (val) => /^\d{7,10}$/.test(val),
+      'Job ID must be 7-10 digits, numeric only'
+    ),
   clientName: z.string().min(1, 'Client name is required'),
   revenue: z.number().min(0, 'Revenue must be a positive number'),
   tips: z.number().min(0, 'Tips must be a positive number'),
@@ -45,11 +51,10 @@ export const CommissionEntrySchema = z.object({
   jobId: z
     .string()
     .min(1, 'Job ID is required')
-    .max(50, 'Job ID must be 50 characters or less')
-    .transform((val) => val.toUpperCase().trim())
+    .transform((val) => val.trim())
     .refine(
-      (val) => /^[A-Z0-9\-_]+$/.test(val),
-      'Job ID can only contain letters, numbers, hyphens, and underscores'
+      (val) => /^\d{7,10}$/.test(val),
+      'Job ID must be 7-10 digits, numeric only'
     ),
   clientName: z
     .string()
