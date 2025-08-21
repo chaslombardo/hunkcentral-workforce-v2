@@ -22,7 +22,7 @@ export interface CommissionConflict {
 }
 
 /**
- * Find commission entries that match a job ID
+ * Find commission entries that match a job ID (exact match only)
  */
 export function findCommissionMatches(
   jobId: string,
