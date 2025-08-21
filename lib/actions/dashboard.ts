@@ -269,6 +269,12 @@ export interface RoleSpecificMetrics {
     logsAwaitingReview: number;
     recentApprovals: number;
   };
+  admin?: {
+    systemHealth: number;
+    userActivity: number;
+    errorRate: number;
+    performanceScore: number;
+  };
 }
 
 // Get role-specific metrics for different user types
@@ -538,6 +544,20 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
       metrics.manager = {
         logsAwaitingReview,
         recentApprovals,
+      };
+    }
+
+    // Admin-specific metrics
+    if (userRoles.includes('admin')) {
+      const totalUsers = await prisma.user.count();
+      const totalLogs = await prisma.dailyLog.count();
+
+      // Mock system health metrics - TODO: Replace with real monitoring data
+      metrics.admin = {
+        systemHealth: 98, // Percentage
+        userActivity: totalUsers,
+        errorRate: 0.2, // Percentage
+        performanceScore: 95, // Percentage
       };
     }
 
