@@ -160,20 +160,25 @@ export function CommissionConflicts() {
 
   if (conflicts.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Check className="h-5 w-5 text-[#026937]" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-white via-white to-hunks-green/5 transition-all duration-500 hover:shadow-2xl hover:shadow-hunks-green/20 hover:scale-[1.01] group backdrop-blur-sm border-hunks-green/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-hunks-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse"></div>
+        <CardHeader className="relative">
+          <CardTitle className="flex items-center gap-2 group-hover:text-hunks-green transition-colors duration-300">
+            <div className="transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
+              <Check className="h-5 w-5 text-[#026937]" />
+            </div>
             Commission Conflicts
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="group-hover:text-hunks-green/70 transition-colors duration-300">
             No commission conflicts found. All entries are properly matched.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Check className="h-12 w-12 mx-auto mb-4 text-[#026937]" />
-            <p>
+        <CardContent className="relative">
+          <div className="text-center py-8 text-muted-foreground group-hover:text-hunks-green/70 transition-colors duration-300">
+            <div className="transition-all duration-500 group-hover:scale-110">
+              <Check className="h-12 w-12 mx-auto mb-4 text-[#026937] animate-pulse" />
+            </div>
+            <p className="transition-all duration-300 group-hover:translate-y-1">
               All commission entries are properly matched to completed jobs.
             </p>
           </div>
@@ -184,13 +189,16 @@ export function CommissionConflicts() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-[#ea7200]" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-white via-white to-red-50 transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/20 hover:scale-[1.01] group backdrop-blur-sm border-red-500/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        <CardHeader className="relative">
+          <CardTitle className="flex items-center gap-2 group-hover:text-red-600 transition-colors duration-300">
+            <div className="transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
+              <AlertTriangle className="h-5 w-5 text-[#ea7200] group-hover:text-red-600" />
+            </div>
             Commission Conflicts ({conflicts.length})
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="group-hover:text-red-600/70 transition-colors duration-300">
             These jobs have multiple commission entries that need manual
             resolution.
           </CardDescription>

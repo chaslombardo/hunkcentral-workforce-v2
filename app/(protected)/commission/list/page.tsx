@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { getCommissionEntries } from '@/lib/actions/commission';
 import { CommissionListWithActions } from '@/components/features/commission/commission-list-with-actions';
+import { CommissionAnalytics } from '@/components/features/commission/commission-analytics';
+import { CommissionProjections } from '@/components/features/commission/commission-projections';
 import { CommissionConflicts } from '@/components/features/commission/commission-conflicts';
 import { BrandButton } from '@/components/brand/brand-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -51,13 +53,26 @@ export default async function CommissionListPage() {
       </div>
 
       <Tabs defaultValue="entries" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="entries">Commission Entries</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics & Trends</TabsTrigger>
+          <TabsTrigger value="projections">Earnings Projections</TabsTrigger>
           <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entries" className="space-y-6">
           <CommissionListWithActions entries={entries} />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <CommissionAnalytics entries={entries} />
+        </TabsContent>
+
+        <TabsContent value="projections" className="space-y-6">
+          <CommissionProjections
+            entries={entries}
+            currentUserId={session.user.id}
+          />
         </TabsContent>
 
         <TabsContent value="conflicts" className="space-y-6">

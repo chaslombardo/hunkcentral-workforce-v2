@@ -22,6 +22,7 @@ import { createCommissionEntry } from '@/lib/actions/commission';
 import { useToast } from '@/hooks/use-toast';
 
 import { BrandButton } from '@/components/brand/brand-button';
+import { ClientAutocomplete } from './client-autocomplete';
 import {
   Form,
   FormControl,
@@ -205,7 +206,7 @@ export function CommissionForm({
             )}
           />
 
-          {/* Client Name Field with Enhanced UX */}
+          {/* Client Name Field with Auto-complete */}
           <FormField
             control={form.control}
             name="clientName"
@@ -216,12 +217,16 @@ export function CommissionForm({
                   Client Name
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Enter client name"
-                    {...field}
-                    className="h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
+                  <ClientAutocomplete
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="Enter or search for client name"
                   />
                 </FormControl>
+                <FormDescription className="text-sm text-muted-foreground">
+                  Start typing to see suggestions from previous jobs, or enter a
+                  new client name
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
