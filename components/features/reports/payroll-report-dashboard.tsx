@@ -5,7 +5,7 @@ import { PayrollSummaryCards } from './payroll-summary-cards';
 import { PayrollChart } from './payroll-chart';
 import { PayrollDataTable } from './payroll-data-table';
 import { PayrollExportDialog } from './payroll-export-dialog';
-import { BrandButton } from '@/components/brand/brand-button';
+import { Button } from '@/components/ui/button';
 import { BrandLoading } from '@/components/brand/brand-loading';
 import { StatusIndicator } from '@/components/brand/status-indicator';
 import { Badge } from '@/components/ui/badge';
@@ -104,25 +104,26 @@ export function PayrollReportDashboard() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Header Section - Following dashboard-01 pattern */}
+          {/* Enhanced Header Section - Following dashboard-01 pattern */}
           <div className="px-4 lg:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
+              <div className="space-y-1">
                 <h1 className="text-2xl font-semibold tracking-tight">
-                  Payroll Reports
+                  Team Payroll Reports
                 </h1>
                 <p className="text-muted-foreground">
-                  Generate and manage payroll reports for all employees
+                  Generate and manage payroll reports for all employees with
+                  advanced filtering and export options
                 </p>
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                {/* Pay Period Selector */}
+                {/* Enhanced Pay Period Selector */}
                 <Select
                   value={selectedPeriod?.id}
                   onValueChange={handlePeriodChange}
                 >
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[200px] transition-all duration-200 hover:bg-accent/50">
                     <SelectValue placeholder="Select pay period" />
                   </SelectTrigger>
                   <SelectContent>
@@ -142,12 +143,12 @@ export function PayrollReportDashboard() {
                   </SelectContent>
                 </Select>
 
-                {/* Date Range Picker */}
+                {/* Enhanced Date Range Picker */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <BrandButton
+                    <Button
                       variant="outline"
-                      className="w-full sm:w-[200px] justify-start text-left font-normal"
+                      className="w-full sm:w-[200px] justify-start text-left font-normal transition-all duration-200 hover:bg-accent/50 hover:scale-[1.02]"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateRange?.from ? (
@@ -162,7 +163,7 @@ export function PayrollReportDashboard() {
                       ) : (
                         <span>Pick a date range</span>
                       )}
-                    </BrandButton>
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
@@ -176,40 +177,88 @@ export function PayrollReportDashboard() {
                   </PopoverContent>
                 </Popover>
 
-                {/* Action Buttons */}
+                {/* Enhanced Action Buttons */}
                 <div className="flex gap-2">
-                  <BrandButton variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="transition-all duration-200 hover:scale-105 hover:bg-accent/50"
+                  >
                     <Filter className="mr-2 h-4 w-4" />
                     Filter
-                  </BrandButton>
-                  <BrandButton
+                  </Button>
+                  <Button
                     onClick={handleExport}
                     size="sm"
-                    variant="primary"
+                    className="transition-all duration-200 hover:scale-105 bg-primary hover:bg-primary/90"
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Export
-                  </BrandButton>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Tabs for different report views - Following dashboard-01 Tabs pattern */}
+          {/* Enhanced Tabs for different report views - Following dashboard-01 Tabs pattern */}
           <Tabs
             defaultValue="overview"
             className="w-full flex-col justify-start gap-6"
           >
             <div className="flex items-center justify-between px-4 lg:px-6">
               <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="detailed">
-                  Detailed{' '}
-                  <Badge variant="secondary">{payrollData.length}</Badge>
+                <TabsTrigger
+                  value="overview"
+                  className="transition-all duration-200"
+                >
+                  Overview
                 </TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="export">Export</TabsTrigger>
+                <TabsTrigger
+                  value="detailed"
+                  className="transition-all duration-200"
+                >
+                  Detailed{' '}
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 transition-all duration-200"
+                  >
+                    {payrollData.length}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="analytics"
+                  className="transition-all duration-200"
+                >
+                  Analytics
+                </TabsTrigger>
+                <TabsTrigger
+                  value="export"
+                  className="transition-all duration-200"
+                >
+                  Export
+                </TabsTrigger>
               </TabsList>
+
+              {/* Additional action buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="transition-all duration-200 hover:scale-105"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  Advanced Filters
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExport}
+                  className="transition-all duration-200 hover:scale-105"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Quick Export
+                </Button>
+              </div>
             </div>
 
             {/* Overview Tab - Main dashboard view */}
