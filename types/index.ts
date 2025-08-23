@@ -48,6 +48,7 @@ export interface User {
   email: string;
   fullName: string;
   roles: UserRole[];
+  permissions?: string[]; // Granular permissions array
   // Department-specific hourly rates (converted from Prisma Decimal to number)
   rateJunkCaptain?: number;
   rateJunkWingman?: number;

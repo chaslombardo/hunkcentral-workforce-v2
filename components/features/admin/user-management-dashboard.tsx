@@ -15,6 +15,7 @@ import {
   IconEdit,
   IconTrash,
   IconCopy,
+  IconShield,
   IconChevronDown,
   IconChevronUp,
   IconSearch,
@@ -89,6 +90,8 @@ import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
 import { formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
+import { PermissionManagementDialog } from './permission-management-dialog';
+import { BulkPermissionDialog } from './bulk-permission-dialog';
 
 // Remove Prisma import - use number type instead
 
@@ -464,6 +467,19 @@ export function UserManagementDashboard() {
               }
               onSuccess={() => loadUsers(searchForm.getValues())}
             />
+            <PermissionManagementDialog
+              user={{
+                ...row.original,
+                roles: row.original.roles as UserRole[],
+              }}
+              trigger={
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <IconShield className="h-4 w-4 mr-2" />
+                  Manage Permissions
+                </DropdownMenuItem>
+              }
+              onSuccess={() => loadUsers(searchForm.getValues())}
+            />
             <DropdownMenuSeparator />
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -716,6 +732,18 @@ export function UserManagementDashboard() {
                 >
                   Clear Selection
                 </Button>
+                <BulkPermissionDialog
+                  selectedUsers={table
+                    .getFilteredSelectedRowModel()
+                    .rows.map((row) => ({
+                      ...row.original,
+                      roles: row.original.roles as UserRole[],
+                    }))}
+                  onSuccess={() => {
+                    setRowSelection({});
+                    loadUsers(searchForm.getValues());
+                  }}
+                />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="sm">

@@ -98,6 +98,178 @@ export async function createUser(data: CreateUserFormData) {
   }
 }
 
+// Update user permissions
+export async function updateUserPermissions(data: {
+  userId: string;
+  permissions: string[];
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    // Get current user data for audit trail
+    const currentUser = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { permissions: true, fullName: true },
+    });
+
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    // Update user permissions
+    const updatedUser = await prisma.user.update({
+      where: { id: data.userId },
+      data: { permissions: data.permissions },
+      select: { id: true, fullName: true, permissions: true },
+    });
+
+    // Log audit trail
+    await prisma.auditLog.create({
+      data: {
+        entityType: 'user',
+        entityId: data.userId,
+        action: 'update_permissions',
+        changes: {
+          permissions: {
+            from: currentUser.permissions,
+            to: data.permissions,
+          },
+        },
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${data.userId}`);
+
+    return {
+      success: true,
+      user: updatedUser,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to update permissions',
+    };
+  }
+}
+
+// Bulk update permissions for multiple users
+export async function bulkUpdatePermissions(data: {
+  userIds: string[];
+  permissions: string[];
+  action: 'add' | 'remove' | 'replace';
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    const results = [];
+
+    for (const userId of data.userIds) {
+      try {
+        const currentUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { permissions: true, fullName: true },
+        });
+
+        if (!currentUser) {
+          results.push({ userId, success: false, error: 'User not found' });
+          continue;
+        }
+
+        let newPermissions: string[];
+
+        switch (data.action) {
+          case 'add':
+            newPermissions = [
+              ...new Set([...currentUser.permissions, ...data.permissions]),
+            ];
+            break;
+          case 'remove':
+            newPermissions = currentUser.permissions.filter(
+              (p) => !data.permissions.includes(p)
+            );
+            break;
+          case 'replace':
+            newPermissions = data.permissions;
+            break;
+          default:
+            throw new Error('Invalid action');
+        }
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: { permissions: newPermissions },
+        });
+
+        // Log audit trail
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'user',
+            entityId: userId,
+            action: `bulk_${data.action}_permissions`,
+            changes: {
+              permissions: {
+                from: currentUser.permissions,
+                to: newPermissions,
+                action: data.action,
+                applied: data.permissions,
+              },
+            },
+            userId: session.user.id,
+          },
+        });
+
+        results.push({ userId, success: true });
+      } catch (error) {
+        results.push({
+          userId,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+
+    revalidatePath('/admin/users');
+
+    const successCount = results.filter((r) => r.success).length;
+    const errorCount = results.filter((r) => !r.success).length;
+
+    return {
+      success: true,
+      results,
+      summary: {
+        total: data.userIds.length,
+        successful: successCount,
+        failed: errorCount,
+      },
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to bulk update permissions',
+    };
+  }
+}
+
 // Update an existing user
 export async function updateUser(data: UpdateUserFormData) {
   try {

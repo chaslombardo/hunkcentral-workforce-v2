@@ -12,6 +12,7 @@ export interface SessionUser {
   email: string;
   fullName: string;
   roles: UserRole[];
+  permissions?: string[];
 }
 
 // Server-side session helper (alias for compatibility)
