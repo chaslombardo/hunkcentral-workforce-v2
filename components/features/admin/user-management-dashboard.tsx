@@ -92,6 +92,7 @@ import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
 import { PermissionManagementDialog } from './permission-management-dialog';
 import { BulkPermissionDialog } from './bulk-permission-dialog';
+import { BulkUserOperations } from './bulk-user-operations';
 
 // Remove Prisma import - use number type instead
 
@@ -575,6 +576,10 @@ export function UserManagementDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <BulkUserOperations
+            selectedUsers={[]}
+            onSuccess={() => loadUsers(searchForm.getValues())}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
