@@ -24,7 +24,10 @@ function createAccessDeniedRedirect(req: NextRequest, reason: string) {
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 function simpleRateLimit(req: NextRequest): boolean {
-  const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
+  const ip =
+    req.headers.get('x-forwarded-for') ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutes
   const maxRequests = 100;
