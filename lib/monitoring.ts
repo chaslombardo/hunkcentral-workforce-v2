@@ -3,8 +3,6 @@
  * Comprehensive monitoring for application health, performance, and errors
  */
 
-import 'server-only';
-
 import { config, isMonitoringEnabled } from '@/lib/production-config';
 import { logProductionError } from '@/lib/production-error-logger';
 import { logInfo, logWarning } from '@/lib/production-logger';
@@ -71,7 +69,7 @@ class MonitoringSystem {
         cpu: {
           usage: (cpuUsage.user + cpuUsage.system) / 1000000, // Convert to seconds
           loadAverage:
-            process.platform !== 'win32'
+            typeof window === 'undefined' && process.platform !== 'win32'
               ? (await import('os')).loadavg()
               : [0, 0, 0],
         },

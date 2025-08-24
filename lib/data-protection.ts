@@ -3,8 +3,6 @@
  * Implements data encryption, backup, retention policies, and GDPR compliance features
  */
 
-import 'server-only';
-
 import { prisma } from '@/lib/prisma';
 import { logProductionError } from '@/lib/production-error-logger';
 import { AuditTrailService } from '@/lib/audit-trail';

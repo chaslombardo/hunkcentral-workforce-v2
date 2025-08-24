@@ -20,6 +20,17 @@ const nextConfig = {
     'fs',
     'path',
     'os',
+    'fs/promises',
+    'stream',
+    'util',
+    'buffer',
+    'events',
+    'url',
+    'querystring',
+    'http',
+    'https',
+    'zlib',
+    'server-only',
   ],
 
   experimental: {
@@ -59,6 +70,17 @@ const nextConfig = {
         crypto: false,
         child_process: false,
         module: false,
+        os: false,
+        path: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        events: false,
+        url: false,
+        querystring: false,
+        http: false,
+        https: false,
+        zlib: false,
       };
 
       // Exclude Prisma and other server-only modules from client bundle
@@ -67,6 +89,11 @@ const nextConfig = {
         '@prisma/client': 'commonjs @prisma/client',
         prisma: 'commonjs prisma',
         bcryptjs: 'commonjs bcryptjs',
+        crypto: 'crypto',
+        fs: 'fs',
+        path: 'path',
+        os: 'os',
+        'fs/promises': 'fs/promises',
       });
     }
 
