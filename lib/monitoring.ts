@@ -3,57 +3,17 @@
  * Comprehensive monitoring for application health, performance, and errors
  */
 
+import 'server-only';
+
 import { config, isMonitoringEnabled } from '@/lib/production-config';
 import { logProductionError } from '@/lib/production-error-logger';
 import { logInfo, logWarning } from '@/lib/production-logger';
 
-export interface HealthCheck {
-  name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  responseTime: number;
-  timestamp: string;
-  details?: Record<string, unknown>;
-  error?: string;
-}
+// Re-export types from the client-safe types file
+export type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
 
-export interface SystemMetrics {
-  timestamp: string;
-  cpu: {
-    usage: number;
-    loadAverage: number[];
-  };
-  memory: {
-    used: number;
-    total: number;
-    percentage: number;
-  };
-  database: {
-    connections: number;
-    activeQueries: number;
-    avgResponseTime: number;
-  };
-  http: {
-    requestsPerMinute: number;
-    avgResponseTime: number;
-    errorRate: number;
-  };
-  errors: {
-    count: number;
-    criticalCount: number;
-    lastError?: string;
-  };
-}
-
-export interface Alert {
-  id: string;
-  type: 'error' | 'performance' | 'security' | 'uptime';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  title: string;
-  message: string;
-  timestamp: string;
-  resolved: boolean;
-  metadata: Record<string, unknown>;
-}
+// Import types for internal use
+import type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
 
 class MonitoringSystem {
   private healthChecks: Map<string, HealthCheck> = new Map();

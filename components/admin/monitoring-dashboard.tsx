@@ -36,7 +36,7 @@ import type {
   HealthCheck,
   SystemMetrics,
   Alert as MonitoringAlert,
-} from '@/lib/monitoring';
+} from '@/lib/monitoring-types';
 
 interface MonitoringDashboardProps {
   className?: string;

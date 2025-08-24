@@ -3,6 +3,8 @@
  * Implements security measures including CSRF protection, rate limiting, input validation, and secure headers
  */
 
+import 'server-only';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { logProductionError } from '@/lib/production-error-logger';
 import bcrypt from 'bcryptjs';
