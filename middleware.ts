@@ -1,11 +1,13 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { edgeLogWarning, createEdgeRequestLogger } from '@/lib/edge-logger';
 import {
-  edgeLogAuthEvent,
-  edgeLogWarning,
-  createEdgeRequestLogger,
-} from '@/lib/edge-logger';
+  defaultRateLimiter,
+  defaultCSRFProtection,
+  defaultSecureHeaders,
+  SecurityMonitor,
+} from '@/lib/security';
 
 function createErrorRedirect(
   req: NextRequest,
@@ -26,7 +28,7 @@ function createAccessDeniedRedirect(req: NextRequest, reason: string) {
 }
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const logger = createEdgeRequestLogger({
       requestId,
@@ -35,6 +37,18 @@ export default withAuth(
     });
 
     try {
+      // Apply rate limiting
+      const rateLimitResponse = await defaultRateLimiter(req);
+      if (rateLimitResponse) {
+        return defaultSecureHeaders(rateLimitResponse);
+      }
+
+      // Apply CSRF protection for non-GET requests
+      const csrfResponse = await defaultCSRFProtection.createMiddleware()(req);
+      if (csrfResponse) {
+        return defaultSecureHeaders(csrfResponse);
+      }
+
       const token = req.nextauth.token;
       const { pathname } = req.nextUrl;
 
@@ -160,7 +174,25 @@ export default withAuth(
         }
       }
 
-      return NextResponse.next();
+      // Apply secure headers to successful responses
+      const response = NextResponse.next();
+
+      // Add security headers
+      const secureResponse = defaultSecureHeaders(response);
+
+      // Add request ID for tracing
+      secureResponse.headers.set('x-request-id', requestId);
+
+      // Add user context if available
+      if (token?.id) {
+        secureResponse.headers.set('x-user-id', token.id as string);
+        secureResponse.headers.set(
+          'x-user-roles',
+          (token.roles as string[]).join(',')
+        );
+      }
+
+      return secureResponse;
     } catch (error) {
       // Log middleware errors with proper context
       logger.warning('Middleware error occurred', {
@@ -172,7 +204,23 @@ export default withAuth(
           requestedPath: req.nextUrl.pathname,
         },
       });
-      return createErrorRedirect(req, 'middleware_error', req.nextUrl.pathname);
+
+      // Log security event for middleware errors
+      await SecurityMonitor.logSecurityEvent('middleware_error', 'high', {
+        url: req.url,
+        userAgent: req.headers.get('user-agent') || 'unknown',
+        metadata: {
+          error: error instanceof Error ? error.message : String(error),
+          requestId,
+        },
+      });
+
+      const errorResponse = createErrorRedirect(
+        req,
+        'middleware_error',
+        req.nextUrl.pathname
+      );
+      return defaultSecureHeaders(errorResponse);
     }
   },
   {

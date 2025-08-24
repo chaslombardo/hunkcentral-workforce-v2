@@ -22,7 +22,14 @@ export interface EnhancedErrorContext {
   timestamp: number;
   environment: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  category: 'server' | 'database' | 'auth' | 'api' | 'middleware' | 'component';
+  category:
+    | 'server'
+    | 'database'
+    | 'auth'
+    | 'api'
+    | 'middleware'
+    | 'component'
+    | 'security';
   metadata?: Record<string, unknown>;
 }
 
