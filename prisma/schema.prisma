@@ -61,6 +61,7 @@ model User {
   discrepancyReportsEmployee DiscrepancyReport[] @relation("DiscrepancyReportEmployee")
   discrepancyReportsReporter DiscrepancyReport[] @relation("DiscrepancyReportReporter")
   discrepancyReportsResolver DiscrepancyReport[] @relation("DiscrepancyReportResolver")
+  pushSubscriptions PushSubscription[]
 
   @@index([email])
   @@index([roles])
@@ -407,4 +408,30 @@ model PrecomputedMetric {
   @@index([metricType, entityType, entityId])
   @@index([payPeriodId])
   @@index([expiresAt])
+}
+
+// Push Notifications
+model PushSubscription {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Push subscription data
+  endpoint   String
+  p256dhKey  String
+  authKey    String
+  
+  // Device information
+  userAgent  String?
+  platform   String?
+  language   String?
+  
+  // Metadata
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([userId, endpoint])
+  @@index([userId])
+  @@index([isActive])
 }
