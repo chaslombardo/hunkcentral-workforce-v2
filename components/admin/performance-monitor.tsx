@@ -28,6 +28,7 @@ import {
   Zap,
   Loader2,
 } from 'lucide-react';
+import { RealTimePerformance } from './real-time-performance';
 import {
   getPerformanceDashboard,
   getPerformanceTrends,
@@ -229,6 +230,7 @@ export function PerformanceMonitor() {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="real-time">Real-Time</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="system">System Health</TabsTrigger>
@@ -387,6 +389,11 @@ export function PerformanceMonitor() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Real-Time Tab */}
+          <TabsContent value="real-time" className="space-y-4">
+            <RealTimePerformance />
           </TabsContent>
 
           {/* Performance Tab */}

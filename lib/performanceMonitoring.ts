@@ -72,7 +72,25 @@ class PerformanceMonitoringService {
   /**
    * Track page load performance
    */
-  trackPageLoad(metric: Omit<PageLoadMetric, 'timestamp'>): void {
+  trackPageLoad(
+    pageOrMetric: string | Omit<PageLoadMetric, 'timestamp'>,
+    loadTime?: number,
+    metadata?: { userId?: string; userAgent?: string; [key: string]: any }
+  ): void {
+    let metric: Omit<PageLoadMetric, 'timestamp'>;
+
+    if (typeof pageOrMetric === 'string') {
+      // Legacy API: trackPageLoad(page, loadTime, metadata)
+      metric = {
+        page: pageOrMetric,
+        loadTime: loadTime!,
+        userId: metadata?.userId,
+        userAgent: metadata?.userAgent,
+      };
+    } else {
+      // New API: trackPageLoad(metric)
+      metric = pageOrMetric;
+    }
     const fullMetric: PageLoadMetric = {
       ...metric,
       timestamp: new Date(),
@@ -127,7 +145,7 @@ class PerformanceMonitoringService {
   /**
    * Track system health metrics
    */
-  trackSystemHealth(metric: Omit<SystemHealthMetric, 'timestamp'>): void {
+  trackSystemHealth(metric: Omit<SystemHealthMetric, 'timestamp'> | any): void {
     const fullMetric: SystemHealthMetric = {
       ...metric,
       timestamp: new Date(),
@@ -236,6 +254,50 @@ class PerformanceMonitoringService {
         date: day.date,
         status: day.systemStatus,
       })),
+    };
+  }
+
+  /**
+   * Get recent page load metrics for real-time monitoring
+   */
+  getRecentPageLoadMetrics(minutes: number = 5): PageLoadMetric[] {
+    const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
+    return this.pageLoadMetrics.filter(
+      (metric) => metric.timestamp >= cutoffTime
+    );
+  }
+
+  /**
+   * Get recent interaction metrics for real-time monitoring
+   */
+  getRecentInteractionMetrics(minutes: number = 5): InteractionMetric[] {
+    const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
+    return this.interactionMetrics.filter(
+      (metric) => metric.timestamp >= cutoffTime
+    );
+  }
+
+  /**
+   * Get current system health status
+   */
+  getSystemHealthStatus(): {
+    status: 'healthy' | 'warning' | 'critical';
+    uptime: number;
+    lastCheck: Date;
+    issues: string[];
+  } {
+    const status = this.getOverallSystemStatus();
+    const recentAlerts = this.alerts.filter(
+      (alert) => alert.timestamp >= new Date(Date.now() - 5 * 60 * 1000)
+    );
+
+    return {
+      status,
+      uptime:
+        Date.now() -
+        (this.systemHealthMetrics[0]?.timestamp.getTime() || Date.now()),
+      lastCheck: new Date(),
+      issues: recentAlerts.map((alert) => alert.message),
     };
   }
 
