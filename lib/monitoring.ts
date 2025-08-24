@@ -1,0 +1,819 @@
+/**
+ * Production Monitoring and Alerting System
+ * Comprehensive monitoring for application health, performance, and errors
+ */
+
+import { config, isMonitoringEnabled } from '@/lib/production-config';
+import { logProductionError } from '@/lib/production-error-logger';
+import { logInfo, logWarning } from '@/lib/production-logger';
+
+export interface HealthCheck {
+  name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  responseTime: number;
+  timestamp: string;
+  details?: Record<string, unknown>;
+  error?: string;
+}
+
+export interface SystemMetrics {
+  timestamp: string;
+  cpu: {
+    usage: number;
+    loadAverage: number[];
+  };
+  memory: {
+    used: number;
+    total: number;
+    percentage: number;
+  };
+  database: {
+    connections: number;
+    activeQueries: number;
+    avgResponseTime: number;
+  };
+  http: {
+    requestsPerMinute: number;
+    avgResponseTime: number;
+    errorRate: number;
+  };
+  errors: {
+    count: number;
+    criticalCount: number;
+    lastError?: string;
+  };
+}
+
+export interface Alert {
+  id: string;
+  type: 'error' | 'performance' | 'security' | 'uptime';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  message: string;
+  timestamp: string;
+  resolved: boolean;
+  metadata: Record<string, unknown>;
+}
+
+class MonitoringSystem {
+  private healthChecks: Map<string, HealthCheck> = new Map();
+  private metrics: SystemMetrics[] = [];
+  private alerts: Alert[] = [];
+  private metricsInterval?: NodeJS.Timeout;
+  private healthCheckInterval?: NodeJS.Timeout;
+
+  constructor() {
+    this.initialize();
+  }
+
+  private initialize(): void {
+    if (!isMonitoringEnabled('enablePerformanceMonitoring')) {
+      return;
+    }
+
+    // Start collecting metrics every 30 seconds
+    this.metricsInterval = setInterval(() => {
+      this.collectMetrics();
+    }, 30000);
+
+    // Run health checks every 60 seconds
+    this.healthCheckInterval = setInterval(() => {
+      this.runHealthChecks();
+    }, 60000);
+
+    // Initial health check
+    this.runHealthChecks();
+
+    logInfo('Monitoring system initialized', {
+      component: 'monitoring',
+      action: 'initialize',
+      metadata: {
+        environment: config.deployment.environment,
+        region: config.deployment.region,
+        version: config.deployment.version,
+      },
+    });
+  }
+
+  private async collectMetrics(): Promise<void> {
+    try {
+      const timestamp = new Date().toISOString();
+
+      // Collect system metrics (Node.js specific)
+      const memoryUsage = process.memoryUsage();
+      const cpuUsage = process.cpuUsage();
+
+      const metrics: SystemMetrics = {
+        timestamp,
+        cpu: {
+          usage: (cpuUsage.user + cpuUsage.system) / 1000000, // Convert to seconds
+          loadAverage:
+            process.platform !== 'win32'
+              ? (await import('os')).loadavg()
+              : [0, 0, 0],
+        },
+        memory: {
+          used: memoryUsage.heapUsed,
+          total: memoryUsage.heapTotal,
+          percentage: (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100,
+        },
+        database: {
+          connections: await this.getDatabaseConnections(),
+          activeQueries: await this.getActiveQueries(),
+          avgResponseTime: await this.getDatabaseResponseTime(),
+        },
+        http: {
+          requestsPerMinute: await this.getRequestsPerMinute(),
+          avgResponseTime: await this.getAvgResponseTime(),
+          errorRate: await this.getErrorRate(),
+        },
+        errors: {
+          count: await this.getErrorCount(),
+          criticalCount: await this.getCriticalErrorCount(),
+          lastError: await this.getLastError(),
+        },
+      };
+
+      this.metrics.push(metrics);
+
+      // Keep only last 100 metrics (about 50 minutes of data)
+      if (this.metrics.length > 100) {
+        this.metrics = this.metrics.slice(-100);
+      }
+
+      // Check for alerts based on metrics
+      await this.checkMetricAlerts(metrics);
+
+      logInfo('System metrics collected', {
+        component: 'monitoring',
+        action: 'collect_metrics',
+        metadata: {
+          memoryUsage: metrics.memory.percentage,
+          errorRate: metrics.http.errorRate,
+          responseTime: metrics.http.avgResponseTime,
+        },
+      });
+    } catch (error) {
+      await logProductionError(error, {
+        component: 'monitoring',
+        action: 'collect_metrics',
+        url: 'system',
+        userAgent: 'server',
+      });
+    }
+  }
+
+  private async runHealthChecks(): Promise<void> {
+    const checks = [
+      this.checkDatabase(),
+      this.checkExternalServices(),
+      this.checkFileSystem(),
+      this.checkMemoryUsage(),
+    ];
+
+    const results = await Promise.allSettled(checks);
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        this.healthChecks.set(result.value.name, result.value);
+      } else {
+        const checkNames = [
+          'database',
+          'external_services',
+          'filesystem',
+          'memory',
+        ];
+        this.healthChecks.set(checkNames[index], {
+          name: checkNames[index],
+          status: 'unhealthy',
+          responseTime: 0,
+          timestamp: new Date().toISOString(),
+          error:
+            result.reason instanceof Error
+              ? result.reason.message
+              : String(result.reason),
+        });
+      }
+    });
+
+    // Check for unhealthy services and create alerts
+    for (const [, check] of this.healthChecks) {
+      if (check.status === 'unhealthy') {
+        await this.createAlert({
+          type: 'uptime',
+          severity: 'high',
+          title: `Health Check Failed: ${check.name}`,
+          message: `Health check for ${check.name} failed: ${check.error || 'Unknown error'}`,
+          metadata: {
+            healthCheck: check,
+          },
+        });
+      }
+    }
+  }
+
+  private async checkDatabase(): Promise<HealthCheck> {
+    const startTime = Date.now();
+
+    try {
+      // Import Prisma client dynamically to avoid circular dependencies
+      const { prisma } = await import('@/lib/prisma');
+
+      // Simple query to check database connectivity
+      await prisma.$queryRaw`SELECT 1`;
+
+      const responseTime = Date.now() - startTime;
+
+      return {
+        name: 'database',
+        status: responseTime < 1000 ? 'healthy' : 'degraded',
+        responseTime,
+        timestamp: new Date().toISOString(),
+        details: {
+          connectionPool: 'active',
+          queryTime: responseTime,
+        },
+      };
+    } catch (error) {
+      return {
+        name: 'database',
+        status: 'unhealthy',
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private async checkExternalServices(): Promise<HealthCheck> {
+    const startTime = Date.now();
+
+    try {
+      // Check Supabase API if configured
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`,
+          {
+            method: 'HEAD',
+            headers: {
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Supabase API returned ${response.status}`);
+        }
+      }
+
+      const responseTime = Date.now() - startTime;
+
+      return {
+        name: 'external_services',
+        status: responseTime < 2000 ? 'healthy' : 'degraded',
+        responseTime,
+        timestamp: new Date().toISOString(),
+        details: {
+          supabase: 'connected',
+        },
+      };
+    } catch (error) {
+      return {
+        name: 'external_services',
+        status: 'unhealthy',
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private async checkFileSystem(): Promise<HealthCheck> {
+    const startTime = Date.now();
+
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+
+      // Check if we can write to temp directory
+      const tempFile = path.join(process.cwd(), '.tmp-health-check');
+      await fs.writeFile(tempFile, 'health-check');
+      await fs.unlink(tempFile);
+
+      const responseTime = Date.now() - startTime;
+
+      return {
+        name: 'filesystem',
+        status: 'healthy',
+        responseTime,
+        timestamp: new Date().toISOString(),
+        details: {
+          writeAccess: true,
+          workingDirectory: process.cwd(),
+        },
+      };
+    } catch (error) {
+      return {
+        name: 'filesystem',
+        status: 'unhealthy',
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private async checkMemoryUsage(): Promise<HealthCheck> {
+    const startTime = Date.now();
+
+    try {
+      const memoryUsage = process.memoryUsage();
+      const memoryPercentage =
+        (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+
+      let status: HealthCheck['status'] = 'healthy';
+      if (memoryPercentage > 90) {
+        status = 'unhealthy';
+      } else if (memoryPercentage > 75) {
+        status = 'degraded';
+      }
+
+      const responseTime = Date.now() - startTime;
+
+      return {
+        name: 'memory',
+        status,
+        responseTime,
+        timestamp: new Date().toISOString(),
+        details: {
+          heapUsed: memoryUsage.heapUsed,
+          heapTotal: memoryUsage.heapTotal,
+          percentage: memoryPercentage,
+          external: memoryUsage.external,
+        },
+      };
+    } catch (error) {
+      return {
+        name: 'memory',
+        status: 'unhealthy',
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private async checkMetricAlerts(metrics: SystemMetrics): Promise<void> {
+    const alertsConfig = config.alerts;
+
+    // Memory usage alert
+    if (metrics.memory.percentage > 90) {
+      await this.createAlert({
+        type: 'performance',
+        severity: 'critical',
+        title: 'High Memory Usage',
+        message: `Memory usage is at ${metrics.memory.percentage.toFixed(1)}%`,
+        metadata: { metrics: metrics.memory },
+      });
+    } else if (metrics.memory.percentage > 75) {
+      await this.createAlert({
+        type: 'performance',
+        severity: 'medium',
+        title: 'Elevated Memory Usage',
+        message: `Memory usage is at ${metrics.memory.percentage.toFixed(1)}%`,
+        metadata: { metrics: metrics.memory },
+      });
+    }
+
+    // Error rate alert
+    if (metrics.http.errorRate > alertsConfig.errorThreshold) {
+      await this.createAlert({
+        type: 'error',
+        severity: 'high',
+        title: 'High Error Rate',
+        message: `Error rate is ${metrics.http.errorRate.toFixed(1)}% (threshold: ${alertsConfig.errorThreshold}%)`,
+        metadata: { metrics: metrics.http },
+      });
+    }
+
+    // Response time alert
+    if (metrics.http.avgResponseTime > alertsConfig.responseTimeThreshold) {
+      await this.createAlert({
+        type: 'performance',
+        severity: 'medium',
+        title: 'Slow Response Time',
+        message: `Average response time is ${metrics.http.avgResponseTime}ms (threshold: ${alertsConfig.responseTimeThreshold}ms)`,
+        metadata: { metrics: metrics.http },
+      });
+    }
+
+    // Critical errors alert
+    if (metrics.errors.criticalCount > 0) {
+      await this.createAlert({
+        type: 'error',
+        severity: 'critical',
+        title: 'Critical Errors Detected',
+        message: `${metrics.errors.criticalCount} critical errors in the last period`,
+        metadata: {
+          metrics: metrics.errors,
+          lastError: metrics.errors.lastError,
+        },
+      });
+    }
+  }
+
+  private async createAlert(
+    alertData: Omit<Alert, 'id' | 'timestamp' | 'resolved'>
+  ): Promise<void> {
+    const alert: Alert = {
+      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      resolved: false,
+      ...alertData,
+    };
+
+    this.alerts.push(alert);
+
+    // Keep only last 100 alerts
+    if (this.alerts.length > 100) {
+      this.alerts = this.alerts.slice(-100);
+    }
+
+    // Send notifications
+    await this.sendAlertNotifications(alert);
+
+    logWarning(`Alert created: ${alert.title}`, {
+      component: 'monitoring',
+      action: 'create_alert',
+      metadata: {
+        alertId: alert.id,
+        type: alert.type,
+        severity: alert.severity,
+        ...alert.metadata,
+      },
+    });
+  }
+
+  private async sendAlertNotifications(alert: Alert): Promise<void> {
+    const alertsConfig = config.alerts;
+
+    try {
+      // Send Slack notification
+      if (
+        alertsConfig.enableSlackNotifications &&
+        alertsConfig.slackWebhookUrl
+      ) {
+        await this.sendSlackNotification(alert, alertsConfig.slackWebhookUrl);
+      }
+
+      // Send email notification
+      if (alertsConfig.enableEmailNotifications && alertsConfig.alertEmail) {
+        await this.sendEmailNotification(alert, alertsConfig.alertEmail);
+      }
+
+      // Log to stderr for external monitoring tools
+      const alertLog = {
+        timestamp: alert.timestamp,
+        level: 'ALERT',
+        type: alert.type,
+        severity: alert.severity,
+        title: alert.title,
+        message: alert.message,
+        environment: config.deployment.environment,
+        service: 'hunkcentral',
+        alertId: alert.id,
+        metadata: alert.metadata,
+      };
+
+      process.stderr.write(`MONITORING_ALERT: ${JSON.stringify(alertLog)}\n`);
+    } catch (error) {
+      await logProductionError(error, {
+        component: 'monitoring',
+        action: 'send_alert_notifications',
+        url: 'system',
+        userAgent: 'server',
+        metadata: {
+          alertId: alert.id,
+          alertType: alert.type,
+        },
+      });
+    }
+  }
+
+  private async sendSlackNotification(
+    alert: Alert,
+    webhookUrl: string
+  ): Promise<void> {
+    const color = {
+      low: '#36a64f',
+      medium: '#ff9500',
+      high: '#ff0000',
+      critical: '#8b0000',
+    }[alert.severity];
+
+    const payload = {
+      text: `🚨 ${alert.title}`,
+      attachments: [
+        {
+          color,
+          fields: [
+            {
+              title: 'Severity',
+              value: alert.severity.toUpperCase(),
+              short: true,
+            },
+            {
+              title: 'Type',
+              value: alert.type.toUpperCase(),
+              short: true,
+            },
+            {
+              title: 'Environment',
+              value: config.deployment.environment.toUpperCase(),
+              short: true,
+            },
+            {
+              title: 'Time',
+              value: new Date(alert.timestamp).toLocaleString(),
+              short: true,
+            },
+            {
+              title: 'Message',
+              value: alert.message,
+              short: false,
+            },
+          ],
+          footer: 'HUNKCentral Monitoring',
+          ts: Math.floor(Date.parse(alert.timestamp) / 1000),
+        },
+      ],
+    };
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Slack notification failed: ${response.status} ${response.statusText}`
+      );
+    }
+  }
+
+  private async sendEmailNotification(
+    alert: Alert,
+    email: string
+  ): Promise<void> {
+    // This would integrate with an email service like SendGrid, AWS SES, etc.
+    // For now, we'll log the email that would be sent
+    const emailContent = {
+      to: email,
+      subject: `🚨 HUNKCentral Alert: ${alert.title}`,
+      body: `
+        Alert Details:
+        - Severity: ${alert.severity.toUpperCase()}
+        - Type: ${alert.type.toUpperCase()}
+        - Environment: ${config.deployment.environment.toUpperCase()}
+        - Time: ${new Date(alert.timestamp).toLocaleString()}
+        - Message: ${alert.message}
+        
+        Alert ID: ${alert.id}
+        
+        This is an automated alert from HUNKCentral monitoring system.
+      `,
+    };
+
+    logInfo('Email alert notification prepared', {
+      component: 'monitoring',
+      action: 'prepare_email_alert',
+      metadata: {
+        alertId: alert.id,
+        recipient: email,
+        subject: emailContent.subject,
+      },
+    });
+
+    // TODO: Implement actual email sending
+    // Example: await sendEmail(emailContent);
+  }
+
+  // Helper methods for metrics collection
+  private async getDatabaseConnections(): Promise<number> {
+    try {
+      // This would query the database for connection count
+      // For now, return a placeholder
+      return 5;
+    } catch {
+      return 0;
+    }
+  }
+
+  private async getActiveQueries(): Promise<number> {
+    try {
+      // This would query the database for active queries
+      // For now, return a placeholder
+      return 2;
+    } catch {
+      return 0;
+    }
+  }
+
+  private async getDatabaseResponseTime(): Promise<number> {
+    try {
+      const startTime = Date.now();
+      const { prisma } = await import('@/lib/prisma');
+      await prisma.$queryRaw`SELECT 1`;
+      return Date.now() - startTime;
+    } catch {
+      return 0;
+    }
+  }
+
+  private async getRequestsPerMinute(): Promise<number> {
+    // This would be tracked by middleware
+    // For now, return a placeholder
+    return 50;
+  }
+
+  private async getAvgResponseTime(): Promise<number> {
+    // This would be tracked by middleware
+    // For now, return a placeholder
+    return 250;
+  }
+
+  private async getErrorRate(): Promise<number> {
+    // This would be calculated from error logs
+    // For now, return a placeholder
+    return 1.5;
+  }
+
+  private async getErrorCount(): Promise<number> {
+    try {
+      const { prisma } = await import('@/lib/prisma');
+      const count = await prisma.auditLog.count({
+        where: {
+          entityType: 'system_error',
+          createdAt: {
+            gte: new Date(Date.now() - 60000), // Last minute
+          },
+        },
+      });
+      return count;
+    } catch {
+      return 0;
+    }
+  }
+
+  private async getCriticalErrorCount(): Promise<number> {
+    try {
+      const { prisma } = await import('@/lib/prisma');
+      const count = await prisma.auditLog.count({
+        where: {
+          entityType: 'system_error',
+          createdAt: {
+            gte: new Date(Date.now() - 60000), // Last minute
+          },
+          changes: {
+            path: ['severity'],
+            equals: 'critical',
+          },
+        },
+      });
+      return count;
+    } catch {
+      return 0;
+    }
+  }
+
+  private async getLastError(): Promise<string | undefined> {
+    try {
+      const { prisma } = await import('@/lib/prisma');
+      const lastError = await prisma.auditLog.findFirst({
+        where: {
+          entityType: 'system_error',
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      if (lastError && lastError.changes) {
+        const changes = lastError.changes as { message?: string };
+        return changes.message;
+      }
+
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  // Public API methods
+  public getHealthChecks(): HealthCheck[] {
+    return Array.from(this.healthChecks.values());
+  }
+
+  public getMetrics(limit = 50): SystemMetrics[] {
+    return this.metrics.slice(-limit);
+  }
+
+  public getAlerts(limit = 50): Alert[] {
+    return this.alerts.slice(-limit);
+  }
+
+  public async resolveAlert(alertId: string): Promise<boolean> {
+    const alert = this.alerts.find((a) => a.id === alertId);
+    if (alert) {
+      alert.resolved = true;
+
+      logInfo(`Alert resolved: ${alert.title}`, {
+        component: 'monitoring',
+        action: 'resolve_alert',
+        metadata: {
+          alertId,
+          type: alert.type,
+          severity: alert.severity,
+        },
+      });
+
+      return true;
+    }
+    return false;
+  }
+
+  public async getSystemStatus(): Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    checks: HealthCheck[];
+    metrics: SystemMetrics | null;
+    activeAlerts: number;
+  }> {
+    const checks = this.getHealthChecks();
+    const metrics = this.metrics[this.metrics.length - 1] || null;
+    const activeAlerts = this.alerts.filter((a) => !a.resolved).length;
+
+    let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+
+    // Determine overall status based on health checks
+    const unhealthyChecks = checks.filter((c) => c.status === 'unhealthy');
+    const degradedChecks = checks.filter((c) => c.status === 'degraded');
+
+    if (unhealthyChecks.length > 0) {
+      status = 'unhealthy';
+    } else if (degradedChecks.length > 0 || activeAlerts > 0) {
+      status = 'degraded';
+    }
+
+    return {
+      status,
+      checks,
+      metrics,
+      activeAlerts,
+    };
+  }
+
+  public destroy(): void {
+    if (this.metricsInterval) {
+      clearInterval(this.metricsInterval);
+    }
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+    }
+
+    logInfo('Monitoring system destroyed', {
+      component: 'monitoring',
+      action: 'destroy',
+    });
+  }
+}
+
+// Global monitoring instance
+let globalMonitoring: MonitoringSystem | null = null;
+
+export function initializeMonitoring(): MonitoringSystem {
+  if (!globalMonitoring) {
+    globalMonitoring = new MonitoringSystem();
+  }
+  return globalMonitoring;
+}
+
+export function getMonitoring(): MonitoringSystem | null {
+  return globalMonitoring;
+}
+
+export function destroyMonitoring(): void {
+  if (globalMonitoring) {
+    globalMonitoring.destroy();
+    globalMonitoring = null;
+  }
+}
+
+// Initialize monitoring in production environments
+if (isMonitoringEnabled('enablePerformanceMonitoring')) {
+  initializeMonitoring();
+}
+
+export { MonitoringSystem };
