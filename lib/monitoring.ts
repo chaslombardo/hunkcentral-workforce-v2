@@ -96,6 +96,9 @@ class MonitoringSystem {
   }
 
   private async collectMetrics(): Promise<void> {
+    // Only run on server-side
+    if (typeof window !== 'undefined') return;
+
     try {
       const timestamp = new Date().toISOString();
 
@@ -164,6 +167,9 @@ class MonitoringSystem {
   }
 
   private async runHealthChecks(): Promise<void> {
+    // Only run on server-side
+    if (typeof window !== 'undefined') return;
+
     const checks = [
       this.checkDatabase(),
       this.checkExternalServices(),
@@ -292,6 +298,11 @@ class MonitoringSystem {
     const startTime = Date.now();
 
     try {
+      // Only run on server-side
+      if (typeof window !== 'undefined') {
+        throw new Error('File system check not available on client-side');
+      }
+
       const fs = await import('fs/promises');
       const path = await import('path');
 
@@ -811,8 +822,11 @@ export function destroyMonitoring(): void {
   }
 }
 
-// Initialize monitoring in production environments
-if (isMonitoringEnabled('enablePerformanceMonitoring')) {
+// Initialize monitoring in production environments (server-side only)
+if (
+  typeof window === 'undefined' &&
+  isMonitoringEnabled('enablePerformanceMonitoring')
+) {
   initializeMonitoring();
 }
 

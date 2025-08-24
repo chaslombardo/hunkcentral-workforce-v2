@@ -63,7 +63,10 @@ class UptimeMonitoringSystem {
   }
 
   private initialize(): void {
-    if (!isMonitoringEnabled('enableUptimeMonitoring')) {
+    if (
+      !isMonitoringEnabled('enableUptimeMonitoring') ||
+      typeof window !== 'undefined'
+    ) {
       return;
     }
 
@@ -81,11 +84,16 @@ class UptimeMonitoringSystem {
   }
 
   private setupDefaultChecks(): void {
+    // Ensure proper URL formatting
+    const baseUrl = config.deployment.deploymentUrl.startsWith('http')
+      ? config.deployment.deploymentUrl
+      : `https://${config.deployment.deploymentUrl}`;
+
     // Application health check
     this.addCheck({
       id: 'app_health',
       name: 'Application Health',
-      url: `${config.deployment.deploymentUrl}/api/health`,
+      url: `${baseUrl}/api/health`,
       method: 'GET',
       expectedStatus: 200,
       timeout: 10000,
@@ -97,7 +105,7 @@ class UptimeMonitoringSystem {
     this.addCheck({
       id: 'database_health',
       name: 'Database Health',
-      url: `${config.deployment.deploymentUrl}/api/health?checks=true`,
+      url: `${baseUrl}/api/health?checks=true`,
       method: 'GET',
       expectedStatus: 200,
       timeout: 15000,
@@ -472,8 +480,11 @@ export function destroyUptimeMonitoring(): void {
   }
 }
 
-// Initialize uptime monitoring in production environments
-if (isMonitoringEnabled('enableUptimeMonitoring')) {
+// Initialize uptime monitoring in production environments (server-side only)
+if (
+  typeof window === 'undefined' &&
+  isMonitoringEnabled('enableUptimeMonitoring')
+) {
   initializeUptimeMonitoring();
 }
 
