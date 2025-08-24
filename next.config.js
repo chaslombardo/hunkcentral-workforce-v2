@@ -11,6 +11,27 @@ const nextConfig = {
     ],
   },
 
+  // Prevent server-only packages from being bundled for client
+  serverExternalPackages: [
+    '@prisma/client',
+    'prisma',
+    'bcryptjs',
+    'crypto',
+    'fs',
+    'path',
+    'os',
+  ],
+
+  experimental: {
+    // Enable optimized package imports
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      '@tabler/icons-react',
+      'lucide-react',
+      'recharts',
+    ],
+  },
+
   // Image optimization
   images: {
     remotePatterns: [
@@ -26,24 +47,46 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  // Bundle analyzer (only in development)
-  ...(process.env.ANALYZE === 'true' && {
-    webpack: async (config, { isServer }) => {
-      if (!isServer) {
-        const { BundleAnalyzerPlugin } = await import(
-          'webpack-bundle-analyzer'
-        );
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'static',
-            openAnalyzer: false,
-            reportFilename: '../bundle-analysis.html',
-          })
-        );
-      }
-      return config;
-    },
-  }),
+  // Webpack configuration
+  webpack: (config, { isServer }) => {
+    // Exclude server-only packages from client-side bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        child_process: false,
+        module: false,
+      };
+
+      // Exclude Prisma and other server-only modules from client bundle
+      config.externals = config.externals || [];
+      config.externals.push({
+        '@prisma/client': 'commonjs @prisma/client',
+        prisma: 'commonjs prisma',
+        bcryptjs: 'commonjs bcryptjs',
+      });
+    }
+
+    // Bundle analyzer (only in development)
+    if (process.env.ANALYZE === 'true' && !isServer) {
+      // Dynamic import to avoid ESLint error
+      const BundleAnalyzerPlugin = eval('require')(
+        'webpack-bundle-analyzer'
+      ).BundleAnalyzerPlugin;
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+          reportFilename: '../bundle-analysis.html',
+        })
+      );
+    }
+
+    return config;
+  },
 
   // Security headers
   async headers() {
