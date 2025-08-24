@@ -1,13 +1,6 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { edgeLogWarning, createEdgeRequestLogger } from '@/lib/edge-logger';
-import {
-  defaultRateLimiter,
-  defaultCSRFProtection,
-  defaultSecureHeaders,
-  SecurityMonitor,
-} from '@/lib/security';
 
 function createErrorRedirect(
   req: NextRequest,
@@ -27,52 +20,67 @@ function createAccessDeniedRedirect(req: NextRequest, reason: string) {
   return NextResponse.redirect(dashboardUrl);
 }
 
+// Simple rate limiting for Edge Runtime
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function simpleRateLimit(req: NextRequest): boolean {
+  const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100;
+
+  const key = `rate_limit:${ip}`;
+  const current = rateLimitStore.get(key);
+
+  if (!current || now > current.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (current.count >= maxRequests) {
+    return false;
+  }
+
+  current.count++;
+  return true;
+}
+
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  // Security headers
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains'
+  );
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()'
+  );
+
+  return response;
+}
+
 export default withAuth(
   async function middleware(req) {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const logger = createEdgeRequestLogger({
-      requestId,
-      url: req.url,
-      userAgent: req.headers.get('user-agent') || 'unknown',
-    });
 
     try {
-      // Apply rate limiting
-      const rateLimitResponse = await defaultRateLimiter(req);
-      if (rateLimitResponse) {
-        return defaultSecureHeaders(rateLimitResponse);
-      }
-
-      // Apply CSRF protection for non-GET requests
-      const csrfResponse = await defaultCSRFProtection.createMiddleware()(req);
-      if (csrfResponse) {
-        return defaultSecureHeaders(csrfResponse);
+      // Simple rate limiting
+      if (!simpleRateLimit(req)) {
+        const response = new NextResponse('Too Many Requests', { status: 429 });
+        return addSecurityHeaders(response);
       }
 
       const token = req.nextauth.token;
       const { pathname } = req.nextUrl;
 
-      // Log request for production monitoring
-      logger.apiRequest('MIDDLEWARE', pathname, {
-        metadata: {
-          hasToken: !!token,
-          userRoles: token?.roles || [],
-          component: 'middleware',
-          action: 'route_protection',
-        },
-      });
-
       // Allow access to auth pages without token
       if (pathname.startsWith('/auth')) {
         // Redirect authenticated users away from login
         if (token) {
-          logger.authEvent('login_success', {
-            userId: token.id as string,
-            metadata: {
-              reason: 'already_authenticated',
-              redirectTo: '/dashboard',
-            },
-          });
           return NextResponse.redirect(new URL('/dashboard', req.url));
         }
         return NextResponse.next();
@@ -101,40 +109,21 @@ export default withAuth(
 
       if (isProtectedRoute) {
         if (!token) {
-          logger.authEvent('permission_denied', {
-            metadata: { reason: 'no_token', requestedPath: pathname },
-          });
           return createErrorRedirect(req, 'session_required', pathname);
         }
 
         // Validate token structure
         if (!token.id || !token.roles) {
-          logger.authEvent('permission_denied', {
-            userId: (token?.id as string) || 'unknown',
-            metadata: {
-              reason: 'invalid_token_structure',
-              requestedPath: pathname,
-            },
-          });
           return createErrorRedirect(req, 'invalid_session', pathname);
         }
       }
 
-      // Role-based route protection with detailed error handling
+      // Role-based route protection
       const userRoles = (token?.roles as string[]) || [];
 
       // Admin routes
       if (pathname.startsWith('/admin')) {
         if (!userRoles.includes('admin')) {
-          logger.authEvent('permission_denied', {
-            userId: (token?.id as string) || 'unknown',
-            metadata: {
-              reason: 'insufficient_role',
-              requiredRole: 'admin',
-              userRoles,
-              requestedPath: pathname,
-            },
-          });
           return createAccessDeniedRedirect(req, 'admin_required');
         }
       }
@@ -145,15 +134,6 @@ export default withAuth(
         pathname.includes('/reports/payroll')
       ) {
         if (!userRoles.includes('manager') && !userRoles.includes('admin')) {
-          logger.authEvent('permission_denied', {
-            userId: (token?.id as string) || 'unknown',
-            metadata: {
-              reason: 'insufficient_role',
-              requiredRole: 'manager_or_admin',
-              userRoles,
-              requestedPath: pathname,
-            },
-          });
           return createAccessDeniedRedirect(req, 'manager_required');
         }
       }
@@ -161,24 +141,13 @@ export default withAuth(
       // Sales routes
       if (pathname.startsWith('/commission')) {
         if (!userRoles.includes('sales') && !userRoles.includes('admin')) {
-          logger.authEvent('permission_denied', {
-            userId: (token?.id as string) || 'unknown',
-            metadata: {
-              reason: 'insufficient_role',
-              requiredRole: 'sales_or_admin',
-              userRoles,
-              requestedPath: pathname,
-            },
-          });
           return createAccessDeniedRedirect(req, 'sales_required');
         }
       }
 
       // Apply secure headers to successful responses
       const response = NextResponse.next();
-
-      // Add security headers
-      const secureResponse = defaultSecureHeaders(response);
+      const secureResponse = addSecurityHeaders(response);
 
       // Add request ID for tracing
       secureResponse.headers.set('x-request-id', requestId);
@@ -194,25 +163,11 @@ export default withAuth(
 
       return secureResponse;
     } catch (error) {
-      // Log middleware errors with proper context
-      logger.warning('Middleware error occurred', {
-        component: 'middleware',
-        action: 'error_handling',
-        metadata: {
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-          requestedPath: req.nextUrl.pathname,
-        },
-      });
-
-      // Log security event for middleware errors
-      await SecurityMonitor.logSecurityEvent('middleware_error', 'high', {
-        url: req.url,
-        userAgent: req.headers.get('user-agent') || 'unknown',
-        metadata: {
-          error: error instanceof Error ? error.message : String(error),
-          requestId,
-        },
+      // Simple error logging for Edge Runtime
+      console.error('Middleware error:', {
+        error: error instanceof Error ? error.message : String(error),
+        requestedPath: req.nextUrl.pathname,
+        requestId,
       });
 
       const errorResponse = createErrorRedirect(
@@ -220,7 +175,7 @@ export default withAuth(
         'middleware_error',
         req.nextUrl.pathname
       );
-      return defaultSecureHeaders(errorResponse);
+      return addSecurityHeaders(errorResponse);
     }
   },
   {
@@ -245,27 +200,19 @@ export default withAuth(
 
           // Validate token structure
           if (!token.id || !token.email) {
-            edgeLogWarning('Invalid token structure detected', {
-              component: 'middleware',
-              action: 'token_validation',
-              metadata: {
-                hasId: !!token.id,
-                hasEmail: !!token.email,
-                pathname: req.nextUrl.pathname,
-              },
+            console.warn('Invalid token structure detected:', {
+              hasId: !!token.id,
+              hasEmail: !!token.email,
+              pathname: req.nextUrl.pathname,
             });
             return false;
           }
 
           return true;
         } catch (error) {
-          edgeLogWarning('Authorization callback error', {
-            component: 'middleware',
-            action: 'authorization_callback',
-            metadata: {
-              error: error instanceof Error ? error.message : String(error),
-              pathname: req.nextUrl.pathname,
-            },
+          console.error('Authorization callback error:', {
+            error: error instanceof Error ? error.message : String(error),
+            pathname: req.nextUrl.pathname,
           });
           return false;
         }

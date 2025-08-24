@@ -2,8 +2,6 @@
 const nextConfig = {
   // Enable experimental features
   experimental: {
-    // Enable server actions
-    serverActions: true,
     // Enable optimized package imports
     optimizePackageImports: [
       '@radix-ui/react-icons',
