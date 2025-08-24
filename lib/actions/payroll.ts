@@ -12,6 +12,8 @@ import {
   convertUserDecimalFields,
   convertCommissionDecimalFields,
 } from '@/lib/decimal-utils';
+import { getCachedMetrics, areMetricsFresh } from '@/lib/metricsCalculator';
+import { triggerPayrollMetricsComputation } from '@/lib/backgroundJobs';
 import type {
   User,
   Department,
@@ -104,13 +106,37 @@ export async function getDetailedPayrollBreakdown(
       throw new Error('Unauthorized: Can only view your own payroll data');
     }
 
-    // Get pay period
+    // Try to get cached payroll metrics first
+    const cachedPayroll = await getCachedMetrics(
+      'payroll_detailed',
+      'user',
+      employeeId,
+      payPeriodId
+    );
+
+    // For closed pay periods, use cached data if available
     const payPeriod = await prisma.payPeriod.findUnique({
       where: { id: payPeriodId },
     });
 
     if (!payPeriod) {
       throw new Error('Pay period not found');
+    }
+
+    // Use cached data for closed pay periods or fresh data (within 1 hour)
+    if (
+      cachedPayroll &&
+      (payPeriod.status === 'closed' ||
+        areMetricsFresh(new Date(cachedPayroll.computedAt), 60))
+    ) {
+      return { success: true, data: cachedPayroll.data };
+    }
+
+    // If no fresh cached data, trigger background computation for next time
+    if (payPeriod.status !== 'closed') {
+      triggerPayrollMetricsComputation(payPeriodId, employeeId, 'high').catch(
+        console.error
+      );
     }
 
     // Get employee data

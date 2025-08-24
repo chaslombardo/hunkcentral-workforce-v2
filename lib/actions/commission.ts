@@ -11,6 +11,11 @@ import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
 import { canModifyDataForDate } from '@/lib/actions/pay-periods';
 import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
+import {
+  onCommissionCreated,
+  onCommissionMatched,
+  onCommissionApproved,
+} from '@/lib/cacheInvalidation';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {
@@ -58,6 +63,14 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
       undefined,
       commissionEntry
     );
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onCommissionCreated(commissionEntry.id);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/commission');
     return { success: true, data: commissionEntry };
@@ -350,6 +363,14 @@ export async function approveCommissionEntry(id: string, comments?: string) {
       approvedEntry,
       { comments, approvedAt: approvedEntry.approvedAt }
     );
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onCommissionApproved(approvedEntry.id);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/commission');
     return { success: true, data: approvedEntry };

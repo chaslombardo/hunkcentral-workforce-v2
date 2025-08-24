@@ -15,6 +15,11 @@ import type {
   UpdateUserFormData,
   UserSearchFormData,
 } from '@/lib/validations';
+import {
+  onUserCreated,
+  onUserUpdated,
+  onUserRatesUpdated,
+} from '@/lib/cacheInvalidation';
 
 // Create a new user
 export async function createUser(data: CreateUserFormData) {
@@ -77,6 +82,14 @@ export async function createUser(data: CreateUserFormData) {
         userId: session.user.id,
       },
     });
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onUserCreated(user.id);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/admin/users');
     return {
@@ -342,6 +355,26 @@ export async function updateUser(data: UpdateUserFormData) {
         userId: session.user.id,
       },
     });
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      // Check if rates were updated to trigger specific invalidation
+      const ratesUpdated = Object.keys(updateData).some(
+        (key) =>
+          key.startsWith('rate') ||
+          key.includes('salary') ||
+          key.includes('commission')
+      );
+
+      if (ratesUpdated) {
+        await onUserRatesUpdated(updatedUser.id);
+      } else {
+        await onUserUpdated(updatedUser.id);
+      }
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/admin/users');
     return {

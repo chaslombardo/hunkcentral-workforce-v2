@@ -2,6 +2,10 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { getCachedMetrics, areMetricsFresh } from '@/lib/metricsCalculator';
+import { triggerDashboardMetricsComputation as triggerBackgroundComputation } from '@/lib/backgroundJobs';
+import { getCachedDataWithWarming } from '@/lib/intelligentCache';
+import { getOptimizedDashboardMetrics } from '@/lib/queryOptimization';
 
 export interface DashboardMetrics {
   pendingLogs: {
@@ -52,6 +56,21 @@ export async function getDashboardMetrics(): Promise<{
     if (!session?.user?.id) {
       return { success: false, error: 'Authentication required' };
     }
+
+    // Try to get cached metrics with intelligent warming
+    const cachedMetrics = await getCachedDataWithWarming(
+      'dashboard_global',
+      'global',
+      undefined
+    );
+
+    // If we have cached data, return it (intelligent cache handles warming)
+    if (cachedMetrics) {
+      return { success: true, data: cachedMetrics };
+    }
+
+    // No cached data available - use optimized real-time query
+    const optimizedData = await getOptimizedDashboardMetrics();
 
     // Get current date for comparisons
     const now = new Date();
@@ -287,6 +306,38 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
     const session = await auth();
     if (!session?.user?.id) {
       return { success: false, error: 'Authentication required' };
+    }
+
+    // Try to get cached role-specific metrics first
+    const cacheKey = userRoles.includes('captain')
+      ? 'dashboard_captain'
+      : userRoles.includes('sales')
+        ? 'dashboard_sales'
+        : userRoles.includes('manager')
+          ? 'dashboard_manager'
+          : userRoles.includes('admin')
+            ? 'dashboard_admin'
+            : null;
+
+    if (cacheKey) {
+      const cachedMetrics = await getCachedMetrics(
+        cacheKey,
+        'user',
+        session.user.id
+      );
+
+      // Check if cached metrics are fresh (within 15 minutes for user-specific data)
+      if (
+        cachedMetrics &&
+        areMetricsFresh(new Date(cachedMetrics.computedAt), 15)
+      ) {
+        return { success: true, data: cachedMetrics.data };
+      }
+
+      // Trigger background computation for next time
+      triggerBackgroundComputation(session.user.id, undefined, 'high').catch(
+        console.error
+      );
     }
 
     const metrics: RoleSpecificMetrics = {};

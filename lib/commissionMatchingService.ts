@@ -8,6 +8,7 @@ import {
 } from '@/lib/commissionMatcher';
 import type { CommissionEntry, DailyLog, LogJob } from '@/types';
 import { logCommissionChange } from '@/lib/auditLogger';
+import { onCommissionMatched } from '@/lib/cacheInvalidation';
 
 export interface MatchingNotification {
   type: 'success' | 'conflict' | 'error';
@@ -58,6 +59,14 @@ export async function handleLogApprovalCommissionMatching(
           matchedLogId: approvedLogId,
         }
       );
+
+      // Trigger cache invalidation for performance optimization
+      try {
+        await onCommissionMatched(match.commissionEntry.id);
+      } catch (cacheError) {
+        // Don't fail the operation if cache invalidation fails
+        console.error('Cache invalidation failed:', cacheError);
+      }
 
       notifications.push({
         type: 'success',
@@ -251,6 +260,14 @@ export async function resolveCommissionConflict(
       },
       { reason: 'Manual conflict resolution' }
     );
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onCommissionMatched(selectedCommissionEntryId);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     const notifications: MatchingNotification[] = [
       {
