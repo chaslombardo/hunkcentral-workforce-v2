@@ -446,6 +446,9 @@ class PerformanceMonitoringService {
     page: string,
     metadata: any
   ): Promise<void> {
+    // Only store metrics on server side
+    if (typeof window !== 'undefined') return;
+
     try {
       await prisma.performanceMetric.create({
         data: {

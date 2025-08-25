@@ -249,14 +249,7 @@ export const bundleAnalysis = {
   ) => {
     if (process.env.NODE_ENV !== 'development') return;
 
-    // Import bundle analyzer dynamically to avoid circular dependencies
-    import('./bundle-analyzer')
-      .then(({ bundleAnalyzer }) => {
-        bundleAnalyzer.trackComponentUsage(componentName, variant, props);
-      })
-      .catch(() => {
-        // Ignore import failures
-      });
+    // Bundle analysis removed for simplification
   },
 };
 

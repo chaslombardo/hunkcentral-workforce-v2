@@ -27,7 +27,7 @@ class AnalyticsService {
   private static instance: AnalyticsService;
   private eventQueue: AnalyticsEvent[] = [];
   private performanceQueue: PerformanceMetric[] = [];
-  private flushInterval: NodeJS.Timeout | null = null;
+  private flushInterval: ReturnType<typeof setInterval> | null = null;
 
   private constructor() {
     // Only initialize in browser environment

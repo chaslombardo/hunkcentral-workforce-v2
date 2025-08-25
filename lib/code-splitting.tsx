@@ -5,7 +5,6 @@
 
 import * as React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { bundleAnalyzer } from './bundle-analyzer';
 
 // Generic loading fallback component
 const LoadingFallback = ({ className }: { className?: string }) => (
@@ -35,7 +34,6 @@ export function createLazyComponent(
         console.warn(`📦 Loaded ${componentName} in ${loadTime.toFixed(2)}ms`);
       }
 
-      bundleAnalyzer.trackComponentUsage(componentName, 'lazy-loaded');
       return moduleResult;
     } catch (error) {
       console.error(`Failed to load ${componentName}:`, error);

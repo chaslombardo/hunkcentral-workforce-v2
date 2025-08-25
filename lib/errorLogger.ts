@@ -1,5 +1,8 @@
 import { prisma } from '@/lib/prisma';
 
+// Client-side guard to prevent Node.js API usage in browser
+const isServer = typeof window === 'undefined';
+
 export interface ErrorContext {
   component: string;
   action: string;
@@ -44,14 +47,24 @@ export async function logServerError(
         message: errorMessage,
         stackTrace: stack,
       },
-      systemInfo: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        arch: process.arch,
-        memoryUsage: process.memoryUsage(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV,
-      },
+      systemInfo: isServer
+        ? {
+            nodeVersion: process.version,
+            platform: process.platform,
+            arch: process.arch,
+            memoryUsage: process.memoryUsage(),
+            uptime: process.uptime(),
+            environment: process.env.NODE_ENV,
+          }
+        : {
+            environment: 'client',
+            userAgent:
+              typeof navigator !== 'undefined'
+                ? navigator.userAgent
+                : 'unknown',
+            platform:
+              typeof navigator !== 'undefined' ? navigator.platform : 'unknown',
+          },
       requestInfo: {
         timestamp: new Date().toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -65,8 +78,8 @@ export async function logServerError(
       resolved: false,
     };
 
-    // Enhanced production logging
-    if (process.env.NODE_ENV === 'production') {
+    // Enhanced production logging - only on server
+    if (isServer && process.env.NODE_ENV === 'production') {
       try {
         // Store error in database for production monitoring with enhanced context
         const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -132,8 +145,12 @@ export async function logServerError(
           dbError: dbError instanceof Error ? dbError.message : String(dbError),
         };
 
-        // Use structured JSON logging for production monitoring tools
-        process.stderr.write(JSON.stringify(structuredLog) + '\n');
+        // Use structured JSON logging for production monitoring tools - server only
+        if (isServer) {
+          process.stderr.write(JSON.stringify(structuredLog) + '\n');
+        } else {
+          console.error('Database logging failed:', structuredLog);
+        }
       }
     } else {
       // Development logging with enhanced context
@@ -150,7 +167,11 @@ export async function logServerError(
       };
 
       // Use structured logging even in development for consistency
-      process.stderr.write(JSON.stringify(devLog, null, 2) + '\n');
+      if (isServer) {
+        process.stderr.write(JSON.stringify(devLog, null, 2) + '\n');
+      } else {
+        console.error('Development Error:', devLog);
+      }
     }
   } catch (loggingError) {
     // Ensure error logging never breaks the application
@@ -165,7 +186,11 @@ export async function logServerError(
           : String(loggingError),
     };
 
-    process.stderr.write(JSON.stringify(fallbackLog) + '\n');
+    if (isServer) {
+      process.stderr.write(JSON.stringify(fallbackLog) + '\n');
+    } else {
+      console.error('Fallback Error Log:', fallbackLog);
+    }
   }
 }
 
@@ -241,16 +266,26 @@ async function logCriticalError(errorLog: ServerErrorLog): Promise<void> {
     };
 
     // For now, log to stderr with CRITICAL prefix for monitoring tools to pick up
-    process.stderr.write(`CRITICAL_ALERT: ${JSON.stringify(criticalAlert)}\n`);
+    if (isServer) {
+      process.stderr.write(
+        `CRITICAL_ALERT: ${JSON.stringify(criticalAlert)}\n`
+      );
+    } else {
+      console.error('CRITICAL_ALERT:', criticalAlert);
+    }
 
     // TODO: Implement actual external service integration
     // Example: await sendToSentry(criticalAlert);
     // Example: await sendToSlack(criticalAlert);
   } catch (alertError) {
     // Don't let critical alerting break the application
-    process.stderr.write(
-      `ALERT_SYSTEM_FAILURE: ${JSON.stringify({ error: alertError })}\n`
-    );
+    if (isServer) {
+      process.stderr.write(
+        `ALERT_SYSTEM_FAILURE: ${JSON.stringify({ error: alertError })}\n`
+      );
+    } else {
+      console.error('ALERT_SYSTEM_FAILURE:', { error: alertError });
+    }
   }
 }
 
