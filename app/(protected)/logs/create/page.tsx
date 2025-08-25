@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { CaptainLogForm } from '@/components/features/logs/captain-log-form';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LogCreateErrorFallback } from '@/components/ui/logs-error-fallback';
-import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { getMonitoring } from '@/lib/monitoring';
 
 export const metadata: Metadata = {
   title: 'Create Daily Log - HUNKCentral',

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
-import { logServerError } from '@/lib/errorLogger';
-import { getErrorStatistics } from '@/lib/production-error-logger';
+import { getMonitoring } from '@/lib/monitoring';
+// Simplified error statistics - remove complex error analytics for now
+// This can be re-implemented with the consolidated monitoring system later
 
 // TypeScript interfaces for error handling
 interface ErrorLogChanges {

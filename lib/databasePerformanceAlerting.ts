@@ -3,7 +3,7 @@
 
 import { prisma } from './prisma';
 import { queryMonitor } from './queryOptimization';
-import { performanceMonitor } from './performanceMonitoring';
+import { getMonitoring } from './monitoring';
 
 export interface DatabaseAlert {
   id: string;

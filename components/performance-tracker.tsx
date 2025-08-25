@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { performanceMonitor } from '@/lib/performanceMonitoring';
+import { getMonitoring } from '@/lib/monitoring';
 
 interface PerformanceTrackerProps {
   userId?: string;
@@ -30,12 +30,15 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
               ?.startTime || 0;
 
           // Track page load metrics
-          performanceMonitor.trackPageLoad(pathname, loadTime, {
-            domContentLoaded,
-            firstPaint,
-            firstContentfulPaint,
-            userId,
-          });
+          const monitoring = getMonitoring();
+          if (monitoring) {
+            monitoring.trackPageLoad(pathname, loadTime, {
+              domContentLoaded,
+              firstPaint,
+              firstContentfulPaint,
+              userId,
+            });
+          }
         }
       }
     };
@@ -55,17 +58,20 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
         'unknown';
       const action = event.type;
 
-      performanceMonitor.trackInteraction({
-        component,
-        action,
-        duration: 0,
-        metadata: {
-          page: pathname,
-          userId,
-          elementTag: target.tagName.toLowerCase(),
-          elementClass: target.className,
-        },
-      });
+      const monitoring = getMonitoring();
+      if (monitoring) {
+        monitoring.trackInteraction({
+          component,
+          action,
+          duration: 0,
+          metadata: {
+            page: pathname,
+            userId,
+            elementTag: target.tagName.toLowerCase(),
+            elementClass: target.className,
+          },
+        });
+      }
     };
 
     // Add event listeners for common interactions
@@ -90,27 +96,16 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
           (navigator as any).mozConnection ||
           (navigator as any).webkitConnection;
 
-        performanceMonitor.trackSystemHealth({
-          metricType: 'memory',
-          value: (performance as any).memory
-            ? (performance as any).memory.usedJSHeapSize
-            : 0,
-          status: 'healthy',
-          memoryUsage: (performance as any).memory
-            ? {
-                used: (performance as any).memory.usedJSHeapSize,
-                total: (performance as any).memory.totalJSHeapSize,
-                limit: (performance as any).memory.jsHeapSizeLimit,
-              }
-            : null,
-          connectionType: connection?.effectiveType || 'unknown',
-          onlineStatus: navigator.onLine,
-          userAgent: navigator.userAgent,
-          viewport: {
-            width: window.innerWidth,
-            height: window.innerHeight,
-          },
-        });
+        const monitoring = getMonitoring();
+        if (monitoring) {
+          monitoring.trackSystemHealth({
+            metricType: 'memory',
+            value: (performance as any).memory
+              ? (performance as any).memory.usedJSHeapSize
+              : 0,
+            status: 'healthy',
+          });
+        }
       }
     };
 
@@ -124,8 +119,11 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
   useEffect(() => {
     // Track page visibility changes
     const handleVisibilityChange = () => {
+      const monitoring = getMonitoring();
+      if (!monitoring) return;
+
       if (document.hidden) {
-        performanceMonitor.trackInteraction({
+        monitoring.trackInteraction({
           component: 'page',
           action: 'hidden',
           duration: 0,
@@ -136,7 +134,7 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
           },
         });
       } else {
-        performanceMonitor.trackInteraction({
+        monitoring.trackInteraction({
           component: 'page',
           action: 'visible',
           duration: 0,

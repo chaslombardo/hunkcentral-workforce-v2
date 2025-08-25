@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { performanceMonitor } from '@/lib/performanceMonitoring';
+import { getMonitoring } from '@/lib/monitoring';
 import { databaseAlerting } from '@/lib/databasePerformanceAlerting';
 
 export async function GET(request: NextRequest) {

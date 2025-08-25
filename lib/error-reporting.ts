@@ -3,11 +3,7 @@
  * Provides comprehensive error reporting and debugging tools
  */
 
-import {
-  logServerError,
-  logAuthError,
-  logDatabaseError,
-} from '@/lib/errorLogger';
+import { getMonitoring } from '@/lib/monitoring';
 import {
   logClientError,
   logClientComponentError,
@@ -174,20 +170,23 @@ export async function reportServerError(
     type: 'server',
   });
 
-  // Log using existing server error logger
-  await logServerError(error, {
-    component: context.component,
-    action: context.action,
-    userId: context.userId,
-    url: context.url,
-    userAgent: context.userAgent,
-    additionalData: {
-      errorId: report.id,
-      level: report.level,
-      sessionId: context.sessionId,
-      ...context.metadata,
-    },
-  });
+  // Log using monitoring system
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: context.component,
+      action: context.action,
+      userId: context.userId,
+      url: context.url,
+      userAgent: context.userAgent,
+      additionalData: {
+        errorId: report.id,
+        level: report.level,
+        sessionId: context.sessionId,
+        ...context.metadata,
+      },
+    });
+  }
 
   return report;
 }

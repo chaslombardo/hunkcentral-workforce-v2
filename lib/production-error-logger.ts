@@ -665,3 +665,92 @@ export async function getErrorStatistics(timeRange: {
     };
   }
 }
+
+/**
+ * Temporary stub for removed production-error-logger
+ * This is a simplified version to maintain compatibility during refactoring
+ * TODO: Remove this file and update all imports to use monitoring.ts in Phase 5
+ */
+
+import { getMonitoring } from '@/lib/monitoring';
+
+export interface ErrorContext {
+  component: string;
+  action: string;
+  userId?: string;
+  sessionId?: string;
+  requestId?: string;
+  url: string;
+  userAgent?: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+  query?: Record<string, string>;
+  params?: Record<string, string>;
+  timestamp?: number;
+  environment?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  category?:
+    | 'server'
+    | 'database'
+    | 'auth'
+    | 'api'
+    | 'middleware'
+    | 'component'
+    | 'security';
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Simplified error logging that delegates to the monitoring system
+ */
+export async function logProductionError(
+  error: Error | unknown,
+  context: Omit<
+    ErrorContext,
+    'timestamp' | 'environment' | 'severity' | 'category'
+  > & {
+    category?: ErrorContext['category'];
+    severity?: ErrorContext['severity'];
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: context.component,
+      action: context.action,
+      userId: context.userId,
+      url: context.url,
+      userAgent: context.userAgent,
+      timestamp: Date.now(),
+      additionalData: context.metadata,
+      severity: context.severity,
+      category: context.category,
+    });
+  } else {
+    // Fallback to console logging
+    console.error('Error:', error, context);
+  }
+}
+
+/**
+ * Stub for error statistics - simplified implementation
+ */
+export async function getErrorStatistics() {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    const errors = monitoring.getErrorLogs({ limit: 100 });
+    return {
+      totalErrors: errors.length,
+      criticalErrors: errors.filter((e) => e.context.severity === 'critical')
+        .length,
+      recentErrors: errors.slice(-10),
+    };
+  }
+
+  return {
+    totalErrors: 0,
+    criticalErrors: 0,
+    recentErrors: [],
+  };
+}

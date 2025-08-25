@@ -4,7 +4,6 @@
  */
 
 import { config, isMonitoringEnabled } from '@/lib/production-config';
-import { logProductionError } from '@/lib/production-error-logger';
 import { logInfo, logWarning } from '@/lib/production-logger';
 
 // Re-export types from the client-safe types file
@@ -13,7 +12,136 @@ export type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
 // Import types for internal use
 import type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
 
+// Performance monitoring types (consolidated from performanceMonitoring.ts)
+export interface PageLoadMetric {
+  page: string;
+  loadTime: number;
+  userId?: string;
+  userAgent?: string;
+  timestamp: Date;
+}
+
+export interface InteractionMetric {
+  action: string;
+  component: string;
+  duration: number;
+  userId?: string;
+  metadata?: Record<string, any>;
+  timestamp: Date;
+}
+
+export interface SystemHealthMetric {
+  metricType: 'cpu' | 'memory' | 'database' | 'cache' | 'errors';
+  value: number;
+  threshold?: number;
+  status: 'healthy' | 'warning' | 'critical';
+  timestamp: Date;
+}
+
+export interface PerformanceAlert {
+  type: 'slow_page' | 'slow_query' | 'high_error_rate' | 'system_health';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  data: any;
+  timestamp: Date;
+}
+
+// Performance configuration (consolidated from performance-config.ts)
+export interface PerformanceConfig {
+  monitoring: {
+    enabled: boolean;
+    trackRenderTimes: boolean;
+    trackBundleUsage: boolean;
+    logInterval: number;
+    maxStoredMeasurements: number;
+  };
+  thresholds: {
+    renderTime: number;
+    propSize: number;
+    reRenderCount: number;
+    memoryUsage: number;
+    pageLoad: { good: number; warning: number; critical: number };
+    interaction: { good: number; warning: number; critical: number };
+    database: { good: number; warning: number; critical: number };
+    errorRate: { warning: number; critical: number };
+  };
+  optimization: {
+    enableMemoization: boolean;
+    enableLazyLoading: boolean;
+    enableTreeShaking: boolean;
+    enableCodeSplitting: boolean;
+  };
+}
+
+// Error logging types (consolidated from error logging files)
+export interface ErrorContext {
+  component: string;
+  action: string;
+  userId?: string;
+  userAgent?: string;
+  url: string;
+  timestamp: number;
+  stack?: string;
+  additionalData?: Record<string, unknown>;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  category?:
+    | 'server'
+    | 'database'
+    | 'auth'
+    | 'api'
+    | 'middleware'
+    | 'component'
+    | 'security';
+}
+
+export interface ErrorLog {
+  id: string;
+  level: 'error' | 'warn' | 'info';
+  message: string;
+  context: ErrorContext;
+  resolved: boolean;
+  timestamp: string;
+  fingerprint: string;
+}
+
+// Default performance configuration
+export const performanceConfig: PerformanceConfig = {
+  monitoring: {
+    enabled: process.env.NODE_ENV === 'development',
+    trackRenderTimes: true,
+    trackBundleUsage: false, // Simplified
+    logInterval: 30000,
+    maxStoredMeasurements: 100,
+  },
+  thresholds: {
+    renderTime: 16,
+    propSize: 1000,
+    reRenderCount: 10,
+    memoryUsage: 50,
+    pageLoad: { good: 1000, warning: 3000, critical: 5000 },
+    interaction: { good: 100, warning: 500, critical: 1000 },
+    database: { good: 100, warning: 500, critical: 1000 },
+    errorRate: { warning: 0.05, critical: 0.1 },
+  },
+  optimization: {
+    enableMemoization: true,
+    enableLazyLoading: true,
+    enableTreeShaking: true,
+    enableCodeSplitting: true,
+  },
+};
+
 class MonitoringSystem {
+  // Performance monitoring properties (consolidated from PerformanceMonitoringService)
+  private pageLoadMetrics: PageLoadMetric[] = [];
+  private interactionMetrics: InteractionMetric[] = [];
+  private systemHealthMetrics: SystemHealthMetric[] = [];
+  private performanceAlerts: PerformanceAlert[] = [];
+  private readonly maxMetrics = 1000; // Reduced from 10000 for simplification
+
+  // Error logging properties (consolidated from error logging files)
+  private errorLogs: ErrorLog[] = [];
+  private readonly maxErrorLogs = 1000;
   private healthChecks: Map<string, HealthCheck> = new Map();
   private metrics: SystemMetrics[] = [];
   private alerts: Alert[] = [];
@@ -115,12 +243,7 @@ class MonitoringSystem {
         },
       });
     } catch (error) {
-      await logProductionError(error, {
-        component: 'monitoring',
-        action: 'collect_metrics',
-        url: 'system',
-        userAgent: 'server',
-      });
+      console.error('Failed to collect metrics:', error);
     }
   }
 
@@ -756,6 +879,377 @@ class MonitoringSystem {
       component: 'monitoring',
       action: 'destroy',
     });
+  }
+
+  // Performance monitoring methods (consolidated from PerformanceMonitoringService)
+
+  /**
+   * Track page load performance
+   */
+  public trackPageLoad(
+    pageOrMetric: string | Omit<PageLoadMetric, 'timestamp'>,
+    loadTime?: number,
+    metadata?: { userId?: string; userAgent?: string; [key: string]: any }
+  ): void {
+    if (!performanceConfig.monitoring.enabled) return;
+
+    let metric: Omit<PageLoadMetric, 'timestamp'>;
+
+    if (typeof pageOrMetric === 'string') {
+      metric = {
+        page: pageOrMetric,
+        loadTime: loadTime!,
+        userId: metadata?.userId,
+        userAgent: metadata?.userAgent,
+      };
+    } else {
+      metric = pageOrMetric;
+    }
+
+    const fullMetric: PageLoadMetric = {
+      ...metric,
+      timestamp: new Date(),
+    };
+
+    this.pageLoadMetrics.push(fullMetric);
+    this.trimMetrics(this.pageLoadMetrics);
+
+    // Check for performance issues
+    this.checkPageLoadPerformance(fullMetric);
+  }
+
+  /**
+   * Track user interaction performance
+   */
+  public trackInteraction(metric: Omit<InteractionMetric, 'timestamp'>): void {
+    if (!performanceConfig.monitoring.enabled) return;
+
+    const fullMetric: InteractionMetric = {
+      ...metric,
+      timestamp: new Date(),
+    };
+
+    this.interactionMetrics.push(fullMetric);
+    this.trimMetrics(this.interactionMetrics);
+
+    this.checkInteractionPerformance(fullMetric);
+  }
+
+  /**
+   * Track system health metrics
+   */
+  public trackSystemHealth(
+    metric: Omit<SystemHealthMetric, 'timestamp'>
+  ): void {
+    const fullMetric: SystemHealthMetric = {
+      ...metric,
+      timestamp: new Date(),
+    };
+
+    this.systemHealthMetrics.push(fullMetric);
+    this.trimMetrics(this.systemHealthMetrics);
+
+    this.checkSystemHealthMetric(fullMetric);
+  }
+
+  /**
+   * Get performance dashboard data
+   */
+  public getPerformanceDashboard() {
+    const pageLoadTimes = this.pageLoadMetrics.map((m) => m.loadTime);
+    const interactionTimes = this.interactionMetrics.map((m) => m.duration);
+
+    return {
+      pageLoad: {
+        average: this.calculateAverage(pageLoadTimes),
+        p95: this.calculatePercentile(pageLoadTimes, 95),
+        recent: pageLoadTimes.slice(-10),
+      },
+      interactions: {
+        average: this.calculateAverage(interactionTimes),
+        p95: this.calculatePercentile(interactionTimes, 95),
+        recent: interactionTimes.slice(-10),
+      },
+      systemHealth: {
+        status: this.getOverallHealthStatus(),
+        metrics: this.systemHealthMetrics.slice(-10),
+      },
+      alerts: this.performanceAlerts.slice(-20),
+    };
+  }
+
+  // Performance utility methods
+  private trimMetrics(metrics: any[]): void {
+    if (metrics.length > this.maxMetrics) {
+      metrics.splice(0, metrics.length - this.maxMetrics);
+    }
+  }
+
+  private calculateAverage(values: number[]): number {
+    if (values.length === 0) return 0;
+    return values.reduce((a, b) => a + b, 0) / values.length;
+  }
+
+  private calculatePercentile(values: number[], percentile: number): number {
+    if (values.length === 0) return 0;
+    const sorted = [...values].sort((a, b) => a - b);
+    const index = Math.ceil((percentile / 100) * sorted.length) - 1;
+    return sorted[Math.max(0, index)];
+  }
+
+  private checkPageLoadPerformance(metric: PageLoadMetric): void {
+    const { thresholds } = performanceConfig;
+
+    if (metric.loadTime > thresholds.pageLoad.critical) {
+      this.createPerformanceAlert({
+        type: 'slow_page',
+        severity: 'critical',
+        message: `Critical page load time: ${metric.page} took ${metric.loadTime}ms`,
+        data: metric,
+        timestamp: new Date(),
+      });
+    } else if (metric.loadTime > thresholds.pageLoad.warning) {
+      this.createPerformanceAlert({
+        type: 'slow_page',
+        severity: 'medium',
+        message: `Slow page load: ${metric.page} took ${metric.loadTime}ms`,
+        data: metric,
+        timestamp: new Date(),
+      });
+    }
+  }
+
+  private checkInteractionPerformance(metric: InteractionMetric): void {
+    const { thresholds } = performanceConfig;
+
+    if (metric.duration > thresholds.interaction.critical) {
+      this.createPerformanceAlert({
+        type: 'slow_query',
+        severity: 'high',
+        message: `Slow interaction: ${metric.action} on ${metric.component} took ${metric.duration}ms`,
+        data: metric,
+        timestamp: new Date(),
+      });
+    }
+  }
+
+  private checkSystemHealthMetric(metric: SystemHealthMetric): void {
+    if (metric.status === 'critical') {
+      this.createPerformanceAlert({
+        type: 'system_health',
+        severity: 'critical',
+        message: `Critical system health: ${metric.metricType} at ${metric.value}`,
+        data: metric,
+        timestamp: new Date(),
+      });
+    }
+  }
+
+  private createPerformanceAlert(alert: PerformanceAlert): void {
+    this.performanceAlerts.push(alert);
+
+    // Keep only last 100 alerts
+    if (this.performanceAlerts.length > 100) {
+      this.performanceAlerts.splice(0, this.performanceAlerts.length - 100);
+    }
+  }
+
+  private getOverallHealthStatus(): 'healthy' | 'warning' | 'critical' {
+    const recentMetrics = this.systemHealthMetrics.slice(-5);
+
+    if (recentMetrics.some((m) => m.status === 'critical')) {
+      return 'critical';
+    }
+    if (recentMetrics.some((m) => m.status === 'warning')) {
+      return 'warning';
+    }
+    return 'healthy';
+  }
+
+  // Error logging methods (consolidated from error logging files)
+
+  /**
+   * Log server errors with comprehensive context
+   */
+  public async logError(
+    error: Error | unknown,
+    context: Omit<ErrorContext, 'timestamp'>
+  ): Promise<void> {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    const isServer = typeof window === 'undefined';
+
+    const enhancedContext: ErrorContext = {
+      ...context,
+      timestamp: Date.now(),
+      stack,
+      severity:
+        context.severity ||
+        this.determineSeverity(errorMessage, context.component),
+    };
+
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const fingerprint = this.createErrorFingerprint(
+      errorMessage,
+      enhancedContext
+    );
+
+    const errorLog: ErrorLog = {
+      id: errorId,
+      level: 'error',
+      message: errorMessage,
+      context: enhancedContext,
+      resolved: false,
+      timestamp: new Date().toISOString(),
+      fingerprint,
+    };
+
+    this.errorLogs.push(errorLog);
+    this.trimErrorLogs();
+
+    // Store in database if on server and in production
+    if (isServer && process.env.NODE_ENV === 'production') {
+      try {
+        const { prisma } = await import('@/lib/prisma');
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'system_error',
+            entityId: errorId,
+            action: 'server_error',
+            userId: context.userId || 'system',
+            changes: {
+              errorId,
+              message: errorMessage,
+              component: context.component,
+              action: context.action,
+              severity: enhancedContext.severity,
+              stack: stack?.substring(0, 1000), // Limit stack trace size
+              fingerprint,
+            },
+          },
+        });
+      } catch (dbError) {
+        // Fallback to console logging if database fails
+        console.error('Failed to log error to database:', dbError);
+      }
+    }
+
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error logged:', {
+        message: errorMessage,
+        component: context.component,
+        action: context.action,
+        severity: enhancedContext.severity,
+        stack: stack?.substring(0, 500),
+      });
+    }
+  }
+
+  /**
+   * Get error logs with optional filtering
+   */
+  public getErrorLogs(options?: {
+    limit?: number;
+    severity?: ErrorContext['severity'];
+    component?: string;
+    resolved?: boolean;
+  }): ErrorLog[] {
+    let filtered = [...this.errorLogs];
+
+    if (options?.severity) {
+      filtered = filtered.filter(
+        (log) => log.context.severity === options.severity
+      );
+    }
+
+    if (options?.component) {
+      filtered = filtered.filter(
+        (log) => log.context.component === options.component
+      );
+    }
+
+    if (options?.resolved !== undefined) {
+      filtered = filtered.filter((log) => log.resolved === options.resolved);
+    }
+
+    const limit = options?.limit || 50;
+    return filtered.slice(-limit);
+  }
+
+  /**
+   * Mark an error as resolved
+   */
+  public resolveError(errorId: string): boolean {
+    const error = this.errorLogs.find((log) => log.id === errorId);
+    if (error) {
+      error.resolved = true;
+      return true;
+    }
+    return false;
+  }
+
+  // Error utility methods
+  private trimErrorLogs(): void {
+    if (this.errorLogs.length > this.maxErrorLogs) {
+      this.errorLogs.splice(0, this.errorLogs.length - this.maxErrorLogs);
+    }
+  }
+
+  private createErrorFingerprint(
+    message: string,
+    context: ErrorContext
+  ): string {
+    const component = context.component;
+    const action = context.action;
+    const stackLines = context.stack?.split('\n').slice(0, 3).join('|') || '';
+
+    const fingerprint = `${component}:${action}:${message}:${stackLines}`
+      .replace(/\d+/g, 'N')
+      .replace(/['"]/g, '')
+      .toLowerCase();
+
+    return Buffer.from(fingerprint).toString('base64').substring(0, 32);
+  }
+
+  private determineSeverity(
+    message: string,
+    component: string
+  ): ErrorContext['severity'] {
+    const msg = message.toLowerCase();
+    const comp = component.toLowerCase();
+
+    // Critical errors
+    if (
+      msg.includes('database') ||
+      msg.includes('auth') ||
+      msg.includes('security') ||
+      msg.includes('payment') ||
+      comp.includes('database') ||
+      comp.includes('auth')
+    ) {
+      return 'critical';
+    }
+
+    // High priority errors
+    if (
+      msg.includes('server error') ||
+      msg.includes('timeout') ||
+      msg.includes('unauthorized')
+    ) {
+      return 'high';
+    }
+
+    // Medium priority errors
+    if (
+      msg.includes('not found') ||
+      msg.includes('bad request') ||
+      msg.includes('validation')
+    ) {
+      return 'medium';
+    }
+
+    return 'low';
   }
 }
 

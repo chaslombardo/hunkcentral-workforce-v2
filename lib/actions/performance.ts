@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import { performanceMonitor } from '@/lib/performanceMonitoring';
+import { getMonitoring } from '@/lib/monitoring';
 import {
   queryMonitor,
   getDatabasePerformanceStats,

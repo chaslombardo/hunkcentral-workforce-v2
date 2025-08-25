@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { getMonitoring } from '@/lib/monitoring';
 import { LogsPageErrorFallback } from '@/components/ui/logs-error-fallback';
 
 // Force dynamic rendering for this page

@@ -5,7 +5,7 @@ import { LogReviewQueue } from '@/components/features/logs/log-review-queue';
 import { Skeleton } from '@/components/ui/skeleton';
 import LogErrorBoundary from '@/components/ui/log-error-boundary';
 import { LogReviewErrorFallback } from '@/components/ui/logs-error-fallback';
-import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { getMonitoring } from '@/lib/monitoring';
 
 export default async function LogReviewPage() {
   let session;

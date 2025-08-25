@@ -1,7 +1,7 @@
 // Authentication utilities and session helpers
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { logAuthError } from '@/lib/errorLogger';
+import { getMonitoring } from '@/lib/monitoring';
 import { prisma } from '@/lib/prisma';
 import type { User, UserRole } from '@/types';
 
