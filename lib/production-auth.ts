@@ -8,7 +8,7 @@ import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import type { SessionUser } from '@/lib/auth';
 import type { UserRole } from '@/types';
 

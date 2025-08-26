@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+// Note: executeOptimizedQuery and getOptimizedUserPerformance functionality integrated into individual action files
 import { convertUserDecimalFields } from '@/lib/decimal-utils';
 import { safeFormatDate } from '@/lib/date-utils';
 

@@ -5,7 +5,7 @@ import { CaptainLogForm } from '@/components/features/logs/captain-log-form';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LogCreateErrorFallback } from '@/components/ui/logs-error-fallback';
 import { loadLog } from '@/lib/actions/logs';
-import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
 import { DailyLogFormData } from '@/lib/validations';
 import { LogJob, LogHour } from '@/types';
 
@@ -95,6 +95,7 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
     if (!logResult.success || !logResult.data) {
       await logPageError(new Error(`Failed to load log: ${logResult.error}`), {
         page: 'logs_edit',
+        action: 'load_log',
         userId: session.user.id,
         url: currentUrl,
         userAgent,
@@ -202,6 +203,7 @@ export default async function EditLogPage({ params }: EditLogPageProps) {
     // Log the error with comprehensive context
     await logPageError(error, {
       page: 'logs_edit',
+      action: 'page_error',
       userId: session?.user?.id,
       url: currentUrl,
       userAgent,

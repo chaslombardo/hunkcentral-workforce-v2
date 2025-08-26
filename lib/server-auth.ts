@@ -1,7 +1,7 @@
 // Server-side authentication utilities with enhanced error handling
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { logAuthError } from '@/lib/errorLogger';
+import { getMonitoring, logAuthError } from '@/lib/monitoring';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { NextRequest } from 'next/server';

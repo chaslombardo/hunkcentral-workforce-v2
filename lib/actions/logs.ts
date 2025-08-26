@@ -6,7 +6,14 @@ import { DailyLogFormSchema, type DailyLogFormData } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { logDailyLogChange } from '@/lib/auditLogger';
 import { canModifyDataForDate } from '@/lib/actions/pay-periods';
+import {
+  onLogCreated,
+  onLogUpdated,
+  onLogApproved,
+  onLogDeleted,
+} from '@/lib/cache';
 import { Prisma } from '@prisma/client';
+// Note: Query optimization functionality integrated directly into log action functions
 
 export type LogActionResult = {
   success: boolean;
@@ -284,6 +291,18 @@ export async function saveDraftLog(
       { formData: validatedData }
     );
 
+    // Trigger cache invalidation for performance optimization
+    try {
+      if (logId) {
+        await onLogUpdated(savedLog.id);
+      } else {
+        await onLogCreated(savedLog.id);
+      }
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
+
     return {
       success: true,
       data: {
@@ -389,6 +408,14 @@ export async function submitLog(
       } catch (auditError) {
         console.error('Audit logging failed (non-critical):', auditError);
         // Don't fail the submission if audit logging fails
+      }
+
+      // Trigger cache invalidation for performance optimization
+      try {
+        await onLogUpdated(submittedLog.id);
+      } catch (cacheError) {
+        // Don't fail the operation if cache invalidation fails
+        console.error('Cache invalidation failed:', cacheError);
       }
 
       revalidatePath('/logs');
@@ -819,6 +846,14 @@ export async function approveLog(
     // Store matching notifications in the response data for UI feedback
     const matchingNotifications = matchingResult.notifications || [];
 
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onLogApproved(result.id);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
+
     revalidatePath('/logs/review');
     revalidatePath('/dashboard');
 
@@ -952,6 +987,14 @@ export async function deleteLog(logId: string): Promise<LogActionResult> {
         // Don't fail the transaction for audit log errors
       }
     });
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onLogDeleted(log.captainId);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/logs/review');
     revalidatePath('/logs');

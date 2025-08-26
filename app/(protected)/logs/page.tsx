@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { logPageError, logAuthError } from '@/lib/errorLogger';
+import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
 import { LogsPageErrorFallback } from '@/components/ui/logs-error-fallback';
 
 // Force dynamic rendering for this page
@@ -232,6 +232,7 @@ export default async function LogsPage() {
     // Log the error with comprehensive context
     await logPageError(error, {
       page: 'logs',
+      action: 'page_error',
       userId: session?.user?.id,
       url: currentUrl || '/logs',
       userAgent,

@@ -15,6 +15,7 @@ import {
   IconEdit,
   IconTrash,
   IconCopy,
+  IconShield,
   IconChevronDown,
   IconChevronUp,
   IconSearch,
@@ -85,10 +86,13 @@ import { useToast } from '@/hooks/use-toast';
 import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
 import { getUsers, deleteUser } from '@/lib/actions/users';
-import { convertUserDecimalFields } from '@/lib/decimal-utils.client';
+import { convertUserDecimalFields } from '@/lib/decimal-utils';
 import { formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
 import { CopySettingsDialog } from './copy-settings-dialog';
+import { PermissionManagementDialog } from './permission-management-dialog';
+import { BulkPermissionDialog } from './bulk-permission-dialog';
+import { BulkUserOperations } from './bulk-user-operations';
 
 // Remove Prisma import - use number type instead
 
@@ -464,6 +468,19 @@ export function UserManagementDashboard() {
               }
               onSuccess={() => loadUsers(searchForm.getValues())}
             />
+            <PermissionManagementDialog
+              user={{
+                ...row.original,
+                roles: row.original.roles as UserRole[],
+              }}
+              trigger={
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <IconShield className="h-4 w-4 mr-2" />
+                  Manage Permissions
+                </DropdownMenuItem>
+              }
+              onSuccess={() => loadUsers(searchForm.getValues())}
+            />
             <DropdownMenuSeparator />
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -559,6 +576,10 @@ export function UserManagementDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <BulkUserOperations
+            selectedUsers={[]}
+            onSuccess={() => loadUsers(searchForm.getValues())}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -716,6 +737,18 @@ export function UserManagementDashboard() {
                 >
                   Clear Selection
                 </Button>
+                <BulkPermissionDialog
+                  selectedUsers={table
+                    .getFilteredSelectedRowModel()
+                    .rows.map((row) => ({
+                      ...row.original,
+                      roles: row.original.roles as UserRole[],
+                    }))}
+                  onSuccess={() => {
+                    setRowSelection({});
+                    loadUsers(searchForm.getValues());
+                  }}
+                />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="sm">

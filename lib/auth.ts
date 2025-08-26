@@ -1,7 +1,7 @@
 // Authentication utilities and session helpers
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { logAuthError } from '@/lib/errorLogger';
+import { getMonitoring, logAuthError } from '@/lib/monitoring';
 import { prisma } from '@/lib/prisma';
 import type { User, UserRole } from '@/types';
 
@@ -12,6 +12,7 @@ export interface SessionUser {
   email: string;
   fullName: string;
   roles: UserRole[];
+  permissions?: string[];
 }
 
 // Server-side session helper (alias for compatibility)

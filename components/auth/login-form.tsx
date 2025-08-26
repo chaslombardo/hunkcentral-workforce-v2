@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
-import { BrandButton } from '@/components/brand/brand-button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -134,6 +134,7 @@ export function LoginForm({
             placeholder="Enter your email"
             {...register('email')}
             disabled={isLoading}
+            required
           />
           {errors.email && (
             <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -148,6 +149,7 @@ export function LoginForm({
             placeholder="Enter your password"
             {...register('password')}
             disabled={isLoading}
+            required
           />
           {errors.password && (
             <p className="text-sm text-destructive">
@@ -156,14 +158,13 @@ export function LoginForm({
           )}
         </div>
 
-        <BrandButton
+        <Button
           type="submit"
-          variant="primary"
-          className="w-full"
-          loading={isLoading}
+          className="w-full bg-hunks-green hover:bg-hunks-green/90 text-white"
+          disabled={isLoading}
         >
           {isLoading ? 'Signing in...' : 'Sign In'}
-        </BrandButton>
+        </Button>
       </div>
 
       <div className="text-center text-sm text-muted-foreground">

@@ -7,8 +7,9 @@ import {
 import { MobileNetworkIndicator } from '@/components/ui/offline-indicator';
 import { NavigationProvider } from '@/contexts/navigation-context';
 import { PerformanceMonitor } from '@/components/performance-monitor';
+import { PerformanceTracker } from '@/components/performance-tracker';
 import { FeedbackDialog } from '@/components/features/feedback/feedback-dialog';
-import { ThemeDebug } from '@/components/theme-debug';
+import { ThemeDebug } from '@/components/theme-manager';
 import { PageErrorBoundary } from '@/components/ui/page-error-boundary';
 import { ProductionErrorBoundary } from '@/components/ui/production-error-boundary';
 import { ProductionProtectedRoute } from '@/components/auth/production-protected-route';
@@ -49,6 +50,9 @@ export default async function ProtectedLayout({
               trackInteractions={true}
               trackFormSubmissions={true}
             />
+
+            {/* Enhanced performance tracking */}
+            <PerformanceTracker userId={userId} />
 
             {/* Mobile network indicator */}
             <MobileNetworkIndicator />

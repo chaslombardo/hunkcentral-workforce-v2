@@ -15,6 +15,7 @@ import type {
   UpdateUserFormData,
   UserSearchFormData,
 } from '@/lib/validations';
+import { onUserCreated, onUserUpdated, onUserRatesUpdated } from '@/lib/cache';
 
 // Create a new user
 export async function createUser(data: CreateUserFormData) {
@@ -78,6 +79,14 @@ export async function createUser(data: CreateUserFormData) {
       },
     });
 
+    // Trigger cache invalidation for performance optimization
+    try {
+      await onUserCreated(user.id);
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
+
     revalidatePath('/admin/users');
     return {
       success: true,
@@ -94,6 +103,178 @@ export async function createUser(data: CreateUserFormData) {
     return {
       success: false,
       error: 'Failed to create user',
+    };
+  }
+}
+
+// Update user permissions
+export async function updateUserPermissions(data: {
+  userId: string;
+  permissions: string[];
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    // Get current user data for audit trail
+    const currentUser = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { permissions: true, fullName: true },
+    });
+
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    // Update user permissions
+    const updatedUser = await prisma.user.update({
+      where: { id: data.userId },
+      data: { permissions: data.permissions },
+      select: { id: true, fullName: true, permissions: true },
+    });
+
+    // Log audit trail
+    await prisma.auditLog.create({
+      data: {
+        entityType: 'user',
+        entityId: data.userId,
+        action: 'update_permissions',
+        changes: {
+          permissions: {
+            from: currentUser.permissions,
+            to: data.permissions,
+          },
+        },
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${data.userId}`);
+
+    return {
+      success: true,
+      user: updatedUser,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to update permissions',
+    };
+  }
+}
+
+// Bulk update permissions for multiple users
+export async function bulkUpdatePermissions(data: {
+  userIds: string[];
+  permissions: string[];
+  action: 'add' | 'remove' | 'replace';
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    const results = [];
+
+    for (const userId of data.userIds) {
+      try {
+        const currentUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { permissions: true, fullName: true },
+        });
+
+        if (!currentUser) {
+          results.push({ userId, success: false, error: 'User not found' });
+          continue;
+        }
+
+        let newPermissions: string[];
+
+        switch (data.action) {
+          case 'add':
+            newPermissions = [
+              ...new Set([...currentUser.permissions, ...data.permissions]),
+            ];
+            break;
+          case 'remove':
+            newPermissions = currentUser.permissions.filter(
+              (p) => !data.permissions.includes(p)
+            );
+            break;
+          case 'replace':
+            newPermissions = data.permissions;
+            break;
+          default:
+            throw new Error('Invalid action');
+        }
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: { permissions: newPermissions },
+        });
+
+        // Log audit trail
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'user',
+            entityId: userId,
+            action: `bulk_${data.action}_permissions`,
+            changes: {
+              permissions: {
+                from: currentUser.permissions,
+                to: newPermissions,
+                action: data.action,
+                applied: data.permissions,
+              },
+            },
+            userId: session.user.id,
+          },
+        });
+
+        results.push({ userId, success: true });
+      } catch (error) {
+        results.push({
+          userId,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+
+    revalidatePath('/admin/users');
+
+    const successCount = results.filter((r) => r.success).length;
+    const errorCount = results.filter((r) => !r.success).length;
+
+    return {
+      success: true,
+      results,
+      summary: {
+        total: data.userIds.length,
+        successful: successCount,
+        failed: errorCount,
+      },
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to bulk update permissions',
     };
   }
 }
@@ -170,6 +351,26 @@ export async function updateUser(data: UpdateUserFormData) {
         userId: session.user.id,
       },
     });
+
+    // Trigger cache invalidation for performance optimization
+    try {
+      // Check if rates were updated to trigger specific invalidation
+      const ratesUpdated = Object.keys(updateData).some(
+        (key) =>
+          key.startsWith('rate') ||
+          key.includes('salary') ||
+          key.includes('commission')
+      );
+
+      if (ratesUpdated) {
+        await onUserRatesUpdated(updatedUser.id);
+      } else {
+        await onUserUpdated(updatedUser.id);
+      }
+    } catch (cacheError) {
+      // Don't fail the operation if cache invalidation fails
+      console.error('Cache invalidation failed:', cacheError);
+    }
 
     revalidatePath('/admin/users');
     return {
@@ -551,6 +752,285 @@ export async function copyUserSettings(fromUserId: string, toUserId: string) {
       success: false,
       error:
         error instanceof Error ? error.message : 'Failed to copy user settings',
+    };
+  }
+}
+
+// Bulk update roles for multiple users
+export async function bulkUpdateRoles(data: {
+  userIds: string[];
+  roles: string[];
+  action: 'add' | 'remove' | 'replace';
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    const results = [];
+
+    for (const userId of data.userIds) {
+      try {
+        const currentUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { roles: true, fullName: true },
+        });
+
+        if (!currentUser) {
+          results.push({ userId, success: false, error: 'User not found' });
+          continue;
+        }
+
+        let newRoles: string[];
+
+        switch (data.action) {
+          case 'add':
+            newRoles = [...new Set([...currentUser.roles, ...data.roles])];
+            break;
+          case 'remove':
+            newRoles = currentUser.roles.filter((r) => !data.roles.includes(r));
+            break;
+          case 'replace':
+            newRoles = data.roles;
+            break;
+          default:
+            throw new Error('Invalid action');
+        }
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: { roles: newRoles },
+        });
+
+        // Log audit trail
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'user',
+            entityId: userId,
+            action: `bulk_${data.action}_roles`,
+            changes: {
+              roles: {
+                from: currentUser.roles,
+                to: newRoles,
+                action: data.action,
+                applied: data.roles,
+              },
+            },
+            userId: session.user.id,
+          },
+        });
+
+        results.push({ userId, success: true });
+      } catch (error) {
+        results.push({
+          userId,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+
+    revalidatePath('/admin/users');
+
+    const successCount = results.filter((r) => r.success).length;
+    const errorCount = results.filter((r) => !r.success).length;
+
+    return {
+      success: true,
+      results,
+      summary: {
+        total: data.userIds.length,
+        successful: successCount,
+        failed: errorCount,
+      },
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to bulk update roles',
+    };
+  }
+}
+
+// Bulk import users from CSV data
+export async function bulkImportUsers(data: {
+  users: Array<{
+    fullName: string;
+    email: string;
+    roles: string[];
+    rateJunkCaptain?: number;
+    rateJunkWingman?: number;
+    rateMoveCaptain?: number;
+    rateMoveWingman?: number;
+    salaryAmount?: number;
+    salaryFrequency?: string;
+    commissionRate?: number;
+  }>;
+  skipDuplicates: boolean;
+  sendWelcomeEmails: boolean;
+}) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    const results = [];
+    let skippedCount = 0;
+
+    for (const userData of data.users) {
+      try {
+        // Check for existing user
+        const existingUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+
+        if (existingUser && data.skipDuplicates) {
+          skippedCount++;
+          results.push({
+            email: userData.email,
+            success: false,
+            error: 'Email already exists (skipped)',
+          });
+          continue;
+        }
+
+        if (existingUser && !data.skipDuplicates) {
+          results.push({
+            email: userData.email,
+            success: false,
+            error: 'Email already exists',
+          });
+          continue;
+        }
+
+        // Generate temporary password
+        const tempPassword = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(tempPassword, 12);
+
+        // Create user
+        const user = await prisma.user.create({
+          data: {
+            ...userData,
+            password: hashedPassword,
+          },
+        });
+
+        // Log audit trail
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'user',
+            entityId: user.id,
+            action: 'bulk_import',
+            changes: {
+              created: {
+                email: user.email,
+                fullName: user.fullName,
+                roles: user.roles,
+              },
+            },
+            userId: session.user.id,
+          },
+        });
+
+        // TODO: Send welcome email if requested
+        if (data.sendWelcomeEmails) {
+          // Implement email sending logic
+        }
+
+        results.push({
+          email: userData.email,
+          success: true,
+          tempPassword: data.sendWelcomeEmails ? undefined : tempPassword,
+        });
+      } catch (error) {
+        results.push({
+          email: userData.email,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+
+    revalidatePath('/admin/users');
+
+    const successCount = results.filter((r) => r.success).length;
+    const errorCount = results.filter((r) => !r.success).length;
+
+    return {
+      success: true,
+      results,
+      summary: {
+        total: data.users.length,
+        successful: successCount,
+        failed: errorCount,
+        skipped: skippedCount,
+      },
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to import users',
+    };
+  }
+}
+
+// Export users to CSV format
+export async function exportUsers(userIds?: string[]) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    const whereClause = userIds ? { id: { in: userIds } } : {};
+
+    const users = await prisma.user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        roles: true,
+        rateJunkCaptain: true,
+        rateJunkWingman: true,
+        rateMoveCaptain: true,
+        rateMoveWingman: true,
+        salaryAmount: true,
+        salaryFrequency: true,
+        commissionRate: true,
+        createdAt: true,
+      },
+      orderBy: { fullName: 'asc' },
+    });
+
+    return {
+      success: true,
+      users,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: 'Failed to export users',
     };
   }
 }

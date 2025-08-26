@@ -9,10 +9,12 @@ import {
   Settings,
   TrendingUp,
   Building2,
+  Trophy,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/layout/nav-main';
 import { NavUser } from '@/components/layout/nav-user';
+import { TeamSwitcher } from '@/components/layout/team-switcher';
 import {
   Sidebar,
   SidebarContent,
@@ -93,6 +95,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Reports & Analytics - Data and insights
   const reportsAnalytics = [];
 
+  // Performance Rankings (available to all users)
+  reportsAnalytics.push({
+    title: 'Rankings',
+    url: '/rankings',
+    icon: Trophy,
+    items: [],
+  });
+
   // Employee self-service payroll (always available)
   reportsAnalytics.push({
     title: 'My Payroll',
@@ -145,22 +155,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
   }
 
+  // Create teams data for team switcher (locations/franchises)
+  const teams = [
+    {
+      name: 'College Hunks',
+      logo: Building2,
+      plan: 'Workforce Management',
+    },
+  ];
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-hunks-green text-white">
-            <Building2 className="size-4" />
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium text-hunks-green">
-              College Hunks
-            </span>
-            <span className="truncate text-xs text-muted-foreground">
-              Workforce Management
-            </span>
-          </div>
-        </div>
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain title="Daily Operations" items={dailyOperations} />

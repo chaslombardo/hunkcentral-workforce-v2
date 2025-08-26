@@ -1,50 +1,61 @@
 /**
- * Utility functions for handling Prisma Decimal type conversions
+ * Unified utility functions for handling Prisma Decimal type conversions
  *
  * This module provides consistent conversion between Prisma Decimal types
  * and JavaScript numbers for calculations and display.
+ * Works in both server and client environments.
  */
 
-import { Decimal } from '@prisma/client/runtime/library';
+// Import Decimal type for server environments
+import type { Decimal } from '@prisma/client/runtime/library';
+
+// Type for decimal values that works in both environments
+type DecimalValue =
+  | Decimal // Prisma Decimal type
+  | { toString(): string }
+  | number
+  | string
+  | null
+  | undefined;
 
 /**
- * Convert a Prisma Decimal to a JavaScript number
+ * Convert a Prisma Decimal or decimal-like value to a JavaScript number
  * Returns 0 if the value is null or undefined
+ * Works in both server and client environments
  */
-export function decimalToNumber(decimal: Decimal | null | undefined): number {
+export function decimalToNumber(decimal: DecimalValue): number {
   if (!decimal) return 0;
   return Number(decimal);
 }
 
 /**
- * Convert a JavaScript number to a Prisma Decimal
+ * Convert a JavaScript number to a Prisma Decimal or number
  * Returns null if the value is null or undefined
+ * Returns number for simplicity in both environments
  */
-export function numberToDecimal(
-  num: number | null | undefined
-): Decimal | null {
+export function numberToDecimal(num: number | null | undefined): number | null {
   if (num === null || num === undefined) return null;
-  return new Decimal(num);
+  return num;
 }
 
 /**
  * Convert an optional Prisma Decimal to an optional JavaScript number
  */
 export function optionalDecimalToNumber(
-  decimal: Decimal | null | undefined
+  decimal: DecimalValue
 ): number | undefined {
   if (!decimal) return undefined;
   return Number(decimal);
 }
 
 /**
- * Convert an optional JavaScript number to an optional Prisma Decimal
+ * Convert an optional JavaScript number to an optional Decimal/number
  */
 export function optionalNumberToDecimal(
   num: number | null | undefined
-): Decimal | null {
+): number | null {
   if (num === null || num === undefined) return null;
-  return new Decimal(num);
+  return num;
 }
 
 /**
@@ -62,22 +73,23 @@ export type DecimalToNumber<T> = {
 
 /**
  * Convert a User model with Decimal fields to numbers
+ * Works in both server and client environments
  */
 export function convertUserDecimalFields<
   T extends {
-    rateJunkCaptain?: Decimal | null;
-    rateJunkWingman?: Decimal | null;
-    rateMoveCaptain?: Decimal | null;
-    rateMoveWingman?: Decimal | null;
-    rateZigma?: Decimal | null;
-    rateTraining?: Decimal | null;
-    rateEstimating?: Decimal | null;
-    rateWarehouse?: Decimal | null;
-    rateAdmin?: Decimal | null;
-    salaryAmount?: Decimal | null;
-    commissionRate?: Decimal | null;
-    junkBonusGoal: Decimal;
-    moveBonusGoal: Decimal;
+    rateJunkCaptain?: DecimalValue;
+    rateJunkWingman?: DecimalValue;
+    rateMoveCaptain?: DecimalValue;
+    rateMoveWingman?: DecimalValue;
+    rateZigma?: DecimalValue;
+    rateTraining?: DecimalValue;
+    rateEstimating?: DecimalValue;
+    rateWarehouse?: DecimalValue;
+    rateAdmin?: DecimalValue;
+    salaryAmount?: DecimalValue;
+    commissionRate?: DecimalValue;
+    junkBonusGoal: DecimalValue;
+    moveBonusGoal: DecimalValue;
   },
 >(
   user: T
@@ -131,15 +143,16 @@ export function convertUserDecimalFields<
 
 /**
  * Convert a LogJob model with Decimal fields to numbers
+ * Works in both server and client environments
  */
 export function convertLogJobDecimalFields<
   T extends {
-    revenue: Decimal;
-    tips: Decimal;
-    junkOnMove?: Decimal | null;
-    valuation?: Decimal | null;
-    materials?: Decimal | null;
-    disposalCost?: Decimal | null;
+    revenue: DecimalValue;
+    tips: DecimalValue;
+    junkOnMove?: DecimalValue;
+    valuation?: DecimalValue;
+    materials?: DecimalValue;
+    disposalCost?: DecimalValue;
   },
 >(
   job: T
@@ -167,10 +180,11 @@ export function convertLogJobDecimalFields<
 
 /**
  * Convert a LogHour model with Decimal fields to numbers
+ * Works in both server and client environments
  */
 export function convertLogHourDecimalFields<
   T extends {
-    hours: Decimal;
+    hours: DecimalValue;
   },
 >(
   hour: T
@@ -185,12 +199,13 @@ export function convertLogHourDecimalFields<
 
 /**
  * Convert a CommissionEntry model with Decimal fields to numbers
+ * Works in both server and client environments
  */
 export function convertCommissionDecimalFields<
   T extends {
-    estimatedRevenue: Decimal;
-    actualRevenue?: Decimal | null;
-    commissionAmount?: Decimal | null;
+    estimatedRevenue: DecimalValue;
+    actualRevenue?: DecimalValue;
+    commissionAmount?: DecimalValue;
   },
 >(
   commission: T

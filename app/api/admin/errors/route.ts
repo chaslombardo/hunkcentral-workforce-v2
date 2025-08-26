@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
-import { logServerError } from '@/lib/errorLogger';
-import { getErrorStatistics } from '@/lib/production-error-logger';
+import { getMonitoring, getErrorStatistics } from '@/lib/monitoring';
+// Simplified error statistics - remove complex error analytics for now
+// This can be re-implemented with the consolidated monitoring system later
 
 // TypeScript interfaces for error handling
 interface ErrorLogChanges {
@@ -138,12 +139,16 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    await logServerError(error, {
-      component: 'api_admin_errors',
-      action: 'get_errors',
-      url: request.url,
-      userAgent: request.headers.get('user-agent') || 'unknown',
-    });
+    const monitoring = getMonitoring();
+    if (monitoring) {
+      await monitoring.logError(error, {
+        component: 'api_admin_errors',
+        action: 'get_errors',
+        url: request.url,
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        category: 'api',
+      });
+    }
 
     return NextResponse.json(
       { error: 'Failed to fetch error data' },
@@ -202,12 +207,16 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    await logServerError(error, {
-      component: 'api_admin_errors',
-      action: 'resolve_error',
-      url: request.url,
-      userAgent: request.headers.get('user-agent') || 'unknown',
-    });
+    const monitoring = getMonitoring();
+    if (monitoring) {
+      await monitoring.logError(error, {
+        component: 'api_admin_errors',
+        action: 'resolve_error',
+        url: request.url,
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        category: 'api',
+      });
+    }
 
     return NextResponse.json(
       { error: 'Failed to resolve error' },
