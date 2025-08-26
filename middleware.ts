@@ -30,7 +30,7 @@ function simpleRateLimit(req: NextRequest): boolean {
     'unknown';
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutes
-  const maxRequests = 100;
+  const maxRequests = 300; // Increased from 100 to 300 for better user experience
 
   const key = `rate_limit:${ip}`;
   const current = rateLimitStore.get(key);

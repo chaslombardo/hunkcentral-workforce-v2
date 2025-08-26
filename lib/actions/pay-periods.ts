@@ -274,29 +274,36 @@ export async function getPayPeriodStats() {
 
     const now = new Date();
 
-    // Get current pay period
-    const currentPayPeriod = await prisma.payPeriod.findFirst({
-      where: {
-        AND: [{ startDate: { lte: now } }, { endDate: { gte: now } }],
+    // Use Promise.all to run queries in parallel for better performance
+    const [currentPayPeriod, statusCounts, totalCount] = await Promise.all([
+      // Get current pay period
+      prisma.payPeriod.findFirst({
+        where: {
+          AND: [{ startDate: { lte: now } }, { endDate: { gte: now } }],
+        },
+        orderBy: { startDate: 'desc' },
+      }),
+
+      // Get status counts in a single aggregation query
+      prisma.payPeriod.groupBy({
+        by: ['status'],
+        _count: {
+          status: true,
+        },
+      }),
+
+      // Get total count
+      prisma.payPeriod.count(),
+    ]);
+
+    // Parse status counts
+    const statusMap = statusCounts.reduce(
+      (acc, item) => {
+        acc[item.status] = item._count.status;
+        return acc;
       },
-      orderBy: { startDate: 'desc' },
-    });
-
-    // Get total pay periods count
-    const totalPayPeriods = await prisma.payPeriod.count();
-
-    // Get pay periods by status
-    const openPeriods = await prisma.payPeriod.count({
-      where: { status: 'open' },
-    });
-
-    const lockedPeriods = await prisma.payPeriod.count({
-      where: { status: 'locked' },
-    });
-
-    const closedPeriods = await prisma.payPeriod.count({
-      where: { status: 'closed' },
-    });
+      { open: 0, locked: 0, closed: 0 } as Record<string, number>
+    );
 
     // Get pending logs count for current period (if exists)
     let pendingLogsCount = 0;
@@ -333,10 +340,10 @@ export async function getPayPeriodStats() {
           pendingLogs: pendingLogsCount,
         },
         totals: {
-          total: totalPayPeriods,
-          open: openPeriods,
-          locked: lockedPeriods,
-          closed: closedPeriods,
+          total: totalCount,
+          open: statusMap.open || 0,
+          locked: statusMap.locked || 0,
+          closed: statusMap.closed || 0,
         },
       },
     };

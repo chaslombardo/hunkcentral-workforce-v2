@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import {
   CalendarIcon,
@@ -164,7 +164,49 @@ export function PayPeriodManager() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-96 bg-muted animate-pulse rounded mt-2" />
+          </div>
+          <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+        </div>
+
+        {/* Grid Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-6 w-32 bg-muted rounded" />
+                  <div className="h-8 w-8 bg-muted rounded" />
+                </div>
+                <div className="h-6 w-16 bg-muted rounded" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-muted rounded" />
+                    <div className="h-4 w-24 bg-muted rounded" />
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-4 w-16 bg-muted rounded" />
+                    <div className="h-4 w-20 bg-muted rounded" />
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-4 w-14 bg-muted rounded" />
+                    <div className="h-4 w-12 bg-muted rounded" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -177,7 +219,11 @@ export function PayPeriodManager() {
             Manage pay periods and control data modification permissions
           </p>
         </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <Dialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          modal={true}
+        >
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -366,7 +412,7 @@ function CreatePayPeriodDialog({
           </div>
           <div className="grid gap-2">
             <Label>Start Date</Label>
-            <Popover>
+            <Popover modal={true}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -379,11 +425,16 @@ function CreatePayPeriodDialog({
                   {startDate ? format(startDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent
+                className="w-auto p-0"
+                onInteractOutside={(e) => e.preventDefault()}
+              >
                 <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={setStartDate}
+                  onSelect={(date) => {
+                    setStartDate(date);
+                  }}
                   initialFocus
                 />
               </PopoverContent>
@@ -391,7 +442,7 @@ function CreatePayPeriodDialog({
           </div>
           <div className="grid gap-2">
             <Label>End Date</Label>
-            <Popover>
+            <Popover modal={true}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -404,11 +455,16 @@ function CreatePayPeriodDialog({
                   {endDate ? format(endDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent
+                className="w-auto p-0"
+                onInteractOutside={(e) => e.preventDefault()}
+              >
                 <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={setEndDate}
+                  onSelect={(date) => {
+                    setEndDate(date);
+                  }}
                   initialFocus
                   disabled={(date) => (startDate ? date <= startDate : false)}
                 />
