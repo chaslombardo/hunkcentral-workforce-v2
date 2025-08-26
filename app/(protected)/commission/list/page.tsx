@@ -33,49 +33,72 @@ export default async function CommissionListPage() {
   const entries = entriesResult.success ? entriesResult.data || [] : [];
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Commission Tracking
-          </h1>
-          <p className="text-muted-foreground">
-            Track commission entries and their matching status with completed
-            jobs.
-          </p>
+    <div className="container mx-auto py-8 space-y-8">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-hunks-orange/5 via-background to-hunks-green/5 rounded-lg p-6 border border-hunks-orange/10">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-hunks-orange mb-3">
+              Commission Tracking
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Track commission entries and their matching status with completed
+              jobs.
+            </p>
+          </div>
+          <Link href="/commission/create">
+            <BrandButton variant="secondary" size="lg" className="h-12 px-8">
+              <Plus className="mr-2 h-5 w-5" />
+              Create Entry
+            </BrandButton>
+          </Link>
         </div>
-        <Link href="/commission/create">
-          <BrandButton variant="primary">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Entry
-          </BrandButton>
-        </Link>
       </div>
 
-      <Tabs defaultValue="entries" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="entries">Commission Entries</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics & Trends</TabsTrigger>
-          <TabsTrigger value="projections">Earnings Projections</TabsTrigger>
-          <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
+      <Tabs defaultValue="entries" className="space-y-8">
+        <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg h-12">
+          <TabsTrigger
+            value="entries"
+            className="data-[state=active]:bg-hunks-orange data-[state=active]:text-white transition-all duration-300 h-10 text-base"
+          >
+            Commission Entries
+          </TabsTrigger>
+          <TabsTrigger
+            value="analytics"
+            className="data-[state=active]:bg-hunks-orange data-[state=active]:text-white transition-all duration-300 h-10 text-base"
+          >
+            Analytics & Trends
+          </TabsTrigger>
+          <TabsTrigger
+            value="projections"
+            className="data-[state=active]:bg-hunks-orange data-[state=active]:text-white transition-all duration-300 h-10 text-base"
+          >
+            Earnings Projections
+          </TabsTrigger>
+          <TabsTrigger
+            value="conflicts"
+            className="data-[state=active]:bg-hunks-orange data-[state=active]:text-white transition-all duration-300 h-10 text-base"
+          >
+            Conflicts
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="entries" className="space-y-6">
+        <TabsContent value="entries" className="space-y-8">
           <CommissionListWithActions entries={entries} />
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent value="analytics" className="space-y-8">
           <CommissionAnalytics entries={entries} />
         </TabsContent>
 
-        <TabsContent value="projections" className="space-y-6">
+        <TabsContent value="projections" className="space-y-8">
           <CommissionProjections
             entries={entries}
             currentUserId={session.user.id}
           />
         </TabsContent>
 
-        <TabsContent value="conflicts" className="space-y-6">
+        <TabsContent value="conflicts" className="space-y-8">
           <CommissionConflicts />
         </TabsContent>
       </Tabs>

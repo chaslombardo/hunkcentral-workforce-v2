@@ -36,6 +36,7 @@ import {
 } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
+import { BrandButton } from '@/components/brand/brand-button';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -566,80 +567,84 @@ export function UserManagementDashboard() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+    <div className="flex flex-1 flex-col gap-6 p-6 lg:gap-8 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold md:text-2xl">User Management</h1>
-          <p className="text-muted-foreground">
-            Manage employee accounts, roles, and compensation settings
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <BulkUserOperations
-            selectedUsers={[]}
-            onSuccess={() => loadUsers(searchForm.getValues())}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Columns
-                <IconChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== 'undefined' &&
-                    column.getCanHide()
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <UserFormDialog
-            mode="create"
-            onSuccess={() => loadUsers(searchForm.getValues())}
-          />
+      <div className="bg-gradient-to-r from-hunks-green/5 via-background to-hunks-orange/5 rounded-lg p-6 border border-hunks-green/10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-hunks-green mb-3">
+              User Management
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Manage employee accounts, roles, and compensation settings
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <BulkUserOperations
+              selectedUsers={[]}
+              onSuccess={() => loadUsers(searchForm.getValues())}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <BrandButton variant="outline-primary" size="sm">
+                  Columns
+                  <IconChevronDown className="ml-2 h-4 w-4" />
+                </BrandButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== 'undefined' &&
+                      column.getCanHide()
+                  )
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <UserFormDialog
+              mode="create"
+              onSuccess={() => loadUsers(searchForm.getValues())}
+            />
+          </div>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <Card>
+      <Card className="border-hunks-green/20 bg-gradient-to-br from-hunks-green/5 via-background to-transparent">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconUsers className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-3 text-xl text-hunks-green">
+            <IconUsers className="h-6 w-6" />
             Users ({data?.pagination.total || 0})
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base">
             Search and filter users by name, email, or role
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={searchForm.handleSubmit(onSearch)}
-            className="space-y-4"
+            className="space-y-6"
           >
             <div className="flex gap-4">
               <div className="flex-1 relative">
-                <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, email, or role..."
-                  className="pl-10"
+                  className="pl-10 h-12 text-base focus-visible:ring-hunks-green"
                   {...searchForm.register('search')}
                   onChange={(e) => {
                     searchForm.setValue('search', e.target.value);
@@ -651,9 +656,14 @@ export function UserManagementDashboard() {
                   }}
                 />
               </div>
-              <Button type="submit" disabled={loading}>
+              <BrandButton
+                variant="primary"
+                type="submit"
+                disabled={loading}
+                className="h-12 px-8"
+              >
                 {loading ? 'Searching...' : 'Search'}
-              </Button>
+              </BrandButton>
             </div>
 
             {/* Role Filters */}

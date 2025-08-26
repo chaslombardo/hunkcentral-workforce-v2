@@ -60,34 +60,39 @@ export default async function LogsPage() {
       userRoles.includes('manager') || userRoles.includes('admin');
 
     return (
-      <div className="container mx-auto py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Daily Logs</h1>
-          <p className="text-muted-foreground">
-            Manage daily work logs, track job progress, and review team
-            activities.
-          </p>
+      <div className="container mx-auto py-8 space-y-8">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-hunks-green/5 via-background to-hunks-orange/5 rounded-lg p-6 border border-hunks-green/10">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-hunks-green mb-3">
+              Daily Logs
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Manage daily work logs, track job progress, and review team
+              activities.
+            </p>
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {canCreateLogs && (
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="border-l-4 border-l-hunks-green bg-gradient-to-br from-hunks-green/5 via-background to-transparent hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-base font-semibold text-hunks-green">
                   Create New Log
                 </CardTitle>
-                <Plus className="h-4 w-4 text-[#026937]" />
+                <Plus className="h-6 w-6 text-hunks-green" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
+                <div className="space-y-4">
+                  <p className="text-base text-muted-foreground leading-relaxed">
                     Record your daily work activities, jobs completed, and team
                     hours.
                   </p>
                   <Link href="/logs/create">
-                    <BrandButton variant="primary" className="w-full">
-                      <Plus className="mr-2 h-4 w-4" />
+                    <BrandButton variant="primary" className="w-full h-12">
+                      <Plus className="mr-2 h-5 w-5" />
                       Create Daily Log
                     </BrandButton>
                   </Link>
@@ -97,21 +102,24 @@ export default async function LogsPage() {
           )}
 
           {canReviewLogs && (
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="border-l-4 border-l-hunks-orange bg-gradient-to-br from-hunks-orange/5 via-background to-transparent hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-base font-semibold text-hunks-orange">
                   Review Logs
                 </CardTitle>
-                <CheckCircle className="h-4 w-4 text-[#ea7200]" />
+                <CheckCircle className="h-6 w-6 text-hunks-orange" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
+                <div className="space-y-4">
+                  <p className="text-base text-muted-foreground leading-relaxed">
                     Review and approve submitted daily logs from your team.
                   </p>
                   <Link href="/logs/review">
-                    <BrandButton variant="outline" className="w-full">
-                      <CheckCircle className="mr-2 h-4 w-4" />
+                    <BrandButton
+                      variant="outline-secondary"
+                      className="w-full h-12"
+                    >
+                      <CheckCircle className="mr-2 h-5 w-5" />
                       Review Queue
                     </BrandButton>
                   </Link>
@@ -120,20 +128,20 @@ export default async function LogsPage() {
             </Card>
           )}
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-500/5 via-background to-transparent hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-base font-semibold text-blue-600">
                 My Recent Logs
               </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <FileText className="h-6 w-6 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-4">
+                <p className="text-base text-muted-foreground leading-relaxed">
                   View your recently submitted logs and their status.
                 </p>
-                <BrandButton variant="outline" className="w-full" disabled>
-                  <Clock className="mr-2 h-4 w-4" />
+                <BrandButton variant="outline" className="w-full h-12" disabled>
+                  <Clock className="mr-2 h-5 w-5" />
                   Coming Soon
                 </BrandButton>
               </div>
@@ -143,36 +151,36 @@ export default async function LogsPage() {
 
         {/* Information Cards */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="border-hunks-green/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-[#026937]" />
+              <CardTitle className="flex items-center gap-3 text-xl text-hunks-green">
+                <FileText className="h-6 w-6" />
                 Log Requirements
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
                     Required
                   </Badge>
-                  <span className="text-sm">
+                  <span className="text-base">
                     Submit logs within 24 hours of work completion
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
                     Required
                   </Badge>
-                  <span className="text-sm">
+                  <span className="text-base">
                     Include all job details and team member hours
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="text-sm px-3 py-1">
                     Important
                   </Badge>
-                  <span className="text-sm">
+                  <span className="text-base">
                     Ensure accurate revenue and expense tracking
                   </span>
                 </div>
@@ -180,24 +188,24 @@ export default async function LogsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-hunks-orange/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-[#ea7200]" />
+              <CardTitle className="flex items-center gap-3 text-xl text-hunks-orange">
+                <CheckCircle className="h-6 w-6" />
                 Review Process
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
                   <StatusIndicator status="pending" size="sm" />
-                  <span className="text-sm">
+                  <span className="text-base">
                     Log submitted and awaiting review
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <StatusIndicator status="approved" size="sm" />
-                  <span className="text-sm">
+                  <span className="text-base">
                     Log approved and processed for payroll
                   </span>
                 </div>

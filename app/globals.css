@@ -126,4 +126,55 @@
   .hunk-gradient-bg {
     @apply bg-gradient-to-br from-hunks-green/5 via-background to-hunks-orange/5;
   }
+
+  /* Modern Interactive Elements */
+  .hunk-card-hover {
+    @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .hunk-button-hover {
+    @apply transition-all duration-200 ease-out hover:scale-105 active:scale-95;
+  }
+
+  .hunk-smooth-enter {
+    @apply animate-smooth-fade-in;
+  }
+
+  /* Enhanced Focus States */
+  .hunk-focus {
+    @apply focus-visible:ring-2 focus-visible:ring-hunks-green focus-visible:ring-offset-2 focus-visible:outline-none;
+  }
+
+  /* Brand Glow Effects */
+  .hunk-glow-green {
+    @apply shadow-lg shadow-hunks-green/20 hover:shadow-xl hover:shadow-hunks-green/30 transition-shadow duration-300;
+  }
+
+  .hunk-glow-orange {
+    @apply shadow-lg shadow-hunks-orange/20 hover:shadow-xl hover:shadow-hunks-orange/30 transition-shadow duration-300;
+  }
+
+  /* Micro-interactions */
+  .hunk-pulse-subtle {
+    @apply animate-subtle-pulse;
+  }
+
+  .hunk-bounce-gentle {
+    @apply hover:animate-gentle-bounce;
+  }
+
+  /* High-tech loading states */
+  .hunk-skeleton {
+    @apply bg-gradient-to-r from-muted via-muted/50 to-muted animate-pulse;
+  }
+
+  /* Responsive text scaling */
+  .hunk-text-responsive {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+
+  /* Modern borders */
+  .hunk-border-modern {
+    @apply border border-hunks-green/20 hover:border-hunks-green/40 transition-colors duration-300;
+  }
 }

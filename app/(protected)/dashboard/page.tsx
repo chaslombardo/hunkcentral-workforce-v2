@@ -35,12 +35,12 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-hunks-green">
+      <div className="space-y-8">
+        <div className="bg-gradient-to-r from-hunks-green/5 via-background to-hunks-orange/5 rounded-lg p-6 border border-hunks-green/10">
+          <h1 className="text-4xl font-bold tracking-tight text-hunks-green mb-3">
             Welcome back, {user?.fullName || 'User'}!
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground leading-relaxed">
             Here&apos;s what&apos;s happening with your workforce today.
           </p>
         </div>
