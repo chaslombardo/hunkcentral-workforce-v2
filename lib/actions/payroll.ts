@@ -14,6 +14,7 @@ import {
 } from '@/lib/decimal-utils';
 import { getCachedMetrics, areMetricsFresh } from '@/lib/metricsCalculator';
 import { triggerPayrollMetricsComputation } from '@/lib/backgroundJobs';
+// Note: Query optimization functionality integrated directly into payroll action functions
 import type {
   User,
   Department,
@@ -1404,6 +1405,7 @@ export async function validateEnhancedPayrollBreakdown(
 
   return { isValid: errors.length === 0, errors };
 }
+
 /**
  * Validate enhanced payroll breakdown data (synchronous version)
  */

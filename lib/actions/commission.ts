@@ -15,7 +15,7 @@ import {
   onCommissionCreated,
   onCommissionMatched,
   onCommissionApproved,
-} from '@/lib/cacheInvalidation';
+} from '@/lib/cache';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {

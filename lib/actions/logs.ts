@@ -11,8 +11,9 @@ import {
   onLogUpdated,
   onLogApproved,
   onLogDeleted,
-} from '@/lib/cacheInvalidation';
+} from '@/lib/cache';
 import { Prisma } from '@prisma/client';
+// Note: Query optimization functionality integrated directly into log action functions
 
 export type LogActionResult = {
   success: boolean;

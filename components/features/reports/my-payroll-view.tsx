@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 
 import {
   Clock,
@@ -34,7 +33,6 @@ import {
   AlertCircle,
   AlertTriangle,
   Shield,
-  WifiOff,
   RefreshCw,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -161,7 +159,6 @@ export function MyPayrollView({
   initialPayPeriod,
 }: MyPayrollViewProps = {}) {
   const isMobile = useIsMobile();
-  const offlineState = useOfflineDetection();
   const [selectedPeriod, setSelectedPeriod] = React.useState<PayPeriod | null>(
     initialPayPeriod || null
   );
@@ -230,7 +227,6 @@ export function MyPayrollView({
   const [detailsError, setDetailsError] = React.useState<string | null>(null);
   const [summaryRetryCount, setSummaryRetryCount] = React.useState(0);
   const [detailsRetryCount, setDetailsRetryCount] = React.useState(0);
-  const [hasOfflineData, setHasOfflineData] = React.useState(false);
 
   // Enhanced summary data loading with retry logic and better error handling
   React.useEffect(() => {
@@ -252,7 +248,6 @@ export function MyPayrollView({
 
         const summaryData = await response.json();
         setSummaryData(summaryData);
-        setHasOfflineData(false);
         setSummaryRetryCount(0);
 
         // Cache the data
@@ -273,7 +268,6 @@ export function MyPayrollView({
           try {
             const parsed = JSON.parse(cachedData);
             setSummaryData(parsed);
-            setHasOfflineData(true);
           } catch {
             // Failed to parse cached data
           }
@@ -284,7 +278,7 @@ export function MyPayrollView({
     };
 
     loadSummary();
-  }, [selectedPeriod, userId, offlineState.isOffline]);
+  }, [selectedPeriod, userId]);
 
   // Enhanced detailed data loading with progressive fallbacks and better error handling
   React.useEffect(() => {
@@ -456,7 +450,7 @@ export function MyPayrollView({
     };
 
     loadDetails();
-  }, [activeTab, selectedPeriod, userId, offlineState.isOffline]);
+  }, [activeTab, selectedPeriod, userId]);
 
   // Reset detailed data when period changes
   React.useEffect(() => {
@@ -483,7 +477,6 @@ export function MyPayrollView({
 
       const summaryData = await response.json();
       setSummaryData(summaryData);
-      setHasOfflineData(false);
       setSummaryRetryCount(0);
 
       // Cache the data
@@ -664,22 +657,6 @@ export function MyPayrollView({
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            {/* Offline Notice */}
-            {offlineState.isOffline && (
-              <div className="px-4 lg:px-6">
-                <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-                  <WifiOff className="h-4 w-4 text-blue-600" />
-                  <AlertTitle className="text-blue-800 dark:text-blue-200">
-                    You&apos;re currently offline
-                  </AlertTitle>
-                  <AlertDescription className="text-blue-700 dark:text-blue-300">
-                    Showing cached payroll data. Some features may be limited
-                    until you&apos;re back online.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-
             {/* Header Section */}
             <div className="px-4 lg:px-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -700,7 +677,6 @@ export function MyPayrollView({
                       const period = payPeriods.find((p) => p.id === value);
                       if (period) setSelectedPeriod(period);
                     }}
-                    disabled={offlineState.isOffline}
                   >
                     <SelectTrigger
                       className={`w-full sm:w-[200px] ${
@@ -732,7 +708,6 @@ export function MyPayrollView({
 
                   <Button
                     onClick={() => setShowExportDialog(true)}
-                    disabled={offlineState.isOffline}
                     className={
                       isMobile
                         ? 'min-h-[44px] min-w-[44px] touch-manipulation'
@@ -752,28 +727,14 @@ export function MyPayrollView({
                 <PayrollLoadingSkeleton />
               ) : summaryData ? (
                 <>
-                  {/* Show warning if using cached/offline data */}
-                  {(hasOfflineData || summaryError) && (
+                  {/* Show error if loading failed */}
+                  {summaryError && (
                     <div className="mb-4">
-                      <Alert
-                        className={
-                          hasOfflineData
-                            ? 'border-blue-200 bg-blue-50'
-                            : 'border-yellow-200 bg-yellow-50'
-                        }
-                      >
-                        {hasOfflineData ? (
-                          <WifiOff className="h-4 w-4" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4" />
-                        )}
-                        <AlertTitle>
-                          {hasOfflineData ? 'Offline Mode' : 'Limited Data'}
-                        </AlertTitle>
+                      <Alert className="border-yellow-200 bg-yellow-50">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Limited Data</AlertTitle>
                         <AlertDescription>
-                          {hasOfflineData
-                            ? "You're viewing cached payroll data. Some features may be limited until you're back online."
-                            : summaryError}
+                          {summaryError}
                           {summaryRetryCount > 0 && (
                             <div className="mt-2">
                               <Button

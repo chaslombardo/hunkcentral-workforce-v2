@@ -5,7 +5,7 @@ import { LogReviewQueue } from '@/components/features/logs/log-review-queue';
 import { Skeleton } from '@/components/ui/skeleton';
 import LogErrorBoundary from '@/components/ui/log-error-boundary';
 import { LogReviewErrorFallback } from '@/components/ui/logs-error-fallback';
-import { getMonitoring } from '@/lib/monitoring';
+import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
 
 export default async function LogReviewPage() {
   let session;
@@ -89,6 +89,7 @@ export default async function LogReviewPage() {
     // Log the error with comprehensive context
     await logPageError(error, {
       page: 'logs_review',
+      action: 'page_error',
       userId: session?.user?.id,
       url: currentUrl || '/logs/review',
       userAgent,

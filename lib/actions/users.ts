@@ -15,11 +15,7 @@ import type {
   UpdateUserFormData,
   UserSearchFormData,
 } from '@/lib/validations';
-import {
-  onUserCreated,
-  onUserUpdated,
-  onUserRatesUpdated,
-} from '@/lib/cacheInvalidation';
+import { onUserCreated, onUserUpdated, onUserRatesUpdated } from '@/lib/cache';
 
 // Create a new user
 export async function createUser(data: CreateUserFormData) {

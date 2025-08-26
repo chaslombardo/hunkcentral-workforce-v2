@@ -8,7 +8,7 @@ import {
 } from '@/lib/commissionMatcher';
 import type { CommissionEntry, DailyLog, LogJob } from '@/types';
 import { logCommissionChange } from '@/lib/auditLogger';
-import { onCommissionMatched } from '@/lib/cacheInvalidation';
+import { onCommissionMatched } from '@/lib/cache';
 
 export interface MatchingNotification {
   type: 'success' | 'conflict' | 'error';

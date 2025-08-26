@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PerformanceMonitor } from '@/components/admin/performance-monitor';
+import { UnifiedMonitoringDashboard } from '@/components/admin/unified-monitoring-dashboard';
 
 export const metadata: Metadata = {
   title: 'Performance Monitoring | HUNKCentral',
@@ -20,7 +20,7 @@ export default function PerformanceMonitoringPage() {
         </p>
       </div>
 
-      <PerformanceMonitor />
+      <UnifiedMonitoringDashboard />
     </div>
   );
 }

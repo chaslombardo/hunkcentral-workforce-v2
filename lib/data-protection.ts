@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import { AuditTrailService } from '@/lib/audit-trail';
 import crypto from 'crypto';
 import { z } from 'zod';

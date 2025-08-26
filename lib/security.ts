@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 

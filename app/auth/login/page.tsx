@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { GalleryVerticalEnd } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-manager';
 
 export default function LoginPage() {
   return (

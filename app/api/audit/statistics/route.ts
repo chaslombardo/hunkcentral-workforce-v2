@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
 import { requireAnyRole } from '@/lib/auth';
 import { AuditTrailService } from '@/lib/audit-trail';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
 
 const StatisticsQuerySchema = z.object({

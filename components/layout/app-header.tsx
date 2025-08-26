@@ -31,7 +31,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-manager';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { useSession } from '@/hooks/useSession';
 import { useNavigation } from '@/contexts/navigation-context';

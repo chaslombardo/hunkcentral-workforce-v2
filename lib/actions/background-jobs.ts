@@ -15,7 +15,7 @@ import {
   triggerUserPerformanceComputation,
   jobQueue,
 } from '@/lib/backgroundJobs';
-import { getCacheHealthMetrics } from '@/lib/cacheInvalidation';
+import { getCacheHealthMetrics } from '@/lib/cache';
 
 export interface BackgroundJobActionResult {
   success: boolean;

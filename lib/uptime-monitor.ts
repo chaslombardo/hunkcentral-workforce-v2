@@ -4,7 +4,7 @@
  */
 
 import { config, isMonitoringEnabled } from '@/lib/production-config';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import { logInfo, logWarning } from '@/lib/production-logger';
 
 export interface UptimeCheck {

@@ -3,7 +3,7 @@ import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
-import { getMonitoring } from '@/lib/monitoring';
+import { getMonitoring, logAuthError } from '@/lib/monitoring';
 import bcrypt from 'bcryptjs';
 import type { UserRole } from '@/types';
 

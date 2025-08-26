@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
 
 export interface AuditLogEntry {

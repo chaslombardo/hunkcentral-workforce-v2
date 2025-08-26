@@ -3,7 +3,11 @@
  * Provides comprehensive error reporting and debugging tools
  */
 
-import { getMonitoring } from '@/lib/monitoring';
+import {
+  getMonitoring,
+  logDatabaseError,
+  logAuthError,
+} from '@/lib/monitoring';
 import {
   logClientError,
   logClientComponentError,

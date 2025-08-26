@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
 import { requireAnyRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 import { SecurityMonitor } from '@/lib/security';
 import { z } from 'zod';
 

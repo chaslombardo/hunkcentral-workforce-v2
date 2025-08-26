@@ -6,9 +6,12 @@
  * Works in both server and client environments.
  */
 
+// Import Decimal type for server environments
+import type { Decimal } from '@prisma/client/runtime/library';
+
 // Type for decimal values that works in both environments
 type DecimalValue =
-  | any // Prisma Decimal type
+  | Decimal // Prisma Decimal type
   | { toString(): string }
   | number
   | string

@@ -13,7 +13,7 @@ import {
   OfflineIndicator,
   ConnectionQualityIndicator,
 } from '@/components/ui/offline-indicator';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-manager';
 
 interface MainLayoutProps {
   children: React.ReactNode;

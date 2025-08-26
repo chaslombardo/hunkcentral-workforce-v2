@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
 import { requireAnyRole } from '@/lib/auth';
 import { DataRetention } from '@/lib/data-protection';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 
 /**
  * GET /api/data-protection/retention - Get current retention policies

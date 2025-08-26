@@ -5,7 +5,7 @@
 
 import { config, isProduction } from '@/lib/production-config';
 import { logInfo, logWarning } from '@/lib/production-logger';
-import { logProductionError } from '@/lib/production-error-logger';
+import { logProductionError } from '@/lib/monitoring';
 
 export interface BackupConfig {
   enabled: boolean;

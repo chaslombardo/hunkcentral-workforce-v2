@@ -2,7 +2,7 @@
 'use client';
 
 import { SessionProvider } from 'next-auth/react';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/theme-manager';
 
 interface ProvidersProps {
   children: React.ReactNode;

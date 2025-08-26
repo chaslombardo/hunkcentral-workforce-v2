@@ -36,7 +36,7 @@ import { useNavigation } from '@/contexts/navigation-context';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-manager';
 
 // Navigation data structure for unified mobile navigation
 const getNavigationData = (userRoles: string[] = []) => {

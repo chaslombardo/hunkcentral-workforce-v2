@@ -6,11 +6,8 @@ import {
   startJobQueueCleanup,
   refreshAllMetrics,
 } from './backgroundJobs';
-import {
-  cleanupExpiredMetrics,
-  getCacheHealthMetrics,
-} from './cacheInvalidation';
-import { startIntelligentCaching } from './intelligentCache';
+import { cleanupExpiredMetrics, getCacheHealthMetrics } from './cache';
+import { startIntelligentCaching } from './cache';
 
 // Background job processing configuration
 export interface BackgroundJobConfig {

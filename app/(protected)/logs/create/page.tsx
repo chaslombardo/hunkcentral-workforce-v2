@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 import { CaptainLogForm } from '@/components/features/logs/captain-log-form';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LogCreateErrorFallback } from '@/components/ui/logs-error-fallback';
-import { getMonitoring } from '@/lib/monitoring';
+import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
 
 export const metadata: Metadata = {
   title: 'Create Daily Log - HUNKCentral',
@@ -90,6 +90,7 @@ export default async function CreateLogPage() {
     // Log the error with comprehensive context
     await logPageError(error, {
       page: 'logs_create',
+      action: 'page_error',
       userId: session?.user?.id,
       url: currentUrl || '/logs/create',
       userAgent,

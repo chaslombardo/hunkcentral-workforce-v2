@@ -1283,3 +1283,291 @@ if (
 }
 
 export { MonitoringSystem };
+
+// Compatibility functions for the old error logging API
+/**
+ * Log authentication errors (compatibility with old logAuthError function)
+ */
+export async function logAuthError(
+  error: Error | unknown,
+  context: {
+    action: string;
+    userId?: string;
+    sessionId?: string;
+    url: string;
+    userAgent?: string;
+    ipAddress?: string;
+    additionalData?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: 'authentication',
+      action: context.action,
+      userId: context.userId,
+      url: context.url,
+      userAgent: context.userAgent,
+      additionalData: {
+        sessionId: context.sessionId,
+        ipAddress: context.ipAddress,
+        securityEvent: true,
+        ...context.additionalData,
+      },
+      category: 'auth',
+      severity: 'high', // Auth errors are typically high priority
+    });
+  }
+}
+
+/**
+ * Log database errors (compatibility with old logDatabaseError function)
+ */
+export async function logDatabaseError(
+  error: Error | unknown,
+  context: {
+    operation: string;
+    table?: string;
+    query?: string;
+    userId?: string;
+    url: string;
+    additionalData?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: 'database',
+      action: context.operation,
+      userId: context.userId,
+      url: context.url,
+      additionalData: {
+        table: context.table,
+        query: context.query?.substring(0, 500),
+        ...context.additionalData,
+      },
+      category: 'database',
+      severity: 'critical', // Database errors are typically critical
+    });
+  }
+}
+
+/**
+ * Log API errors (compatibility with old logApiError function)
+ */
+export async function logApiError(
+  error: Error | unknown,
+  request: {
+    method: string;
+    url: string;
+    headers: Record<string, string>;
+    query?: Record<string, string>;
+    params?: Record<string, string>;
+    body?: unknown;
+  },
+  context: {
+    action: string;
+    userId?: string;
+    sessionId?: string;
+    requestId?: string;
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: 'api_route',
+      action: context.action,
+      userId: context.userId,
+      url: request.url,
+      userAgent: request.headers['user-agent'],
+      additionalData: {
+        method: request.method,
+        headers: request.headers,
+        query: request.query,
+        params: request.params,
+        body:
+          typeof request.body === 'object'
+            ? JSON.stringify(request.body).substring(0, 1000)
+            : String(request.body).substring(0, 1000),
+        sessionId: context.sessionId,
+        requestId: context.requestId,
+      },
+      category: 'api',
+      severity: 'medium',
+    });
+  }
+}
+
+/**
+ * Log page errors (compatibility with old logPageError function)
+ */
+export async function logPageError(
+  error: Error | unknown,
+  context: {
+    page: string;
+    action: string;
+    userId?: string;
+    url: string;
+    userAgent?: string;
+    additionalData?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: 'page',
+      action: context.action,
+      userId: context.userId,
+      url: context.url,
+      userAgent: context.userAgent,
+      additionalData: {
+        page: context.page,
+        ...context.additionalData,
+      },
+      category: 'component',
+      severity: 'medium',
+    });
+  }
+}
+
+/**
+ * Log production errors (compatibility with old logProductionError function)
+ */
+export async function logProductionError(
+  error: Error | unknown,
+  context: {
+    component: string;
+    action: string;
+    userId?: string;
+    url: string;
+    userAgent?: string;
+    category?: ErrorContext['category'];
+    severity?: ErrorContext['severity'];
+    additionalData?: Record<string, unknown>;
+    metadata?: Record<string, unknown>; // Alias for additionalData for backward compatibility
+  }
+): Promise<void> {
+  const monitoring = getMonitoring();
+  if (monitoring) {
+    await monitoring.logError(error, {
+      component: context.component,
+      action: context.action,
+      userId: context.userId,
+      url: context.url,
+      userAgent: context.userAgent,
+      additionalData: context.additionalData || context.metadata,
+      category: context.category || 'server',
+      severity: context.severity || 'medium',
+    });
+  }
+}
+
+/**
+ * Get error statistics (compatibility with old getErrorStatistics function)
+ */
+export async function getErrorStatistics(timeRange?: {
+  start: Date;
+  end: Date;
+}): Promise<{
+  total: number;
+  bySeverity: Record<string, number>;
+  byCategory: Record<string, number>;
+  byComponent: Record<string, number>;
+  resolved: number;
+  topErrors: Array<{
+    fingerprint: string;
+    message: string;
+    occurrenceCount: number;
+    component: string;
+    severity: string;
+  }>;
+}> {
+  const monitoring = getMonitoring();
+  if (!monitoring) {
+    return {
+      total: 0,
+      bySeverity: {},
+      byCategory: {},
+      byComponent: {},
+      resolved: 0,
+      topErrors: [],
+    };
+  }
+
+  const errors = monitoring.getErrorLogs({ limit: 1000 });
+
+  // Filter by time range if provided
+  const filteredErrors = timeRange
+    ? errors.filter((error) => {
+        const errorTime = new Date(error.timestamp);
+        return errorTime >= timeRange.start && errorTime <= timeRange.end;
+      })
+    : errors;
+
+  const stats = {
+    total: filteredErrors.length,
+    bySeverity: {} as Record<string, number>,
+    byCategory: {} as Record<string, number>,
+    byComponent: {} as Record<string, number>,
+    resolved: 0,
+    topErrors: [] as Array<{
+      fingerprint: string;
+      message: string;
+      occurrenceCount: number;
+      component: string;
+      severity: string;
+    }>,
+  };
+
+  const errorMap = new Map<
+    string,
+    {
+      fingerprint: string;
+      message: string;
+      occurrenceCount: number;
+      component: string;
+      severity: string;
+    }
+  >();
+
+  filteredErrors.forEach((error) => {
+    const severity = error.context.severity || 'medium';
+    const category = error.context.category || 'server';
+    const component = error.context.component;
+
+    // Count by severity
+    stats.bySeverity[severity] = (stats.bySeverity[severity] || 0) + 1;
+
+    // Count by category
+    stats.byCategory[category] = (stats.byCategory[category] || 0) + 1;
+
+    // Count by component
+    stats.byComponent[component] = (stats.byComponent[component] || 0) + 1;
+
+    // Count resolved
+    if (error.resolved) {
+      stats.resolved++;
+    }
+
+    // Track unique errors
+    if (!errorMap.has(error.fingerprint)) {
+      errorMap.set(error.fingerprint, {
+        fingerprint: error.fingerprint,
+        message: error.message,
+        occurrenceCount: 1,
+        component: component,
+        severity: severity,
+      });
+    } else {
+      const existing = errorMap.get(error.fingerprint)!;
+      existing.occurrenceCount++;
+    }
+  });
+
+  // Get top errors by occurrence count
+  stats.topErrors = Array.from(errorMap.values())
+    .sort((a, b) => b.occurrenceCount - a.occurrenceCount)
+    .slice(0, 10);
+
+  return stats;
+}
