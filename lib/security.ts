@@ -41,7 +41,7 @@ export interface SecurityConfig {
 export const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
   rateLimiting: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100,
+    maxRequests: 300, // Increased from 100 to 300 to reduce false positives
     skipSuccessfulRequests: false,
   },
   csrf: {

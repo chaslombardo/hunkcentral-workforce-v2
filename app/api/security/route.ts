@@ -214,7 +214,7 @@ async function handleGet(user: any, request: NextRequest) {
           // In a real implementation, this would come from a config store
           rateLimiting: {
             windowMs: 15 * 60 * 1000,
-            maxRequests: 100,
+            maxRequests: 300, // Updated to match new limits
             skipSuccessfulRequests: false,
           },
           csrf: {
