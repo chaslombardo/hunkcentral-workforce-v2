@@ -1,33 +1,36 @@
 import { Suspense } from 'react';
 import { PayPeriodManager } from '@/components/features/admin/pay-period-manager';
 import { PayPeriodSummaryTiles } from '@/components/features/admin/pay-period-summary-tiles';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const dynamic = 'force-dynamic';
 
 export default function PayPeriodsPage() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-hunks-green/5 via-background to-hunks-orange/5 rounded-lg p-6 border border-hunks-green/10">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-hunks-green mb-3">
+            Pay Period Management
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Manage pay periods and control when data can be modified for payroll
+            processing
+          </p>
+        </div>
+      </div>
+
+      {/* Summary Tiles */}
       <Suspense fallback={<PayPeriodSummaryTilesSkeleton />}>
         <PayPeriodSummaryTiles />
       </Suspense>
-      <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>Pay Period Management</CardTitle>
-            <CardDescription>
-              Manage pay periods and control when data can be modified for
-              payroll processing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+
+      {/* Main Content */}
+      <div className="min-h-[60vh] flex-1 rounded-xl">
+        <Card className="h-full border-hunks-green/20 bg-gradient-to-br from-hunks-green/5 via-background to-transparent">
+          <CardContent className="p-8">
             <Suspense fallback={<PayPeriodManagerSkeleton />}>
               <PayPeriodManager />
             </Suspense>
