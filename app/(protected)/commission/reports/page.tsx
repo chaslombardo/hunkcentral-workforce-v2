@@ -268,7 +268,7 @@ export default async function CommissionReportsPage() {
             </CardHeader>
             <CardContent>
               <CommissionCalculationBreakdown
-                entries={filteredEntries as any}
+                entries={filteredEntries}
                 showDetailed={true}
               />
             </CardContent>
