@@ -185,13 +185,13 @@ function LaborCostExplanation({ data }: { data: LaborCostData }) {
             <div className="flex justify-between">
               <span>Labor Percentage:</span>
               <span className="font-mono">
-                {(data.actualPercentage * 100).toFixed(1)}%
+                {data.actualPercentage.toFixed(1)}%
               </span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Target Goal:</span>
               <span className="font-mono">
-                {(data.goalPercentage * 100).toFixed(1)}%
+                {data.goalPercentage.toFixed(1)}%
               </span>
             </div>
           </>
@@ -222,15 +222,11 @@ function BonusExplanation({ data }: { data: BonusData }) {
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Target Goal:</span>
-          <span className="font-mono">
-            {(data.goalPercentage * 100).toFixed(1)}%
-          </span>
+          <span className="font-mono">{data.goalPercentage.toFixed(1)}%</span>
         </div>
         <div className="flex justify-between">
           <span>Actual Percentage:</span>
-          <span className="font-mono">
-            {(data.actualPercentage * 100).toFixed(1)}%
-          </span>
+          <span className="font-mono">{data.actualPercentage.toFixed(1)}%</span>
         </div>
         <div className="flex justify-between">
           <span>Efficiency Gain:</span>
@@ -238,7 +234,7 @@ function BonusExplanation({ data }: { data: BonusData }) {
             className={`font-mono ${isEligible ? 'text-green-600' : 'text-red-600'}`}
           >
             {isEligible ? '+' : ''}
-            {(efficiency * 100).toFixed(1)}%
+            {efficiency.toFixed(1)}%
           </span>
         </div>
         <div className="flex justify-between">
@@ -356,14 +352,12 @@ function EfficiencyExplanation({ data }: { data: LaborCostData }) {
           <span
             className={`font-mono ${isEfficient ? 'text-green-600' : 'text-red-600'}`}
           >
-            {(data.actualPercentage * 100).toFixed(1)}%
+            {data.actualPercentage.toFixed(1)}%
           </span>
         </div>
         <div className="flex justify-between">
           <span>Target:</span>
-          <span className="font-mono">
-            {(data.goalPercentage * 100).toFixed(1)}%
-          </span>
+          <span className="font-mono">{data.goalPercentage.toFixed(1)}%</span>
         </div>
       </div>
       <p className="text-xs text-muted-foreground">

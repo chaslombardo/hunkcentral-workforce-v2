@@ -262,7 +262,7 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
             <BreadcrumbItem
               className={cn(
                 'flex items-center gap-1.5',
-                index === 0 && 'hidden lg:flex' // Show first item on medium screens and up
+                index === 0 && 'hidden md:flex' // Hide first item on smaller screens
               )}
             >
               {breadcrumb.href ? (
@@ -277,7 +277,7 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
                       aria-hidden="true"
                     />
                   )}
-                  <span className="truncate max-w-[100px] sm:max-w-[140px] md:max-w-[180px]">
+                  <span className="truncate max-w-[120px] sm:max-w-[160px]">
                     {breadcrumb.label}
                   </span>
                 </BreadcrumbLink>
@@ -293,7 +293,7 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
                       aria-hidden="true"
                     />
                   )}
-                  <span className="truncate max-w-[100px] sm:max-w-[140px] md:max-w-[180px]">
+                  <span className="truncate max-w-[120px] sm:max-w-[160px]">
                     {breadcrumb.label}
                   </span>
                 </BreadcrumbPage>
@@ -302,7 +302,7 @@ export const SmartBreadcrumbs = React.memo(function SmartBreadcrumbs({
             {index < breadcrumbs.length - 1 && (
               <BreadcrumbSeparator
                 className={cn(
-                  index === 0 && 'hidden lg:block' // Hide separator after first item on smaller screens
+                  index === 0 && 'hidden md:block' // Hide separator after first item on smaller screens
                 )}
                 aria-hidden="true"
               />

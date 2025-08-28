@@ -74,7 +74,114 @@ interface PayrollDataTableProps {
   selectedPeriod: PayPeriod | null;
 }
 
-// Payroll data is now fetched from API via props - no mock data needed
+// Mock data for development - replace with actual payroll data
+const mockPayrollData: PayrollCalculation[] = [
+  {
+    employeeId: '1',
+    employee: {
+      id: '1',
+      fullName: 'John Smith',
+      email: 'john@example.com',
+      roles: ['captain'],
+    } as User,
+    totalHours: 40,
+    hoursByDepartment: {
+      junk: 40,
+      move: 0,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 0,
+    },
+    grossWages: 720,
+    tips: 150,
+    bonuses: 85,
+    commission: 0,
+    totalPay: 955,
+    breakdown: {
+      hourlyWages: 720,
+      salaryAmount: 0,
+      salaryType: null,
+      salaryFrequency: null,
+      tips: 150,
+      commission: 0,
+      laborBonuses: 85,
+      totalBeforeSalaryAdjustment: 955,
+      finalPay: 955,
+    },
+  },
+  {
+    employeeId: '2',
+    employee: {
+      id: '2',
+      fullName: 'Sarah Johnson',
+      email: 'sarah@example.com',
+      roles: ['wingman'],
+    } as User,
+    totalHours: 38,
+    hoursByDepartment: {
+      junk: 0,
+      move: 38,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 0,
+    },
+    grossWages: 760,
+    tips: 200,
+    bonuses: 120,
+    commission: 0,
+    totalPay: 1080,
+    breakdown: {
+      hourlyWages: 760,
+      salaryAmount: 0,
+      salaryType: null,
+      salaryFrequency: null,
+      tips: 200,
+      commission: 0,
+      laborBonuses: 120,
+      totalBeforeSalaryAdjustment: 1080,
+      finalPay: 1080,
+    },
+  },
+  {
+    employeeId: '3',
+    employee: {
+      id: '3',
+      fullName: 'Mike Davis',
+      email: 'mike@example.com',
+      roles: ['sales'],
+    } as User,
+    totalHours: 40,
+    hoursByDepartment: {
+      junk: 0,
+      move: 0,
+      zigma: 0,
+      training: 0,
+      estimating: 0,
+      warehouse: 0,
+      admin: 40,
+    },
+    grossWages: 640,
+    tips: 0,
+    bonuses: 0,
+    commission: 450,
+    totalPay: 1090,
+    breakdown: {
+      hourlyWages: 640,
+      salaryAmount: 0,
+      salaryType: null,
+      salaryFrequency: null,
+      tips: 0,
+      commission: 450,
+      laborBonuses: 0,
+      totalBeforeSalaryAdjustment: 1090,
+      finalPay: 1090,
+    },
+  },
+];
 
 const columns: ColumnDef<PayrollCalculation>[] = [
   {
@@ -312,8 +419,8 @@ export function PayrollDataTable({
   // Mobile responsiveness will be implemented in future iteration
   // const { isMobile } = useResponsiveTable();
 
-  // Use actual payroll data from props
-  const data = payrollData;
+  // Use mock data for development
+  const data = payrollData.length > 0 ? payrollData : mockPayrollData;
 
   const table = useReactTable({
     data,

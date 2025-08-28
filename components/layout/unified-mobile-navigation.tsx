@@ -255,12 +255,12 @@ export function UnifiedMobileHeader() {
         </div>
       </div>
 
-      {/* Mobile breadcrumbs - shown below header with improved styling */}
-      <div className="bg-background px-4 py-3">
+      {/* Mobile breadcrumbs - shown below header */}
+      <div className="border-b bg-background px-4 py-2">
         <SmartBreadcrumbs
           className="flex sm:hidden"
-          maxItems={2}
-          showIcons={true}
+          maxItems={3}
+          showIcons={false}
         />
       </div>
     </div>

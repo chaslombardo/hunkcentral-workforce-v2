@@ -196,16 +196,13 @@ export function useMobilePayrollLoading<T>(
 export function useMobilePayrollSummary(userId: string, payPeriodId: string) {
   return useMobilePayrollLoading(
     async () => {
-      const response = await fetch(`/api/payroll?employeeId=${userId}&payPeriodId=${payPeriodId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch payroll summary');
-      }
-      const data = await response.json();
+      // Mock API call - replace with actual implementation
+      await new Promise((resolve) => setTimeout(resolve, 500));
       return {
-        totalPay: data.totalPay || 0,
-        totalHours: data.totalHours || 0,
-        tips: data.tips || 0,
-        bonuses: data.bonuses || 0,
+        totalPay: 955,
+        totalHours: 40,
+        tips: 150,
+        bonuses: 85,
       };
     },
     [userId, payPeriodId],

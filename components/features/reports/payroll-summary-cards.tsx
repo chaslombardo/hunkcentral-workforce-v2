@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Clock, Award } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Clock, Award } from 'lucide-react';
 import { formatCurrency, formatHours } from '@/lib/formatters';
 import type { PayPeriod } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
@@ -36,8 +36,20 @@ export function PayrollSummaryCards({
   const totalTips = payrollData.reduce((sum, calc) => sum + calc.tips, 0);
   const totalBonuses = payrollData.reduce((sum, calc) => sum + calc.bonuses, 0);
 
-  // Note: Historical comparison data would come from API in real implementation
-  // For now, showing current period data without comparison
+  // Mock previous period data for comparison
+  const previousTotalPayroll = totalPayroll * 0.95; // 5% increase
+  const payrollChange =
+    totalPayroll > 0
+      ? ((totalPayroll - previousTotalPayroll) / previousTotalPayroll) * 100
+      : 0;
+  const payrollTrending = payrollChange > 0;
+
+  const previousTotalHours = totalHours * 1.02; // 2% decrease
+  const hoursChange =
+    totalHours > 0
+      ? ((totalHours - previousTotalHours) / previousTotalHours) * 100
+      : 0;
+  const hoursTrending = hoursChange > 0;
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -50,13 +62,24 @@ export function PayrollSummaryCards({
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              Current Period
+              {payrollTrending ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {payrollTrending ? '+' : ''}
+              {payrollChange.toFixed(1)}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Total pay for current period
+            {payrollTrending ? 'Increased' : 'Decreased'} from last period
+            {payrollTrending ? (
+              <TrendingUp className="size-4" />
+            ) : (
+              <TrendingDown className="size-4" />
+            )}
           </div>
           <div className="text-muted-foreground">
             {selectedPeriod ? `For ${selectedPeriod.name}` : 'Current period'}
@@ -95,13 +118,20 @@ export function PayrollSummaryCards({
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              Current Period
+              {hoursTrending ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {hoursTrending ? '+' : ''}
+              {hoursChange.toFixed(1)}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Total hours worked <Clock className="size-4" />
+            {hoursTrending ? 'More' : 'Fewer'} hours than last period
+            <Clock className="size-4" />
           </div>
           <div className="text-muted-foreground">All departments combined</div>
         </CardFooter>
