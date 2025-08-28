@@ -23,9 +23,9 @@ export function ManagerSectionCards({ metrics }: ManagerSectionCardsProps) {
   const pendingLogs = metrics?.logsAwaitingReview || 0;
   const recentApprovals = metrics?.recentApprovals || 0;
 
-  // Mock data for display purposes - these would come from real metrics in production
+  // Mock data for display purposes
   const teamEfficiency = 87;
-  const exceptionAlerts: number = 3; // Mock data - would be dynamic in production
+  const exceptionAlerts = 3;
 
   // Enhanced trend calculations
   const getPendingTrend = () => {
@@ -52,8 +52,7 @@ export function ManagerSectionCards({ metrics }: ManagerSectionCardsProps) {
   const getAlertsTrend = () => {
     if (exceptionAlerts > 8) return { value: 35.6, type: 'increase' as const };
     if (exceptionAlerts > 3) return { value: 12.4, type: 'increase' as const };
-    if (exceptionAlerts === 0)
-      return { value: -100, type: 'decrease' as const };
+    if (exceptionAlerts <= 0) return { value: -100, type: 'decrease' as const };
     return { value: -25.3, type: 'decrease' as const };
   };
 
