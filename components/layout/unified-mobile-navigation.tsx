@@ -242,11 +242,11 @@ export function UnifiedMobileHeader() {
             <Building2 className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium text-hunks-green">
-              College Hunks
+            <span className="truncate font-semibold text-hunks-green">
+              HUNKCENTRAL
             </span>
-            <span className="truncate text-xs text-muted-foreground">
-              Workforce Management
+            <span className="truncate text-xs font-medium text-hunks-orange">
+              Logs and Pay Tracker
             </span>
           </div>
         </div>
@@ -255,12 +255,12 @@ export function UnifiedMobileHeader() {
         </div>
       </div>
 
-      {/* Mobile breadcrumbs - shown below header */}
-      <div className="border-b bg-background px-4 py-2">
+      {/* Mobile breadcrumbs - shown below header with improved styling */}
+      <div className="bg-background px-4 py-3">
         <SmartBreadcrumbs
           className="flex sm:hidden"
-          maxItems={3}
-          showIcons={false}
+          maxItems={2}
+          showIcons={true}
         />
       </div>
     </div>
@@ -388,10 +388,10 @@ function MoreMenuButton() {
                   <Building2 className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <SheetTitle className="truncate font-medium text-[#026937]">
-                    College Hunks
+                  <SheetTitle className="truncate font-semibold text-[#026937]">
+                    HUNKCENTRAL
                   </SheetTitle>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="truncate text-xs font-medium text-[#ea7200]">
                     All Features
                   </span>
                 </div>

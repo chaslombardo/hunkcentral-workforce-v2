@@ -84,71 +84,56 @@ interface SalesDataTableProps {
   metrics?: SalesMetrics;
 }
 
-// Generate sample commission data - TODO: Replace with real data
-const generateSampleCommissionData = (
-  metrics?: SalesMetrics
-): CommissionData[] => {
-  const clients = [
-    'Smith Residence',
-    'Johnson Family',
-    'Office Complex',
-    'Downtown Apartment',
-    'Wilson House',
-    'Corporate HQ',
-    'Storage Facility',
-    'Retail Store',
-    'Estate Sale',
-    'Moving Company',
-    'Warehouse',
-    'Restaurant Chain',
-  ];
-  const jobTypes: ('junk' | 'move')[] = ['junk', 'move'];
-  const statuses: ('pending' | 'matched' | 'paid')[] = [
-    'pending',
-    'matched',
-    'paid',
-  ];
+// Hook to fetch commission data from API
+const useCommissionData = () => {
+  const [data, setData] = React.useState<CommissionData[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  return Array.from({ length: 20 }, (_, i) => {
-    const bookingDate = new Date();
-    bookingDate.setDate(bookingDate.getDate() - Math.floor(Math.random() * 30));
-
-    const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const estimatedRevenue = Math.floor(Math.random() * 1200) + 300;
-    const commissionRate = 0.05 + Math.random() * 0.05; // 5-10%
-    const estimatedCommission = estimatedRevenue * commissionRate;
-
-    let actualRevenue: number | undefined;
-    let actualCommission: number | undefined;
-    let matchedDate: string | undefined;
-    let jobId: string | undefined;
-
-    if (status === 'matched' || status === 'paid') {
-      actualRevenue = estimatedRevenue + (Math.random() - 0.5) * 200; // Slight variance
-      actualCommission = actualRevenue * commissionRate;
-      matchedDate = new Date(
-        bookingDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000
-      ).toISOString();
-      jobId = `${jobType.toUpperCase()}-${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`;
-    }
-
-    return {
-      id: `COMM-${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`,
-      bookingDate: bookingDate.toISOString().split('T')[0],
-      clientName: clients[Math.floor(Math.random() * clients.length)],
-      jobType,
-      estimatedRevenue,
-      actualRevenue,
-      commissionRate,
-      estimatedCommission,
-      actualCommission,
-      status,
-      jobId,
-      matchedDate,
-      notes: status === 'pending' ? 'Awaiting job completion' : undefined,
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/commission/list');
+        if (!response.ok) {
+          throw new Error('Failed to fetch commission data');
+        }
+        
+        const result = await response.json();
+        
+        // Transform API data to match our interface
+        const transformedData: CommissionData[] = result.data?.map((entry: any) => ({
+          id: entry.id,
+          bookingDate: entry.createdAt.split('T')[0],
+          clientName: entry.clientName,
+          jobType: entry.jobType,
+          estimatedRevenue: entry.estimatedRevenue,
+          actualRevenue: entry.actualRevenue,
+          commissionRate: entry.sales?.commissionRate || 0.05,
+          estimatedCommission: entry.estimatedRevenue * (entry.sales?.commissionRate || 0.05),
+          actualCommission: entry.commissionAmount,
+          status: entry.status,
+          jobId: entry.jobId,
+          matchedDate: entry.matchedLog?.logDate,
+          notes: entry.status === 'pending' ? 'Awaiting job completion' : undefined,
+        })) || [];
+        
+        setData(transformedData);
+      } catch (err) {
+        console.error('Error fetching commission data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        setData([]); // Return empty array on error
+      } finally {
+        setIsLoading(false);
+      }
     };
-  });
+
+    fetchData();
+  }, []);
+
+  return { data, isLoading, error };
 };
 
 const columns: ColumnDef<CommissionData>[] = [
@@ -331,10 +316,68 @@ export function SalesDataTable({ metrics }: SalesDataTableProps) {
     pageSize: 10,
   });
 
-  const data = React.useMemo(
-    () => generateSampleCommissionData(metrics),
-    [metrics]
-  );
+  const { data, isLoading, error } = useCommissionData();
+
+  const table = useReactTable({
+    data: data || [],
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      pagination,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  });
+
+  // Calculate summary stats
+  const pendingCommissions = data.filter((item) => item.status === 'pending');
+  const matchedCommissions = data.filter((item) => item.status === 'matched');
+  const paidCommissions = data.filter((item) => item.status === 'paid');
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4 px-4 lg:px-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-6 bg-muted rounded w-48 animate-pulse"></div>
+            <div className="h-4 bg-muted rounded w-64 mt-2 animate-pulse"></div>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 bg-muted rounded animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="px-4 lg:px-6">
+        <div className="text-center py-6">
+          <h3 className="text-lg font-semibold text-hunks-green mb-2">Commission Tracking</h3>
+          <p className="text-muted-foreground mb-2">Unable to load commission data</p>
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const table = useReactTable({
     data,

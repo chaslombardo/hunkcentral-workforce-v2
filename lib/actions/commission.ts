@@ -27,13 +27,8 @@ export async function createCommissionEntry(data: CommissionEntryFormData) {
     // Validate the data
     const validatedData = CommissionEntrySchema.parse(data);
 
-    // Check if data can be modified for the target date
-    const canModify = await canModifyDataForDate(validatedData.targetDate);
-    if (!canModify) {
-      throw new Error(
-        'Cannot create commission entry for this date - pay period is locked or closed'
-      );
-    }
+    // Note: Commission entries are sales forecasts and should not be restricted by pay periods
+    // They represent future bookings and can be created for any date
 
     // Note: We allow duplicate job IDs from different sales people
     // Conflicts will be detected and handled during the commission matching process

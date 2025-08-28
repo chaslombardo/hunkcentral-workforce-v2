@@ -152,6 +152,13 @@ export function UserDetailView({ user }: UserDetailViewProps) {
 
   const formatPercentage = (value?: number | null) => {
     if (!value) return '-';
+    // Commission rates are stored as percentages (e.g., 5 for 5%)
+    // So we don't need to multiply by 100
+    return `${Number(value).toFixed(1)}%`;
+  };
+
+  const formatDecimalAsPercentage = (value?: number | null) => {
+    if (!value) return '-';
     return `${(Number(value) * 100).toFixed(1)}%`;
   };
 
@@ -540,7 +547,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-center py-4">
-                  {formatPercentage(user.junkBonusGoal)}
+                  {formatDecimalAsPercentage(user.junkBonusGoal)}
                 </div>
                 <div className="text-sm text-muted-foreground text-center">
                   Target labor cost percentage for bonus eligibility
@@ -560,7 +567,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-center py-4">
-                  {formatPercentage(user.moveBonusGoal)}
+                  {formatDecimalAsPercentage(user.moveBonusGoal)}
                 </div>
                 <div className="text-sm text-muted-foreground text-center">
                   Target labor cost percentage for bonus eligibility
@@ -588,7 +595,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                   <h4 className="font-medium mb-2">Junk Operations:</h4>
                   <p className="text-sm text-muted-foreground">
                     If actual labor cost is below{' '}
-                    {formatPercentage(user.junkBonusGoal)}, captain earns bonus
+                    {formatDecimalAsPercentage(user.junkBonusGoal)}, captain earns bonus
                     on the difference
                   </p>
                 </div>
@@ -596,7 +603,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
                   <h4 className="font-medium mb-2">Move Operations:</h4>
                   <p className="text-sm text-muted-foreground">
                     If actual labor cost is below{' '}
-                    {formatPercentage(user.moveBonusGoal)}, captain earns bonus
+                    {formatDecimalAsPercentage(user.moveBonusGoal)}, captain earns bonus
                     on the difference
                   </p>
                 </div>

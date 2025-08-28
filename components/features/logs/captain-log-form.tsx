@@ -394,7 +394,10 @@ export function CaptainLogForm({
           {/* Overall Log Totals - only show if there's data */}
           {(overallCalculation.totalRevenue > 0 ||
             overallCalculation.totalHours > 0) && (
-            <LogTotals calculation={overallCalculation} />
+            <LogTotals 
+              calculation={overallCalculation} 
+              captainId={form.watch('captainId')}
+            />
           )}
 
           {/* Save Status Alert */}

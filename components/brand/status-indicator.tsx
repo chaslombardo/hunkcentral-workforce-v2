@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * StatusIndicator Component
  *
@@ -24,11 +26,6 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import {
-  usePerformanceMonitor,
-  bundleAnalysis,
-} from '@/lib/performance-monitor';
-import { useAccessibilityTesting } from '@/lib/accessibility-utils';
 
 // Status type definitions based on common application statuses
 export type StatusType =
@@ -181,27 +178,6 @@ export const StatusIndicator = React.memo(function StatusIndicator({
   className,
   ...props
 }: StatusIndicatorProps) {
-  const monitor = usePerformanceMonitor('StatusIndicator');
-  const startMarkRef = React.useRef<string>('');
-  const statusRef = React.useRef<HTMLSpanElement>(null);
-
-  // Performance monitoring
-  React.useLayoutEffect(() => {
-    startMarkRef.current = monitor.startRender();
-  });
-
-  React.useLayoutEffect(() => {
-    monitor.endRender(startMarkRef.current);
-  });
-
-  // Accessibility testing in development
-  useAccessibilityTesting(statusRef as React.RefObject<HTMLElement>);
-
-  // Warn about large props in development and track bundle usage
-  React.useEffect(() => {
-    bundleAnalysis.warnLargeProps('StatusIndicator', props, 200);
-    bundleAnalysis.trackRender('StatusIndicator', status, props);
-  }, [props, status]);
 
   // Memoize icon component selection
   const IconComponent = React.useMemo(
@@ -255,7 +231,6 @@ export const StatusIndicator = React.memo(function StatusIndicator({
 
   return (
     <Badge
-      ref={statusRef}
       className={badgeClassName}
       data-testid="status-indicator"
       {...accessibilityProps}

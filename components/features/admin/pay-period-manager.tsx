@@ -366,6 +366,8 @@ function CreatePayPeriodDialog({
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [submitting, setSubmitting] = useState(false);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -412,7 +414,7 @@ function CreatePayPeriodDialog({
           </div>
           <div className="grid gap-2">
             <Label>Start Date</Label>
-            <Popover modal={true}>
+            <Popover open={startDateOpen} onOpenChange={setStartDateOpen} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -425,24 +427,31 @@ function CreatePayPeriodDialog({
                   {startDate ? format(startDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-auto p-0"
-                onInteractOutside={(e) => e.preventDefault()}
-              >
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={startDate}
                   onSelect={(date) => {
                     setStartDate(date);
+                    if (date) {
+                      setStartDateOpen(false); // Auto-close on selection
+                      // If end date is before start date, clear it
+                      if (endDate && date >= endDate) {
+                        setEndDate(undefined);
+                      }
+                      // Auto-open end date picker for smooth workflow
+                      setTimeout(() => setEndDateOpen(true), 300);
+                    }
                   }}
                   initialFocus
+                  disabled={(date) => date < new Date(new Date().getFullYear(), 0, 1)}
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div className="grid gap-2">
             <Label>End Date</Label>
-            <Popover modal={true}>
+            <Popover open={endDateOpen} onOpenChange={setEndDateOpen} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -455,15 +464,13 @@ function CreatePayPeriodDialog({
                   {endDate ? format(endDate, 'PPP') : 'Pick a date'}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-auto p-0"
-                onInteractOutside={(e) => e.preventDefault()}
-              >
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={endDate}
                   onSelect={(date) => {
                     setEndDate(date);
+                    setEndDateOpen(false); // Auto-close on selection
                   }}
                   initialFocus
                   disabled={(date) => (startDate ? date <= startDate : false)}

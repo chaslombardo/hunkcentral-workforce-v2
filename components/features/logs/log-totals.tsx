@@ -31,9 +31,10 @@ import { formatCurrency, formatPercentage } from '@/lib/logCalculations';
 
 interface LogTotalsProps {
   calculation: OverallCalculation;
+  captainId?: string;
 }
 
-export function LogTotals({ calculation }: LogTotalsProps) {
+export function LogTotals({ calculation, captainId }: LogTotalsProps) {
   const {
     totalRevenue,
     totalTips,
@@ -277,7 +278,19 @@ export function LogTotals({ calculation }: LogTotalsProps) {
                     {employeeSummary.map((employee) => (
                       <TableRow key={employee.employeeId}>
                         <TableCell className="font-medium">
-                          {employee.employeeName}
+                          <div className="flex items-center gap-1">
+                            {employee.employeeName}
+                            {captainId && employee.employeeId === captainId && (
+                              <span 
+                                className="text-lg" 
+                                title="Captain" 
+                                role="img" 
+                                aria-label="Captain"
+                              >
+                                💪
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           {employee.totalHours.toFixed(1)}h

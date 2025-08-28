@@ -176,38 +176,8 @@ export function PayPeriodAnalysis({
     setChartView(value as 'trends' | 'departments' | 'performance');
   };
 
-  // Generate mock insights based on data
-  const mockInsights: PayrollInsight[] = [
-    {
-      type: 'positive',
-      title: 'Tips Performance Improved',
-      description: 'Your tips increased by 25% compared to last period',
-      metric: '+$30 in tips',
-      recommendation: 'Keep up the excellent customer service!',
-    },
-    {
-      type: 'neutral',
-      title: 'Department Mix Changed',
-      description:
-        'You worked more junk hours and fewer move hours this period',
-      metric: '+2h junk, -2h move',
-    },
-    {
-      type: 'positive',
-      title: 'Labor Efficiency Bonus',
-      description: 'Your efficiency improved, earning additional bonuses',
-      metric: '+2% efficiency',
-      recommendation: 'Continue focusing on efficient job completion',
-    },
-    {
-      type: 'warning',
-      title: 'Approaching Overtime',
-      description:
-        'You worked 42 hours this period, close to overtime threshold',
-      metric: '42 hours worked',
-      recommendation: 'Monitor hours to optimize pay structure',
-    },
-  ];
+  // Note: In real implementation, insights would be generated from actual payroll data
+  // For now, showing placeholder message instead of mock insights
 
   if (error) {
     return (
@@ -317,16 +287,11 @@ export function PayPeriodAnalysis({
                 <DollarSign className="h-3 w-3" />
                 Total Pay
               </CardDescription>
-              <CardTitle className="text-xl">{formatCurrency(1020)}</CardTitle>
+              <CardTitle className="text-xl">No data</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp
-                  data-testid="trending-up"
-                  className="h-3 w-3 text-green-600"
-                />
-                <span className="text-green-600">+6.8%</span>
-                <span className="text-muted-foreground">vs last period</span>
+                <span className="text-muted-foreground">Data unavailable</span>
               </div>
             </CardContent>
           </Card>
@@ -338,16 +303,11 @@ export function PayPeriodAnalysis({
                 <Clock className="h-3 w-3" />
                 Hours Worked
               </CardDescription>
-              <CardTitle className="text-xl">42h</CardTitle>
+              <CardTitle className="text-xl">No data</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp
-                  data-testid="trending-up"
-                  className="h-3 w-3 text-green-600"
-                />
-                <span className="text-green-600">+5.0%</span>
-                <span className="text-muted-foreground">vs last period</span>
+                <span className="text-muted-foreground">Data unavailable</span>
               </div>
             </CardContent>
           </Card>
@@ -359,7 +319,7 @@ export function PayPeriodAnalysis({
                 <Award className="h-3 w-3" />
                 Tips Earned
               </CardDescription>
-              <CardTitle className="text-xl">{formatCurrency(180)}</CardTitle>
+              <CardTitle className="text-xl">No data</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
@@ -548,51 +508,11 @@ export function PayPeriodAnalysis({
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
-              {mockInsights.map((insight, index) => (
-                <div key={index} className="flex gap-3 p-3 rounded-lg border">
-                  <div
-                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      insight.type === 'positive'
-                        ? 'bg-green-100 text-green-600'
-                        : insight.type === 'negative'
-                          ? 'bg-red-100 text-red-600'
-                          : insight.type === 'warning'
-                            ? 'bg-yellow-100 text-yellow-600'
-                            : 'bg-blue-100 text-blue-600'
-                    }`}
-                  >
-                    {insight.type === 'positive' && (
-                      <TrendingUp className="h-4 w-4" />
-                    )}
-                    {insight.type === 'negative' && (
-                      <TrendingDown className="h-4 w-4" />
-                    )}
-                    {insight.type === 'warning' && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {insight.type === 'neutral' && <Info className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{insight.title}</h4>
-                      {insight.metric && (
-                        <Badge variant="outline" className="text-xs">
-                          {insight.metric}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {insight.description}
-                    </p>
-                    {insight.recommendation && (
-                      <p className="text-xs text-blue-600 font-medium">
-                        💡 {insight.recommendation}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8">
+              <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Performance insights will be available when payroll data is processed.
+              </p>
             </div>
           )}
         </CardContent>
@@ -619,83 +539,11 @@ export function PayPeriodAnalysis({
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="grid grid-cols-4 gap-4 pb-2 border-b font-medium text-sm">
-                <div>Metric</div>
-                <div className="text-center">Current Period</div>
-                <div className="text-center">Previous Period</div>
-                <div className="text-center">Change</div>
-              </div>
-
-              {[
-                {
-                  metric: 'Total Pay',
-                  current: '$1,020',
-                  previous: '$955',
-                  change: '+6.8%',
-                  positive: true,
-                },
-                {
-                  metric: 'Total Hours',
-                  current: '42h',
-                  previous: '40h',
-                  change: '+5.0%',
-                  positive: true,
-                },
-                {
-                  metric: 'Tips Earned',
-                  current: '$180',
-                  previous: '$150',
-                  change: '+20.0%',
-                  positive: true,
-                },
-                {
-                  metric: 'Bonuses',
-                  current: '$95',
-                  previous: '$85',
-                  change: '+11.8%',
-                  positive: true,
-                },
-                {
-                  metric: 'Tips per Hour',
-                  current: '$4.29',
-                  previous: '$3.75',
-                  change: '+14.4%',
-                  positive: true,
-                },
-                {
-                  metric: 'Labor Efficiency',
-                  current: '95%',
-                  previous: '92%',
-                  change: '+3.3%',
-                  positive: true,
-                },
-                {
-                  metric: 'Jobs Completed',
-                  current: '24',
-                  previous: '22',
-                  change: '+9.1%',
-                  positive: true,
-                },
-              ].map((row, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-4 gap-4 py-2 text-sm"
-                >
-                  <div className="font-medium">{row.metric}</div>
-                  <div className="text-center">{row.current}</div>
-                  <div className="text-center text-muted-foreground">
-                    {row.previous}
-                  </div>
-                  <div
-                    className={`text-center font-medium ${
-                      row.positive ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
-                    {row.change}
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-8">
+              <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Detailed comparison data will be available when historical payroll data is processed.
+              </p>
             </div>
           )}
         </CardContent>

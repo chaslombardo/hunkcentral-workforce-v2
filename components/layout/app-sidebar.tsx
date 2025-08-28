@@ -155,12 +155,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
   }
 
-  // Create teams data for team switcher (locations/franchises)
+  // Create teams data for team switcher (single location only)
   const teams = [
     {
-      name: 'College Hunks',
+      name: 'HUNKCENTRAL',
       logo: Building2,
-      plan: 'Workforce Management',
+      plan: 'Logs and Pay Tracker',
     },
   ];
 

@@ -8,14 +8,12 @@ import {
   IconMedal,
   IconStar,
   IconCurrencyDollar,
-  IconClock,
   IconUsers,
   IconMinus,
 } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -29,7 +27,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatCurrency } from '@/lib/formatters';
@@ -52,74 +49,66 @@ interface PerformanceData {
 
 interface PerformanceRankingsProps {
   timeRange?: string;
-  onTimeRangeChange?: (range: string) => void;
 }
 
-// Generate sample performance data - TODO: Replace with real data
-const generateSamplePerformanceData = (): PerformanceData[] => {
-  const names = [
-    'John Smith',
-    'Sarah Johnson',
-    'Mike Wilson',
-    'Lisa Chen',
-    'David Brown',
-    'Emily Davis',
-    'Chris Martinez',
-    'Ashley Taylor',
-    'Ryan Anderson',
-    'Jessica White',
-    'Kevin Lee',
-    'Amanda Garcia',
-    'Tyler Moore',
-    'Nicole Thompson',
-    'Brandon Clark',
-  ];
+// Hook to fetch performance data from API
+const usePerformanceData = (timeRange: string) => {
+  const [data, setData] = React.useState<PerformanceData[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const roles: ('captain' | 'wingman' | 'sales')[] = [
-    'captain',
-    'wingman',
-    'sales',
-  ];
-  const trends: ('up' | 'down' | 'same')[] = ['up', 'down', 'same'];
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/analytics/performance?range=${timeRange}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch performance data');
+        }
+        
+        const result = await response.json();
+        
+        // Transform API data to match our interface
+        const transformedData: PerformanceData[] = result.captains?.map((captain: any, index: number) => {
+          const totalRevenue = captain.junkMetrics.totalRevenue + captain.moveMetrics.totalRevenue;
+          const totalJobs = captain.junkMetrics.jobCount + captain.moveMetrics.jobCount;
+          const avgLaborPercentage = totalJobs > 0 
+            ? (captain.junkMetrics.laborPercentage + captain.moveMetrics.laborPercentage) / 2 
+            : 0;
+          
+          return {
+            id: captain.captainId,
+            name: captain.captainName,
+            initials: captain.captainName
+              .split(' ')
+              .map((n: string) => n[0])
+              .join(''),
+            role: 'captain' as const,
+            revenue: totalRevenue,
+            efficiency: Math.round(100 - avgLaborPercentage), // Higher efficiency = lower labor %
+            productivity: Math.round((totalRevenue / Math.max(totalJobs, 1)) / 10), // Simplified productivity metric
+            tips: 0, // Tips would need to be added to API response
+            rank: index + 1,
+            trend: 'same' as const, // Would need historical data for trend calculation
+            score: Math.round(totalRevenue / 100 + (100 - avgLaborPercentage) * 2),
+          };
+        }) || [];
+        
+        setData(transformedData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        setData([]); // Return empty array on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  return names
-    .map((name, index) => {
-      const role = roles[Math.floor(Math.random() * roles.length)];
-      const revenue = Math.floor(Math.random() * 5000) + 1000;
-      const efficiency = Math.floor(Math.random() * 30) + 70; // 70-100%
-      const productivity = Math.floor(Math.random() * 40) + 60; // 60-100%
-      const tips = Math.floor(Math.random() * 500) + 100;
-      const trend = trends[Math.floor(Math.random() * trends.length)];
+    fetchData();
+  }, [timeRange]);
 
-      // Calculate composite score
-      const score = Math.floor(
-        revenue / 50 + efficiency * 2 + productivity * 1.5 + tips / 10
-      );
-
-      return {
-        id: `emp-${index + 1}`,
-        name,
-        initials: name
-          .split(' ')
-          .map((n) => n[0])
-          .join(''),
-        role,
-        revenue,
-        efficiency,
-        productivity,
-        tips,
-        rank: index + 1,
-        previousRank:
-          trend === 'up' ? index + 2 : trend === 'down' ? index : index + 1,
-        trend,
-        score,
-      };
-    })
-    .sort((a, b) => b.score - a.score)
-    .map((item, index) => ({
-      ...item,
-      rank: index + 1,
-    }));
+  return { data, isLoading, error };
 };
 
 const getRankIcon = (rank: number) => {
@@ -143,15 +132,85 @@ const getTrendIcon = (trend: 'up' | 'down' | 'same') => {
 
 export function PerformanceRankings({
   timeRange = '30d',
-  onTimeRangeChange,
 }: PerformanceRankingsProps) {
   const [rankingType, setRankingType] = React.useState('overall');
   const [roleFilter, setRoleFilter] = React.useState('all');
 
-  const performanceData = React.useMemo(
-    () => generateSamplePerformanceData(),
-    []
-  );
+  const { data: performanceData, isLoading, error } = usePerformanceData(timeRange);
+
+  const filteredData = React.useMemo(() => {
+    if (!performanceData.length) return [];
+    
+    let filtered = performanceData;
+
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter((item) => item.role === roleFilter);
+    }
+
+    // Sort by ranking type
+    if (rankingType === 'revenue') {
+      filtered = [...filtered].sort((a, b) => b.revenue - a.revenue);
+    } else if (rankingType === 'efficiency') {
+      filtered = [...filtered].sort((a, b) => b.efficiency - a.efficiency);
+    } else if (rankingType === 'productivity') {
+      filtered = [...filtered].sort((a, b) => b.productivity - a.productivity);
+    } else if (rankingType === 'tips') {
+      filtered = [...filtered].sort((a, b) => b.tips - a.tips);
+    }
+
+    // Reassign ranks
+    return filtered.map((item, index) => ({
+      ...item,
+      rank: index + 1,
+    }));
+  }, [performanceData, rankingType, roleFilter]);
+
+  const topPerformers = filteredData.slice(0, 3);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-6 bg-muted rounded-md w-48 mb-2"></div>
+          <div className="h-4 bg-muted rounded-md w-64"></div>
+        </div>
+        <div className="grid gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-20 bg-muted rounded-lg animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-6">
+            <p className="text-muted-foreground mb-2">Unable to load performance data</p>
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show empty state if no data
+  if (!performanceData.length) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-6">
+            <IconTrophy className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No performance data available for the selected time period</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const filteredData = React.useMemo(() => {
     let filtered = performanceData;

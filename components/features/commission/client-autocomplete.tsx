@@ -34,44 +34,12 @@ interface ClientAutocompleteProps {
   disabled?: boolean;
 }
 
-// Mock data - In real implementation, this would come from an API
-const mockSuggestions: ClientSuggestion[] = [
-  {
-    name: 'Johnson Family',
-    jobCount: 3,
-    lastJobDate: new Date('2024-01-15'),
-    avgRevenue: 450,
-    jobTypes: ['junk', 'move'],
-  },
-  {
-    name: 'Smith Residence',
-    jobCount: 1,
-    lastJobDate: new Date('2024-01-10'),
-    avgRevenue: 320,
-    jobTypes: ['junk'],
-  },
-  {
-    name: 'ABC Corporation',
-    jobCount: 5,
-    lastJobDate: new Date('2024-01-20'),
-    avgRevenue: 850,
-    jobTypes: ['junk', 'move'],
-  },
-  {
-    name: 'Downtown Apartments',
-    jobCount: 8,
-    lastJobDate: new Date('2024-01-18'),
-    avgRevenue: 1200,
-    jobTypes: ['move'],
-  },
-  {
-    name: 'Green Valley HOA',
-    jobCount: 2,
-    lastJobDate: new Date('2024-01-12'),
-    avgRevenue: 680,
-    jobTypes: ['junk'],
-  },
-];
+// TODO: Replace with real API call to fetch client suggestions
+// This should fetch from commission entries and daily logs to get recent client names
+const fetchClientSuggestions = async (): Promise<ClientSuggestion[]> => {
+  // For now, return empty array until API is implemented
+  return [];
+};
 
 export function ClientAutocomplete({
   value,
@@ -91,11 +59,10 @@ export function ClientAutocomplete({
   // Load suggestions when component mounts
   useEffect(() => {
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSuggestions(mockSuggestions);
-      setLoading(false);
-    }, 300);
+    fetchClientSuggestions()
+      .then(setSuggestions)
+      .catch(() => setSuggestions([]))
+      .finally(() => setLoading(false));
   }, []);
 
   const formatCurrency = (amount: number) => {
