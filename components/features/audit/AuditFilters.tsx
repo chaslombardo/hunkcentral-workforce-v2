@@ -68,125 +68,148 @@ export function AuditFilters() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 p-4 border rounded-lg bg-muted/50">
-      <div className="space-y-2">
-        <Label htmlFor="entityType">Entity Type</Label>
-        <Select value={entityType} onValueChange={setEntityType}>
-          <SelectTrigger className="h-10">
-            <SelectValue placeholder="All types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            <SelectItem value="daily_log">Daily Log</SelectItem>
-            <SelectItem value="commission_entry">Commission Entry</SelectItem>
-            <SelectItem value="user">User</SelectItem>
-            <SelectItem value="pay_period">Pay Period</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="space-y-4">
+      {/* Filter Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+        <div className="space-y-2">
+          <Label htmlFor="entityType" className="text-sm font-medium">
+            Entity Type
+          </Label>
+          <Select value={entityType} onValueChange={setEntityType}>
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="daily_log">Daily Log</SelectItem>
+              <SelectItem value="commission_entry">Commission Entry</SelectItem>
+              <SelectItem value="user">User</SelectItem>
+              <SelectItem value="pay_period">Pay Period</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="action" className="text-sm font-medium">
+            Action
+          </Label>
+          <Select value={action} onValueChange={setAction}>
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All actions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All actions</SelectItem>
+              <SelectItem value="create">Create</SelectItem>
+              <SelectItem value="update">Update</SelectItem>
+              <SelectItem value="delete">Delete</SelectItem>
+              <SelectItem value="approve">Approve</SelectItem>
+              <SelectItem value="submit">Submit</SelectItem>
+              <SelectItem value="reject">Reject</SelectItem>
+              <SelectItem value="match">Match</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="entityId" className="text-sm font-medium">
+            Entity ID
+          </Label>
+          <Input
+            id="entityId"
+            className="h-10 w-full"
+            placeholder="Enter entity ID"
+            value={entityId}
+            onChange={(e) => setEntityId(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="userId" className="text-sm font-medium">
+            User ID
+          </Label>
+          <Input
+            id="userId"
+            className="h-10 w-full"
+            placeholder="Enter user ID"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Start Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-full h-10 justify-start text-left font-normal',
+                  !startDate && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {startDate
+                    ? format(startDate, 'MMM dd, yyyy')
+                    : 'Pick a date'}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={setStartDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">End Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-full h-10 justify-start text-left font-normal',
+                  !endDate && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {endDate ? format(endDate, 'MMM dd, yyyy') : 'Pick a date'}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={endDate}
+                onSelect={setEndDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="action">Action</Label>
-        <Select value={action} onValueChange={setAction}>
-          <SelectTrigger className="h-10">
-            <SelectValue placeholder="All actions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All actions</SelectItem>
-            <SelectItem value="create">Create</SelectItem>
-            <SelectItem value="update">Update</SelectItem>
-            <SelectItem value="delete">Delete</SelectItem>
-            <SelectItem value="approve">Approve</SelectItem>
-            <SelectItem value="submit">Submit</SelectItem>
-            <SelectItem value="reject">Reject</SelectItem>
-            <SelectItem value="match">Match</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="entityId">Entity ID</Label>
-        <Input
-          id="entityId"
-          className="h-10"
-          placeholder="Enter entity ID"
-          value={entityId}
-          onChange={(e) => setEntityId(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="userId">User ID</Label>
-        <Input
-          id="userId"
-          className="h-10"
-          placeholder="Enter user ID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Start Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                'w-full h-10 justify-start text-left font-normal',
-                !startDate && 'text-muted-foreground'
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {startDate ? format(startDate, 'PPP') : 'Pick a date'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={startDate}
-              onSelect={setStartDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="space-y-2">
-        <Label>End Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                'w-full h-10 justify-start text-left font-normal',
-                !endDate && 'text-muted-foreground'
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {endDate ? format(endDate, 'PPP') : 'Pick a date'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={endDate}
-              onSelect={setEndDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="col-span-full flex gap-2 justify-end mt-4">
-        <Button variant="outline" onClick={clearFilters}>
-          <XIcon className="mr-2 h-4 w-4" />
-          Clear
-        </Button>
-        <Button onClick={applyFilters}>
-          <FilterIcon className="mr-2 h-4 w-4" />
-          Apply Filters
-        </Button>
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between pt-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          Use filters to narrow down audit log results
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={clearFilters}>
+            <XIcon className="mr-2 h-4 w-4" />
+            Clear
+          </Button>
+          <Button size="sm" onClick={applyFilters}>
+            <FilterIcon className="mr-2 h-4 w-4" />
+            Apply Filters
+          </Button>
+        </div>
       </div>
     </div>
   );
