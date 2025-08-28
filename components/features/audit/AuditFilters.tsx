@@ -72,7 +72,7 @@ export function AuditFilters() {
       <div className="space-y-2">
         <Label htmlFor="entityType">Entity Type</Label>
         <Select value={entityType} onValueChange={setEntityType}>
-          <SelectTrigger>
+          <SelectTrigger className="h-10">
             <SelectValue placeholder="All types" />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +88,7 @@ export function AuditFilters() {
       <div className="space-y-2">
         <Label htmlFor="action">Action</Label>
         <Select value={action} onValueChange={setAction}>
-          <SelectTrigger>
+          <SelectTrigger className="h-10">
             <SelectValue placeholder="All actions" />
           </SelectTrigger>
           <SelectContent>
@@ -108,6 +108,7 @@ export function AuditFilters() {
         <Label htmlFor="entityId">Entity ID</Label>
         <Input
           id="entityId"
+          className="h-10"
           placeholder="Enter entity ID"
           value={entityId}
           onChange={(e) => setEntityId(e.target.value)}
@@ -118,6 +119,7 @@ export function AuditFilters() {
         <Label htmlFor="userId">User ID</Label>
         <Input
           id="userId"
+          className="h-10"
           placeholder="Enter user ID"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
@@ -131,7 +133,7 @@ export function AuditFilters() {
             <Button
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                'w-full h-10 justify-start text-left font-normal',
                 !startDate && 'text-muted-foreground'
               )}
             >
@@ -157,7 +159,7 @@ export function AuditFilters() {
             <Button
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                'w-full h-10 justify-start text-left font-normal',
                 !endDate && 'text-muted-foreground'
               )}
             >
@@ -176,7 +178,7 @@ export function AuditFilters() {
         </Popover>
       </div>
 
-      <div className="col-span-full flex gap-2 justify-end">
+      <div className="col-span-full flex gap-2 justify-end mt-4">
         <Button variant="outline" onClick={clearFilters}>
           <XIcon className="mr-2 h-4 w-4" />
           Clear

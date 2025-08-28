@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
 import { requireAnyRole } from '@/lib/auth';
 import { AuditTrailService } from '@/lib/audit-trail';
-import { getMonitoring, logProductionError } from '@/lib/monitoring';
+import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
 
 const AuditSearchQuerySchema = z.object({
@@ -177,7 +177,12 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        return new NextResponse(exportResult.data, {
+        // Convert Buffer to proper format for NextResponse
+        const responseData = Buffer.isBuffer(exportResult.data)
+          ? new Uint8Array(exportResult.data).buffer
+          : exportResult.data;
+
+        return new NextResponse(responseData, {
           status: 200,
           headers: {
             'Content-Type': exportResult.contentType,

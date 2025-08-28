@@ -184,13 +184,13 @@ export function UserFormDialog({
             commissionRate: user.commissionRate
               ? Number(user.commissionRate)
               : undefined,
-            junkBonusGoal: Number(user.junkBonusGoal) || 0.14,
-            moveBonusGoal: Number(user.moveBonusGoal) || 0.24,
+            junkBonusGoal: (Number(user.junkBonusGoal) || 0.14) * 100,
+            moveBonusGoal: (Number(user.moveBonusGoal) || 0.24) * 100,
           }
         : {
             roles: [],
-            junkBonusGoal: 0.14,
-            moveBonusGoal: 0.24,
+            junkBonusGoal: 14,
+            moveBonusGoal: 24,
           },
   });
 
@@ -414,6 +414,19 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateJunkCaptain', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          // Remove dollar sign when focusing for easier editing
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -428,6 +441,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateJunkWingman', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -442,6 +467,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateMoveCaptain', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -456,6 +493,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateMoveWingman', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -470,6 +519,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateZigma', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -484,6 +545,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateTraining', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -498,6 +571,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateEstimating', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -512,6 +597,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateWarehouse', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -526,6 +623,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('rateAdmin', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -555,6 +664,18 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('salaryAmount', Number(formatted));
+                            e.target.value = `$${formatted}`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('$', '');
+                          e.target.value = value;
+                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -627,6 +748,18 @@ export function UserFormDialog({
                         setValueAs: (value) =>
                           value === '' ? undefined : Number(value),
                       })}
+                      onBlur={(e) => {
+                        const value = e.target.value;
+                        if (value && !isNaN(Number(value))) {
+                          const formatted = Number(value).toFixed(2);
+                          form.setValue('commissionRate', Number(formatted));
+                          e.target.value = `${formatted}%`;
+                        }
+                      }}
+                      onFocus={(e) => {
+                        const value = e.target.value.replace('%', '');
+                        e.target.value = value;
+                      }}
                       placeholder="0.00"
                     />
                   </div>
@@ -651,15 +784,29 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        max="1"
+                        max="100"
                         {...form.register('junkBonusGoal', {
-                          setValueAs: (value) =>
-                            value === '' ? 0.14 : Number(value),
+                          setValueAs: (value) => {
+                            const num = value === '' ? 14 : Number(value);
+                            return num / 100; // Convert percentage to decimal for storage
+                          },
                         })}
-                        placeholder="0.14"
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('junkBonusGoal', Number(formatted) / 100);
+                            e.target.value = `${formatted}%`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('%', '');
+                          e.target.value = value;
+                        }}
+                        placeholder="14"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Default: 14% (0.14)
+                        Default: 14%
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -669,15 +816,29 @@ export function UserFormDialog({
                         type="number"
                         step="0.01"
                         min="0"
-                        max="1"
+                        max="100"
                         {...form.register('moveBonusGoal', {
-                          setValueAs: (value) =>
-                            value === '' ? 0.24 : Number(value),
+                          setValueAs: (value) => {
+                            const num = value === '' ? 24 : Number(value);
+                            return num / 100; // Convert percentage to decimal for storage
+                          },
                         })}
-                        placeholder="0.24"
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !isNaN(Number(value))) {
+                            const formatted = Number(value).toFixed(2);
+                            form.setValue('moveBonusGoal', Number(formatted) / 100);
+                            e.target.value = `${formatted}%`;
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const value = e.target.value.replace('%', '');
+                          e.target.value = value;
+                        }}
+                        placeholder="24"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Default: 24% (0.24)
+                        Default: 24%
                       </p>
                     </div>
                   </div>

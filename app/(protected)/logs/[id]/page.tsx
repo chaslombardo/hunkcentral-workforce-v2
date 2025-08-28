@@ -5,7 +5,7 @@ import { LogDetailView } from '@/components/features/logs/log-detail-view';
 import { LogDetailSkeleton } from '@/components/features/logs/log-detail-skeleton';
 import LogErrorBoundary from '@/components/ui/log-error-boundary';
 import { LogDetailErrorFallback } from '@/components/ui/logs-error-fallback';
-import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
+import { logAuthError, logPageError } from '@/lib/monitoring';
 import type { Session } from 'next-auth';
 
 interface LogDetailPageProps {

@@ -5,7 +5,7 @@ import { CaptainLogForm } from '@/components/features/logs/captain-log-form';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LogCreateErrorFallback } from '@/components/ui/logs-error-fallback';
 import { loadLog } from '@/lib/actions/logs';
-import { getMonitoring, logAuthError, logPageError } from '@/lib/monitoring';
+import { logAuthError, logPageError } from '@/lib/monitoring';
 import { DailyLogFormData } from '@/lib/validations';
 import { LogJob, LogHour } from '@/types';
 

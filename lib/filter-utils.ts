@@ -1,5 +1,5 @@
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import {
   FilterConfig,
   DateRangeValue,
