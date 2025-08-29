@@ -95,60 +95,16 @@ export function ABTestManager() {
   const loadExperiments = async () => {
     setLoading(true);
     try {
-      // In a real implementation, this would fetch from your API
-      // For now, we'll use mock data
-      const mockExperiments: ABTestExperiment[] = [
-        {
-          id: '1',
-          name: 'dashboard-metrics-layout',
-          description: 'Test different layouts for dashboard metric cards',
-          status: 'active',
-          startDate: '2024-01-10T00:00:00Z',
-          variants: [
-            { name: 'control', weight: 50, config: { layout: 'grid' } },
-            { name: 'list-view', weight: 50, config: { layout: 'list' } },
-          ],
-          targetMetric: 'dashboard_engagement',
-          participants: 234,
-          conversions: 89,
-          conversionRate: 38.0,
-        },
-        {
-          id: '2',
-          name: 'button-color-test',
-          description: 'Test primary button color variations',
-          status: 'completed',
-          startDate: '2024-01-01T00:00:00Z',
-          endDate: '2024-01-08T00:00:00Z',
-          variants: [
-            { name: 'control', weight: 33, config: { color: '#026937' } },
-            { name: 'orange', weight: 33, config: { color: '#ea7200' } },
-            { name: 'blue', weight: 34, config: { color: '#3b82f6' } },
-          ],
-          targetMetric: 'form_completion',
-          participants: 456,
-          conversions: 234,
-          conversionRate: 51.3,
-        },
-        {
-          id: '3',
-          name: 'navigation-structure',
-          description: 'Test simplified vs detailed navigation menu',
-          status: 'draft',
-          variants: [
-            { name: 'control', weight: 50, config: { style: 'detailed' } },
-            { name: 'simplified', weight: 50, config: { style: 'simple' } },
-          ],
-          targetMetric: 'navigation_efficiency',
-          participants: 0,
-          conversions: 0,
-          conversionRate: 0,
-        },
-      ];
-
-      setExperiments(mockExperiments);
+      // TODO: Replace with actual API call
+      const response = await fetch('/api/ab-tests');
+      if (!response.ok) {
+        throw new Error('Failed to fetch experiments');
+      }
+      const experimentsData = await response.json();
+      setExperiments(experimentsData);
     } catch (error) {
       console.error('Failed to load experiments:', error);
+      setExperiments([]);
     } finally {
       setLoading(false);
     }
@@ -156,19 +112,18 @@ export function ABTestManager() {
 
   const createExperiment = async (config: ABTestConfig) => {
     try {
-      // In a real implementation, this would call your API
-      const newExperiment: ABTestExperiment = {
-        id: Date.now().toString(),
-        name: config.name,
-        description: config.description,
-        status: 'draft',
-        variants: config.variants,
-        targetMetric: config.targetMetric,
-        participants: 0,
-        conversions: 0,
-        conversionRate: 0,
-      };
+      // TODO: Replace with actual API call
+      const response = await fetch('/api/ab-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
 
+      if (!response.ok) {
+        throw new Error('Failed to create experiment');
+      }
+
+      const newExperiment = await response.json();
       setExperiments((prev) => [...prev, newExperiment]);
       setShowCreateDialog(false);
     } catch (error) {
@@ -203,36 +158,14 @@ export function ABTestManager() {
 
   const viewResults = async (experiment: ABTestExperiment) => {
     try {
-      // In a real implementation, this would call abTesting.getResults()
-      const mockResults = {
-        experiment: {
-          name: experiment.name,
-          description: experiment.description,
-          status: experiment.status,
-          startDate: experiment.startDate,
-          endDate: experiment.endDate,
-          targetMetric: experiment.targetMetric,
-        },
-        results: experiment.variants.map((variant) => ({
-          variant: variant.name,
-          participants: Math.floor(
-            experiment.participants * (variant.weight / 100)
-          ),
-          conversions: Math.floor(
-            experiment.conversions *
-              (variant.weight / 100) *
-              (0.8 + Math.random() * 0.4)
-          ),
-          conversionRate: 35 + Math.random() * 20,
-          interactions: Math.floor(Math.random() * 1000),
-          averageValue: Math.random() * 100,
-          totalValue: Math.random() * 10000,
-        })),
-        totalParticipants: experiment.participants,
-        totalEvents: Math.floor(experiment.participants * 3.5),
-      };
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/ab-tests/${experiment.id}/results`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch experiment results');
+      }
 
-      setExperimentResults(mockResults);
+      const results = await response.json();
+      setExperimentResults(results);
       setSelectedExperiment(experiment);
       setShowResultsDialog(true);
     } catch (error) {

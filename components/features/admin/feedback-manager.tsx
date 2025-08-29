@@ -85,74 +85,16 @@ export function FeedbackManager() {
   const loadFeedback = async () => {
     setLoading(true);
     try {
-      // In a real implementation, this would fetch from your API
-      // For now, we'll use mock data
-      const mockFeedback: FeedbackItem[] = [
-        {
-          id: '1',
-          type: 'bug',
-          title: 'Log submission fails on mobile',
-          description:
-            "When trying to submit a log on mobile, the form doesn't respond after clicking submit.",
-          priority: 'high',
-          status: 'open',
-          page: '/logs/create',
-          email: 'captain@example.com',
-          timestamp: '2024-01-15T10:30:00Z',
-        },
-        {
-          id: '2',
-          type: 'feature',
-          title: 'Add bulk approval for logs',
-          description:
-            'It would be helpful to approve multiple logs at once instead of one by one.',
-          priority: 'medium',
-          status: 'in_progress',
-          page: '/logs/review',
-          timestamp: '2024-01-14T14:20:00Z',
-        },
-        {
-          id: '3',
-          type: 'improvement',
-          title: 'Dashboard loading is slow',
-          description:
-            'The dashboard takes too long to load, especially the metrics cards.',
-          priority: 'medium',
-          status: 'resolved',
-          page: '/dashboard',
-          timestamp: '2024-01-13T09:15:00Z',
-          resolution:
-            'Optimized database queries and added caching. Load time reduced from 3s to 1.2s.',
-          resolvedAt: '2024-01-14T16:45:00Z',
-        },
-        {
-          id: '4',
-          type: 'performance',
-          title: 'Payroll report generation timeout',
-          description:
-            'Large payroll reports fail to generate and show a timeout error.',
-          priority: 'critical',
-          status: 'open',
-          page: '/reports/payroll',
-          email: 'admin@example.com',
-          timestamp: '2024-01-15T08:45:00Z',
-        },
-        {
-          id: '5',
-          type: 'general',
-          title: 'Love the new design!',
-          description:
-            'The recent UI updates look great and make the app much easier to use.',
-          priority: 'low',
-          status: 'closed',
-          page: '/dashboard',
-          timestamp: '2024-01-12T16:30:00Z',
-        },
-      ];
-
-      setFeedback(mockFeedback);
+      // TODO: Replace with actual API call
+      const response = await fetch('/api/feedback');
+      if (!response.ok) {
+        throw new Error('Failed to fetch feedback');
+      }
+      const feedbackData = await response.json();
+      setFeedback(feedbackData);
     } catch (error) {
       console.error('Failed to load feedback:', error);
+      setFeedback([]);
     } finally {
       setLoading(false);
     }
@@ -164,33 +106,25 @@ export function FeedbackManager() {
     resolution?: string
   ) => {
     try {
-      // In a real implementation, this would call your API
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/feedback/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, resolution }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update feedback');
+      }
+
+      const updatedFeedback = await response.json();
+
       setFeedback((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                status,
-                resolution,
-                resolvedAt:
-                  status === 'resolved' ? new Date().toISOString() : undefined,
-              }
-            : item
-        )
+        prev.map((item) => (item.id === id ? updatedFeedback : item))
       );
 
       if (selectedFeedback?.id === id) {
-        setSelectedFeedback((prev) =>
-          prev
-            ? {
-                ...prev,
-                status,
-                resolution,
-                resolvedAt:
-                  status === 'resolved' ? new Date().toISOString() : undefined,
-              }
-            : null
-        );
+        setSelectedFeedback(updatedFeedback);
       }
     } catch (error) {
       console.error('Failed to update feedback:', error);

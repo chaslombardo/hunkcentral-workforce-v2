@@ -603,12 +603,12 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
       const totalUsers = await prisma.user.count();
       const totalLogs = await prisma.dailyLog.count();
 
-      // Mock system health metrics - TODO: Replace with real monitoring data
+      // TODO: Replace with real monitoring data from system health API
       metrics.admin = {
-        systemHealth: 98, // Percentage
+        systemHealth: 0, // Will be populated by monitoring service
         userActivity: totalUsers,
-        errorRate: 0.2, // Percentage
-        performanceScore: 95, // Percentage
+        errorRate: 0, // Will be populated by error tracking service
+        performanceScore: 0, // Will be populated by performance monitoring
       };
     }
 

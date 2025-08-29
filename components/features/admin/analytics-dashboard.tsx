@@ -81,79 +81,16 @@ export function AnalyticsDashboard() {
   const loadAnalytics = async () => {
     setRefreshing(true);
     try {
-      // In a real implementation, this would call your analytics API
-      // For now, we'll simulate the data structure
-      const mockData: AnalyticsData = {
-        userInteractionPatterns: {
-          sessionDuration: 18, // minutes
-          commonClickTargets: [
-            { element: 'submit-log-button', count: 456 },
-            { element: 'navigation-menu', count: 234 },
-            { element: 'add-job-button', count: 189 },
-            { element: 'approve-button', count: 167 },
-            { element: 'export-button', count: 123 },
-          ],
-          navigationPaths: [
-            { path: '/dashboard → /logs/create', frequency: 234, count: 234 },
-            { path: '/logs/create → /dashboard', frequency: 189, count: 189 },
-            {
-              path: '/dashboard → /reports/payroll',
-              frequency: 156,
-              count: 156,
-            },
-            { path: '/logs/review → /logs/[id]', frequency: 134, count: 134 },
-            {
-              path: '/commission/create → /commission/list',
-              frequency: 98,
-              count: 98,
-            },
-          ],
-        },
-        performanceMetrics: [
-          { name: 'Page Load Time', value: 1.2, change: -0.1 },
-          { name: 'Render Time', value: 0.8, change: 0.05 },
-          { name: 'Interaction Delay', value: 0.1, change: -0.02 },
-          { name: 'Bundle Size', value: 245.5, change: 12.3 },
-          { name: 'First Paint', value: 0.95, change: -0.08 },
-          { name: 'Time to Interactive', value: 1.8, change: 0.15 },
-        ],
-        topPages: [
-          { page: '/dashboard', views: 1234, bounceRate: 0.12, avgTime: 180 },
-          { page: '/logs/create', views: 856, bounceRate: 0.08, avgTime: 240 },
-          {
-            page: '/reports/payroll',
-            views: 645,
-            bounceRate: 0.15,
-            avgTime: 300,
-          },
-          {
-            page: '/commission/create',
-            views: 432,
-            bounceRate: 0.1,
-            avgTime: 200,
-          },
-          { page: '/logs/review', views: 321, bounceRate: 0.18, avgTime: 150 },
-        ],
-        errorRates: [
-          { date: '2024-01-01', errors: 12, total: 1000 },
-          { date: '2024-01-02', errors: 8, total: 1100 },
-          { date: '2024-01-03', errors: 15, total: 950 },
-          { date: '2024-01-04', errors: 6, total: 1200 },
-          { date: '2024-01-05', errors: 4, total: 1300 },
-          { date: '2024-01-06', errors: 9, total: 1150 },
-          { date: '2024-01-07', errors: 7, total: 1250 },
-        ],
-        userActivity: Array.from({ length: 24 }, (_, hour) => ({
-          name: `${hour}:00`,
-          hour,
-          users: Math.floor(Math.random() * 100) + 20,
-          color: hour % 2 === 0 ? '#026937' : '#ea7200',
-        })),
-      };
-
-      setData(mockData);
+      // TODO: Replace with actual analytics API call
+      const response = await fetch(`/api/analytics?timeRange=${timeRange}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics data');
+      }
+      const analyticsData = await response.json();
+      setData(analyticsData);
     } catch (error) {
       console.error('Failed to load analytics:', error);
+      setData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMonitoring, initializeMonitoring } from '@/lib/monitoring';
+import { getMonitoringIntegration } from '@/lib/monitoring-integration';
 import { config, isMonitoringEnabled } from '@/lib/production-config';
 import { logApiRequest } from '@/lib/production-logger';
 
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     // Initialize monitoring if not already done
     const monitoring = getMonitoring() || initializeMonitoring();
+    const monitoringIntegration = getMonitoringIntegration();
 
     // Get query parameters
     const { searchParams } = new URL(url);
@@ -24,18 +26,31 @@ export async function GET(request: NextRequest) {
     const metrics = searchParams.get('metrics') === 'true';
     const alerts = searchParams.get('alerts') === 'true';
 
-    // Get system status
+    // Get system status from both monitoring systems
     const systemStatus = await monitoring.getSystemStatus();
+    const integrationHealth = monitoringIntegration.getSystemHealth();
+
+    // Determine overall status
+    const overallStatus =
+      integrationHealth?.status === 'unhealthy' ||
+      systemStatus.status === 'unhealthy'
+        ? 'unhealthy'
+        : integrationHealth?.status === 'degraded' ||
+            systemStatus.status === 'degraded'
+          ? 'degraded'
+          : 'healthy';
 
     // Basic health response
     const healthResponse = {
-      status: systemStatus.status,
+      status: overallStatus,
       timestamp: new Date().toISOString(),
       version: config.deployment.version,
       environment: config.deployment.environment,
       region: config.deployment.region,
       uptime: process.uptime(),
       buildId: config.deployment.buildId,
+      services: integrationHealth?.services || {},
+      enabledMonitoringServices: monitoringIntegration.getEnabledServices(),
     };
 
     // Add detailed information if requested
@@ -48,6 +63,7 @@ export async function GET(request: NextRequest) {
         ...((detailed || metrics) && {
           metrics: systemStatus.metrics,
           recentMetrics: monitoring.getMetrics(10),
+          serviceMetrics: await monitoringIntegration.getServiceMetrics(),
         }),
         ...((detailed || alerts) && {
           alerts: monitoring.getAlerts(20),
@@ -83,7 +99,8 @@ export async function GET(request: NextRequest) {
           checks,
           metrics,
           alerts,
-          systemStatus: systemStatus.status,
+          systemStatus: overallStatus,
+          integrationStatus: integrationHealth?.status,
         },
       });
 
@@ -110,7 +127,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(healthResponse, {
-      status: systemStatus.status === 'healthy' ? 200 : 503,
+      status: overallStatus === 'healthy' ? 200 : 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Response-Time': `${responseTime}ms`,

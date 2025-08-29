@@ -29,11 +29,12 @@ import { format } from 'date-fns';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 import type { DateRange } from 'react-day-picker';
 import { getPayPeriods, type PayPeriod } from '@/lib/actions/pay-periods';
+// import { getPayrollData } from '@/lib/actions/payroll-reports';
 
 export function PayrollReportDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PayPeriod | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [payrollData] = useState<PayrollCalculation[]>([]);
+  const [payrollData, setPayrollData] = useState<PayrollCalculation[]>([]);
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showExportDialog, setShowExportDialog] = useState(false);
