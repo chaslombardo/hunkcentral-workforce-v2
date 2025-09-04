@@ -1215,3 +1215,226 @@ export async function unapproveLog(logId: string): Promise<LogActionResult> {
     };
   }
 }
+
+/**
+ * List logs for the View Logs page with role-aware filtering, pagination, and stats
+ */
+export type ListLogsParams = {
+  status?: Array<'draft' | 'submitted' | 'approved'>;
+  captainId?: string; // managers/admins can filter by captain
+  mineOnly?: boolean; // captains: only their logs
+  from?: Date;
+  to?: Date;
+  payPeriodId?: string; // optional future enhancement
+  search?: string; // jobId or clientName search
+  page?: number;
+  pageSize?: number;
+};
+
+export async function listLogs(
+  params: ListLogsParams = {}
+): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Validate DB
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
+    }
+
+    const roles = session.user.roles || [];
+    const isCaptain = roles.includes('captain');
+    const isManager = roles.includes('manager');
+    const isAdmin = roles.includes('admin');
+
+    // Build where clause
+    const where: Prisma.DailyLogWhereInput = {};
+
+    // Role scoping
+    if (isCaptain && !isManager && !isAdmin) {
+      // Captains see only their logs (created or captain)
+      where.OR = [
+        { captainId: session.user.id },
+        { createdById: session.user.id },
+      ];
+    } else if (params.mineOnly) {
+      // Optional mineOnly filter
+      where.OR = [
+        { captainId: session.user.id },
+        { createdById: session.user.id },
+      ];
+    }
+
+    // Status filter
+    if (params.status && params.status.length > 0) {
+      where.status = { in: params.status } as any;
+    }
+
+    // Captain filter (managers/admins only)
+    if ((isManager || isAdmin) && params.captainId) {
+      where.captainId = params.captainId;
+    }
+
+    // Date range filter
+    if (params.from || params.to) {
+      where.logDate = {
+        gte: params.from,
+        lte: params.to,
+      };
+    }
+
+    // Basic search on jobs (jobId or clientName)
+    const jobWhere: Prisma.LogJobWhereInput | undefined = params.search
+      ? {
+          OR: [
+            { jobId: { contains: params.search, mode: 'insensitive' } },
+            { clientName: { contains: params.search, mode: 'insensitive' } },
+          ],
+        }
+      : undefined;
+
+    // Pagination
+    const page = Math.max(1, params.page || 1);
+    const pageSize = Math.min(100, Math.max(1, params.pageSize || 25));
+
+    // Query logs
+    const [total, logs] = await prisma.$transaction([
+      prisma.dailyLog.count({ where }),
+      prisma.dailyLog.findMany({
+        where,
+        include: {
+          captain: { select: { id: true, fullName: true } },
+          jobs: jobWhere
+            ? { where: jobWhere, select: { revenue: true, tips: true } }
+            : { select: { revenue: true, tips: true } },
+          hours: { select: { hours: true } },
+        },
+        orderBy: [{ logDate: 'desc' }, { createdAt: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
+
+    // Aggregate quick stats over the returned (filtered) set
+    let totalRevenue = 0;
+    let totalTips = 0;
+    let approvedCount = 0;
+    let submittedCount = 0;
+    let draftCount = 0;
+
+    const items = logs.map((log) => {
+      const revenue = log.jobs.reduce((s, j) => s + Number(j.revenue || 0), 0);
+      const tips = log.jobs.reduce((s, j) => s + Number(j.tips || 0), 0);
+      const hours = log.hours.reduce((s, h) => s + Number(h.hours || 0), 0);
+
+      totalRevenue += revenue;
+      totalTips += tips;
+      if (log.status === 'approved') approvedCount += 1;
+      if (log.status === 'submitted') submittedCount += 1;
+      if (log.status === 'draft') draftCount += 1;
+
+      return {
+        id: log.id,
+        captainId: log.captainId,
+        captainName: log.captain?.fullName || 'Unknown Captain',
+        logDate: log.logDate,
+        status: log.status,
+        revenue,
+        tips,
+        hours,
+        jobCount: log.jobs.length,
+        createdAt: log.createdAt,
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        total,
+        page,
+        pageSize,
+        items,
+        stats: {
+          totalRevenue,
+          totalTips,
+          counts: {
+            approved: approvedCount,
+            submitted: submittedCount,
+            draft: draftCount,
+          },
+        },
+      },
+    };
+  } catch (error) {
+    return { success: false, error: handleDatabaseError(error, 'list logs') };
+  }
+}
+
+/**
+ * Delete a draft log with role-aware permissions
+ * - Captain: can delete own drafts (createdById or captainId)
+ * - Manager/Admin: can delete any draft
+ */
+export async function deleteDraft(logId: string): Promise<LogActionResult> {
+  try {
+    if (!logId) return { success: false, error: 'Invalid log ID provided' };
+
+    const session = await auth();
+    if (!session?.user?.id)
+      return { success: false, error: 'Authentication required' };
+
+    const roles = session.user.roles || [];
+    const isManagerOrAdmin =
+      roles.includes('manager') || roles.includes('admin');
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: { id: true, status: true, captainId: true, createdById: true },
+    });
+    if (!log) return { success: false, error: 'Log not found' };
+
+    if (log.status !== 'draft') {
+      return {
+        success: false,
+        error: 'Only draft logs can be deleted with this action',
+      };
+    }
+
+    const isOwner =
+      log.captainId === session.user.id || log.createdById === session.user.id;
+    if (!isOwner && !isManagerOrAdmin) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    // Reuse transaction pattern from deleteLog, but limited scope
+    await prisma.$transaction(async (tx) => {
+      await tx.logHour.deleteMany({ where: { logId } });
+      await tx.logJob.deleteMany({ where: { logId } });
+      await tx.auditLog.deleteMany({ where: { dailyLogId: logId } });
+      await tx.dailyLog.delete({ where: { id: logId } });
+    });
+
+    try {
+      await onLogDeleted(log.captainId);
+    } catch (cacheError) {
+      console.error('Cache invalidation failed:', cacheError);
+    }
+
+    revalidatePath('/logs/view');
+    revalidatePath('/logs');
+
+    return { success: true, data: { id: logId, deleted: true } };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'delete draft'),
+    };
+  }
+}
