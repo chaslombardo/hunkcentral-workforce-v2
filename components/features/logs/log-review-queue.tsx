@@ -291,10 +291,12 @@ function createColumns(
                   View Full Details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconEye className="mr-2 h-4 w-4" />
-                Quick View
-              </DropdownMenuItem>
+              <LogDetailDialog logId={row.original.id}>
+                <DropdownMenuItem>
+                  <IconEye className="mr-2 h-4 w-4" />
+                  Quick View
+                </DropdownMenuItem>
+              </LogDetailDialog>
               {row.original.status === 'submitted' && (
                 <>
                   <DropdownMenuSeparator />
