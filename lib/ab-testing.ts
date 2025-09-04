@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from 'react';
 import { prisma } from '@/lib/prisma';
 import { analytics } from '@/lib/analytics';
 
@@ -353,71 +352,3 @@ class ABTestingService {
 }
 
 export const abTesting = ABTestingService.getInstance();
-
-// React hook for A/B testing
-export function useABTest(experimentName: string, userId?: string) {
-  const [variant, setVariant] = useState<ABTestResult | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getVariant = async () => {
-      try {
-        // Generate session ID if no user ID
-        const sessionId = userId ? undefined : generateSessionId();
-        const result = await abTesting.getVariant(
-          experimentName,
-          userId,
-          sessionId
-        );
-        setVariant(result);
-      } catch (error) {
-        console.error('Error getting A/B test variant:', error);
-        setVariant(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getVariant();
-  }, [experimentName, userId]);
-
-  const trackEvent = useCallback(
-    (eventType: string, value?: number, metadata?: Record<string, unknown>) => {
-      if (variant) {
-        const sessionId = userId ? undefined : generateSessionId();
-        abTesting.trackEvent(
-          experimentName,
-          eventType,
-          userId,
-          sessionId,
-          value,
-          metadata
-        );
-      }
-    },
-    [experimentName, userId, variant]
-  );
-
-  return {
-    variant,
-    loading,
-    trackEvent,
-    isControl: variant?.isControl || false,
-    config: variant?.config || {},
-  };
-}
-
-// Generate a session ID for anonymous users
-function generateSessionId(): string {
-  if (typeof window !== 'undefined') {
-    let sessionId = sessionStorage.getItem('ab_session_id');
-    if (!sessionId) {
-      sessionId =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-      sessionStorage.setItem('ab_session_id', sessionId);
-    }
-    return sessionId;
-  }
-  return Math.random().toString(36).substring(2, 15);
-}
