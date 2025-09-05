@@ -1438,3 +1438,126 @@ export async function deleteDraft(logId: string): Promise<LogActionResult> {
     };
   }
 }
+
+/**
+ * Round a decimal hour value to nearest 5 minutes
+ */
+function roundHoursToNearest5Min(value: number): number {
+  const minutes = Math.round((value * 60) / 5) * 5;
+  return Math.max(0, minutes) / 60;
+}
+
+/**
+ * Quick update of common fields (hours and job revenue/tips/upsells)
+ * - Captains: only draft/submitted logs they own
+ * - Managers: draft/submitted logs; approved requires unapproval and open pay period
+ * - Admins: same as manager, but allowed on any when unapproved
+ */
+export async function quickUpdateLog(
+  logId: string,
+  changes: {
+    hours?: Array<{ id: string; hours: number; isCoCaptain?: boolean }>;
+    jobs?: Array<{
+      id: string;
+      revenue?: number;
+      tips?: number;
+      junkOnMove?: number;
+      valuation?: number;
+      materials?: number;
+    }>;
+  }
+): Promise<LogActionResult> {
+  try {
+    if (!logId) return { success: false, error: 'Invalid log ID provided' };
+    const session = await auth();
+    if (!session?.user?.id)
+      return { success: false, error: 'Authentication required' };
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: {
+        id: true,
+        status: true,
+        logDate: true,
+        captainId: true,
+        createdById: true,
+      },
+    });
+    if (!log) return { success: false, error: 'Log not found' };
+
+    const roles = session.user.roles || [];
+    const isCaptain = roles.includes('captain');
+    const isManager = roles.includes('manager');
+    const isAdmin = roles.includes('admin');
+
+    const isOwner =
+      log.captainId === session.user.id || log.createdById === session.user.id;
+
+    // Permission checks
+    if (isCaptain && !isManager && !isAdmin) {
+      if (!isOwner) return { success: false, error: 'Permission denied' };
+      if (log.status === 'approved')
+        return { success: false, error: 'Unapprove required before editing' };
+    }
+
+    if (isManager || isAdmin) {
+      if (log.status === 'approved') {
+        const canModify = await canModifyDataForDate(log.logDate);
+        if (!canModify)
+          return { success: false, error: 'Pay period is locked or closed' };
+        return { success: false, error: 'Unapprove required before editing' };
+      }
+    }
+
+    // Apply updates in a transaction
+    await prisma.$transaction(async (tx) => {
+      if (changes.hours && changes.hours.length > 0) {
+        for (const h of changes.hours) {
+          const rounded = roundHoursToNearest5Min(Number(h.hours || 0));
+          await tx.logHour.update({
+            where: { id: h.id },
+            data: {
+              hours: rounded,
+              ...(typeof h.isCoCaptain === 'boolean'
+                ? { isCoCaptain: h.isCoCaptain }
+                : {}),
+            },
+          });
+        }
+      }
+      if (changes.jobs && changes.jobs.length > 0) {
+        for (const j of changes.jobs) {
+          await tx.logJob.update({
+            where: { id: j.id },
+            data: {
+              ...(j.revenue !== undefined
+                ? { revenue: Number(j.revenue) }
+                : {}),
+              ...(j.tips !== undefined ? { tips: Number(j.tips) } : {}),
+              ...(j.junkOnMove !== undefined
+                ? { junkOnMove: Number(j.junkOnMove) }
+                : {}),
+              ...(j.valuation !== undefined
+                ? { valuation: Number(j.valuation) }
+                : {}),
+              ...(j.materials !== undefined
+                ? { materials: Number(j.materials) }
+                : {}),
+            },
+          });
+        }
+      }
+    });
+
+    revalidatePath(`/logs/${logId}`);
+    revalidatePath('/logs/review');
+    revalidatePath('/logs/view');
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'quick update log'),
+    };
+  }
+}
