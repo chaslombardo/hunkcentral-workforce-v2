@@ -8,6 +8,7 @@ import {
   IconEye,
   IconEdit,
   IconChevronDown,
+  IconEditCircle,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +36,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { listLogs, deleteDraft, type ListLogsParams } from '@/lib/actions/logs';
+import {
+  listLogs,
+  deleteDraft,
+  quickUpdateLog,
+  type ListLogsParams,
+} from '@/lib/actions/logs';
 
 interface LogsViewClientProps {
   initialData: {
@@ -110,6 +116,44 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
         await reload();
       } else {
         toast.error(res.error || 'Failed to delete draft');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Quick Edit state
+  const [quickEditOpen, setQuickEditOpen] = React.useState(false);
+  const [quickEditTarget, setQuickEditTarget] = React.useState<string | null>(
+    null
+  );
+
+  const openQuickEdit = (id: string) => {
+    setQuickEditTarget(id);
+    setQuickEditOpen(true);
+  };
+
+  const onQuickEditSave = async (payload: {
+    hours?: Array<{ id: string; hours: number }>;
+    jobs?: Array<{
+      id: string;
+      revenue?: number;
+      tips?: number;
+      junkOnMove?: number;
+      valuation?: number;
+      materials?: number;
+    }>;
+  }) => {
+    if (!quickEditTarget) return;
+    setLoading(true);
+    try {
+      const res = await quickUpdateLog(quickEditTarget, payload);
+      if (res.success) {
+        toast.success('Log updated');
+        setQuickEditOpen(false);
+        await reload();
+      } else {
+        toast.error(res.error || 'Failed to update log');
       }
     } finally {
       setLoading(false);
@@ -264,6 +308,15 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
                             </Button>
                           </Link>
                         )}
+                        {row.status !== 'approved' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openQuickEdit(row.id)}
+                          >
+                            <IconEditCircle className="w-4 h-4" />
+                          </Button>
+                        )}
                         {row.status === 'draft' && (
                           <Button
                             size="sm"
@@ -327,6 +380,178 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
           </div>
         </CardContent>
       </Card>
+      {/* Quick Edit Drawer (simplified) */}
+      {quickEditOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center sm:justify-center">
+          <div className="w-full sm:max-w-2xl bg-background rounded-t-xl sm:rounded-xl p-4 space-y-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Quick Edit</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setQuickEditOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Adjust hours (rounded to nearest 5 minutes) and job
+              revenue/tips/upsells.
+            </p>
+            <QuickEditForm onSave={onQuickEditSave} saving={loading} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuickEditForm({
+  onSave,
+  saving,
+}: {
+  onSave: (payload: any) => void;
+  saving: boolean;
+}) {
+  const [hours, setHours] = React.useState<
+    Array<{ id: string; hours: number }>
+  >([]);
+  const [jobs, setJobs] = React.useState<
+    Array<{
+      id: string;
+      revenue?: number;
+      tips?: number;
+      junkOnMove?: number;
+      valuation?: number;
+      materials?: number;
+    }>
+  >([]);
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Hours</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {hours.map((h, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                placeholder="hourId"
+                value={h.id}
+                onChange={(e) => {
+                  const next = [...hours];
+                  next[i].id = e.target.value;
+                  setHours(next);
+                }}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="hours"
+                value={h.hours}
+                onChange={(e) => {
+                  const next = [...hours];
+                  next[i].hours = Number(e.target.value || 0);
+                  setHours(next);
+                }}
+              />
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setHours((arr) => [...arr, { id: '', hours: 0 }])}
+          >
+            Add Hour Row
+          </Button>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Jobs</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {jobs.map((j, i) => (
+            <div key={i} className="grid grid-cols-6 gap-2">
+              <Input
+                className="col-span-2"
+                placeholder="jobId"
+                value={j.id}
+                onChange={(e) => {
+                  const next = [...jobs];
+                  next[i].id = e.target.value;
+                  setJobs(next);
+                }}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="revenue"
+                value={j.revenue ?? ''}
+                onChange={(e) => {
+                  const next = [...jobs];
+                  next[i].revenue =
+                    e.target.value === '' ? undefined : Number(e.target.value);
+                  setJobs(next);
+                }}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="tips"
+                value={j.tips ?? ''}
+                onChange={(e) => {
+                  const next = [...jobs];
+                  next[i].tips =
+                    e.target.value === '' ? undefined : Number(e.target.value);
+                  setJobs(next);
+                }}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="valuation"
+                value={j.valuation ?? ''}
+                onChange={(e) => {
+                  const next = [...jobs];
+                  next[i].valuation =
+                    e.target.value === '' ? undefined : Number(e.target.value);
+                  setJobs(next);
+                }}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="materials"
+                value={j.materials ?? ''}
+                onChange={(e) => {
+                  const next = [...jobs];
+                  next[i].materials =
+                    e.target.value === '' ? undefined : Number(e.target.value);
+                  setJobs(next);
+                }}
+              />
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setJobs((arr) => [...arr, { id: '' }])}
+          >
+            Add Job Row
+          </Button>
+        </CardContent>
+      </Card>
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => onSave({ hours, jobs })}
+          disabled={saving}
+        >
+          Save
+        </Button>
+      </div>
     </div>
   );
 }
