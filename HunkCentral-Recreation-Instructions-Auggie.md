@@ -33,7 +33,7 @@ HunkCentral is a digital workforce management system for College Hunks Hauling J
 
 - **Five User Roles**: Admin, Manager, Captain, Sales, Wingman
 - **Granular Permissions**: Role-based dashboard content and feature access
-- **Location-Based Access**: Multi-location support with location restrictions
+- **Advanced Admin Features and Functions**
 
 ## Technical Architecture Requirements
 
