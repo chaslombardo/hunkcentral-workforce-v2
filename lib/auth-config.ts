@@ -3,7 +3,7 @@ import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
-import { getMonitoring, logAuthError } from '@/lib/monitoring';
+import { logAuthError } from '@/lib/errorLogger';
 import bcrypt from 'bcryptjs';
 import type { UserRole } from '@/types';
 
@@ -174,4 +174,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };

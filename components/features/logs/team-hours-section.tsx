@@ -41,9 +41,8 @@ import type { DailyLogFormData } from '@/lib/validations';
 import { calculateOtherHoursSection } from '@/lib/logCalculations';
 import type { User } from '@/types';
 
-const departments = [
-  { value: 'junk', label: 'Junk Removal' },
-  { value: 'move', label: 'Moving' },
+// Departments for Other Hours section (exclude junk and move)
+const otherHoursDepartments = [
   { value: 'zigma', label: 'Zigma' },
   { value: 'training', label: 'Training' },
   { value: 'estimating', label: 'Estimating' },
@@ -62,7 +61,7 @@ export function TeamHoursSection({
   description,
   employees,
 }: TeamHoursSectionProps) {
-  const { control, watch } = useFormContext<DailyLogFormData>();
+  const { control, watch, getValues } = useFormContext<DailyLogFormData>();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -70,9 +69,25 @@ export function TeamHoursSection({
   });
 
   const addTeamMember = () => {
+    // Get captain's ID from form or use empty string if not set
+    const captainId = getValues('captainId');
+
+    // Filter out employees already added to this section
+    const currentHourEntries = getValues('hours') || [];
+    const alreadyAddedEmployeeIds = currentHourEntries
+      .filter(
+        (hour) =>
+          hour.department ===
+          (title.includes('Other') ? 'admin' : 'junk' || 'move')
+      )
+      .map((hour) => hour.employeeId);
+
     append({
-      employeeId: '',
-      department: 'junk',
+      employeeId:
+        captainId && !alreadyAddedEmployeeIds.includes(captainId)
+          ? captainId
+          : '', // Default to captain if not already added
+      department: 'admin', // Default to admin for Other Hours section
       hours: 0,
       isCoCaptain: false,
     });
@@ -84,6 +99,16 @@ export function TeamHoursSection({
 
   // Watch all hours for real-time calculations
   const allHours = watch('hours') || [];
+
+  // Get employees already added to THIS section to filter them out
+  const getAlreadyAddedEmployeesForThisSection = () => {
+    const sectionDepartment = title.includes('Other')
+      ? ['admin', 'zigma', 'training', 'estimating', 'warehouse']
+      : ['junk', 'move'];
+    return allHours
+      .filter((hour) => sectionDepartment.includes(hour.department))
+      .map((hour) => hour.employeeId);
+  };
 
   // Calculate other hours section summary - use empty array if no employees provided
   const otherHoursCalculation = calculateOtherHoursSection(
@@ -141,8 +166,9 @@ export function TeamHoursSection({
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span>
                               {
-                                departments.find((d) => d.value === department)
-                                  ?.label
+                                otherHoursDepartments.find(
+                                  (d) => d.value === department
+                                )?.label
                               }
                             </span>
                             <span>{hours}h</span>
@@ -168,14 +194,23 @@ export function TeamHoursSection({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {employees?.map((employee) => (
-                                      <SelectItem
-                                        key={employee.id}
-                                        value={employee.id}
-                                      >
-                                        {employee.fullName}
-                                      </SelectItem>
-                                    )) || []}
+                                    {employees
+                                      ?.filter(
+                                        (employee) =>
+                                          !getAlreadyAddedEmployeesForThisSection().includes(
+                                            employee.id
+                                          ) ||
+                                          employee.id ===
+                                            watch(`hours.${index}.employeeId`) // Allow currently selected employee
+                                      )
+                                      .map((employee) => (
+                                        <SelectItem
+                                          key={employee.id}
+                                          value={employee.id}
+                                        >
+                                          {employee.fullName}
+                                        </SelectItem>
+                                      )) || []}
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -200,7 +235,7 @@ export function TeamHoursSection({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {departments.map((dept) => (
+                                    {otherHoursDepartments.map((dept) => (
                                       <SelectItem
                                         key={dept.value}
                                         value={dept.value}
@@ -225,7 +260,7 @@ export function TeamHoursSection({
                                 <FormControl>
                                   <Input
                                     type="number"
-                                    step="0.25"
+                                    step="0.083333"
                                     min="0"
                                     max="24"
                                     placeholder="0.00"

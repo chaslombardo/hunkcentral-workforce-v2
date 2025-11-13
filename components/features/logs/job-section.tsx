@@ -55,7 +55,8 @@ export function JobSection({
   description,
   employees = [],
 }: JobSectionProps) {
-  const { control, watch, setValue } = useFormContext<DailyLogFormData>();
+  const { control, watch, setValue, getValues } =
+    useFormContext<DailyLogFormData>();
 
   const {
     fields: jobFields,
@@ -108,8 +109,20 @@ export function JobSection({
   };
 
   const addTeamMember = () => {
+    // Get captain's ID from form
+    const captainId = getValues('captainId');
+
+    // Filter out employees already added to this section
+    const currentHourEntries = getValues('hours') || [];
+    const alreadyAddedEmployeeIds = currentHourEntries
+      .filter((hour) => hour.department === jobType)
+      .map((hour) => hour.employeeId);
+
     appendHour({
-      employeeId: '',
+      employeeId:
+        captainId && !alreadyAddedEmployeeIds.includes(captainId)
+          ? captainId
+          : '', // Default to captain if not already added
       department: jobType,
       hours: 0,
       isCoCaptain: false,
@@ -137,6 +150,13 @@ export function JobSection({
   const allJobs = watch('jobs') || [];
   const allHours = watch('hours') || [];
   const formDisposalCost = watch('disposalCost') || 0;
+
+  // Get employees already added to THIS section to filter them out
+  const getAlreadyAddedEmployeesForThisSection = () => {
+    return allHours
+      .filter((hour) => hour.department === jobType)
+      .map((hour) => hour.employeeId);
+  };
 
   // Calculate section summary
   const sectionCalculation = calculateSectionSummary(
@@ -317,14 +337,25 @@ export function JobSection({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {employees.map((employee) => (
-                                      <SelectItem
-                                        key={employee.id}
-                                        value={employee.id}
-                                      >
-                                        {employee.fullName}
-                                      </SelectItem>
-                                    ))}
+                                    {employees
+                                      .filter(
+                                        (employee) =>
+                                          !getAlreadyAddedEmployeesForThisSection().includes(
+                                            employee.id
+                                          ) ||
+                                          employee.id ===
+                                            watch(
+                                              `hours.${globalIndex}.employeeId`
+                                            ) // Allow currently selected employee
+                                      )
+                                      .map((employee) => (
+                                        <SelectItem
+                                          key={employee.id}
+                                          value={employee.id}
+                                        >
+                                          {employee.fullName}
+                                        </SelectItem>
+                                      ))}
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -342,7 +373,7 @@ export function JobSection({
                                 <FormControl>
                                   <Input
                                     type="number"
-                                    step="0.25"
+                                    step="0.083333"
                                     min="0"
                                     max="24"
                                     placeholder="0.00"

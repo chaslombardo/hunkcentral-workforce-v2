@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -247,6 +248,37 @@ export function CaptainLogForm({
                 )}
               />
 
+              {/* Date Selector */}
+              <FormField
+                control={form.control}
+                name="logDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Log Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        placeholder="Select date"
+                        value={
+                          field.value ? format(field.value, 'yyyy-MM-dd') : ''
+                        }
+                        onChange={(e) => {
+                          const date = e.target.value;
+                          field.onChange(date ? new Date(date) : new Date());
+                        }}
+                        className="focus-visible:ring-hunks-green"
+                        max={format(new Date(), 'yyyy-MM-dd')} // Prevent future dates
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Select the date for this log. You can select past dates
+                      but not future dates.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Separator />
 
               {/* Section Visibility Toggles */}
@@ -394,10 +426,7 @@ export function CaptainLogForm({
           {/* Overall Log Totals - only show if there's data */}
           {(overallCalculation.totalRevenue > 0 ||
             overallCalculation.totalHours > 0) && (
-            <LogTotals 
-              calculation={overallCalculation} 
-              captainId={form.watch('captainId')}
-            />
+            <LogTotals calculation={overallCalculation} />
           )}
 
           {/* Save Status Alert */}
