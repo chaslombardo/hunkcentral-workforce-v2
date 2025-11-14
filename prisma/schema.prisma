@@ -1,0 +1,437 @@
+// HUNKCentral Prisma Schema
+// Complete database schema for workforce management system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users (NextAuth + Prisma)
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  fullName          String
+  roles             String[]  // Array of roles: 'captain', 'wingman', 'manager', 'sales', 'admin'
+  
+  // Theme and UI preferences
+  themePreference   String    @default("system") // 'light', 'dark', 'system'
+  
+  // Granular permissions (in addition to roles)
+  permissions       String[]  @default([]) // Array of specific permissions
+
+  // Department-specific hourly rates
+  rateJunkCaptain   Decimal?  @db.Decimal(6, 2)
+  rateJunkWingman   Decimal?  @db.Decimal(6, 2)
+  rateMoveCaptain   Decimal?  @db.Decimal(6, 2)
+  rateMoveWingman   Decimal?  @db.Decimal(6, 2)
+  rateZigma         Decimal?  @db.Decimal(6, 2)
+  rateTraining      Decimal?  @db.Decimal(6, 2)
+  rateEstimating    Decimal?  @db.Decimal(6, 2)
+  rateWarehouse     Decimal?  @db.Decimal(6, 2)
+  rateAdmin         Decimal?  @db.Decimal(6, 2)
+
+  // Salary settings
+  salaryAmount      Decimal?  @db.Decimal(10, 2)
+  salaryFrequency   String?   // 'weekly', 'bi-weekly', 'monthly'
+  salaryType        String?   // 'base': replaces hourly wages, 'guaranteed': minimum if primary pay is low, 'supplemental': added to other earnings
+
+  // Commission and bonus settings
+  commissionRate    Decimal?  @db.Decimal(5, 2)
+  junkBonusGoal     Decimal   @default(0.14) @db.Decimal(5, 2)
+  moveBonusGoal     Decimal   @default(0.24) @db.Decimal(5, 2)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  dailyLogs         DailyLog[]
+  approvedLogs      DailyLog[] @relation("ApprovedBy")
+  createdLogs       DailyLog[] @relation("CreatedBy")
+  editedLogs        DailyLog[] @relation("LastEditedBy")
+  logHours          LogHour[]
+  commissionEntries CommissionEntry[]
+  approvedCommissions CommissionEntry[] @relation("CommissionApprovedBy")
+  rejectedCommissions CommissionEntry[] @relation("CommissionRejectedBy")
+  auditLogs         AuditLog[]
+  discrepancyReportsEmployee DiscrepancyReport[] @relation("DiscrepancyReportEmployee")
+  discrepancyReportsReporter DiscrepancyReport[] @relation("DiscrepancyReportReporter")
+  discrepancyReportsResolver DiscrepancyReport[] @relation("DiscrepancyReportResolver")
+  pushSubscriptions PushSubscription[]
+
+  @@index([email])
+  @@index([roles])
+  @@index([createdAt])
+}
+
+// Daily Logs
+model DailyLog {
+  id          String    @id @default(uuid())
+  captainId   String
+  captain     User      @relation(fields: [captainId], references: [id])
+  logDate     DateTime  @db.Date
+  status      String    // 'draft', 'submitted', 'approved'
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  approvedById String?
+  approvedBy  User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  // Audit fields
+  createdById String
+  createdBy   User      @relation("CreatedBy", fields: [createdById], references: [id])
+  lastEditedById String?
+  lastEditedBy User?    @relation("LastEditedBy", fields: [lastEditedById], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  jobs        LogJob[]
+  hours       LogHour[]
+  commissions CommissionEntry[]
+  auditLogs   AuditLog[]
+
+  @@index([captainId])
+  @@index([logDate])
+  @@index([status])
+  @@index([captainId, logDate])
+  @@index([status, submittedAt])
+  @@index([approvedById, approvedAt])
+  @@unique([captainId, logDate]) // One log per captain per day
+}
+
+// Log Jobs
+model LogJob {
+  id          String   @id @default(uuid())
+  logId       String
+  log         DailyLog @relation(fields: [logId], references: [id])
+  jobType     String   // 'junk', 'move'
+  jobId       String
+  clientName  String
+  revenue     Decimal  @db.Decimal(10, 2)
+  tips        Decimal  @db.Decimal(10, 2)
+
+  // Move-specific fields
+  junkOnMove  Decimal? @db.Decimal(10, 2)
+  valuation   Decimal? @db.Decimal(10, 2)
+  materials   Decimal? @db.Decimal(10, 2)
+
+  // Junk-specific fields (section level)
+  disposalCost Decimal? @db.Decimal(10, 2)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([logId])
+  @@index([jobType])
+  @@index([jobId])
+  @@index([logId, jobType])
+}
+
+// Log Hours
+model LogHour {
+  id          String   @id @default(uuid())
+  logId       String
+  log         DailyLog @relation(fields: [logId], references: [id])
+  employeeId  String
+  employee    User     @relation(fields: [employeeId], references: [id])
+  department  String   // 'junk', 'move', 'zigma', 'training', 'estimating', 'warehouse', 'admin'
+  hours       Decimal  @db.Decimal(5, 2)
+  isCoCaptain Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([logId])
+  @@index([employeeId])
+  @@index([department])
+  @@index([logId, employeeId])
+  @@index([employeeId, department])
+}
+
+// Commission Entries
+model CommissionEntry {
+  id               String    @id @default(uuid())
+  salesId          String
+  sales            User      @relation(fields: [salesId], references: [id])
+  jobId            String
+  clientName       String
+  jobType          String
+  targetDate       DateTime  @db.Date
+  estimatedRevenue Decimal   @db.Decimal(10, 2)
+  actualRevenue    Decimal?  @db.Decimal(10, 2)
+  commissionAmount Decimal?  @db.Decimal(10, 2)
+  status           String    // 'pending', 'matched', 'approved', 'rejected'
+
+  matchedLogId     String?
+  matchedLog       DailyLog? @relation(fields: [matchedLogId], references: [id])
+
+  // Approval fields
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?     @relation("CommissionApprovedBy", fields: [approvedById], references: [id])
+
+  // Rejection fields
+  rejectedAt       DateTime?
+  rejectedById     String?
+  rejectedBy       User?     @relation("CommissionRejectedBy", fields: [rejectedById], references: [id])
+  rejectionReason  String?
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([salesId])
+  @@index([jobId])
+  @@index([status])
+  @@index([targetDate])
+  @@index([salesId, status])
+  @@index([jobId, status])
+  @@index([matchedLogId])
+}
+
+// Pay Periods
+model PayPeriod {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  status    String   // 'open', 'locked', 'closed'
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  discrepancyReports DiscrepancyReport[]
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@unique([name]) // Unique pay period names
+}
+
+// Discrepancy Reports
+model DiscrepancyReport {
+  id              String   @id @default(uuid())
+  employeeId      String
+  employee        User     @relation("DiscrepancyReportEmployee", fields: [employeeId], references: [id])
+  payPeriodId     String
+  payPeriod       PayPeriod @relation(fields: [payPeriodId], references: [id])
+  reportedById    String
+  reportedBy      User     @relation("DiscrepancyReportReporter", fields: [reportedById], references: [id])
+  
+  priority        String   // 'low', 'medium', 'high', 'critical'
+  category        String   // 'calculation', 'data_integrity', 'rate_issue', 'hours_mismatch', 'tips_error', 'other'
+  description     String
+  expectedOutcome String?
+  contactEmail    String?
+  requestCallback Boolean  @default(false)
+  
+  errors          Json     // Array of ValidationError objects
+  severity        String   // 'low', 'medium', 'high', 'critical'
+  status          String   // 'open', 'investigating', 'resolved', 'dismissed'
+  resolution      String?
+  resolvedById    String?
+  resolvedBy      User?    @relation("DiscrepancyReportResolver", fields: [resolvedById], references: [id])
+  resolvedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([payPeriodId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+}
+
+// Audit Log
+model AuditLog {
+  id          String   @id @default(uuid())
+  entityType  String   // 'daily_log', 'commission_entry', 'user', etc.
+  entityId    String   // ID of the entity being audited
+  action      String   // 'create', 'update', 'delete', 'approve', 'submit'
+  changes     Json?    // JSON object containing before/after values
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Optional relation to daily log for log-specific audits
+  dailyLogId  String?
+  dailyLog    DailyLog? @relation(fields: [dailyLogId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@index([entityType])
+  @@index([entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([dailyLogId])
+}
+
+// Analytics Events
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  eventType   String   // 'click', 'form_submit', 'page_view', 'navigation', 'error', 'feedback_submitted'
+  userId      String?
+  metadata    Json     @default("{}")
+  timestamp   DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// Performance Metrics
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  metricType  String   // 'page_load', 'interaction_delay', 'bundle_size', 'render_time'
+  value       Float
+  page        String
+  userId      String?
+  metadata    Json     @default("{}")
+  timestamp   DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+
+  @@index([metricType])
+  @@index([page])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// User Feedback
+model UserFeedback {
+  id               String   @id @default(uuid())
+  type             String   // 'bug', 'feature', 'improvement', 'performance', 'general'
+  title            String
+  description      String
+  page             String
+  priority         String   // 'low', 'medium', 'high', 'critical'
+  email            String?
+  userId           String?
+  userAgent        String?
+  screenResolution String?
+  status           String   @default("open") // 'open', 'in_progress', 'resolved', 'closed'
+  resolution       String?
+  resolvedAt       DateTime?
+  timestamp        DateTime @default(now())
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([priority])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// A/B Test Experiments
+model ABTestExperiment {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  status      String   @default("draft") // 'draft', 'active', 'paused', 'completed'
+  startDate   DateTime?
+  endDate     DateTime?
+  variants    Json     // Array of variant configurations
+  targetMetric String  // The metric being optimized
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignments ABTestAssignment[]
+  events      ABTestEvent[]
+}
+
+// A/B Test User Assignments
+model ABTestAssignment {
+  id           String           @id @default(uuid())
+  experimentId String
+  experiment   ABTestExperiment @relation(fields: [experimentId], references: [id])
+  userId       String?
+  sessionId    String?
+  variant      String
+  assignedAt   DateTime         @default(now())
+
+  @@unique([experimentId, userId])
+  @@unique([experimentId, sessionId])
+}
+
+// A/B Test Events
+model ABTestEvent {
+  id           String           @id @default(uuid())
+  experimentId String
+  experiment   ABTestExperiment @relation(fields: [experimentId], references: [id])
+  userId       String?
+  sessionId    String?
+  variant      String
+  eventType    String           // 'conversion', 'interaction', 'page_view'
+  value        Float?           // Numeric value for the event
+  metadata     Json             @default("{}")
+  timestamp    DateTime         @default(now())
+
+  createdAt    DateTime         @default(now())
+}
+
+// Pre-computed Metrics for Performance Optimization
+model PrecomputedMetric {
+  id          String   @id @default(uuid())
+  metricType  String   // 'dashboard_captain', 'dashboard_manager', 'payroll_summary', 'labor_costs', etc.
+  entityType  String?  // 'user', 'pay_period', 'department', 'global'
+  entityId    String?  // ID of the entity (user ID, pay period ID, etc.)
+  
+  // Metric data
+  data        Json     // JSON object containing the computed metrics
+  
+  // Metadata
+  payPeriodId String?  // Associated pay period for time-based metrics
+  department  String?  // Department filter if applicable
+  
+  // Cache management
+  computedAt  DateTime @default(now())
+  expiresAt   DateTime? // Optional expiration time
+  version     Int      @default(1) // Version for cache invalidation
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([metricType, entityType, entityId, payPeriodId, department])
+  @@index([metricType, entityType, entityId])
+  @@index([payPeriodId])
+  @@index([expiresAt])
+}
+
+// Push Notifications
+model PushSubscription {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Push subscription data
+  endpoint   String
+  p256dhKey  String
+  authKey    String
+  
+  // Device information
+  userAgent  String?
+  platform   String?
+  language   String?
+  
+  // Metadata
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([userId, endpoint])
+  @@index([userId])
+  @@index([isActive])
+}
