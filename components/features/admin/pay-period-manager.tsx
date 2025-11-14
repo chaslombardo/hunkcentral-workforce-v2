@@ -414,7 +414,11 @@ function CreatePayPeriodDialog({
           </div>
           <div className="grid gap-2">
             <Label>Start Date</Label>
-            <Popover open={startDateOpen} onOpenChange={setStartDateOpen} modal={false}>
+            <Popover
+              open={startDateOpen}
+              onOpenChange={setStartDateOpen}
+              modal={false}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -444,14 +448,20 @@ function CreatePayPeriodDialog({
                     }
                   }}
                   initialFocus
-                  disabled={(date) => date < new Date(new Date().getFullYear(), 0, 1)}
+                  disabled={(date) =>
+                    date < new Date(new Date().getFullYear(), 0, 1)
+                  }
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div className="grid gap-2">
             <Label>End Date</Label>
-            <Popover open={endDateOpen} onOpenChange={setEndDateOpen} modal={false}>
+            <Popover
+              open={endDateOpen}
+              onOpenChange={setEndDateOpen}
+              modal={false}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"

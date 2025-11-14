@@ -142,31 +142,46 @@ export async function calculatePrecomputedMetrics(
 
     switch (metricType) {
       case 'dashboard':
-        data = await calculateDashboardMetrics(payload.userId, payload.payPeriodId);
+        data = await calculateDashboardMetrics(
+          payload.userId,
+          payload.payPeriodId
+        );
         entityType = payload.userId ? 'user' : 'global';
         entityId = payload.userId || null;
         break;
 
       case 'payroll':
-        data = await calculatePayrollMetrics(payload.payPeriodId, payload.userId);
+        data = await calculatePayrollMetrics(
+          payload.payPeriodId,
+          payload.userId
+        );
         entityType = 'user';
         entityId = payload.userId;
         break;
 
       case 'labor_costs':
-        data = await calculateLaborCostMetrics(payload.payPeriodId, payload.department);
+        data = await calculateLaborCostMetrics(
+          payload.payPeriodId,
+          payload.department
+        );
         entityType = payload.department ? 'department' : 'global';
         entityId = payload.department || null;
         break;
 
       case 'commission':
-        data = await calculateCommissionMetrics(payload.userId, payload.payPeriodId);
+        data = await calculateCommissionMetrics(
+          payload.userId,
+          payload.payPeriodId
+        );
         entityType = 'user';
         entityId = payload.userId;
         break;
 
       case 'user_performance':
-        data = await calculateUserPerformanceMetrics(payload.userId, payload.payPeriodId);
+        data = await calculateUserPerformanceMetrics(
+          payload.userId,
+          payload.payPeriodId
+        );
         entityType = 'user';
         entityId = payload.userId;
         break;
@@ -197,20 +212,22 @@ async function calculateDashboardMetrics(
   userId?: string,
   payPeriodId?: string
 ): Promise<DashboardMetrics> {
-  const user = userId ? await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, roles: true, fullName: true },
-  }) : null;
+  const user = userId
+    ? await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, roles: true, fullName: true },
+      })
+    : null;
 
   const metrics: DashboardMetrics = {};
 
   // Get current pay period if not specified
-  const currentPayPeriod = payPeriodId ? 
-    await prisma.payPeriod.findUnique({ where: { id: payPeriodId } }) :
-    await prisma.payPeriod.findFirst({
-      where: { status: 'open' },
-      orderBy: { startDate: 'desc' },
-    });
+  const currentPayPeriod = payPeriodId
+    ? await prisma.payPeriod.findUnique({ where: { id: payPeriodId } })
+    : await prisma.payPeriod.findFirst({
+        where: { status: 'open' },
+        orderBy: { startDate: 'desc' },
+      });
 
   if (!currentPayPeriod) {
     throw new Error('No active pay period found');
@@ -218,7 +235,10 @@ async function calculateDashboardMetrics(
 
   // Captain metrics
   if (!user || user.roles.includes('captain')) {
-    metrics.captain = await calculateCaptainMetrics(userId, currentPayPeriod.id);
+    metrics.captain = await calculateCaptainMetrics(
+      userId,
+      currentPayPeriod.id
+    );
   }
 
   // Manager metrics
@@ -276,10 +296,16 @@ async function calculateCaptainMetrics(userId?: string, payPeriodId?: string) {
 
   for (const log of logs) {
     // Create simplified totals calculation
-    const logRevenue = log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0);
+    const logRevenue = log.jobs.reduce(
+      (sum, job) => sum + Number(job.revenue),
+      0
+    );
     const logTips = log.jobs.reduce((sum, job) => sum + Number(job.tips), 0);
-    const logHours = log.hours.reduce((sum, hour) => sum + Number(hour.hours), 0);
-    
+    const logHours = log.hours.reduce(
+      (sum, hour) => sum + Number(hour.hours),
+      0
+    );
+
     totalRevenue += logRevenue;
     totalTips += logTips;
     totalHours += logHours;
@@ -303,14 +329,16 @@ async function calculateCaptainMetrics(userId?: string, payPeriodId?: string) {
 
   const totalJobs = jobsByType.junk + jobsByType.move;
   const averageJobSize = totalJobs > 0 ? totalRevenue / totalJobs : 0;
-  const junkLaborCostPercent = junkRevenue > 0 ? (junkLaborCost / junkRevenue) * 100 : 0;
-  const moveLaborCostPercent = moveRevenue > 0 ? (moveLaborCost / moveRevenue) * 100 : 0;
+  const junkLaborCostPercent =
+    junkRevenue > 0 ? (junkLaborCost / junkRevenue) * 100 : 0;
+  const moveLaborCostPercent =
+    moveRevenue > 0 ? (moveLaborCost / moveRevenue) * 100 : 0;
 
   // Recent logs for quick access
   const recentLogs = logs
     .sort((a, b) => b.logDate.getTime() - a.logDate.getTime())
     .slice(0, 5)
-    .map(log => ({
+    .map((log) => ({
       id: log.id,
       date: log.logDate,
       status: log.status,
@@ -342,7 +370,7 @@ async function calculateManagerMetrics(payPeriodId: string) {
 
   // Team performance (top performers)
   const teamPerformance = await prisma.dailyLog.findMany({
-    where: { 
+    where: {
       status: 'approved',
       // Add pay period filter if needed
     },
@@ -355,7 +383,7 @@ async function calculateManagerMetrics(payPeriodId: string) {
 
   // Exception alerts (logs with high labor costs)
   const exceptionAlerts = await prisma.dailyLog.findMany({
-    where: { 
+    where: {
       status: 'submitted',
       // Add conditions for high labor costs
     },
@@ -380,14 +408,14 @@ async function calculateManagerMetrics(payPeriodId: string) {
 
   return {
     pendingApprovals,
-    teamPerformance: teamPerformance.map(log => ({
+    teamPerformance: teamPerformance.map((log) => ({
       captainName: log.captain.fullName,
       revenue: log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0),
       jobs: log.jobs.length,
       date: log.logDate,
     })),
     laborCostTrends: [], // TODO: Implement trend calculation
-    exceptionAlerts: exceptionAlerts.map(log => ({
+    exceptionAlerts: exceptionAlerts.map((log) => ({
       captainName: log.captain.fullName,
       date: log.logDate,
       issue: 'High labor cost detected',
@@ -412,24 +440,29 @@ async function calculateSalesMetrics(userId?: string, payPeriodId?: string) {
   });
 
   const totalCommissions = commissions
-    .filter(c => c.status === 'approved')
+    .filter((c) => c.status === 'approved')
     .reduce((sum, c) => sum + Number(c.commissionAmount || 0), 0);
 
-  const pendingCommissions = commissions.filter(c => c.status === 'pending').length;
-  const matchedCommissions = commissions.filter(c => c.status === 'matched').length;
+  const pendingCommissions = commissions.filter(
+    (c) => c.status === 'pending'
+  ).length;
+  const matchedCommissions = commissions.filter(
+    (c) => c.status === 'matched'
+  ).length;
 
   const totalBookings = commissions.length;
-  const matchedBookings = commissions.filter(c => c.matchedLogId).length;
-  const bookingAccuracy = totalBookings > 0 ? (matchedBookings / totalBookings) * 100 : 0;
+  const matchedBookings = commissions.filter((c) => c.matchedLogId).length;
+  const bookingAccuracy =
+    totalBookings > 0 ? (matchedBookings / totalBookings) * 100 : 0;
 
   const pipelineValue = commissions
-    .filter(c => c.status === 'pending')
+    .filter((c) => c.status === 'pending')
     .reduce((sum, c) => sum + Number(c.estimatedRevenue), 0);
 
   const recentBookings = commissions
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 5)
-    .map(c => ({
+    .map((c) => ({
       id: c.id,
       clientName: c.clientName,
       estimatedRevenue: c.estimatedRevenue,
@@ -451,7 +484,7 @@ async function calculateSalesMetrics(userId?: string, payPeriodId?: string) {
 // Admin-specific metrics
 async function calculateAdminMetrics(payPeriodId: string) {
   const activeUsers = await prisma.user.count();
-  
+
   const logsToday = await prisma.dailyLog.count({
     where: {
       logDate: new Date(),
@@ -484,9 +517,9 @@ async function calculatePayrollMetrics(
 
   const users = await prisma.user.findMany({
     where: whereClause,
-    select: { 
-      id: true, 
-      fullName: true, 
+    select: {
+      id: true,
+      fullName: true,
       roles: true,
       salaryAmount: true,
       salaryType: true,
@@ -504,42 +537,51 @@ async function calculatePayrollMetrics(
         status: 'approved',
         // Add pay period date filter here
       },
-      include: { 
-        jobs: true, 
+      include: {
+        jobs: true,
         hours: { include: { employee: true } },
-        captain: true 
+        captain: true,
       },
     });
-    
+
     // Get commission entries for the user
     const commissionEntries = await prisma.commissionEntry.findMany({
-      where: { 
+      where: {
         salesId: user.id,
-        status: 'approved'
+        status: 'approved',
       },
       include: { matchedLog: true },
     });
 
     // Calculate basic payroll metrics
-    const totalHours = userLogs.reduce((sum, log) => 
-      sum + log.hours.filter(h => h.employeeId === user.id)
-        .reduce((hourSum, hour) => hourSum + Number(hour.hours), 0), 0
+    const totalHours = userLogs.reduce(
+      (sum, log) =>
+        sum +
+        log.hours
+          .filter((h) => h.employeeId === user.id)
+          .reduce((hourSum, hour) => hourSum + Number(hour.hours), 0),
+      0
     );
 
-    const totalRevenue = userLogs.reduce((sum, log) => 
-      sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0), 0
+    const totalRevenue = userLogs.reduce(
+      (sum, log) =>
+        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.revenue), 0),
+      0
     );
 
-    const totalTips = userLogs.reduce((sum, log) => 
-      sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.tips), 0), 0
+    const totalTips = userLogs.reduce(
+      (sum, log) =>
+        sum + log.jobs.reduce((jobSum, job) => jobSum + Number(job.tips), 0),
+      0
     );
 
-    const totalCommission = commissionEntries.reduce((sum, entry) => 
-      sum + Number(entry.commissionAmount || 0), 0
+    const totalCommission = commissionEntries.reduce(
+      (sum, entry) => sum + Number(entry.commissionAmount || 0),
+      0
     );
 
     const totalJobs = userLogs.reduce((sum, log) => sum + log.jobs.length, 0);
-    
+
     payrollMetrics.push({
       userId: user.id,
       payPeriodId,
@@ -600,16 +642,21 @@ async function calculateLaborCostMetrics(
   let totalLaborCost = 0;
 
   for (const log of logs) {
-    const logRevenue = log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0);
+    const logRevenue = log.jobs.reduce(
+      (sum, job) => sum + Number(job.revenue),
+      0
+    );
     // TODO: Calculate labor cost properly
     const logLaborCost = 0; // Placeholder
-    
+
     totalRevenue += logRevenue;
     totalLaborCost += logLaborCost;
   }
 
-  const laborCostPercent = totalRevenue > 0 ? (totalLaborCost / totalRevenue) * 100 : 0;
-  const goalPercent = department === 'junk' ? 14 : department === 'move' ? 24 : 19; // Average
+  const laborCostPercent =
+    totalRevenue > 0 ? (totalLaborCost / totalRevenue) * 100 : 0;
+  const goalPercent =
+    department === 'junk' ? 14 : department === 'move' ? 24 : 19; // Average
   const variance = laborCostPercent - goalPercent;
 
   // TODO: Implement trends and top performers calculation
@@ -651,7 +698,7 @@ async function calculateUserPerformanceMetrics(
   }
 
   // TODO: Implement comprehensive performance ranking calculation
-  
+
   return {
     userId,
     payPeriodId,

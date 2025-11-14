@@ -70,7 +70,7 @@ class JobQueue {
     };
 
     this.jobs.set(jobId, job);
-    
+
     // Start processing if not already running
     if (!this.isProcessing) {
       this.processJobs();
@@ -101,11 +101,12 @@ class JobQueue {
   private getNextJob(): BackgroundJob | null {
     const now = new Date();
     const pendingJobs = Array.from(this.jobs.values())
-      .filter(job => job.status === 'pending' && job.scheduledAt <= now)
+      .filter((job) => job.status === 'pending' && job.scheduledAt <= now)
       .sort((a, b) => {
         // Sort by priority first, then by scheduled time
         const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-        const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+        const priorityDiff =
+          priorityOrder[b.priority] - priorityOrder[a.priority];
         if (priorityDiff !== 0) return priorityDiff;
         return a.scheduledAt.getTime() - b.scheduledAt.getTime();
       });
@@ -139,12 +140,18 @@ class JobQueue {
 
       if (job.attempts >= job.maxAttempts) {
         job.status = 'failed';
-        console.error(`Job ${job.id} failed permanently after ${job.attempts} attempts`);
+        console.error(
+          `Job ${job.id} failed permanently after ${job.attempts} attempts`
+        );
       } else {
         // Retry with exponential backoff
         job.status = 'pending';
-        job.scheduledAt = new Date(Date.now() + Math.pow(2, job.attempts) * 1000);
-        console.log(`Job ${job.id} will retry in ${Math.pow(2, job.attempts)} seconds`);
+        job.scheduledAt = new Date(
+          Date.now() + Math.pow(2, job.attempts) * 1000
+        );
+        console.log(
+          `Job ${job.id} will retry in ${Math.pow(2, job.attempts)} seconds`
+        );
       }
     }
   }
@@ -156,9 +163,10 @@ class JobQueue {
 
   // Clear completed jobs (cleanup)
   cleanup() {
-    const completedJobs = Array.from(this.jobs.entries())
-      .filter(([_, job]) => job.status === 'completed' || job.status === 'failed');
-    
+    const completedJobs = Array.from(this.jobs.entries()).filter(
+      ([_, job]) => job.status === 'completed' || job.status === 'failed'
+    );
+
     completedJobs.forEach(([jobId]) => this.jobs.delete(jobId));
   }
 }
@@ -284,11 +292,11 @@ export async function invalidateMetricsCache(
   entityId?: string
 ): Promise<void> {
   const whereClause: any = {};
-  
+
   if (metricType) {
     whereClause.metricType = metricType;
   }
-  
+
   if (entityId) {
     whereClause.entityId = entityId;
   }
@@ -297,21 +305,23 @@ export async function invalidateMetricsCache(
     where: whereClause,
   });
 
-  console.log(`Invalidated metrics cache for type: ${metricType}, entity: ${entityId}`);
+  console.log(
+    `Invalidated metrics cache for type: ${metricType}, entity: ${entityId}`
+  );
 }
 
 // Refresh all metrics (expensive operation)
 export async function refreshAllMetrics(): Promise<void> {
   console.log('Starting full metrics refresh...');
-  
+
   // Clear all existing metrics
   await prisma.precomputedMetric.deleteMany();
-  
+
   // Get all active users and pay periods
   const users = await prisma.user.findMany({
     select: { id: true, roles: true },
   });
-  
+
   const payPeriods = await prisma.payPeriod.findMany({
     where: { status: { in: ['open', 'locked'] } },
     select: { id: true },
@@ -319,19 +329,27 @@ export async function refreshAllMetrics(): Promise<void> {
 
   // Trigger computation for all combinations
   const jobs: Promise<string>[] = [];
-  
+
   for (const payPeriod of payPeriods) {
     // Global metrics for pay period
-    jobs.push(triggerDashboardMetricsComputation(undefined, payPeriod.id, 'low'));
+    jobs.push(
+      triggerDashboardMetricsComputation(undefined, payPeriod.id, 'low')
+    );
     jobs.push(triggerPayrollMetricsComputation(payPeriod.id, undefined, 'low'));
-    jobs.push(triggerLaborCostMetricsComputation(payPeriod.id, undefined, 'low'));
-    
+    jobs.push(
+      triggerLaborCostMetricsComputation(payPeriod.id, undefined, 'low')
+    );
+
     // User-specific metrics
     for (const user of users) {
-      jobs.push(triggerUserPerformanceComputation(user.id, payPeriod.id, 'low'));
-      
+      jobs.push(
+        triggerUserPerformanceComputation(user.id, payPeriod.id, 'low')
+      );
+
       if (user.roles.includes('sales')) {
-        jobs.push(triggerCommissionMetricsComputation(user.id, payPeriod.id, 'low'));
+        jobs.push(
+          triggerCommissionMetricsComputation(user.id, payPeriod.id, 'low')
+        );
       }
     }
   }
@@ -356,8 +374,10 @@ export async function onLogApproved(logId: string): Promise<void> {
     invalidateMetricsCache('payroll_summary', log.captainId),
     invalidateMetricsCache('labor_costs'),
     triggerDashboardMetricsComputation(log.captainId, undefined, 'high'),
-    getCurrentPayPeriodId().then(payPeriodId => 
-      payPeriodId ? triggerPayrollMetricsComputation(payPeriodId, log.captainId, 'high') : Promise.resolve('')
+    getCurrentPayPeriodId().then((payPeriodId) =>
+      payPeriodId
+        ? triggerPayrollMetricsComputation(payPeriodId, log.captainId, 'high')
+        : Promise.resolve('')
     ),
   ]);
 }
@@ -395,12 +415,13 @@ async function getCurrentPayPeriodId(): Promise<string | undefined> {
     where: { status: 'open' },
     orderBy: { startDate: 'desc' },
   });
-  
+
   return currentPayPeriod?.id;
 }
 
 // Cleanup function to run periodically
-export function startJobQueueCleanup(intervalMs = 300000) { // 5 minutes
+export function startJobQueueCleanup(intervalMs = 300000) {
+  // 5 minutes
   setInterval(() => {
     jobQueue.cleanup();
   }, intervalMs);

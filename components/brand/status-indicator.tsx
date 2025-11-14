@@ -178,7 +178,6 @@ export const StatusIndicator = React.memo(function StatusIndicator({
   className,
   ...props
 }: StatusIndicatorProps) {
-
   // Memoize icon component selection
   const IconComponent = React.useMemo(
     () => CustomIcon || statusIcons[status],

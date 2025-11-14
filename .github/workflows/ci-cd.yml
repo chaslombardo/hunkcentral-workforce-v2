@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, feature/hunkcentral-rebuild ]
+    branches: [main, develop, feature/hunkcentral-rebuild]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
   NODE_VERSION: '20'
@@ -16,7 +16,7 @@ jobs:
   quality:
     name: Code Quality & Testing
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -380,12 +380,12 @@ jobs:
               repo: context.repo.repo,
               run_id: context.runId,
             });
-            
+
             // Keep only the most recent 10 artifacts
             const oldArtifacts = artifacts.data.artifacts
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .slice(10);
-            
+
             for (const artifact of oldArtifacts) {
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,

@@ -795,7 +795,10 @@ export function UserFormDialog({
                           const value = e.target.value;
                           if (value && !isNaN(Number(value))) {
                             const formatted = Number(value).toFixed(2);
-                            form.setValue('junkBonusGoal', Number(formatted) / 100);
+                            form.setValue(
+                              'junkBonusGoal',
+                              Number(formatted) / 100
+                            );
                             e.target.value = `${formatted}%`;
                           }
                         }}
@@ -827,7 +830,10 @@ export function UserFormDialog({
                           const value = e.target.value;
                           if (value && !isNaN(Number(value))) {
                             const formatted = Number(value).toFixed(2);
-                            form.setValue('moveBonusGoal', Number(formatted) / 100);
+                            form.setValue(
+                              'moveBonusGoal',
+                              Number(formatted) / 100
+                            );
                             e.target.value = `${formatted}%`;
                           }
                         }}

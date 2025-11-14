@@ -281,10 +281,10 @@ export function LogTotals({ calculation, captainId }: LogTotalsProps) {
                           <div className="flex items-center gap-1">
                             {employee.employeeName}
                             {captainId && employee.employeeId === captainId && (
-                              <span 
-                                className="text-lg" 
-                                title="Captain" 
-                                role="img" 
+                              <span
+                                className="text-lg"
+                                title="Captain"
+                                role="img"
                                 aria-label="Captain"
                               >
                                 💪
