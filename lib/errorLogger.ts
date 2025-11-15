@@ -267,7 +267,9 @@ export async function logAuthError(
       | 'logout'
       | 'permission_check'
       | 'api_auth'
-      | 'page_auth';
+      | 'page_auth'
+      | 'impersonation_start'
+      | 'impersonation_end';
     userId?: string;
     url: string;
     userAgent?: string;

@@ -74,12 +74,9 @@ export function TeamHoursSection({
 
     // Filter out employees already added to this section
     const currentHourEntries = getValues('hours') || [];
+    const departmentFilter = title.includes('Other') ? 'admin' : 'junk';
     const alreadyAddedEmployeeIds = currentHourEntries
-      .filter(
-        (hour) =>
-          hour.department ===
-          (title.includes('Other') ? 'admin' : 'junk' || 'move')
-      )
+      .filter((hour) => hour.department === departmentFilter)
       .map((hour) => hour.employeeId);
 
     append({
@@ -87,7 +84,7 @@ export function TeamHoursSection({
         captainId && !alreadyAddedEmployeeIds.includes(captainId)
           ? captainId
           : '', // Default to captain if not already added
-      department: 'admin', // Default to admin for Other Hours section
+      department: departmentFilter, // Use the determined department filter
       hours: 0,
       isCoCaptain: false,
     });

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -19,6 +20,7 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconSearch,
+  IconUser,
 } from '@tabler/icons-react';
 import {
   ColumnDef,
@@ -56,6 +58,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -86,7 +89,7 @@ import { useToast } from '@/hooks/use-toast';
 
 import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
-import { getUsers, deleteUser, updateUser } from '@/lib/actions/users';
+import { getUsers, deleteUser, setUserActiveStatus } from '@/lib/actions/users';
 import { convertUserDecimalFields } from '@/lib/decimal-utils';
 import { formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
@@ -94,11 +97,13 @@ import { CopySettingsDialog } from './copy-settings-dialog';
 import { PermissionManagementDialog } from './permission-management-dialog';
 import { BulkPermissionDialog } from './bulk-permission-dialog';
 import { BulkUserOperations } from './bulk-user-operations';
+import { useSession } from '@/hooks/useSession';
 
 // Remove Prisma import - use number type instead
 
 interface User {
   id: string;
+  username?: string | null;
   email: string;
   fullName: string;
   roles: string[];
@@ -117,6 +122,8 @@ interface User {
   commissionRate?: number | null;
   junkBonusGoal: number;
   moveBonusGoal: number;
+  isActive: boolean;
+  deactivatedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -172,6 +179,14 @@ export function UserManagementDashboard() {
     pageSize: 10,
   });
   const { toast } = useToast();
+  const router = useRouter();
+  const { user: sessionUser, refreshSession } = useSession();
+  const [statusMutations, setStatusMutations] = useState<
+    Record<string, boolean>
+  >({});
+  const [impersonationStates, setImpersonationStates] = useState<
+    Record<string, boolean>
+  >({});
 
   const searchForm = useForm({
     defaultValues: {
@@ -242,6 +257,66 @@ export function UserManagementDashboard() {
         description: 'Failed to delete user',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleStatusChange = async (
+    userId: string,
+    fullName: string,
+    nextStatus: boolean
+  ) => {
+    setStatusMutations((prev) => ({ ...prev, [userId]: true }));
+    try {
+      const result = await setUserActiveStatus(userId, nextStatus);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update status');
+      }
+      toast({
+        title: nextStatus ? 'User Activated' : 'User Deactivated',
+        description: `${fullName} has been ${nextStatus ? 're-activated' : 'deactivated'}.`,
+      });
+      loadUsers(searchForm.getValues());
+    } catch (error) {
+      toast({
+        title: 'Status Update Failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to update status',
+        variant: 'destructive',
+      });
+    } finally {
+      setStatusMutations((prev) => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const handleViewAsUser = async (userId: string, fullName: string) => {
+    setImpersonationStates((prev) => ({ ...prev, [userId]: true }));
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Failed to start impersonation');
+      }
+
+      await refreshSession();
+      toast({
+        title: 'Impersonation Activated',
+        description: `You are now viewing the app as ${fullName}.`,
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: 'Impersonation Failed',
+        description:
+          error instanceof Error ? error.message : 'Unable to impersonate user',
+        variant: 'destructive',
+      });
+    } finally {
+      setImpersonationStates((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -368,6 +443,16 @@ export function UserManagementDashboard() {
       ),
     },
     {
+      accessorKey: 'username',
+      header: 'Username',
+      cell: ({ row }) =>
+        row.original.username ? (
+          <span className="font-mono text-sm">@{row.original.username}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground">—</span>
+        ),
+    },
+    {
       accessorKey: 'email',
       header: ({ column }) => (
         <Button
@@ -408,6 +493,34 @@ export function UserManagementDashboard() {
           ))}
         </div>
       ),
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const isMutating = statusMutations[row.original.id];
+        const isSelf = sessionUser?.id === row.original.id;
+        return (
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={row.original.isActive}
+              disabled={isMutating || isSelf}
+              onCheckedChange={(checked) =>
+                handleStatusChange(
+                  row.original.id,
+                  row.original.fullName,
+                  checked
+                )
+              }
+            />
+            <span
+              className={`text-sm font-medium ${row.original.isActive ? 'text-green-600' : 'text-red-600'}`}
+            >
+              {row.original.isActive ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'compensation',
@@ -461,17 +574,6 @@ export function UserManagementDashboard() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <UserFormDialog
-              mode="edit"
-              user={row.original}
-              trigger={
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <IconEdit className="h-4 w-4 mr-2" />
-                  Edit User
-                </DropdownMenuItem>
-              }
-              onSuccess={() => loadUsers(searchForm.getValues())}
-            />
             <CopySettingsDialog
               sourceUser={row.original}
               trigger={
@@ -534,18 +636,33 @@ export function UserManagementDashboard() {
     },
 
     {
-      id: 'actions',
-      header: 'Actions',
+      id: 'quick-actions',
+      header: 'Quick Actions',
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={
+              sessionUser?.id === row.original.id ||
+              impersonationStates[row.original.id] ||
+              !row.original.isActive
+            }
+            onClick={() =>
+              handleViewAsUser(row.original.id, row.original.fullName)
+            }
+          >
+            <IconUser className="mr-1 h-4 w-4" />
+            {impersonationStates[row.original.id] ? 'Switching…' : 'View as'}
+          </Button>
           <UserFormDialog
             mode="edit"
             user={row.original}
-            onSuccess={() => loadUsers()}
+            onSuccess={() => loadUsers(searchForm.getValues())}
             trigger={
-              <Button variant="outline" size="sm">
+              <Button variant="secondary" size="sm">
                 <IconEdit className="h-4 w-4" />
                 Edit
               </Button>

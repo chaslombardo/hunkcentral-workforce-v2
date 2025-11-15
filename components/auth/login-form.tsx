@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  identifier: z.string().min(1, 'Please enter your email or username'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -32,7 +32,7 @@ const errorMessages = {
     'Your account has been deactivated. Contact your administrator.',
   system_error: 'A system error occurred. Please try again.',
   session_error: 'There was a problem with your session. Please sign in again.',
-  CredentialsSignin: 'Invalid email or password. Please try again.',
+  CredentialsSignin: 'Invalid credentials. Please try again.',
   default: 'An unexpected error occurred. Please try again.',
 };
 
@@ -70,9 +70,8 @@ export function LoginForm({
 
     try {
       const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-
       const result = await signIn('credentials', {
-        email: data.email,
+        identifier: data.identifier.trim(),
         password: data.password,
         redirect: false,
         callbackUrl,
@@ -83,21 +82,23 @@ export function LoginForm({
           errorMessages[result.error as keyof typeof errorMessages] ||
           errorMessages.default;
         setError(errorMessage);
-      } else if (result?.ok) {
-        // Clear any URL error parameters
+        return;
+      }
+
+      if (result?.ok) {
         const cleanUrl = new URL(window.location.href);
         cleanUrl.searchParams.delete('error');
         cleanUrl.searchParams.delete('callbackUrl');
-
-        // Redirect to intended page or dashboard
+        window.history.replaceState({}, document.title, cleanUrl.toString());
         router.push(callbackUrl);
         router.refresh();
-      } else {
-        setError('Authentication failed. Please try again.');
+        return;
       }
+
+      setError(errorMessages.authentication_failed);
     } catch (authError) {
       console.error('Login error:', authError);
-      setError('An unexpected error occurred. Please try again.');
+      setError(errorMessages.system_error);
     } finally {
       setIsLoading(false);
     }
@@ -127,17 +128,20 @@ export function LoginForm({
 
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="identifier">Email or Username</Label>
           <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            {...register('email')}
+            id="identifier"
+            type="text"
+            placeholder="Enter your email or username"
+            autoComplete="username"
+            {...register('identifier')}
             disabled={isLoading}
             required
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
+          {errors.identifier && (
+            <p className="text-sm text-destructive">
+              {errors.identifier.message}
+            </p>
           )}
         </div>
 
@@ -147,6 +151,7 @@ export function LoginForm({
             id="password"
             type="password"
             placeholder="Enter your password"
+            autoComplete="current-password"
             {...register('password')}
             disabled={isLoading}
             required

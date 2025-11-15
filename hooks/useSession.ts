@@ -9,8 +9,13 @@ import type { SessionUser } from '@/lib/auth';
 export function useSession() {
   const { data: session, status, update } = useNextAuthSession();
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [impersonationError, setImpersonationError] = useState<string | null>(
+    null
+  );
+  const [isStoppingImpersonation, setIsStoppingImpersonation] = useState(false);
 
   const user = session?.user as SessionUser | undefined;
+  const impersonation = session?.impersonation;
 
   // Validate session integrity
   useEffect(() => {
@@ -49,17 +54,45 @@ export function useSession() {
     }
   };
 
+  const stopImpersonation = async () => {
+    if (!impersonation?.isImpersonating) {
+      return;
+    }
+
+    setIsStoppingImpersonation(true);
+    setImpersonationError(null);
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || 'Failed to stop impersonation');
+      }
+      await refreshSession();
+    } catch (error) {
+      console.error('Failed to stop impersonation:', error);
+      setImpersonationError(
+        error instanceof Error ? error.message : 'Failed to stop impersonation'
+      );
+    } finally {
+      setIsStoppingImpersonation(false);
+    }
+  };
+
   const isAdmin = hasRole('admin');
   const isManager = hasRole('manager');
   const isCaptain = hasRole('captain');
   const isSales = hasRole('sales');
   const isWingman = hasRole('wingman');
+  const isImpersonating = impersonation?.isImpersonating ?? false;
 
   return {
     session,
     user,
     status,
     sessionError,
+    impersonationError,
     isLoading: status === 'loading',
     isAuthenticated: status === 'authenticated' && !sessionError,
     hasRole,
@@ -70,5 +103,9 @@ export function useSession() {
     isSales,
     isWingman,
     refreshSession,
+    impersonation,
+    isImpersonating,
+    stopImpersonation,
+    isStoppingImpersonation,
   };
 }

@@ -50,6 +50,7 @@ import { CopySettingsDialog } from './copy-settings-dialog';
 
 interface User {
   id: string;
+  username?: string | null;
   email: string;
   fullName: string;
   roles: string[];
@@ -68,6 +69,8 @@ interface User {
   commissionRate?: number | null;
   junkBonusGoal: number;
   moveBonusGoal: number;
+  isActive: boolean;
+  deactivatedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

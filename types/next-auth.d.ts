@@ -8,9 +8,27 @@ declare module 'next-auth' {
       email: string;
       name: string;
       fullName: string;
+      username?: string | null;
       roles: UserRole[];
       permissions?: string[];
       commissionRate?: number | null;
+      isActive?: boolean;
+      originalUserId?: string;
+      originalFullName?: string;
+      originalRoles?: UserRole[];
+      impersonatedUserId?: string;
+      impersonatedFullName?: string;
+      impersonatedRoles?: UserRole[];
+      impersonationStartedAt?: string;
+      isImpersonating?: boolean;
+    };
+    impersonation?: {
+      isImpersonating: boolean;
+      originalUserId?: string;
+      originalFullName?: string;
+      targetUserId?: string;
+      targetFullName?: string;
+      startedAt?: string;
     };
   }
 
@@ -19,9 +37,11 @@ declare module 'next-auth' {
     email: string;
     name: string;
     fullName: string;
+    username?: string | null;
     roles: UserRole[];
     permissions?: string[];
     commissionRate?: number | null;
+    isActive?: boolean;
   }
 }
 
@@ -32,5 +52,14 @@ declare module 'next-auth/jwt' {
     roles: UserRole[];
     permissions?: string[];
     commissionRate?: number | null;
+    username?: string | null;
+    isActive?: boolean;
+    originalUserId?: string;
+    originalFullName?: string;
+    originalRoles?: UserRole[];
+    impersonatedUserId?: string;
+    impersonatedFullName?: string;
+    impersonatedRoles?: UserRole[];
+    impersonationStartedAt?: string;
   }
 }

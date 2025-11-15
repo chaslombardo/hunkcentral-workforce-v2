@@ -14,6 +14,7 @@ import {
   ConnectionQualityIndicator,
 } from '@/components/ui/offline-indicator';
 import { ThemeSwitcher } from '@/components/theme-manager';
+import { ImpersonationBanner } from '@/components/auth/impersonation-banner';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -38,6 +39,9 @@ export function MainLayout({ children }: MainLayoutProps) {
             <OfflineIndicator />
           </div>
         </header>
+        <div className="px-4">
+          <ImpersonationBanner className="mb-4" />
+        </div>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <ConnectionQualityIndicator />
           {children}

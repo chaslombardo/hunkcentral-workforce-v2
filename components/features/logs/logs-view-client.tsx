@@ -89,7 +89,7 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
         pageSize,
         search: search || undefined,
       };
-      if (status !== 'all') params.status = [status];
+      if (status !== 'all') params.status = status;
       if (captainId !== 'all') params.captainId = captainId;
       const res = await listLogs(params);
       if (res.success) {

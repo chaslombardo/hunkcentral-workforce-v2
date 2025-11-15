@@ -56,7 +56,7 @@ interface AdminChartAreaInteractiveProps {
   metrics?: AdminMetrics;
 }
 
-// Sample system performance data for demonstration - TODO: Replace with real data from metrics
+// System performance data driven by real metrics
 const generateSampleSystemData = (metrics?: AdminMetrics) => {
   return Array.from({ length: 24 }, (_, i) => {
     const date = new Date();

@@ -45,6 +45,10 @@ import {
   NoCommissionsEmptyState,
   NoCommissionMatchesEmptyState,
 } from '@/components/features/empty-states';
+import {
+  getCommissionJobTypeMeta,
+  normalizeCommissionJobType,
+} from './job-type-options';
 
 interface CommissionEntry {
   id: string;
@@ -369,6 +373,11 @@ export function CommissionList({
                     entry.estimatedRevenue,
                     entry.actualRevenue
                   );
+                  const normalizedJobType = normalizeCommissionJobType(
+                    entry.jobType
+                  );
+                  const jobTypeMeta =
+                    getCommissionJobTypeMeta(normalizedJobType);
 
                   return (
                     <TableRow
@@ -389,12 +398,17 @@ export function CommissionList({
                         {entry.sales.fullName}
                       </TableCell>
                       <TableCell className="capitalize transition-all duration-300 group-hover:text-hunks-green group-hover:translate-x-1">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${entry.jobType === 'junk' ? 'bg-hunks-orange' : 'bg-hunks-green'} animate-pulse group-hover:scale-150 group-hover:shadow-lg ${entry.jobType === 'junk' ? 'group-hover:shadow-hunks-orange/50' : 'group-hover:shadow-hunks-green/50'}`}
-                          ></div>
-                          <span className="group-hover:font-medium transition-all duration-300">
-                            {entry.jobType}
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full transition-all duration-300 ${jobTypeMeta.indicatorClass} animate-pulse group-hover:scale-150 group-hover:shadow-lg`}
+                            ></div>
+                            <span className="group-hover:font-medium transition-all duration-300">
+                              {jobTypeMeta.label}
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {jobTypeMeta.description}
                           </span>
                         </div>
                       </TableCell>
@@ -533,6 +547,8 @@ export function CommissionList({
               entry.estimatedRevenue,
               entry.actualRevenue
             );
+            const normalizedJobType = normalizeCommissionJobType(entry.jobType);
+            const jobTypeMeta = getCommissionJobTypeMeta(normalizedJobType);
 
             return (
               <MobileTableItem
@@ -551,7 +567,16 @@ export function CommissionList({
                 />
                 <MobileTableField
                   label="Type"
-                  value={<span className="capitalize">{entry.jobType}</span>}
+                  value={
+                    <div className="space-y-1">
+                      <span className="capitalize font-medium">
+                        {jobTypeMeta.label}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {jobTypeMeta.description}
+                      </span>
+                    </div>
+                  }
                 />
                 <MobileTableField
                   label="Target Date"

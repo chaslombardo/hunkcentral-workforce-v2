@@ -5,6 +5,11 @@
 export type UserRole = 'admin' | 'manager' | 'captain' | 'sales' | 'wingman';
 
 export type JobType = 'junk' | 'move';
+export type CommissionJobType =
+  | 'move'
+  | 'moveLabor'
+  | 'junkRemoval'
+  | 'generalLabor';
 
 export type LogStatus = 'draft' | 'submitted' | 'approved';
 
@@ -45,6 +50,7 @@ export type DiscrepancyStatus =
 
 export interface User {
   id: string;
+  username?: string | null;
   email: string;
   fullName: string;
   roles: UserRole[];
@@ -67,6 +73,8 @@ export interface User {
   commissionRate?: number;
   junkBonusGoal: number;
   moveBonusGoal: number;
+  isActive?: boolean;
+  deactivatedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -131,7 +139,7 @@ export interface CommissionEntry {
   sales: User;
   jobId: string;
   clientName: string;
-  jobType: JobType;
+  jobType: CommissionJobType;
   targetDate: Date;
   // Financial fields (converted from Prisma Decimal to number)
   estimatedRevenue: number;

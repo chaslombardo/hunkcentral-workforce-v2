@@ -14,6 +14,7 @@ import { PageErrorBoundary } from '@/components/ui/page-error-boundary';
 import { ProductionErrorBoundary } from '@/components/ui/production-error-boundary';
 import { ProductionProtectedRoute } from '@/components/auth/production-protected-route';
 import { validateProductionSession } from '@/lib/production-auth';
+import { ImpersonationBanner } from '@/components/auth/impersonation-banner';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +71,7 @@ export default async function ProtectedLayout({
             {/* Mobile content - only visible on mobile */}
             <div className="md:hidden">
               <div className="flex flex-1 flex-col gap-4 p-4 pb-20">
+                <ImpersonationBanner />
                 {children}
               </div>
             </div>

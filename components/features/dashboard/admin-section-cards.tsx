@@ -3,7 +3,6 @@
 import {
   IconTrendingDown,
   IconTrendingUp,
-  IconMinus,
   IconServer,
   IconUsers,
   IconActivity,
@@ -27,6 +26,9 @@ interface AdminMetrics {
   userActivity: number;
   errorRate: number;
   performanceScore: number;
+  activeUsers?: number;
+  pendingTasks?: number;
+  databaseHealth?: number;
 }
 
 interface AdminSectionCardsProps {
@@ -39,6 +41,11 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
   const userActivity = metrics?.userActivity || 156;
   const errorRate = metrics?.errorRate || 0.1;
   const performanceScore = metrics?.performanceScore || 95;
+  const activeUsers =
+    metrics?.activeUsers ?? Math.max(1, Math.round(userActivity * 0.85));
+  const pendingTasks =
+    metrics?.pendingTasks ?? Math.max(0, Math.round(5 - performanceScore / 25));
+  const databaseHealth = metrics?.databaseHealth ?? Math.max(90, systemHealth);
 
   // Calculate trends based on provided data or defaults
   const healthTrend = systemHealth > 95 ? 1.2 : -2.3; // Simulated trend

@@ -46,6 +46,10 @@ import {
 } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  getCommissionJobTypeMeta,
+  normalizeCommissionJobType,
+} from './job-type-options';
 
 interface CommissionEntry {
   id: string;
@@ -426,6 +430,11 @@ export function CommissionCalculationBreakdown({
                     entry.actualRevenue
                   );
                   const isExpanded = expandedEntries.has(entry.id);
+                  const normalizedJobType = normalizeCommissionJobType(
+                    entry.jobType
+                  );
+                  const jobTypeMeta =
+                    getCommissionJobTypeMeta(normalizedJobType);
 
                   return (
                     <>
@@ -442,7 +451,7 @@ export function CommissionCalculationBreakdown({
                               {entry.clientName}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {entry.jobType}
+                              {jobTypeMeta.label}
                             </div>
                           </div>
                         </TableCell>

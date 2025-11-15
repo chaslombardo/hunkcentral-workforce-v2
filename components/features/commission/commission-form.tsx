@@ -34,18 +34,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { SalesConsultantSelect } from './sales-consultant-select';
+import { COMMISSION_JOB_TYPE_OPTIONS } from './job-type-options';
 
 interface CommissionFormProps {
   salesUsers: Array<{
@@ -65,16 +60,18 @@ export function CommissionForm({
   const { toast } = useToast();
   const router = useRouter();
 
+  const baseDefaults: CommissionEntryFormData = {
+    salesId: currentUserId || '',
+    jobId: '',
+    clientName: '',
+    jobType: 'move',
+    targetDate: new Date(),
+    estimatedRevenue: undefined as unknown as number,
+  };
+
   const form = useForm<CommissionEntryFormData>({
     resolver: zodResolver(CommissionEntrySchema),
-    defaultValues: {
-      salesId: currentUserId || '',
-      jobId: '',
-      clientName: '',
-      jobType: 'junk',
-      targetDate: new Date(),
-      estimatedRevenue: 0.01,
-    },
+    defaultValues: baseDefaults,
   });
 
   const onSubmit = async (data: CommissionEntryFormData) => {
@@ -87,7 +84,12 @@ export function CommissionForm({
           title: 'Success',
           description: 'Commission entry created successfully',
         });
-        form.reset();
+        form.reset({
+          ...baseDefaults,
+          salesId: currentUserId || '',
+          targetDate: new Date(),
+          estimatedRevenue: undefined as unknown as number,
+        });
         router.push('/commission/list');
       } else {
         toast({
@@ -108,287 +110,261 @@ export function CommissionForm({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-5xl mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Sales Consultant Field with Enhanced UX */}
-          <FormField
-            control={form.control}
-            name="salesId"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <User className="h-4 w-4 text-[#026937]" />
-                  Sales Consultant
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20">
-                      <SelectValue placeholder="Select sales consultant" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-60">
-                    {salesUsers.map((user) => (
-                      <SelectItem
-                        key={user.id}
-                        value={user.id}
-                        className="transition-colors duration-150 hover:bg-[#026937]/5"
-                      >
-                        <div className="flex flex-col items-start text-left w-full py-1">
-                          <span className="font-medium text-foreground">
-                            {user.fullName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {user.email}
-                          </span>
-                          {user.commissionRate && (
-                            <span className="text-xs text-[#026937] font-medium flex items-center gap-1 mt-1">
-                              <CheckCircle className="h-3 w-3" />
-                              {user.commissionRate}% commission rate
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription className="text-sm text-muted-foreground">
-                  Select the sales consultant who booked this job. You can
-                  select any sales person with commission permissions.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Job ID Field with Enhanced Validation UX */}
-          <FormField
-            control={form.control}
-            name="jobId"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <Briefcase className="h-4 w-4 text-[#026937]" />
-                  Job ID *
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter 7-10 digit job ID (e.g., 1234567)"
-                      {...field}
-                      className="font-mono h-12 text-lg tracking-wider transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20 pr-12"
-                      onChange={(e) => {
-                        // Only allow numeric input with smooth feedback
-                        const value = e.target.value.replace(/\D/g, '');
-                        field.onChange(value);
-                      }}
-                      maxLength={10}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                    />
-                    {field.value &&
-                      field.value.length >= 7 &&
-                      field.value.length <= 10 && (
-                        <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#026937] animate-in fade-in-0 duration-200" />
-                      )}
-                  </div>
-                </FormControl>
-                <FormDescription className="text-sm text-muted-foreground">
-                  Must be 7-10 digits, numeric only. Must match exactly what
-                  will be entered in the captain&apos;s log. Duplicate job IDs
-                  are not allowed.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Client Name Field with Auto-complete */}
-          <FormField
-            control={form.control}
-            name="clientName"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <User className="h-4 w-4 text-[#026937]" />
-                  Client Name
-                </FormLabel>
-                <FormControl>
-                  <ClientAutocomplete
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="Enter or search for client name"
-                  />
-                </FormControl>
-                <FormDescription className="text-sm text-muted-foreground">
-                  Start typing to see suggestions from previous jobs, or enter a
-                  new client name
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Job Type Field with Enhanced UX */}
-          <FormField
-            control={form.control}
-            name="jobType"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <Briefcase className="h-4 w-4 text-[#026937]" />
-                  Job Type
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20">
-                      <SelectValue placeholder="Select job type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem
-                      value="junk"
-                      className="transition-colors duration-150 hover:bg-[#026937]/5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#ea7200]"></div>
-                        Junk Removal
-                      </div>
-                    </SelectItem>
-                    <SelectItem
-                      value="move"
-                      className="transition-colors duration-150 hover:bg-[#026937]/5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#026937]"></div>
-                        Moving
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Target Date Field with Enhanced UX */}
-          <FormField
-            control={form.control}
-            name="targetDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <CalendarLucide className="h-4 w-4 text-[#026937]" />
-                  Target Date
-                </FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-10 rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm"
+        >
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="salesId"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <User className="h-4 w-4 text-[#026937]" />
+                      Sales Consultant
+                    </FormLabel>
                     <FormControl>
-                      <BrandButton
-                        variant="outline"
-                        className={cn(
-                          'w-full h-12 pl-4 text-left font-normal transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          <span className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-[#026937]" />
-                            {format(field.value, 'PPP')}
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <CalendarIcon className="h-4 w-4 opacity-50" />
-                            Pick a date
-                          </span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </BrandButton>
+                      <SalesConsultantSelect
+                        salesUsers={salesUsers}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      className="rounded-md border"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription className="text-sm text-muted-foreground">
-                  Expected completion date for this job
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Choose the sales rep who booked this job.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Estimated Revenue Field with Enhanced UX */}
-          <FormField
-            control={form.control}
-            name="estimatedRevenue"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-2 text-base font-semibold">
-                  <DollarSign className="h-4 w-4 text-[#026937]" />
-                  Estimated Revenue
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-lg">
-                      $
-                    </span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      placeholder="0.00"
-                      className="pl-10 h-12 text-lg font-medium transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          field.onChange(0.01);
-                        } else {
-                          const numValue = parseFloat(value);
-                          field.onChange(
-                            isNaN(numValue) ? 0.01 : Math.max(0.01, numValue)
-                          );
-                        }
-                      }}
-                      onFocus={(e) => {
-                        e.target.select();
-                      }}
-                    />
-                    {field.value && field.value > 0.01 && (
-                      <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#026937] animate-in fade-in-0 duration-200" />
-                    )}
-                  </div>
-                </FormControl>
-                <FormDescription className="text-sm text-muted-foreground">
-                  Your estimated revenue for this job
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="jobId"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <Briefcase className="h-4 w-4 text-[#026937]" />
+                      Job ID *
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          placeholder="Enter 7-10 digit job ID (e.g., 1234567)"
+                          {...field}
+                          className="font-mono h-12 text-lg tracking-wider transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20 pr-12"
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            field.onChange(value);
+                          }}
+                          maxLength={10}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                        />
+                        {field.value &&
+                          field.value.length >= 7 &&
+                          field.value.length <= 10 && (
+                            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#026937]" />
+                          )}
+                      </div>
+                    </FormControl>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Must match the Job ID that will appear on the captain log.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Enhanced Action Buttons */}
-          <div className="flex gap-4 pt-8 border-t border-border/50">
+              <FormField
+                control={form.control}
+                name="clientName"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <User className="h-4 w-4 text-[#026937]" />
+                      Client Name
+                    </FormLabel>
+                    <FormControl>
+                      <ClientAutocomplete
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Enter or search for client name"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="jobType"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <Briefcase className="h-4 w-4 text-[#026937]" />
+                      Job Type
+                    </FormLabel>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {COMMISSION_JOB_TYPE_OPTIONS.map((option) => (
+                        <button
+                          type="button"
+                          key={option.value}
+                          onClick={() => field.onChange(option.value)}
+                          className={cn(
+                            'rounded-xl border p-3 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#026937]/40',
+                            field.value === option.value
+                              ? 'border-[#026937] bg-[#026937]/5 shadow-sm'
+                              : 'border-border hover:border-[#026937]/40'
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                'h-2 w-2 rounded-full',
+                                option.indicatorClass
+                              )}
+                            />
+                            <span className="text-sm font-semibold">
+                              {option.label}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {option.description}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="targetDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <CalendarLucide className="h-4 w-4 text-[#026937]" />
+                      Target Date
+                    </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <BrandButton
+                            variant="outline"
+                            className={cn(
+                              'w-full h-12 pl-4 text-left font-normal transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value ? (
+                              <span className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-[#026937]" />
+                                {format(field.value, 'PPP')}
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-2">
+                                <CalendarIcon className="h-4 w-4 opacity-50" />
+                                Pick a date
+                              </span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </BrandButton>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className="rounded-md border"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Expected completion date for this job
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="estimatedRevenue"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                      <DollarSign className="h-4 w-4 text-[#026937]" />
+                      Estimated Revenue
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-lg">
+                          $
+                        </span>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0.00"
+                          className="pl-10 h-12 text-lg font-medium transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
+                          value={
+                            field.value === undefined ? '' : String(field.value)
+                          }
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(
+                              /[^0-9.]/g,
+                              ''
+                            );
+                            if (rawValue === '') {
+                              field.onChange(undefined as unknown as number);
+                              return;
+                            }
+                            const parsed = parseFloat(rawValue);
+                            if (Number.isNaN(parsed)) {
+                              field.onChange(undefined as unknown as number);
+                              return;
+                            }
+                            field.onChange(parsed);
+                          }}
+                          onBlur={() => {
+                            if (typeof field.value === 'number') {
+                              field.onChange(Number(field.value.toFixed(2)));
+                            }
+                          }}
+                        />
+                        {typeof field.value === 'number' && field.value > 0 && (
+                          <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#026937]" />
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Enter the booked amount (before tips or labor bonuses).
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4 border-t border-border/60 pt-6">
             <BrandButton
               type="button"
               variant="outline"
               onClick={() => router.back()}
               disabled={isSubmitting}
-              className="flex-1 h-12 transition-all duration-200 hover:border-[#026937]/50"
+              className="h-12 flex-1"
             >
               Cancel
             </BrandButton>
@@ -396,7 +372,7 @@ export function CommissionForm({
               type="submit"
               variant="primary"
               loading={isSubmitting}
-              className="flex-1 h-12 bg-gradient-to-r from-[#026937] to-[#026937]/90 hover:from-[#026937]/90 hover:to-[#026937] transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="h-12 flex-1"
             >
               {isSubmitting ? 'Creating Entry...' : 'Create Entry'}
             </BrandButton>

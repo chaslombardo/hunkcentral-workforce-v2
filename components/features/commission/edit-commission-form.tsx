@@ -34,18 +34,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { SalesConsultantSelect } from './sales-consultant-select';
+import {
+  COMMISSION_JOB_TYPE_OPTIONS,
+  normalizeCommissionJobType,
+} from './job-type-options';
 
 interface EditCommissionFormProps {
   commissionEntry: {
@@ -78,6 +76,7 @@ export function EditCommissionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const normalizedJobType = normalizeCommissionJobType(commissionEntry.jobType);
 
   const form = useForm<CommissionEntryFormData>({
     resolver: zodResolver(CommissionEntrySchema),
@@ -85,9 +84,10 @@ export function EditCommissionForm({
       salesId: commissionEntry.salesId,
       jobId: commissionEntry.jobId,
       clientName: commissionEntry.clientName,
-      jobType: commissionEntry.jobType as 'junk' | 'move',
+      jobType: normalizedJobType,
       targetDate: new Date(commissionEntry.targetDate),
-      estimatedRevenue: commissionEntry.estimatedRevenue,
+      estimatedRevenue:
+        commissionEntry.estimatedRevenue ?? (undefined as unknown as number),
     },
   });
 
@@ -134,40 +134,13 @@ export function EditCommissionForm({
                   <User className="h-4 w-4 text-[#026937]" />
                   Sales Consultant
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20">
-                      <SelectValue placeholder="Select sales consultant" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-60">
-                    {salesUsers.map((user) => (
-                      <SelectItem
-                        key={user.id}
-                        value={user.id}
-                        className="transition-colors duration-150 hover:bg-[#026937]/5"
-                      >
-                        <div className="flex flex-col items-start text-left w-full py-1">
-                          <span className="font-medium text-foreground">
-                            {user.fullName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {user.email}
-                          </span>
-                          {user.commissionRate && (
-                            <span className="text-xs text-[#026937] font-medium flex items-center gap-1 mt-1">
-                              <CheckCircle className="h-3 w-3" />
-                              {user.commissionRate}% commission rate
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <SalesConsultantSelect
+                    salesUsers={salesUsers}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -244,36 +217,36 @@ export function EditCommissionForm({
                   <Briefcase className="h-4 w-4 text-[#026937]" />
                   Job Type
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20">
-                      <SelectValue placeholder="Select job type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem
-                      value="junk"
-                      className="transition-colors duration-150 hover:bg-[#026937]/5"
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {COMMISSION_JOB_TYPE_OPTIONS.map((option) => (
+                    <button
+                      type="button"
+                      key={option.value}
+                      onClick={() => field.onChange(option.value)}
+                      className={cn(
+                        'rounded-xl border p-3 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#026937]/40',
+                        field.value === option.value
+                          ? 'border-[#026937] bg-[#026937]/5 shadow-sm'
+                          : 'border-border hover:border-[#026937]/40'
+                      )}
                     >
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#ea7200]"></div>
-                        Junk Removal
+                        <span
+                          className={cn(
+                            'h-2 w-2 rounded-full',
+                            option.indicatorClass
+                          )}
+                        />
+                        <span className="text-sm font-semibold">
+                          {option.label}
+                        </span>
                       </div>
-                    </SelectItem>
-                    <SelectItem
-                      value="move"
-                      className="transition-colors duration-150 hover:bg-[#026937]/5"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#026937]"></div>
-                        Moving
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {option.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -348,29 +321,33 @@ export function EditCommissionForm({
                       $
                     </span>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
                       className="pl-10 h-12 text-lg font-medium transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
-                      {...field}
-                      value={field.value || ''}
+                      value={
+                        field.value === undefined ? '' : String(field.value)
+                      }
                       onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          field.onChange(0.01);
-                        } else {
-                          const numValue = parseFloat(value);
-                          field.onChange(
-                            isNaN(numValue) ? 0.01 : Math.max(0.01, numValue)
-                          );
+                        const rawValue = e.target.value.replace(/[^0-9.]/g, '');
+                        if (rawValue === '') {
+                          field.onChange(undefined as unknown as number);
+                          return;
+                        }
+                        const parsed = parseFloat(rawValue);
+                        field.onChange(
+                          Number.isNaN(parsed)
+                            ? (undefined as unknown as number)
+                            : parsed
+                        );
+                      }}
+                      onBlur={() => {
+                        if (typeof field.value === 'number') {
+                          field.onChange(Number(field.value.toFixed(2)));
                         }
                       }}
-                      onFocus={(e) => {
-                        e.target.select();
-                      }}
                     />
-                    {field.value && field.value > 0.01 && (
+                    {typeof field.value === 'number' && field.value > 0 && (
                       <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#026937] animate-in fade-in-0 duration-200" />
                     )}
                   </div>

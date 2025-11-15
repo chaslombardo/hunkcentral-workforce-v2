@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 
 import { CreateUserSchema, UpdateUserSchema } from '@/lib/validations';
 import type { CreateUserFormData, UpdateUserFormData } from '@/lib/validations';
@@ -44,6 +45,7 @@ import { createUser, updateUser } from '@/lib/actions/users';
 
 interface User {
   id: string;
+  username?: string | null;
   email: string;
   fullName: string;
   roles: string[];
@@ -62,6 +64,8 @@ interface User {
   commissionRate?: number | null;
   junkBonusGoal: number;
   moveBonusGoal: number;
+  isActive: boolean;
+  deactivatedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -149,6 +153,7 @@ export function UserFormDialog({
       mode === 'edit' && user
         ? {
             id: user.id,
+            username: user.username || '',
             email: user.email,
             fullName: user.fullName,
             roles: (user.roles || []) as UserRole[],
@@ -186,11 +191,14 @@ export function UserFormDialog({
               : undefined,
             junkBonusGoal: (Number(user.junkBonusGoal) || 0.14) * 100,
             moveBonusGoal: (Number(user.moveBonusGoal) || 0.24) * 100,
+            isActive: user.isActive,
           }
         : {
+            username: '',
             roles: [],
             junkBonusGoal: 14,
             moveBonusGoal: 24,
+            isActive: true,
           },
   });
 
@@ -231,11 +239,20 @@ export function UserFormDialog({
   const handleRoleChange = (role: UserRole, checked: boolean) => {
     const currentRoles = form.getValues('roles') || [];
     if (checked) {
-      form.setValue('roles', [...currentRoles, role]);
+      form.setValue('roles', [...new Set([...currentRoles, role])], {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
     } else {
       form.setValue(
         'roles',
-        currentRoles.filter((r) => r !== role)
+        currentRoles.filter((r) => r !== role),
+        {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        }
       );
     }
   };
@@ -302,6 +319,23 @@ export function UserFormDialog({
                       {form.formState.errors.fullName && (
                         <p className="text-sm text-red-600">
                           {form.formState.errors.fullName.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        autoComplete="off"
+                        {...form.register('username', {
+                          setValueAs: (value) =>
+                            value ? String(value).trim() : '',
+                        })}
+                        placeholder="john.doe"
+                      />
+                      {form.formState.errors.username && (
+                        <p className="text-sm text-red-600">
+                          {form.formState.errors.username.message}
                         </p>
                       )}
                     </div>
@@ -388,6 +422,28 @@ export function UserFormDialog({
                         {form.formState.errors.roles.message}
                       </p>
                     )}
+                  </div>
+
+                  <div className="rounded-lg border p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium">Account Status</p>
+                        <p className="text-xs text-muted-foreground">
+                          Deactivated users cannot sign in until reactivated
+                        </p>
+                      </div>
+                      <Switch
+                        id="isActive"
+                        checked={form.watch('isActive') ?? true}
+                        onCheckedChange={(checked) =>
+                          form.setValue('isActive', checked, {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>

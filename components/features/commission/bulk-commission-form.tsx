@@ -2,20 +2,11 @@
 
 import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolver/zod';
 import { useRouter } from 'next/navigation';
-import {
-  Plus,
-  Trash2,
-  Save,
-  CheckCircle2,
-  AlertCircle,
-  Upload,
-  Download,
-} from 'lucide-react';
+import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BrandButton } from '@/components/brand/brand-button';
-import { Form, FormControl, FormMessage } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -41,12 +32,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   CommissionEntrySchema,
   type CommissionEntryFormData,
@@ -72,14 +58,14 @@ interface BulkFormSchema {
   entries: BulkEntry[];
 }
 
-const createEmptyEntry = (): BulkEntry => ({
+const createEmptyEntry = (defaultSalesId = ''): BulkEntry => ({
   id: Math.random().toString(36).substring(7),
-  salesId: '',
+  salesId: defaultSalesId,
   jobId: '',
   clientName: '',
   jobType: 'move',
   targetDate: new Date(),
-  estimatedRevenue: 0.01,
+  estimatedRevenue: undefined as unknown as number,
   status: 'pending',
 });
 
@@ -94,7 +80,7 @@ export function BulkCommissionForm({
 
   const form = useForm<BulkFormSchema>({
     defaultValues: {
-      entries: [createEmptyEntry()],
+      entries: [createEmptyEntry(currentUserId)],
     },
   });
 
@@ -326,23 +312,54 @@ export function BulkCommissionForm({
                           $
                         </span>
                         <Input
-                          type="number"
-                          step="0.01"
-                          min="0.01"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="0.00"
                           value={
-                            form.watch(`entries.${index}.estimatedRevenue`) ||
-                            ''
+                            form.watch(`entries.${index}.estimatedRevenue`) ===
+                            undefined
+                              ? ''
+                              : String(
+                                  form.watch(
+                                    `entries.${index}.estimatedRevenue`
+                                  )
+                                )
                           }
                           onChange={(e) => {
-                            const value = parseFloat(e.target.value);
+                            const rawValue = e.target.value.replace(
+                              /[^0-9.]/g,
+                              ''
+                            );
+                            if (rawValue === '') {
+                              updateEntry(
+                                index,
+                                'estimatedRevenue',
+                                undefined as unknown as number
+                              );
+                              return;
+                            }
+                            const parsed = parseFloat(rawValue);
                             updateEntry(
                               index,
                               'estimatedRevenue',
-                              isNaN(value) ? 0.01 : Math.max(0.01, value)
+                              Number.isNaN(parsed)
+                                ? (undefined as unknown as number)
+                                : parsed
                             );
                           }}
                           className="pl-8"
+                          onBlur={(e) => {
+                            const value = parseFloat(
+                              e.target.value.replace(/[^0-9.]/g, '')
+                            );
+                            if (!Number.isNaN(value)) {
+                              updateEntry(
+                                index,
+                                'estimatedRevenue',
+                                Number(value.toFixed(2))
+                              );
+                            }
+                          }}
                         />
                       </div>
                     </TableCell>

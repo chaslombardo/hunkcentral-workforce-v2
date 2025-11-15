@@ -1,0 +1,163 @@
+/**
+ * Utility functions for handling data serialization between server and client components
+ * Ensures Prisma Decimal objects and other non-serializable objects are properly converted
+ */
+
+import type { Decimal } from '@prisma/client/runtime/library';
+
+// Type for decimal values that works in both environments
+type DecimalValue =
+  | Decimal // Prisma Decimal type
+  | { toString(): string }
+  | number
+  | string
+  | null
+  | undefined;
+
+/**
+ * Convert Prisma Decimals to JavaScript numbers
+ */
+export function decimalToNumber(decimal: DecimalValue): number {
+  if (!decimal) return 0;
+  return Number(decimal);
+}
+
+/**
+ * Convert a JavaScript number to a Prisma Decimal
+ */
+export function numberToDecimal(num: number | null | undefined): Decimal | null {
+  if (num === null || num === undefined) return null;
+  return num as unknown as Decimal;
+}
+
+/**
+ * Properly serialize objects to be safe for client components
+ * This function handles Prisma Decimal objects and other non-serializable types
+ */
+export function safeSerialize<T>(obj: T): { [key: string]: any } {
+  const serialized: { [key: string]: any } = {};
+
+  // Recursively process each property
+  for (const key in obj) {
+    const value = obj[key];
+
+    // Skip React internal properties and functions
+    if (
+      typeof key === 'string' ||
+      typeof value === 'function' ||
+      typeof value === 'symbol'
+    ) {
+      continue;
+    }
+
+    // Handle nested objects and arrays
+    if (value && typeof value === 'object') {
+      try {
+        if (Array.isArray(value)) {
+          serialized[key] = value.map((item) => safeSerialize(item));
+        } else if (value && typeof value === 'object') {
+          serialized[key] = safeSerialize(value as Record<string, any>);
+        } else if (value === null || value === undefined) {
+          serialized[key] = null;
+        } else if (value.toString && typeof value !== 'function') {
+          serialized[key] = value.toString();
+        } else if (typeof value === 'bigint') {
+          serialized[key] = value.toString();
+        } else {
+          serialized[key] = JSON.stringify(value);
+        }
+      } catch (e) {
+        serialized[key] = 'undefined'; // Fallback
+      }
+    } else if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
+      serialized[key] = value;
+    }
+
+  return serialized;
+}
+
+/**
+ * Convert Prisma User objects to client-safe objects
+ * This function ensures all Decimal fields are converted to numbers before serialization
+ */
+export function serializeUser(user: any): { [key: string]: any } {
+  if (!user || typeof user !== 'object') return {};
+
+  return safeSerialize({
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    roles: user.roles,
+    rateJunkCaptain: decimalToNumber(user.rateJunkCaptain),
+    rateJunkWingman: decimalToNumber(user.rateJunkWingman),
+    rateMoveCaptain: decimalToNumber(user.rateMoveCaptain),
+    rateMoveWingman: decimalToNumber(user.rateMoveWingman),
+    rateZigma: decimalToNumber(user.rateZigma),
+    rateTraining: decimalToNumber(user.rateTraining),
+    rateEstimating: decimalToNumber(user.rateEstimating),
+    rateWarehouse: decimalToNumber(user.rateWarehouse),
+    rateAdmin: decimalToNumber(user.rateAdmin),
+    salaryAmount: decimalToNumber(user.salaryAmount),
+    commissionRate: decimalToNumber(user.commissionRate),
+    junkBonusGoal: decimalToNumber(user.junkBonusGoal),
+    moveBonusGoal: decimalToNumber(user.moveBonusGoal),
+    createdAt: user.createdAt?.toISOString(),
+    updatedAt: user.updatedAt?.toISOString(),
+  });
+}
+
+/**
+ * Log production errors without sensitive user data exposure
+ */
+export function safeLogError(
+  error: Error,
+  context: {
+    action: string;
+    userId?: string;
+    url?: string;
+    userAgent?: string;
+    additionalData?: Record<string, any>;
+  }
+) {
+  // Remove any User data from the error context
+  const cleanError = {
+    message: error.message,
+    name: error.name,
+    stack: error.stack?.slice(0, 500), // Limit stack size
+  };
+
+  // Log without sensitive user data in production
+  if (process.env.NODE_ENV !== 'development') {
+    console.error(`${error.name}: ${cleanError.message}`);
+    console.error('Error details:', context);
+  }
+}
+
+/**
+ * Enhanced error logging with safe object serialization
+ */
+export function safeLogErrorWithObject(
+  error: Error,
+  data?: Record<string, any>,
+  context?: {
+    action: string;
+    userId?: string;
+    url?: string;
+    userAgent?: string;
+    additionalData?: Record<string, any>;
+  }
+) {
+  // Remove any potentially sensitive user data from the error context
+  const cleanedData = data ? {
+    ...data,
+    // Remove nested user objects which might contain sensitive data
+  } : {};
+
+  // Log with clean error details
+  safeLogError(error, {
+    action: context?.action || 'server_error',
+    userId: context?.userId,
+    url: context?.url,
+    additionalData: cleanedData,
+  });
+}

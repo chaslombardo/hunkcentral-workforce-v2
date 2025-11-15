@@ -42,23 +42,36 @@ export async function createUser(data: CreateUserFormData) {
       throw error; // Re-throw if not a ZodError
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
+    // Check if user already exists by email or username
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: validatedData.email },
+          { username: validatedData.username },
+        ],
+      },
     });
 
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      if (existingUser.email === validatedData.email) {
+        throw new Error('User with this email already exists');
+      }
+      if (existingUser.username === validatedData.username) {
+        throw new Error('Username already exists');
+      }
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 12);
 
+    const { password, ...userData } = validatedData;
+
     // Create user
     const user = await prisma.user.create({
       data: {
-        ...validatedData,
+        ...userData,
         password: hashedPassword,
+        deactivatedAt: userData.isActive ? null : new Date(),
       },
     });
 
@@ -73,6 +86,8 @@ export async function createUser(data: CreateUserFormData) {
             email: user.email,
             fullName: user.fullName,
             roles: user.roles,
+            username: user.username,
+            isActive: user.isActive,
           },
         },
         userId: session.user.id,
@@ -90,7 +105,12 @@ export async function createUser(data: CreateUserFormData) {
     revalidatePath('/admin/users');
     return {
       success: true,
-      user: { id: user.id, email: user.email, fullName: user.fullName },
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        username: user.username,
+      },
     };
   } catch (error) {
     // Error creating user
@@ -313,20 +333,44 @@ export async function updateUser(data: UpdateUserFormData) {
       throw new Error('User not found');
     }
 
-    // Prepare update data
-    const updateData: Record<string, unknown> = { ...validatedData };
-    delete updateData.id;
+    // Ensure username uniqueness when changed
+    if (
+      validatedData.username &&
+      validatedData.username !== existingUser.username
+    ) {
+      const usernameOwner = await prisma.user.findUnique({
+        where: { username: validatedData.username },
+      });
+
+      if (usernameOwner && usernameOwner.id !== existingUser.id) {
+        throw new Error('Username already exists');
+      }
+    }
+
+    const { id, password, ...rest } = validatedData;
+
+    const updateData: Record<string, unknown> = { ...rest };
+
+    if (updateData.username === undefined) {
+      delete updateData.username;
+    }
 
     // Hash password if provided
-    if (validatedData.password) {
-      updateData.password = await bcrypt.hash(validatedData.password, 12);
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 12);
     } else {
       delete updateData.password;
     }
 
+    if (typeof rest.isActive === 'boolean') {
+      updateData.deactivatedAt = rest.isActive ? null : new Date();
+    } else {
+      delete updateData.deactivatedAt;
+    }
+
     // Update user
     const updatedUser = await prisma.user.update({
-      where: { id: validatedData.id },
+      where: { id },
       data: updateData,
     });
 
@@ -341,11 +385,15 @@ export async function updateUser(data: UpdateUserFormData) {
             email: existingUser.email,
             fullName: existingUser.fullName,
             roles: existingUser.roles,
+            username: existingUser.username,
+            isActive: existingUser.isActive,
           },
           after: {
             email: updatedUser.email,
             fullName: updatedUser.fullName,
             roles: updatedUser.roles,
+            username: updatedUser.username,
+            isActive: updatedUser.isActive,
           },
         },
         userId: session.user.id,
@@ -379,6 +427,8 @@ export async function updateUser(data: UpdateUserFormData) {
         id: updatedUser.id,
         email: updatedUser.email,
         fullName: updatedUser.fullName,
+        username: updatedUser.username,
+        isActive: updatedUser.isActive,
       },
     };
   } catch (error) {
@@ -392,6 +442,71 @@ export async function updateUser(data: UpdateUserFormData) {
     return {
       success: false,
       error: 'Failed to update user',
+    };
+  }
+}
+
+export async function setUserActiveStatus(
+  userId: string,
+  isActive: boolean,
+  metadata?: { reason?: string }
+) {
+  try {
+    const session = await getSession();
+    if (!session?.user?.roles?.includes('admin')) {
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    if (session.user.id === userId && !isActive) {
+      throw new Error('You cannot deactivate your own account');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.isActive === isActive) {
+      return { success: true, user };
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isActive,
+        deactivatedAt: isActive ? null : new Date(),
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        entityType: 'user',
+        entityId: userId,
+        action: isActive ? 'reactivate' : 'deactivate',
+        changes: {
+          isActive: {
+            from: user.isActive,
+            to: updatedUser.isActive,
+          },
+          metadata,
+        },
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${userId}`);
+    return {
+      success: true,
+      user: updatedUser,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update status',
     };
   }
 }
@@ -529,6 +644,7 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
       where,
       select: {
         id: true,
+        username: true,
         email: true,
         fullName: true,
         roles: true,
@@ -547,6 +663,8 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
         commissionRate: true,
         junkBonusGoal: true,
         moveBonusGoal: true,
+        isActive: true,
+        deactivatedAt: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -555,10 +673,35 @@ export async function getUsers(params: Partial<UserSearchFormData> = {}) {
       take: limit,
     });
 
+    const formattedUsers = users.map((user) => ({
+      ...user,
+      rateJunkCaptain: user.rateJunkCaptain
+        ? Number(user.rateJunkCaptain)
+        : null,
+      rateJunkWingman: user.rateJunkWingman
+        ? Number(user.rateJunkWingman)
+        : null,
+      rateMoveCaptain: user.rateMoveCaptain
+        ? Number(user.rateMoveCaptain)
+        : null,
+      rateMoveWingman: user.rateMoveWingman
+        ? Number(user.rateMoveWingman)
+        : null,
+      rateZigma: user.rateZigma ? Number(user.rateZigma) : null,
+      rateTraining: user.rateTraining ? Number(user.rateTraining) : null,
+      rateEstimating: user.rateEstimating ? Number(user.rateEstimating) : null,
+      rateWarehouse: user.rateWarehouse ? Number(user.rateWarehouse) : null,
+      rateAdmin: user.rateAdmin ? Number(user.rateAdmin) : null,
+      salaryAmount: user.salaryAmount ? Number(user.salaryAmount) : null,
+      commissionRate: user.commissionRate ? Number(user.commissionRate) : null,
+      junkBonusGoal: user.junkBonusGoal ? Number(user.junkBonusGoal) : null,
+      moveBonusGoal: user.moveBonusGoal ? Number(user.moveBonusGoal) : null,
+    }));
+
     return {
       success: true,
       data: {
-        users,
+        users: formattedUsers,
         pagination: {
           page,
           limit,
@@ -591,6 +734,7 @@ export async function getUserById(userId: string) {
       where: { id: userId },
       select: {
         id: true,
+        username: true,
         email: true,
         fullName: true,
         roles: true,
@@ -609,6 +753,8 @@ export async function getUserById(userId: string) {
         commissionRate: true,
         junkBonusGoal: true,
         moveBonusGoal: true,
+        isActive: true,
+        deactivatedAt: true,
         createdAt: true,
         updatedAt: true,
       },

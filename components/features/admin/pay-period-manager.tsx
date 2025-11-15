@@ -76,8 +76,9 @@ export function PayPeriodManager() {
   }, []);
 
   const loadPayPeriods = async () => {
+    let result: Awaited<ReturnType<typeof getPayPeriods>> | null = null;
     try {
-      const result = await getPayPeriods();
+      result = await getPayPeriods();
       if (result.success && result.data) {
         // Sort pay periods chronologically by start date (most recent first)
         const sortedPeriods = result.data.sort(
@@ -93,7 +94,7 @@ export function PayPeriodManager() {
     } finally {
       setLoading(false);
       // Load stats for all pay periods after loading pay periods
-      if (result.success && result.data) {
+      if (result?.success && result.data) {
         loadAllPayPeriodStats(result.data);
       }
     }

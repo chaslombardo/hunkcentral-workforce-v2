@@ -1,5 +1,6 @@
 // Commission matching algorithms
 import type { CommissionEntry, DailyLog, LogJob } from '@/types';
+import { normalizeCommissionJobType } from '@/lib/commission-job-types';
 
 export interface CommissionMatch {
   commissionEntry: CommissionEntry;
@@ -303,7 +304,7 @@ export async function processCommissionMatching(
       ? Number(entry.commissionAmount)
       : null,
     status: entry.status as 'pending' | 'matched' | 'approved',
-    jobType: entry.jobType as 'junk' | 'move',
+    jobType: normalizeCommissionJobType(entry.jobType),
     sales: entry.sales
       ? {
           ...entry.sales,

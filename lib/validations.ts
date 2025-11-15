@@ -1,5 +1,6 @@
 // Zod schemas for form validation
 import { z } from 'zod';
+import { COMMISSION_JOB_TYPES } from './commission-job-types';
 
 // User roles enum
 export const UserRoleSchema = z.enum([
@@ -20,7 +21,10 @@ export const UserSchema = z.object({
 
 // Login schema
 export const LoginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z
+    .string()
+    .email('Please enter a valid email address')
+    .transform((val) => val.trim().toLowerCase()),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -45,7 +49,8 @@ export const LogJobSchema = z.object({
   disposalCost: z.number().min(0).optional(),
 });
 
-// Commission entry schema
+export const CommissionJobTypeEnum = z.enum(COMMISSION_JOB_TYPES);
+
 export const CommissionEntrySchema = z.object({
   salesId: z.string().min(1, 'Sales consultant is required'),
   jobId: z
@@ -60,7 +65,7 @@ export const CommissionEntrySchema = z.object({
     .string()
     .min(1, 'Client name is required')
     .max(100, 'Client name must be 100 characters or less'),
-  jobType: z.enum(['move', 'moveLabor', 'junkRemoval', 'generalLabor']),
+  jobType: CommissionJobTypeEnum,
   targetDate: z.date(),
   estimatedRevenue: z
     .number()
@@ -101,10 +106,23 @@ export const DailyLogFormSchema = z.object({
 });
 
 // Base user schema for common fields
+const UsernameSchema = z
+  .string()
+  .trim()
+  .min(3, 'Username must be at least 3 characters')
+  .max(32, 'Username must be 32 characters or less')
+  .regex(
+    /^[a-zA-Z0-9._-]+$/,
+    'Username can only contain letters, numbers, dots, underscores, and hyphens'
+  )
+  .transform((val) => val.toLowerCase());
+
 const BaseUserSchema = z.object({
+  username: UsernameSchema.optional(),
   email: z.string().email('Please enter a valid email address'),
   fullName: z.string().min(1, 'Full name is required'),
   roles: z.array(UserRoleSchema).min(1, 'At least one role is required'),
+  isActive: z.boolean().optional(),
 
   // Department-specific hourly rates
   rateJunkCaptain: z.number().min(0).optional(),
@@ -130,11 +148,15 @@ const BaseUserSchema = z.object({
 
 // User management schemas
 export const CreateUserSchema = BaseUserSchema.extend({
+  username: UsernameSchema,
+  isActive: z.boolean().default(true),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export const UpdateUserSchema = BaseUserSchema.extend({
   id: z.string(),
+  isActive: z.boolean().optional(),
+  username: UsernameSchema.optional(),
   password: z
     .union([
       z.string().min(8, 'Password must be at least 8 characters'),
@@ -166,6 +188,7 @@ export type LoginFormData = z.infer<typeof LoginSchema>;
 export type LogJobFormData = z.infer<typeof LogJobSchema>;
 export type LogHourFormData = z.infer<typeof LogHourSchema>;
 export type CommissionEntryFormData = z.infer<typeof CommissionEntrySchema>;
+export type CommissionJobType = (typeof COMMISSION_JOB_TYPES)[number];
 export type DailyLogFormData = z.infer<typeof DailyLogFormSchema>;
 export type CreateUserFormData = z.infer<typeof CreateUserSchema>;
 export type UpdateUserFormData = z.infer<typeof UpdateUserSchema>;

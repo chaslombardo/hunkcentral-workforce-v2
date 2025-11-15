@@ -6,6 +6,7 @@ import {
   type MatchResult,
   type CommissionConflict,
 } from '@/lib/commissionMatcher';
+import { normalizeCommissionJobType } from '@/lib/commission-job-types';
 import type { CommissionEntry, DailyLog, LogJob } from '@/types';
 import { logCommissionChange } from '@/lib/auditLogger';
 import { onCommissionMatched } from '@/lib/cache';
@@ -439,7 +440,7 @@ export async function getCommissionConflicts(): Promise<{
             ? Number(entry.commissionAmount)
             : null,
           status: entry.status as 'pending' | 'matched' | 'approved',
-          jobType: entry.jobType as 'junk' | 'move',
+          jobType: normalizeCommissionJobType(entry.jobType),
           sales: {
             ...entry.sales,
             junkBonusGoal: Number(entry.sales.junkBonusGoal),

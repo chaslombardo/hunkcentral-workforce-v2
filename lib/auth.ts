@@ -11,8 +11,19 @@ export interface SessionUser {
   id: string;
   email: string;
   fullName: string;
+  username?: string | null;
   roles: UserRole[];
   permissions?: string[];
+  commissionRate?: number | null;
+  isActive?: boolean;
+  originalUserId?: string;
+  originalFullName?: string;
+  originalRoles?: UserRole[];
+  impersonatedUserId?: string;
+  impersonatedFullName?: string;
+  impersonatedRoles?: UserRole[];
+  impersonationStartedAt?: string;
+  isImpersonating?: boolean;
 }
 
 // Server-side session helper (alias for compatibility)
@@ -57,7 +68,14 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     try {
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { id: true, email: true, fullName: true, roles: true },
+        select: {
+          id: true,
+          email: true,
+          fullName: true,
+          roles: true,
+          username: true,
+          isActive: true,
+        },
       });
 
       if (!dbUser) {
@@ -78,7 +96,9 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
         id: dbUser.id,
         email: dbUser.email,
         fullName: dbUser.fullName,
+        username: dbUser.username,
         roles: dbUser.roles as UserRole[],
+        isActive: dbUser.isActive,
       };
     } catch (dbError) {
       await logAuthError(dbError, {

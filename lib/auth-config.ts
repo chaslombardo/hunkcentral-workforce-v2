@@ -13,42 +13,66 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        identifier: { label: 'Email or Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
-        if (!credentials?.email || !credentials?.password) {
+        const identifier = credentials?.identifier?.trim();
+        const password = credentials?.password;
+
+        if (!identifier || !password) {
           await logAuthError(new Error('Missing credentials'), {
             action: 'login',
             url: req?.headers?.referer || '/auth/login',
             userAgent: req?.headers?.['user-agent'],
             additionalData: {
-              email: credentials?.email ? 'provided' : 'missing',
-              password: credentials?.password ? 'provided' : 'missing',
+              identifier: identifier ? 'provided' : 'missing',
+              password: password ? 'provided' : 'missing',
             },
           });
           return null;
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+          const isEmail = identifier.includes('@');
+          const normalizedEmail = identifier.toLowerCase();
+
+          let user = await prisma.user.findUnique({
+            where: isEmail
+              ? { email: normalizedEmail }
+              : { username: identifier },
           });
+
+          if (!user) {
+            user = await prisma.user.findFirst({
+              where: {
+                OR: [{ email: normalizedEmail }, { username: identifier }],
+              },
+            });
+          }
 
           if (!user) {
             await logAuthError(new Error('User not found'), {
               action: 'login',
               url: req?.headers?.referer || '/auth/login',
               userAgent: req?.headers?.['user-agent'],
-              additionalData: { email: credentials.email },
+              additionalData: { identifier },
             });
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+          if (!user.isActive) {
+            await logAuthError(new Error('Account deactivated'), {
+              action: 'login',
+              userId: user.id,
+              url: req?.headers?.referer || '/auth/login',
+              userAgent: req?.headers?.['user-agent'],
+              additionalData: { identifier },
+            });
+            throw new Error('account_deactivated');
+          }
+
+          const isPasswordValid = await bcrypt.compare(password, user.password);
 
           if (!isPasswordValid) {
             await logAuthError(new Error('Invalid password'), {
@@ -56,13 +80,10 @@ export const authOptions: NextAuthOptions = {
               userId: user.id,
               url: req?.headers?.referer || '/auth/login',
               userAgent: req?.headers?.['user-agent'],
-              additionalData: { email: credentials.email },
+              additionalData: { identifier },
             });
             return null;
           }
-
-          // Log successful authentication in development
-          // Authentication successful - user logged in
 
           return {
             id: user.id,
@@ -70,6 +91,8 @@ export const authOptions: NextAuthOptions = {
             name: user.fullName,
             fullName: user.fullName,
             roles: user.roles as UserRole[],
+            username: user.username,
+            isActive: user.isActive,
             commissionRate: user.commissionRate
               ? Number(user.commissionRate)
               : null,
@@ -79,8 +102,14 @@ export const authOptions: NextAuthOptions = {
             action: 'login',
             url: req?.headers?.referer || '/auth/login',
             userAgent: req?.headers?.['user-agent'],
-            additionalData: { email: credentials.email },
+            additionalData: { identifier },
           });
+          if (
+            error instanceof Error &&
+            error.message === 'account_deactivated'
+          ) {
+            throw error;
+          }
           return null;
         }
       },
@@ -101,6 +130,40 @@ export const authOptions: NextAuthOptions = {
           session.user.fullName = token.fullName as string;
           session.user.roles = token.roles as UserRole[];
           session.user.commissionRate = token.commissionRate as number | null;
+          session.user.username = token.username as string | null;
+          session.user.isActive = token.isActive as boolean | undefined;
+          session.user.originalUserId = token.originalUserId as
+            | string
+            | undefined;
+          session.user.originalFullName = token.originalFullName as
+            | string
+            | undefined;
+          session.user.originalRoles = token.originalRoles as
+            | UserRole[]
+            | undefined;
+          session.user.impersonatedUserId = token.impersonatedUserId as
+            | string
+            | undefined;
+          session.user.impersonatedFullName = token.impersonatedFullName as
+            | string
+            | undefined;
+          session.user.impersonatedRoles = token.impersonatedRoles as
+            | UserRole[]
+            | undefined;
+          session.user.impersonationStartedAt = token.impersonationStartedAt as
+            | string
+            | undefined;
+          session.user.isImpersonating = Boolean(
+            token.originalUserId && token.impersonatedUserId
+          );
+          session.impersonation = {
+            isImpersonating: session.user.isImpersonating ?? false,
+            originalUserId: session.user.originalUserId,
+            originalFullName: session.user.originalFullName,
+            targetUserId: session.user.impersonatedUserId,
+            targetFullName: session.user.impersonatedFullName,
+            startedAt: session.user.impersonationStartedAt,
+          };
         }
         return session;
       } catch (error) {
@@ -124,6 +187,17 @@ export const authOptions: NextAuthOptions = {
           token.roles = (user as any).roles;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           token.commissionRate = (user as any).commissionRate;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          token.username = (user as any).username ?? null;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          token.isActive = (user as any).isActive ?? true;
+          delete token.originalUserId;
+          delete token.originalFullName;
+          delete token.originalRoles;
+          delete token.impersonatedUserId;
+          delete token.impersonatedFullName;
+          delete token.impersonatedRoles;
+          delete token.impersonationStartedAt;
         }
 
         // Validate token integrity on each request
@@ -132,7 +206,15 @@ export const authOptions: NextAuthOptions = {
             // Verify user still exists and is active
             const currentUser = await prisma.user.findUnique({
               where: { id: token.id as string },
-              select: { id: true, email: true, fullName: true, roles: true },
+              select: {
+                id: true,
+                email: true,
+                fullName: true,
+                roles: true,
+                username: true,
+                isActive: true,
+                commissionRate: true,
+              },
             });
 
             if (!currentUser) {
@@ -149,6 +231,11 @@ export const authOptions: NextAuthOptions = {
             // Update token with current user data
             token.fullName = currentUser.fullName;
             token.roles = currentUser.roles as UserRole[];
+            token.username = currentUser.username;
+            token.isActive = currentUser.isActive;
+            token.commissionRate = currentUser.commissionRate
+              ? Number(currentUser.commissionRate)
+              : null;
           } catch (dbError) {
             await logAuthError(dbError, {
               action: 'session_validation',

@@ -1074,6 +1074,297 @@ export async function bulkDeleteLogs(
 }
 
 /**
+ * List logs with filtering and pagination
+ */
+export interface ListLogsParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  captainId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  mineOnly?: boolean;
+}
+
+export async function listLogs(
+  params: ListLogsParams = {}
+): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const {
+      page = 1,
+      pageSize = 20,
+      status,
+      captainId,
+      dateFrom,
+      dateTo,
+      search,
+      mineOnly,
+    } = params;
+
+    // Build where clause with filters
+    const where: any = {};
+
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+
+    if (captainId) {
+      where.captainId = captainId;
+    }
+
+    if (dateFrom || dateTo) {
+      where.logDate = {};
+      if (dateFrom) where.logDate.gte = dateFrom;
+      if (dateTo) where.logDate.lte = dateTo;
+    }
+
+    if (search) {
+      where.OR = [
+        { captain: { fullName: { contains: search, mode: 'insensitive' } } },
+        {
+          jobs: {
+            some: { clientName: { contains: search, mode: 'insensitive' } },
+          },
+        },
+      ];
+    }
+
+    // Check if user has permission to view logs
+    const isAdminOrManager =
+      session.user.roles?.includes('admin') ||
+      session.user.roles?.includes('manager');
+
+    if (!isAdminOrManager || mineOnly) {
+      // Non-admin users or when mineOnly is true, only show user's logs
+      where.OR = [
+        { createdById: session.user.id },
+        { captainId: session.user.id },
+      ];
+    }
+
+    const [logs, total] = await Promise.all([
+      prisma.dailyLog.findMany({
+        where,
+        include: {
+          captain: {
+            select: { id: true, fullName: true },
+          },
+          approvedBy: {
+            select: { id: true, fullName: true },
+          },
+          jobs: {
+            select: { revenue: true, tips: true },
+          },
+          hours: {
+            select: { hours: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.dailyLog.count({ where }),
+    ]);
+
+    const processedLogs = logs.map((log) => ({
+      id: log.id,
+      captainName: log.captain?.fullName || 'Unknown',
+      logDate: log.logDate,
+      status: log.status,
+      totalRevenue: log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0),
+      totalHours: log.hours.reduce((sum, hour) => sum + Number(hour.hours), 0),
+      jobCount: log.jobs.length,
+      submittedAt: log.submittedAt || log.createdAt,
+      approvedAt: log.approvedAt,
+      approvedBy: log.approvedBy?.fullName,
+    }));
+
+    return {
+      success: true,
+      data: {
+        logs: processedLogs,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'list logs'),
+    };
+  }
+}
+
+/**
+ * Delete a draft log
+ */
+export async function deleteDraft(logId: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: { status: true, createdById: true },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    if (log.status !== 'draft') {
+      return { success: false, error: 'Only draft logs can be deleted' };
+    }
+
+    if (
+      log.createdById !== session.user.id &&
+      !session.user.roles?.includes('admin')
+    ) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    await prisma.dailyLog.delete({
+      where: { id: logId },
+    });
+
+    return {
+      success: true,
+      data: { deleted: true },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'delete draft'),
+    };
+  }
+}
+
+/**
+ * Quick update of log status or basic fields
+ */
+export async function quickUpdateLog(
+  logId: string,
+  updates: {
+    status?: string;
+    notes?: string;
+    hours?: Array<{ id: string; hours: number }>;
+    jobs?: Array<{
+      id: string;
+      revenue?: number;
+      tips?: number;
+      junkOnMove?: number;
+      valuation?: number;
+      materials?: number;
+    }>;
+  }
+): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: { status: true, createdById: true, captainId: true },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    const canEdit =
+      log.createdById === session.user.id ||
+      log.captainId === session.user.id ||
+      session.user.roles?.includes('admin') ||
+      session.user.roles?.includes('manager');
+
+    if (!canEdit) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    const updateData: any = {
+      lastEditedById: session.user.id,
+      updatedAt: new Date(),
+    };
+
+    if (updates.status) {
+      updateData.status = updates.status;
+      if (updates.status === 'submitted') {
+        updateData.submittedAt = new Date();
+      }
+    }
+
+    // Update hours if provided
+    if (updates.hours) {
+      await Promise.all(
+        updates.hours.map(async (hourUpdate) =>
+          prisma.logHour.update({
+            where: { id: hourUpdate.id },
+            data: { hours: hourUpdate.hours },
+          })
+        )
+      );
+    }
+
+    // Update jobs if provided
+    if (updates.jobs) {
+      await Promise.all(
+        updates.jobs.map(async (jobUpdate) =>
+          prisma.logJob.update({
+            where: { id: jobUpdate.id },
+            data: {
+              ...(jobUpdate.revenue !== undefined && {
+                revenue: jobUpdate.revenue,
+              }),
+              ...(jobUpdate.tips !== undefined && { tips: jobUpdate.tips }),
+              ...(jobUpdate.junkOnMove !== undefined && {
+                junkOnMove: jobUpdate.junkOnMove,
+              }),
+              ...(jobUpdate.valuation !== undefined && {
+                valuation: jobUpdate.valuation,
+              }),
+              ...(jobUpdate.materials !== undefined && {
+                materials: jobUpdate.materials,
+              }),
+            },
+          })
+        )
+      );
+    }
+
+    const updatedLog = await prisma.dailyLog.update({
+      where: { id: logId },
+      data: updateData,
+    });
+
+    return {
+      success: true,
+      data: {
+        id: updatedLog.id,
+        status: updatedLog.status,
+        updatedAt: updatedLog.updatedAt,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'quick update log'),
+    };
+  }
+}
+
+/**
  * Unapprove a daily log (revert from approved back to submitted)
  */
 export async function unapproveLog(logId: string): Promise<LogActionResult> {

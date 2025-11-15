@@ -406,8 +406,7 @@ export async function getPayPeriodStatsForTile(payPeriodId: string) {
       };
     }
 
-    // Calculate total hours and payroll from daily logs in this period
-    const logsAggregation = await prisma.dailyLog.aggregate({
+    const approvedLogs = await prisma.dailyLog.findMany({
       where: {
         logDate: {
           gte: payPeriod.startDate,
@@ -415,21 +414,68 @@ export async function getPayPeriodStatsForTile(payPeriodId: string) {
         },
         status: 'approved',
       },
-      _sum: {
-        totalHours: true,
-        grossPayroll: true,
-      },
-      _count: {
-        id: true, // Count of approved logs
+      select: {
+        id: true,
+        hours: {
+          select: {
+            hours: true,
+            department: true,
+            employee: {
+              select: {
+                rateJunkCaptain: true,
+                rateJunkWingman: true,
+                rateMoveCaptain: true,
+                rateMoveWingman: true,
+                rateZigma: true,
+                rateTraining: true,
+                rateEstimating: true,
+                rateWarehouse: true,
+                rateAdmin: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    const departmentRateMap: Record<
+      string,
+      keyof (typeof approvedLogs)[number]['hours'][number]['employee']
+    > = {
+      junk: 'rateJunkWingman',
+      move: 'rateMoveWingman',
+      zigma: 'rateZigma',
+      training: 'rateTraining',
+      estimating: 'rateEstimating',
+      warehouse: 'rateWarehouse',
+      admin: 'rateAdmin',
+    };
+
+    const totalHours = approvedLogs.reduce((logTotal, log) => {
+      return (
+        logTotal +
+        log.hours.reduce((hourTotal, hour) => hourTotal + Number(hour.hours), 0)
+      );
+    }, 0);
+
+    const grossPayroll = approvedLogs.reduce((logTotal, log) => {
+      return (
+        logTotal +
+        log.hours.reduce((hourTotal, hour) => {
+          const rateKey = departmentRateMap[hour.department] ?? 'rateAdmin';
+          const rateValue = hour.employee?.[rateKey];
+          const rate = rateValue ? Number(rateValue) : 0;
+          return hourTotal + rate * Number(hour.hours);
+        }, 0)
+      );
+    }, 0);
 
     return {
       success: true,
       data: {
-        totalHours: logsAggregation._sum.totalHours || 0,
-        grossPayroll: logsAggregation._sum.grossPayroll || 0,
-        approvedLogsCount: logsAggregation._count.id || 0,
+        totalHours,
+        grossPayroll,
+        approvedLogsCount: approvedLogs.length,
         days: Math.ceil(
           (new Date(payPeriod.endDate).getTime() -
             new Date(payPeriod.startDate).getTime()) /
