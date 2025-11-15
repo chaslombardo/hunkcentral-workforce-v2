@@ -85,6 +85,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: '/commission/create',
         },
         {
+          title: 'Bulk Entry',
+          url: '/commission/bulk',
+        },
+        {
           title: 'Track Commission',
           url: '/commission/list',
         },
