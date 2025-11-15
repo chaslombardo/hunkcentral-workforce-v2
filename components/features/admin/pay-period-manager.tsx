@@ -9,6 +9,7 @@ import {
   Lock,
   Unlock,
   Archive,
+  Edit,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -251,6 +252,15 @@ export function PayPeriodManager() {
                     {period.status === 'open' && (
                       <>
                         <DropdownMenuItem
+                          onClick={() => {
+                            // TODO: Implement edit pay period functionality
+                            toast.info('Edit functionality coming soon');
+                          }}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Period
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() =>
                             handleStatusChange(period.id, 'locked')
                           }
@@ -292,11 +302,29 @@ export function PayPeriodManager() {
                       </>
                     )}
                     {period.status === 'locked' && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => handleStatusChange(period.id, 'open')}
+                        >
+                          <Unlock className="mr-2 h-4 w-4" />
+                          Reopen Period
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleStatusChange(period.id, 'closed')
+                          }
+                        >
+                          <Archive className="mr-2 h-4 w-4" />
+                          Close Period
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {period.status === 'closed' && (
                       <DropdownMenuItem
-                        onClick={() => handleStatusChange(period.id, 'closed')}
+                        onClick={() => handleStatusChange(period.id, 'open')}
                       >
-                        <Archive className="mr-2 h-4 w-4" />
-                        Close Period
+                        <Unlock className="mr-2 h-4 w-4" />
+                        Reopen Period
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
@@ -380,8 +408,18 @@ function CreatePayPeriodDialog({
     try {
       await onSubmit({
         name,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate:
+          startDate.getFullYear() +
+          '-' +
+          String(startDate.getMonth() + 1).padStart(2, '0') +
+          '-' +
+          String(startDate.getDate()).padStart(2, '0'),
+        endDate:
+          endDate.getFullYear() +
+          '-' +
+          String(endDate.getMonth() + 1).padStart(2, '0') +
+          '-' +
+          String(endDate.getDate()).padStart(2, '0'),
       });
       // Reset form
       setName('');

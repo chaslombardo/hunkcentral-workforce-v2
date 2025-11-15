@@ -44,34 +44,50 @@ export async function createPayPeriod(input: CreatePayPeriodInput) {
 
     const validatedInput = createPayPeriodSchema.parse(input);
 
-    // Validate date range
-    const startDate = new Date(validatedInput.startDate);
-    const endDate = new Date(validatedInput.endDate);
+    // Validate date range - preserve exact dates by parsing date strings correctly
+    const [startYear, startMonth, startDay] = validatedInput.startDate
+      .split('-')
+      .map(Number);
+    const [endYear, endMonth, endDay] = validatedInput.endDate
+      .split('-')
+      .map(Number);
 
-    if (startDate >= endDate) {
+    // Create date objects that preserve the exact calendar dates in local timezone
+    const localStart = new Date(
+      startYear,
+      startMonth - 1,
+      startDay,
+      0,
+      0,
+      0,
+      0
+    );
+    const localEnd = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999);
+
+    if (localStart >= localEnd) {
       throw new Error('End date must be after start date');
     }
 
-    // Check for overlapping pay periods
+    // Check for overlapping pay periods using local timezone dates
     const overlapping = await prisma.payPeriod.findFirst({
       where: {
         OR: [
           {
             AND: [
-              { startDate: { lte: startDate } },
-              { endDate: { gte: startDate } },
+              { startDate: { lte: localStart } },
+              { endDate: { gte: localStart } },
             ],
           },
           {
             AND: [
-              { startDate: { lte: endDate } },
-              { endDate: { gte: endDate } },
+              { startDate: { lte: localEnd } },
+              { endDate: { gte: localEnd } },
             ],
           },
           {
             AND: [
-              { startDate: { gte: startDate } },
-              { endDate: { lte: endDate } },
+              { startDate: { gte: localStart } },
+              { endDate: { lte: localEnd } },
             ],
           },
         ],
@@ -85,8 +101,8 @@ export async function createPayPeriod(input: CreatePayPeriodInput) {
     const payPeriod = await prisma.payPeriod.create({
       data: {
         name: validatedInput.name,
-        startDate,
-        endDate,
+        startDate: localStart,
+        endDate: localEnd,
         status: 'open',
       },
     });
