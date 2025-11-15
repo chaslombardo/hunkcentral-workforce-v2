@@ -29,28 +29,40 @@ export function useDashboardData(userRoles?: string[]): UseDashboardDataReturn {
       setLoading(true);
       setError(null);
 
-      // Fetch general metrics
-      const metricsResult = await getDashboardMetrics();
-      if (metricsResult.success && metricsResult.data) {
-        setMetrics(metricsResult.data);
+      // Fetch metrics in parallel to avoid waterfall effect
+      const [metricsResult, roleResult] = await Promise.allSettled([
+        getDashboardMetrics(),
+        userRoles && userRoles.length > 0
+          ? getRoleSpecificMetrics(userRoles)
+          : Promise.resolve({ success: true, data: null }),
+      ]);
+
+      // Handle general metrics
+      if (metricsResult.status === 'fulfilled' && metricsResult.value.success) {
+        setMetrics(metricsResult.value.data);
       } else {
-        throw new Error(
-          metricsResult.error || 'Failed to load dashboard metrics'
-        );
+        const error =
+          metricsResult.status === 'rejected'
+            ? metricsResult.reason
+            : metricsResult.value.error;
+        throw new Error(error || 'Failed to load dashboard metrics');
       }
 
-      // Fetch role-specific metrics if roles are provided
-      if (userRoles && userRoles.length > 0) {
-        const roleResult = await getRoleSpecificMetrics(userRoles);
-        if (roleResult.success && roleResult.data) {
-          setRoleMetrics(roleResult.data);
-        } else {
-          // Don't throw error for role metrics, just log it
-          console.warn(
-            'Failed to load role-specific metrics:',
-            roleResult.error
-          );
-        }
+      // Handle role-specific metrics
+      if (
+        roleResult.status === 'fulfilled' &&
+        roleResult.value?.success &&
+        roleResult.value.data
+      ) {
+        setRoleMetrics(roleResult.value.data);
+      } else if (roleResult.status === 'rejected' || roleResult.value?.error) {
+        // Don't throw for role metrics, just log it
+        console.warn(
+          'Failed to load role-specific metrics:',
+          roleResult.status === 'rejected'
+            ? roleResult.reason
+            : roleResult.value?.error
+        );
       }
     } catch (err) {
       setError(

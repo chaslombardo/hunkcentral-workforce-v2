@@ -72,29 +72,61 @@ export async function getDashboardMetrics(): Promise<{
     // No cached data available - use direct queries (optimization integrated)
     const optimizedData = null; // Use fallback individual queries
 
-    // Fallback to individual queries
+    // Use parallel queries for better performance
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // Fetch pending logs count
-    const pendingLogsCount = await prisma.dailyLog.count({
-      where: { status: 'submitted' },
-    });
-
-    // Get pending logs from last week for comparison
-    const pendingLogsLastWeek = await prisma.dailyLog.count({
-      where: {
-        status: 'submitted',
-        submittedAt: {
-          gte: twoWeeksAgo,
-          lt: oneWeekAgo,
+    // Execute all counts in parallel for faster loading
+    const [
+      pendingLogsCount,
+      pendingLogsLastWeek,
+      commissionEntriesCount,
+      commissionEntriesLastWeek,
+      activeUsersCount,
+      usersLastMonth,
+    ] = await Promise.all([
+      // Fetch pending logs count
+      prisma.dailyLog.count({
+        where: { status: 'submitted' },
+      }),
+      // Get pending logs from last week for comparison
+      prisma.dailyLog.count({
+        where: {
+          status: 'submitted',
+          submittedAt: {
+            gte: twoWeeksAgo,
+            lt: oneWeekAgo,
+          },
         },
-      },
-    });
+      }),
+      // Fetch commission entries count (this week)
+      prisma.commissionEntry.count({
+        where: {
+          createdAt: { gte: oneWeekAgo },
+        },
+      }),
+      // Get commission entries from previous week for comparison
+      prisma.commissionEntry.count({
+        where: {
+          createdAt: {
+            gte: twoWeeksAgo,
+            lt: oneWeekAgo,
+          },
+        },
+      }),
+      // Fetch active users count
+      prisma.user.count(),
+      // Get users from last month for comparison (assuming relatively stable)
+      prisma.user.count({
+        where: {
+          createdAt: { lt: oneMonthAgo },
+        },
+      }),
+    ]);
 
-    // Calculate pending logs change
+    // Calculate changes
     const pendingLogsChange =
       pendingLogsLastWeek > 0
         ? ((pendingLogsCount - pendingLogsLastWeek) / pendingLogsLastWeek) * 100
@@ -102,24 +134,6 @@ export async function getDashboardMetrics(): Promise<{
           ? 100
           : 0;
 
-    // Fetch commission entries count (this week)
-    const commissionEntriesCount = await prisma.commissionEntry.count({
-      where: {
-        createdAt: { gte: oneWeekAgo },
-      },
-    });
-
-    // Get commission entries from previous week for comparison
-    const commissionEntriesLastWeek = await prisma.commissionEntry.count({
-      where: {
-        createdAt: {
-          gte: twoWeeksAgo,
-          lt: oneWeekAgo,
-        },
-      },
-    });
-
-    // Calculate commission entries change
     const commissionEntriesChange =
       commissionEntriesLastWeek > 0
         ? ((commissionEntriesCount - commissionEntriesLastWeek) /
@@ -129,15 +143,12 @@ export async function getDashboardMetrics(): Promise<{
           ? 100
           : 0;
 
-    // Fetch active users count
-    const activeUsersCount = await prisma.user.count();
-
-    // Get users from last month for comparison (assuming relatively stable)
-    const usersLastMonth = await prisma.user.count({
-      where: {
-        createdAt: { lt: oneMonthAgo },
-      },
-    });
+    const activeUsersChange =
+      usersLastMonth > 0
+        ? ((activeUsersCount - usersLastMonth) / usersLastMonth) * 100
+        : activeUsersCount > 0
+          ? 100
+          : 0;
 
     // Calculate active users change
     const activeUsersChange =
