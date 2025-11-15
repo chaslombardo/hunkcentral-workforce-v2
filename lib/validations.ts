@@ -60,7 +60,7 @@ export const CommissionEntrySchema = z.object({
     .string()
     .min(1, 'Client name is required')
     .max(100, 'Client name must be 100 characters or less'),
-  jobType: z.enum(['junk', 'move']),
+  jobType: z.enum(['move', 'moveLabor', 'junkRemoval', 'generalLabor']),
   targetDate: z.date(),
   estimatedRevenue: z
     .number()

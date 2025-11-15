@@ -46,7 +46,7 @@ export default async function CreateCommissionPage() {
         </p>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-4xl">
         <Card>
           <CardHeader>
             <CardTitle>Commission Entry Details</CardTitle>
