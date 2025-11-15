@@ -21,10 +21,10 @@ export const UserSchema = z.object({
 
 // Login schema
 export const LoginSchema = z.object({
-  email: z
+  identifier: z
     .string()
-    .email('Please enter a valid email address')
-    .transform((val) => val.trim().toLowerCase()),
+    .min(1, 'Please enter your email or username')
+    .transform((val) => val.trim()),
   password: z.string().min(1, 'Password is required'),
 });
 
