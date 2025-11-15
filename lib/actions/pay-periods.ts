@@ -278,7 +278,7 @@ export async function canModifyDataForDate(date: Date) {
 }
 
 // Get pay period statistics for dashboard tiles
-export async function getPayPeriodStats() {
+export async function getPayPeriodStats(payPeriodId?: string) {
   try {
     const session = await auth();
     if (
@@ -361,6 +361,80 @@ export async function getPayPeriodStats() {
           locked: statusMap.locked || 0,
           closed: statusMap.closed || 0,
         },
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch pay period statistics',
+    };
+  }
+}
+
+// Get statistics for a specific pay period
+export async function getPayPeriodStatsForTile(payPeriodId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      };
+    }
+
+    if (
+      !session.user.roles?.some((role) => ['admin', 'manager'].includes(role))
+    ) {
+      return {
+        success: false,
+        error: 'Insufficient permissions',
+      };
+    }
+
+    // Get pay period details
+    const payPeriod = await prisma.payPeriod.findUnique({
+      where: { id: payPeriodId },
+    });
+
+    if (!payPeriod) {
+      return {
+        success: false,
+        error: 'Pay period not found',
+      };
+    }
+
+    // Calculate total hours and payroll from daily logs in this period
+    const logsAggregation = await prisma.dailyLog.aggregate({
+      where: {
+        logDate: {
+          gte: payPeriod.startDate,
+          lte: payPeriod.endDate,
+        },
+        status: 'approved',
+      },
+      _sum: {
+        totalHours: true,
+        grossPayroll: true,
+      },
+      _count: {
+        id: true, // Count of approved logs
+      },
+    });
+
+    return {
+      success: true,
+      data: {
+        totalHours: logsAggregation._sum.totalHours || 0,
+        grossPayroll: logsAggregation._sum.grossPayroll || 0,
+        approvedLogsCount: logsAggregation._count.id || 0,
+        days: Math.ceil(
+          (new Date(payPeriod.endDate).getTime() -
+            new Date(payPeriod.startDate).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ),
       },
     };
   } catch (error) {

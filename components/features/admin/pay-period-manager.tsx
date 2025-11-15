@@ -57,6 +57,7 @@ import {
   createPayPeriod,
   updatePayPeriodStatus,
   getPayPeriods,
+  getPayPeriodStatsForTile,
   deletePayPeriod,
   type PayPeriod,
   type CreatePayPeriodInput,
@@ -66,6 +67,8 @@ export function PayPeriodManager() {
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [payPeriodStats, setPayPeriodStats] = useState<Record<string, any>>({});
+  const [loadingStats, setLoadingStats] = useState<Record<string, boolean>>({});
 
   // Load pay periods
   useEffect(() => {
@@ -89,7 +92,42 @@ export function PayPeriodManager() {
       toast.error('Failed to load pay periods');
     } finally {
       setLoading(false);
+      // Load stats for all pay periods after loading pay periods
+      if (result.success && result.data) {
+        loadAllPayPeriodStats(result.data);
+      }
     }
+  };
+
+  // Load statistics for all pay periods
+  const loadAllPayPeriodStats = async (periods: PayPeriod[]) => {
+    const stats: Record<string, any> = {};
+    const loading: Record<string, boolean> = {};
+
+    // Initialize loading states
+    periods.forEach((period) => {
+      loading[period.id] = true;
+    });
+    setLoadingStats({ ...loading });
+
+    // Load stats for each period
+    await Promise.all(
+      periods.map(async (period) => {
+        try {
+          const statsResult = await getPayPeriodStatsForTile(period.id);
+          if (statsResult.success) {
+            stats[period.id] = statsResult.data;
+          }
+        } catch (error) {
+          console.error(`Failed to load stats for period ${period.id}:`, error);
+        } finally {
+          loading[period.id] = false;
+          setLoadingStats({ ...loading });
+        }
+      })
+    );
+
+    setPayPeriodStats(stats);
   };
 
   const handleCreatePayPeriod = async (data: CreatePayPeriodInput) => {
@@ -360,6 +398,60 @@ export function PayPeriodManager() {
                     days
                   </span>
                 </div>
+                {period.status !== 'open' && (
+                  <>
+                    <div className="border-t pt-2 mt-2 space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          Total Hours:
+                        </span>
+                        {loadingStats[period.id] ? (
+                          <span className="text-muted-foreground">
+                            Loading...
+                          </span>
+                        ) : (
+                          <span className="font-medium">
+                            {payPeriodStats[period.id]?.totalHours?.toFixed(
+                              1
+                            ) || '0.0'}
+                            h
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          Gross Payroll:
+                        </span>
+                        {loadingStats[period.id] ? (
+                          <span className="text-muted-foreground">
+                            Loading...
+                          </span>
+                        ) : (
+                          <span className="font-medium">
+                            $
+                            {payPeriodStats[period.id]?.grossPayroll?.toFixed(
+                              2
+                            ) || '0.00'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          Approved Logs:
+                        </span>
+                        {loadingStats[period.id] ? (
+                          <span className="text-muted-foreground">
+                            Loading...
+                          </span>
+                        ) : (
+                          <span className="font-medium">
+                            {payPeriodStats[period.id]?.approvedLogsCount || 0}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
