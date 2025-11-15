@@ -86,7 +86,7 @@ import { useToast } from '@/hooks/use-toast';
 
 import type { UserSearchFormData } from '@/lib/validations';
 import type { UserRole } from '@/types';
-import { getUsers, deleteUser } from '@/lib/actions/users';
+import { getUsers, deleteUser, updateUser } from '@/lib/actions/users';
 import { convertUserDecimalFields } from '@/lib/decimal-utils';
 import { formatDateDisplay } from '@/lib/formatters';
 import { UserFormDialog } from './user-form-dialog';
@@ -240,6 +240,19 @@ export function UserManagementDashboard() {
       toast({
         title: 'Error',
         description: 'Failed to delete user',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEditUser = async (userId: string) => {
+    try {
+      // The UserFormDialog will handle the edit, so we don't need this function
+      // The edit functionality is now handled by the UserFormDialog modal
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to open edit dialog',
         variant: 'destructive',
       });
     }
@@ -517,6 +530,28 @@ export function UserManagementDashboard() {
             </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
+      ),
+    },
+
+    {
+      id: 'actions',
+      header: 'Actions',
+      enableSorting: false,
+      enableHiding: false,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <UserFormDialog
+            mode="edit"
+            user={row.original}
+            onSuccess={() => loadUsers()}
+            trigger={
+              <Button variant="outline" size="sm">
+                <IconEdit className="h-4 w-4" />
+                Edit
+              </Button>
+            }
+          />
+        </div>
       ),
     },
   ];
