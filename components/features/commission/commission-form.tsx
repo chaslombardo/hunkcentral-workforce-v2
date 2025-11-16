@@ -316,30 +316,47 @@ export function CommissionForm({
                         <Input
                           type="text"
                           inputMode="decimal"
-                          placeholder="0.00"
+                          placeholder=""
                           className="pl-10 h-12 text-lg font-medium transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
                           value={
-                            field.value === undefined ? '' : String(field.value)
+                            field.value === undefined || field.value === 0
+                              ? ''
+                              : String(field.value)
                           }
                           onChange={(e) => {
                             const rawValue = e.target.value.replace(
                               /[^0-9.]/g,
                               ''
                             );
-                            if (rawValue === '') {
-                              field.onChange(undefined as unknown as number);
+                            if (rawValue === '' || rawValue === '.') {
+                              field.onChange(0);
                               return;
                             }
                             const parsed = parseFloat(rawValue);
                             if (Number.isNaN(parsed)) {
-                              field.onChange(undefined as unknown as number);
+                              field.onChange(0);
                               return;
                             }
                             field.onChange(parsed);
                           }}
                           onBlur={() => {
                             if (typeof field.value === 'number') {
-                              field.onChange(Number(field.value.toFixed(2)));
+                              if (field.value === 0) {
+                                field.onChange(0);
+                              } else {
+                                field.onChange(Number(field.value.toFixed(2)));
+                              }
+                            }
+                          }}
+                          onFocus={(e) => {
+                            // Clear value on focus if it's 0 or empty
+                            if (
+                              field.value === 0 ||
+                              field.value === undefined
+                            ) {
+                              e.target.value = '';
+                            } else {
+                              e.target.value = String(field.value);
                             }
                           }}
                         />
