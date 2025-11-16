@@ -39,7 +39,7 @@ export function useDashboardData(userRoles?: string[]): UseDashboardDataReturn {
 
       // Handle general metrics
       if (metricsResult.status === 'fulfilled' && metricsResult.value.success) {
-        setMetrics(metricsResult.value.data);
+        setMetrics(metricsResult.value.data || null);
       } else {
         const error =
           metricsResult.status === 'rejected'
@@ -54,14 +54,17 @@ export function useDashboardData(userRoles?: string[]): UseDashboardDataReturn {
         roleResult.value?.success &&
         roleResult.value.data
       ) {
-        setRoleMetrics(roleResult.value.data);
-      } else if (roleResult.status === 'rejected' || roleResult.value?.error) {
+        setRoleMetrics(roleResult.value.data || null);
+      } else if (
+        roleResult.status === 'rejected' ||
+        (roleResult.value as any)?.error
+      ) {
         // Don't throw for role metrics, just log it
         console.warn(
           'Failed to load role-specific metrics:',
           roleResult.status === 'rejected'
             ? roleResult.reason
-            : roleResult.value?.error
+            : (roleResult.value as any)?.error || 'Unknown error occurred'
         );
       }
     } catch (err) {

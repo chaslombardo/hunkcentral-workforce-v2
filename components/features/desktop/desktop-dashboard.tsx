@@ -24,26 +24,8 @@ import { AdminChartAreaInteractive } from '../dashboard/admin-chart-area-interac
 import { AdminDataTable } from '../dashboard/admin-data-table';
 
 interface DesktopDashboardProps {
-  metrics?: {
-    pendingLogs: number;
-    commissionEntries: number;
-    activeUsers: number;
-    recentActivity: Array<{
-      id: string;
-      type: 'log' | 'commission' | 'user';
-      description: string;
-      timestamp: Date;
-      user: string;
-    }>;
-  };
-  roleMetrics?: {
-    admin?: {
-      totalRevenue: number;
-      pendingLogs: number;
-      activeUsers: number;
-      dailyTips: number;
-    };
-  };
+  metrics?: any; // DashboardMetrics
+  roleMetrics?: any; // RoleSpecificMetrics
   loading?: boolean;
   error?: string | null;
   user?: {

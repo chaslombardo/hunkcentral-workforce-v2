@@ -22,15 +22,7 @@ import {
 
 interface CaptainDesktopDashboardProps {
   metrics?: any;
-  roleMetrics?: {
-    captain?: {
-      todayRevenue: number;
-      jobsToday: number;
-      teamSize: number;
-      tipsToday: number;
-      hasPendingLog: boolean;
-    };
-  };
+  roleMetrics?: any;
   loading?: boolean;
   error?: string | null;
   user?: any;

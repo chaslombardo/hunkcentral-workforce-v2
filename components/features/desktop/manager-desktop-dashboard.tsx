@@ -22,14 +22,7 @@ import {
 
 interface ManagerDesktopDashboardProps {
   metrics?: any;
-  roleMetrics?: {
-    manager?: {
-      teamSize: number;
-      pendingLogs: number;
-      weeklyRevenue: number;
-      efficiency: number;
-    };
-  };
+  roleMetrics?: any;
   loading?: boolean;
   error?: string | null;
   user?: any;

@@ -143,13 +143,6 @@ export async function getDashboardMetrics(): Promise<{
           ? 100
           : 0;
 
-    const activeUsersChange =
-      usersLastMonth > 0
-        ? ((activeUsersCount - usersLastMonth) / usersLastMonth) * 100
-        : activeUsersCount > 0
-          ? 100
-          : 0;
-
     // Calculate active users change
     const activeUsersChange =
       usersLastMonth > 0
