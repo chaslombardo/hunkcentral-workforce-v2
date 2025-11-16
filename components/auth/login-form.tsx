@@ -90,7 +90,7 @@ export function LoginForm({
         cleanUrl.searchParams.delete('error');
         cleanUrl.searchParams.delete('callbackUrl');
         window.history.replaceState({}, document.title, cleanUrl.toString());
-        router.push(callbackUrl);
+        router.replace(cleanUrl.toString());
         router.refresh();
         return;
       }
