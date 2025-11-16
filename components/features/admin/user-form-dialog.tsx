@@ -470,19 +470,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateJunkCaptain', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          // Remove dollar sign when focusing for easier editing
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -497,18 +484,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateJunkWingman', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -523,18 +498,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateMoveCaptain', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -549,18 +512,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateMoveWingman', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -575,18 +526,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateZigma', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -601,18 +540,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateTraining', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -627,18 +554,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateEstimating', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -653,18 +568,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateWarehouse', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -679,18 +582,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('rateAdmin', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -720,18 +611,6 @@ export function UserFormDialog({
                           setValueAs: (value) =>
                             value === '' ? undefined : Number(value),
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue('salaryAmount', Number(formatted));
-                            e.target.value = `$${formatted}`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('$', '');
-                          e.target.value = value;
-                        }}
                         placeholder="0.00"
                       />
                     </div>
@@ -804,18 +683,6 @@ export function UserFormDialog({
                         setValueAs: (value) =>
                           value === '' ? undefined : Number(value),
                       })}
-                      onBlur={(e) => {
-                        const value = e.target.value;
-                        if (value && !isNaN(Number(value))) {
-                          const formatted = Number(value).toFixed(2);
-                          form.setValue('commissionRate', Number(formatted));
-                          e.target.value = `${formatted}%`;
-                        }
-                      }}
-                      onFocus={(e) => {
-                        const value = e.target.value.replace('%', '');
-                        e.target.value = value;
-                      }}
                       placeholder="0.00"
                     />
                   </div>
@@ -847,21 +714,6 @@ export function UserFormDialog({
                             return num / 100; // Convert percentage to decimal for storage
                           },
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue(
-                              'junkBonusGoal',
-                              Number(formatted) / 100
-                            );
-                            e.target.value = `${formatted}%`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('%', '');
-                          e.target.value = value;
-                        }}
                         placeholder="14"
                       />
                       <p className="text-xs text-muted-foreground">
@@ -882,21 +734,6 @@ export function UserFormDialog({
                             return num / 100; // Convert percentage to decimal for storage
                           },
                         })}
-                        onBlur={(e) => {
-                          const value = e.target.value;
-                          if (value && !isNaN(Number(value))) {
-                            const formatted = Number(value).toFixed(2);
-                            form.setValue(
-                              'moveBonusGoal',
-                              Number(formatted) / 100
-                            );
-                            e.target.value = `${formatted}%`;
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const value = e.target.value.replace('%', '');
-                          e.target.value = value;
-                        }}
                         placeholder="24"
                       />
                       <p className="text-xs text-muted-foreground">
