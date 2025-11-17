@@ -379,55 +379,16 @@ class MonitoringSystem {
     const startTime = Date.now();
 
     try {
-      // Check if we're in a server environment that supports filesystem operations
-      // Skip filesystem checks during build time in Next.js
-      if (typeof window !== 'undefined') {
-        throw new Error('File system check not available on client-side');
-      }
-
-      // Skip during ANY build process or when not in actual server runtime
-      // This prevents fs imports during Vercel builds
-      if (
-        process.env.NEXT_PHASE === 'phase-production-build' ||
-        process.env.NODE_ENV === 'production' ||
-        process.env.NODE_ENV === 'build' ||
-        !process.env.NEXT_RUNTIME ||
-        typeof process === 'undefined' ||
-        process.env.VERCEL_ENV === '1'
-      ) {
-        throw new Error('File system check skipped during build process');
-      }
-
-      // Only attempt fs import if we're definitely in server runtime
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fs = (await import('fs')) as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const path = (await import('path')) as any;
-
-      // Check if we can write to temp directory
-      const tempFile = path.join(process.cwd(), '.tmp-health-check');
-      await fs.promises.writeFile(tempFile, 'health-check');
-      await fs.promises.unlink(tempFile);
-
-      const responseTime = Date.now() - startTime;
-
-      return {
-        name: 'filesystem',
-        status: 'healthy',
-        responseTime,
-        timestamp: new Date().toISOString(),
-        details: {
-          writeAccess: true,
-          workingDirectory: process.cwd(),
-        },
-      };
+      // File system checks moved to API route to avoid client-side bundling
+      // This prevents fs module from being included in client bundles
+      throw new Error('File system checks delegated to /api/health endpoint');
     } catch (error) {
       return {
         name: 'filesystem',
-        status: 'unhealthy',
+        status: 'degraded', // Using 'degraded' since check is delegated, not failed
         responseTime: Date.now() - startTime,
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : String(error),
+        error: 'File system checks available via /api/health endpoint',
       };
     }
   }
