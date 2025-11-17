@@ -310,6 +310,7 @@ export async function submitLog(
 ): Promise<LogActionResult> {
   try {
     const session = await auth();
+    // eslint-disable-next-line no-console
     console.log(
       'SubmitLog session check:',
       session?.user?.id ? 'Session found' : 'No session'
@@ -1179,4 +1180,409 @@ export async function unapproveLog(logId: string): Promise<LogActionResult> {
       error: handleDatabaseError(error, 'unapprove log'),
     };
   }
+}
+
+/**
+ * List logs with pagination and filtering
+ */
+export async function listLogs(
+  params: ListLogsParams
+): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
+    }
+
+    const {
+      page = 1,
+      pageSize = 50,
+      search = '',
+      status = '',
+      dateRange,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = params;
+
+    // Build where clause
+    const where: any = {};
+
+    // Add status filter
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+
+    // Add date range filter
+    if (dateRange) {
+      where.logDate = {
+        gte: dateRange.start,
+        lte: dateRange.end,
+      };
+    }
+
+    // Add search filter - search across multiple fields
+    if (search) {
+      where.OR = [
+        {
+          captain: {
+            fullName: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        },
+        {
+          jobs: {
+            some: {
+              clientName: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+      ];
+    }
+
+    // Role-based access control
+    if (
+      !session.user.roles?.includes('admin') &&
+      !session.user.roles?.includes('manager')
+    ) {
+      // Non-managers can only see their own logs
+      where.createdById = session.user.id;
+    }
+
+    // Build order by clause
+    const orderBy: any = {};
+    orderBy[sortBy] = sortOrder;
+
+    // Execute query with pagination
+    const [logs, total] = await Promise.all([
+      prisma.dailyLog.findMany({
+        where,
+        include: {
+          captain: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+          jobs: {
+            select: {
+              revenue: true,
+              tips: true,
+              clientName: true,
+              jobType: true,
+            },
+          },
+          hours: {
+            include: {
+              employee: {
+                select: {
+                  id: true,
+                  fullName: true,
+                },
+              },
+            },
+          },
+          approvedBy: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+        orderBy,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.dailyLog.count({ where }),
+    ]);
+
+    // Process and format data
+    const processedLogs = logs.map((log) => ({
+      id: log.id,
+      captain: log.captain,
+      logDate: log.logDate,
+      status: log.status,
+      jobCount: log.jobs.length,
+      employeeCount: log.hours.length,
+      totalRevenue: log.jobs.reduce((sum, job) => sum + Number(job.revenue), 0),
+      totalTips: log.jobs.reduce((sum, job) => sum + Number(job.tips), 0),
+      submittedAt: log.submittedAt,
+      approvedAt: log.approvedAt,
+      approvedBy: log.approvedBy,
+      createdAt: log.createdAt,
+      updatedAt: log.updatedAt,
+      jobs: log.jobs.map((job) => ({
+        ...job,
+        revenue: Number(job.revenue),
+        tips: Number(job.tips),
+      })),
+      hours: log.hours.map((hour) => ({
+        ...hour,
+        hours: Number(hour.hours),
+      })),
+    }));
+
+    return {
+      success: true,
+      data: {
+        logs: processedLogs,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'list logs'),
+    };
+  }
+}
+
+/**
+ * Delete a draft log
+ */
+export async function deleteDraft(logId: string): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: {
+        id: true,
+        status: true,
+        createdById: true,
+        logDate: true,
+      },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    // Only allow deletion of draft logs by the creator or admins
+    if (log.status !== 'draft') {
+      return { success: false, error: 'Only draft logs can be deleted' };
+    }
+
+    if (
+      log.createdById !== session.user.id &&
+      !session.user.roles?.includes('admin')
+    ) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    // Check if data can be modified for this date
+    const canModify = await canModifyDataForDate(log.logDate);
+    if (!canModify) {
+      return {
+        success: false,
+        error: 'Cannot delete log - pay period is locked or closed',
+      };
+    }
+
+    // Use transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // Delete related records first
+      await tx.logHour.deleteMany({
+        where: { logId: logId },
+      });
+
+      await tx.logJob.deleteMany({
+        where: { logId: logId },
+      });
+
+      // Delete the log itself
+      await tx.dailyLog.delete({
+        where: { id: logId },
+      });
+
+      // Create audit log entry
+      try {
+        await logDailyLogChange(
+          'delete',
+          logId,
+          session.user.id,
+          { status: 'draft' },
+          undefined,
+          { deletedAt: new Date() }
+        );
+      } catch (auditError) {
+        console.error('Audit log creation failed:', auditError);
+      }
+    });
+
+    revalidatePath('/logs');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      data: { id: logId, deleted: true },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'delete draft'),
+    };
+  }
+}
+
+/**
+ * Quick update of log status or basic fields
+ */
+export async function quickUpdateLog(
+  logId: string,
+  updates: {
+    status?: 'draft' | 'submitted' | 'approved';
+    notes?: string;
+  }
+): Promise<LogActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Validate database connection
+    const dbConnected = await validateDatabaseConnection();
+    if (!dbConnected) {
+      return {
+        success: false,
+        error: 'Database connection unavailable. Please try again later.',
+      };
+    }
+
+    const log = await prisma.dailyLog.findUnique({
+      where: { id: logId },
+      select: {
+        id: true,
+        status: true,
+        logDate: true,
+        createdById: true,
+      },
+    });
+
+    if (!log) {
+      return { success: false, error: 'Log not found' };
+    }
+
+    // Check permissions
+    const canUpdate =
+      log.createdById === session.user.id ||
+      session.user.roles?.includes('manager') ||
+      session.user.roles?.includes('admin');
+
+    if (!canUpdate) {
+      return { success: false, error: 'Permission denied' };
+    }
+
+    // Check if data can be modified for this date
+    const canModify = await canModifyDataForDate(log.logDate);
+    if (!canModify) {
+      return {
+        success: false,
+        error: 'Cannot update log - pay period is locked or closed',
+      };
+    }
+
+    // Prevent status changes to approved without proper permissions
+    if (
+      updates.status === 'approved' &&
+      !session.user.roles?.includes('manager') &&
+      !session.user.roles?.includes('admin')
+    ) {
+      return {
+        success: false,
+        error: 'Manager or admin access required to approve logs',
+      };
+    }
+
+    const updateData: any = {
+      lastEditedById: session.user.id,
+      updatedAt: new Date(),
+    };
+
+    if (updates.status) {
+      updateData.status = updates.status;
+
+      if (updates.status === 'submitted') {
+        updateData.submittedAt = new Date();
+      } else if (updates.status === 'approved') {
+        updateData.approvedAt = new Date();
+        updateData.approvedById = session.user.id;
+      }
+    }
+
+    const updatedLog = await prisma.dailyLog.update({
+      where: { id: logId },
+      data: updateData,
+    });
+
+    // Create audit log entry
+    await logDailyLogChange(
+      'quick-update',
+      logId,
+      session.user.id,
+      { status: log.status },
+      { status: updatedLog.status },
+      updates
+    );
+
+    revalidatePath('/logs');
+    revalidatePath(`/logs/${logId}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedLog.id,
+        status: updatedLog.status,
+        updatedAt: updatedLog.updatedAt,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleDatabaseError(error, 'quick update log'),
+    };
+  }
+}
+
+// Type definitions for the new functions
+export interface ListLogsParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

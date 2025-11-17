@@ -379,18 +379,30 @@ class MonitoringSystem {
     const startTime = Date.now();
 
     try {
-      // Only run on server-side
+      // Check if we're in a server environment that supports filesystem operations
+      // Skip filesystem checks during build time in Next.js
       if (typeof window !== 'undefined') {
         throw new Error('File system check not available on client-side');
       }
 
-      const fs = await import('fs/promises');
-      const path = await import('path');
+      // Skip during build process - check for Next.js build indicators
+      if (
+        process.env.NEXT_PHASE === 'phase-production-build' ||
+        (process.env.NODE_ENV === 'production' && !process.env.NEXT_RUNTIME)
+      ) {
+        throw new Error('File system check skipped during build process');
+      }
+
+      // Use dynamic import with type assertion to avoid bundling fs
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fs = (await import('fs')) as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const path = (await import('path')) as any;
 
       // Check if we can write to temp directory
       const tempFile = path.join(process.cwd(), '.tmp-health-check');
-      await fs.writeFile(tempFile, 'health-check');
-      await fs.unlink(tempFile);
+      await fs.promises.writeFile(tempFile, 'health-check');
+      await fs.promises.unlink(tempFile);
 
       const responseTime = Date.now() - startTime;
 
