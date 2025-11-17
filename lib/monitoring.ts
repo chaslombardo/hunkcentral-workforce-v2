@@ -385,15 +385,20 @@ class MonitoringSystem {
         throw new Error('File system check not available on client-side');
       }
 
-      // Skip during build process - check for Next.js build indicators
+      // Skip during ANY build process or when not in actual server runtime
+      // This prevents fs imports during Vercel builds
       if (
         process.env.NEXT_PHASE === 'phase-production-build' ||
-        (process.env.NODE_ENV === 'production' && !process.env.NEXT_RUNTIME)
+        process.env.NODE_ENV === 'production' ||
+        process.env.NODE_ENV === 'build' ||
+        !process.env.NEXT_RUNTIME ||
+        typeof process === 'undefined' ||
+        process.env.VERCEL_ENV === '1'
       ) {
         throw new Error('File system check skipped during build process');
       }
 
-      // Use dynamic import with type assertion to avoid bundling fs
+      // Only attempt fs import if we're definitely in server runtime
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fs = (await import('fs')) as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
