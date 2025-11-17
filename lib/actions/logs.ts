@@ -1,4 +1,4 @@
-'use server';
+'use server'; // Fixed fs import issue - health checks moved to API route
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
