@@ -32,7 +32,26 @@ interface MotionWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Animation type
    */
-  type?: 'entrance' | 'exit' | 'hover' | 'focus' | 'loading' | 'success';
+  type?:
+    | 'entrance'
+    | 'exit'
+    | 'hover'
+    | 'focus'
+    | 'loading'
+    | 'success'
+    | 'explosion'
+    | 'glitch'
+    | 'shake'
+    | 'rotate'
+    | 'zoom'
+    | 'slide'
+    | 'flip'
+    | 'wave'
+    | 'elastic'
+    | 'spin'
+    | 'pulseGlow'
+    | 'slideBounce'
+    | 'morph';
   /**
    * Whether animation should run on mount
    */
@@ -129,6 +148,33 @@ export const MotionWrapper = React.forwardRef<
           return 'animate-pulse';
         case 'success':
           return 'animate-bounce';
+        // EXTREME animation types
+        case 'explosion':
+          return 'animate-in zoom-in-95 rotate-in-12';
+        case 'glitch':
+          return 'animate-bounce';
+        case 'shake':
+          return 'animate-pulse';
+        case 'rotate':
+          return 'animate-spin';
+        case 'zoom':
+          return 'animate-in zoom-in-150';
+        case 'slide':
+          return 'animate-in slide-in-from-left-8';
+        case 'flip':
+          return 'animate-in flip-in-x';
+        case 'wave':
+          return 'animate-bounce';
+        case 'elastic':
+          return 'animate-in zoom-in-75';
+        case 'spin':
+          return 'animate-spin';
+        case 'pulseGlow':
+          return 'animate-pulse';
+        case 'slideBounce':
+          return 'animate-in slide-in-from-top-4';
+        case 'morph':
+          return 'animate-in fade-in';
         default:
           return '';
       }
@@ -214,6 +260,153 @@ export const HoverMotion = React.forwardRef<
   <MotionWrapper ref={ref} type="hover" preset="gentle" {...props} />
 ));
 HoverMotion.displayName = 'HoverMotion';
+
+/**
+ * EXTREME ANIMATION COMPONENTS
+ */
+
+/**
+ * Explosion animation - dramatic zoom and rotate
+ */
+export const ExplosionMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="explosion" preset="explosion" {...props} />
+));
+ExplosionMotion.displayName = 'ExplosionMotion';
+
+/**
+ * Glitch effect - jittery digital animation
+ */
+export const GlitchMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="glitch" preset="glitch" {...props} />
+));
+GlitchMotion.displayName = 'GlitchMotion';
+
+/**
+ * Shake animation - horizontal shaking
+ */
+export const ShakeMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="shake" preset="shake" {...props} />
+));
+ShakeMotion.displayName = 'ShakeMotion';
+
+/**
+ * Rotate animation - 360 degree rotation
+ */
+export const RotateMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="rotate" preset="rotate" {...props} />
+));
+RotateMotion.displayName = 'RotateMotion';
+
+/**
+ * Zoom animation - dramatic scale
+ */
+export const ZoomMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="zoom" preset="zoom" {...props} />
+));
+ZoomMotion.displayName = 'ZoomMotion';
+
+/**
+ * Slide animation - dramatic slide from side
+ */
+export const SlideMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="slide" preset="slide" {...props} />
+));
+SlideMotion.displayName = 'SlideMotion';
+
+/**
+ * Flip animation - 3D flip effect
+ */
+export const FlipMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="flip" preset="flip" {...props} />
+));
+FlipMotion.displayName = 'FlipMotion';
+
+/**
+ * Wave animation - smooth wave motion
+ */
+export const WaveMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="wave" preset="wave" {...props} />
+));
+WaveMotion.displayName = 'WaveMotion';
+
+/**
+ * Elastic animation - bouncy elastic effect
+ */
+export const ElasticMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="elastic" preset="elastic" {...props} />
+));
+ElasticMotion.displayName = 'ElasticMotion';
+
+/**
+ * Spin animation - continuous spinning
+ */
+export const SpinMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="spin" preset="spin" {...props} />
+));
+SpinMotion.displayName = 'SpinMotion';
+
+/**
+ * Pulse glow animation - glowing pulse effect
+ */
+export const PulseGlowMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="pulseGlow" preset="pulseGlow" {...props} />
+));
+PulseGlowMotion.displayName = 'PulseGlowMotion';
+
+/**
+ * Slide bounce animation - slide with bounce
+ */
+export const SlideBounceMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="slideBounce" preset="slideBounce" {...props} />
+));
+SlideBounceMotion.displayName = 'SlideBounceMotion';
+
+/**
+ * Morph animation - shape morphing
+ */
+export const MorphMotion = React.forwardRef<
+  HTMLDivElement,
+  Omit<MotionWrapperProps, 'type'>
+>((props, ref) => (
+  <MotionWrapper ref={ref} type="morph" preset="morph" {...props} />
+));
+MorphMotion.displayName = 'MorphMotion';
 
 /**
  * Staggered animation container for lists

@@ -105,6 +105,75 @@ export const ANIMATION_PRESETS: Record<string, BaseAnimationPreset> = {
     duration: 800,
     easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', // bounce
   },
+
+  // EXTREME animations for dramatic effect
+  explosion: {
+    duration: 800,
+    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    iterations: 1,
+  },
+  glitch: {
+    duration: 300,
+    easing: 'steps(10)',
+    iterations: 3,
+  },
+  shake: {
+    duration: 500,
+    easing: 'ease-in-out',
+    iterations: 3,
+    direction: 'alternate' as const,
+  },
+  rotate: {
+    duration: 600,
+    easing: 'ease-in-out',
+    iterations: 1,
+  },
+  zoom: {
+    duration: 400,
+    easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    iterations: 1,
+  },
+  slide: {
+    duration: 700,
+    easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    iterations: 1,
+  },
+  flip: {
+    duration: 800,
+    easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    iterations: 1,
+  },
+  wave: {
+    duration: 1200,
+    easing: 'ease-in-out',
+    iterations: 1,
+  },
+  elastic: {
+    duration: 1000,
+    easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    iterations: 1,
+  },
+  spin: {
+    duration: 600,
+    easing: 'linear',
+    iterations: 1,
+  },
+  pulseGlow: {
+    duration: 1500,
+    easing: 'ease-in-out',
+    iterations: 'infinite' as const,
+    direction: 'alternate' as const,
+  },
+  slideBounce: {
+    duration: 900,
+    easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    iterations: 1,
+  },
+  morph: {
+    duration: 700,
+    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    iterations: 1,
+  },
 } as const;
 
 /**

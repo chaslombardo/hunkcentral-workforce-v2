@@ -3,21 +3,28 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
+import {
+  ExplosionMotion,
+  ZoomMotion,
+  ShakeMotion,
+  PulseGlowMotion,
+} from '@/components/ui/motion-wrapper';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:scale-105 active:scale-95',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:scale-110 hover:rotate-1 active:scale-95',
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25',
+          'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:rotate-1 active:shadow-2xl',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90 hover:shadow-lg hover:shadow-destructive/25',
+          'bg-destructive text-destructive-foreground shadow-lg hover:bg-destructive/90 hover:shadow-xl hover:shadow-destructive/30 hover:rotate-1 active:shadow-2xl',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-accent-foreground/20',
+          'border-2 border-input bg-background shadow-md hover:bg-accent hover:text-accent-foreground hover:border-accent-foreground/30 hover:shadow-lg hover:-translate-y-1',
         secondary:
-          'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md',
-        ghost: 'hover:bg-accent hover:text-accent-foreground hover:shadow-sm',
+          'bg-secondary text-secondary-foreground shadow-lg hover:bg-secondary/80 hover:shadow-xl hover:-translate-y-1',
+        ghost:
+          'hover:bg-accent hover:text-accent-foreground hover:shadow-lg hover:-translate-y-1',
         link: 'text-primary underline-offset-4 hover:underline hover:text-primary/80',
       },
       size: {
