@@ -1581,6 +1581,7 @@ export interface ListLogsParams {
   pageSize?: number;
   search?: string;
   status?: string;
+  captainId?: string;
   dateRange?: {
     start: Date;
     end: Date;

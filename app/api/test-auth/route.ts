@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 export async function GET() {
   try {
     const session = await auth();
-    console.log('Test auth session:', session);
+    console.error('Test auth session:', session);
 
     return NextResponse.json({
       success: true,

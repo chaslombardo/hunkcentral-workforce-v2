@@ -4,7 +4,8 @@ import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
+    // Unused - keeping for potential future authentication
+    await auth();
     const { searchParams } = new URL(request.url);
 
     const type = searchParams.get('type');

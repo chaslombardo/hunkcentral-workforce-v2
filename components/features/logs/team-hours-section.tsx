@@ -74,12 +74,13 @@ export function TeamHoursSection({
 
     // Filter out employees already added to this section
     const currentHourEntries = getValues('hours') || [];
+    const sectionType = title.includes('Other')
+      ? 'admin'
+      : title.includes('Junk')
+        ? 'junk'
+        : 'move';
     const alreadyAddedEmployeeIds = currentHourEntries
-      .filter(
-        (hour) =>
-          hour.department ===
-          (title.includes('Other') ? 'admin' : 'junk' || 'move')
-      )
+      .filter((hour) => hour.department === sectionType)
       .map((hour) => hour.employeeId);
 
     append({

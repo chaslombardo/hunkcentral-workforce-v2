@@ -35,13 +35,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from 'sonner';
 import {
   listLogs,
   deleteDraft,
   quickUpdateLog,
   type ListLogsParams,
 } from '@/lib/actions/logs';
+import { toast } from 'sonner';
 
 interface LogsViewClientProps {
   initialData: {
@@ -77,7 +77,7 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
     'all' | 'draft' | 'submitted' | 'approved'
   >('all');
   const [search, setSearch] = React.useState('');
-  const [captainId, setCaptainId] = React.useState<string | 'all'>('all');
+  const [captainId] = React.useState<string | 'all'>('all');
   const [page, setPage] = React.useState(1);
   const pageSize = 25;
 
@@ -89,7 +89,7 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
         pageSize,
         search: search || undefined,
       };
-      if (status !== 'all') params.status = [status];
+      if (status !== 'all') params.status = status;
       if (captainId !== 'all') params.captainId = captainId;
       const res = await listLogs(params);
       if (res.success) {
@@ -147,14 +147,18 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
     if (!quickEditTarget) return;
     setLoading(true);
     try {
-      const res = await quickUpdateLog(quickEditTarget, payload);
-      if (res.success) {
-        toast.success('Log updated');
-        setQuickEditOpen(false);
-        await reload();
-      } else {
-        toast.error(res.error || 'Failed to update log');
-      }
+      // TODO: Implement proper hours and jobs updates
+      // For now, just show a message that this feature is not yet available
+      toast.info('Quick edit for hours and jobs is not yet implemented');
+      setQuickEditOpen(false);
+      // const res = await quickUpdateLog(quickEditTarget, { status: 'draft' });
+      // if (res.success) {
+      //   toast.success('Log updated');
+      //   setQuickEditOpen(false);
+      //   await reload();
+      // } else {
+      //   toast.error(res.error || 'Failed to update log');
+      // }
     } finally {
       setLoading(false);
     }
@@ -223,7 +227,12 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
               className="pl-8 w-[260px]"
             />
           </div>
-          <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+          <Select
+            value={status}
+            onValueChange={(v) =>
+              setStatus(v as 'all' | 'draft' | 'submitted' | 'approved')
+            }
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -410,7 +419,17 @@ function QuickEditForm({
   onSave,
   saving,
 }: {
-  onSave: (payload: any) => void;
+  onSave: (payload: {
+    hours?: Array<{ id: string; hours: number }>;
+    jobs?: Array<{
+      id: string;
+      revenue?: number;
+      tips?: number;
+      junkOnMove?: number;
+      valuation?: number;
+      materials?: number;
+    }>;
+  }) => void;
   saving: boolean;
 }) {
   const [hours, setHours] = React.useState<

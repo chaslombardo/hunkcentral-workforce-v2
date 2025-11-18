@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -78,7 +78,7 @@ export function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState('7d');
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     setRefreshing(true);
     try {
       // TODO: Replace with actual analytics API call
@@ -95,11 +95,11 @@ export function AnalyticsDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [timeRange]);
 
   useEffect(() => {
     loadAnalytics();
-  }, [timeRange]);
+  }, [timeRange, loadAnalytics]);
 
   const exportData = () => {
     if (!data) return;

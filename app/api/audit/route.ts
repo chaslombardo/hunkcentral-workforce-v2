@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { AuditTrailService } from '@/lib/audit-trail';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -56,7 +56,7 @@ const AuditExportQuerySchema = z.object({
 /**
  * GET /api/audit - Search audit logs
  */
-async function handleGet(user: any, request: NextRequest) {
+async function handleGet(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin', 'manager'], {
       url: request.url,
@@ -69,7 +69,21 @@ async function handleGet(user: any, request: NextRequest) {
     const validatedQuery = AuditSearchQuerySchema.parse(queryParams);
 
     // Build filters
-    const filters: any = {
+    const filters: {
+      entityType?: string;
+      entityId?: string;
+      action?: string;
+      userId?: string;
+      searchTerm?: string;
+      page?: number;
+      limit?: number;
+      sortBy?: 'createdAt' | 'action' | 'entityType' | 'userId';
+      sortOrder?: 'asc' | 'desc';
+      dateRange?: {
+        start: Date;
+        end: Date;
+      };
+    } = {
       entityType: validatedQuery.entityType,
       entityId: validatedQuery.entityId,
       action: validatedQuery.action,
@@ -131,7 +145,7 @@ async function handleGet(user: any, request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   return withProductionApiAuth(
-    async (user: any) => {
+    async (user: SessionUser) => {
       try {
         requireAnyRole(user, ['admin', 'manager'], {
           url: request.url,
@@ -142,7 +156,17 @@ export async function POST(request: NextRequest) {
         const validatedQuery = AuditExportQuerySchema.parse(body);
 
         // Build filters for export
-        const filters: any = {
+        const filters: {
+          entityType?: string;
+          entityId?: string;
+          action?: string;
+          userId?: string;
+          searchTerm?: string;
+          dateRange?: {
+            start: Date;
+            end: Date;
+          };
+        } = {
           entityType: validatedQuery.entityType,
           entityId: validatedQuery.entityId,
           action: validatedQuery.action,
