@@ -1211,6 +1211,7 @@ export async function listLogs(
       dateRange,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      mineOnly,
     } = params;
 
     // Build where clause
@@ -1255,10 +1256,11 @@ export async function listLogs(
 
     // Role-based access control
     if (
-      !session.user.roles?.includes('admin') &&
-      !session.user.roles?.includes('manager')
+      mineOnly ||
+      (!session.user.roles?.includes('admin') &&
+        !session.user.roles?.includes('manager'))
     ) {
-      // Non-managers can only see their own logs
+      // Non-managers or when mineOnly is true can only see their own logs
       where.createdById = session.user.id;
     }
 
@@ -1585,4 +1587,5 @@ export interface ListLogsParams {
   };
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  mineOnly?: boolean;
 }
