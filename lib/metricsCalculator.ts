@@ -133,7 +133,7 @@ export async function calculatePrecomputedMetrics(
   metricType: string,
   payload: any
 ): Promise<void> {
-  console.log(`Computing ${metricType} metrics with payload:`, payload);
+  // console.log(`Computing ${metricType} metrics with payload:`, payload);
 
   try {
     let data: any;
@@ -200,7 +200,7 @@ export async function calculatePrecomputedMetrics(
       department: payload.department,
     });
 
-    console.log(`Successfully computed ${metricType} metrics`);
+    // console.log(`Successfully computed ${metricType} metrics`);
   } catch (error) {
     console.error(`Error computing ${metricType} metrics:`, error);
     throw error;

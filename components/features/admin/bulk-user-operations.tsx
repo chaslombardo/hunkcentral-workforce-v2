@@ -8,8 +8,6 @@ import {
   IconUpload,
   IconDownload,
   IconUsers,
-  IconCopy,
-  IconUserPlus,
   IconUserCheck,
   IconUserX,
   IconFileSpreadsheet,
@@ -127,7 +125,7 @@ export function BulkUserOperations({
     },
   });
 
-  const handleBulkImport = async (data: BulkImportFormData) => {
+  const handleBulkImport = async (_data: BulkImportFormData) => {
     setIsSubmitting(true);
     setUploadProgress(0);
 
@@ -157,6 +155,7 @@ export function BulkUserOperations({
       setOpen(false);
       onSuccess?.();
     } catch (error) {
+      console.error('Import failed:', error);
       toast({
         title: 'Import Failed',
         description: 'Failed to import users. Please check the file format.',
@@ -191,6 +190,7 @@ export function BulkUserOperations({
       setOpen(false);
       onSuccess?.();
     } catch (error) {
+      console.error('Role assignment failed:', error);
       toast({
         title: 'Role Assignment Failed',
         description: 'Failed to update user roles.',
@@ -217,6 +217,7 @@ export function BulkUserOperations({
       setOpen(false);
       onSuccess?.();
     } catch (error) {
+      console.error('User update failed:', error);
       toast({
         title: 'User Update Failed',
         description: 'Failed to update user status.',
@@ -250,24 +251,13 @@ export function BulkUserOperations({
         });
       }
     } catch (error) {
+      console.error('Export failed:', error);
       toast({
         title: 'Export Failed',
         description: 'Failed to export users.',
         variant: 'destructive',
       });
     }
-  };
-
-  const generateUserCSV = (users: User[]) => {
-    const headers = ['Full Name', 'Email', 'Roles', 'Created At'];
-    const rows = users.map((user) => [
-      user.fullName,
-      user.email,
-      user.roles.join(';'),
-      new Date().toISOString(), // TODO: Use actual created date
-    ]);
-
-    return [headers, ...rows].map((row) => row.join(',')).join('\n');
   };
 
   const generateUserCSVFromData = (users: any[]) => {

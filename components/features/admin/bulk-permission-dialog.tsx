@@ -121,6 +121,7 @@ export function BulkPermissionDialog({
         });
       }
     } catch (error) {
+      console.error('Bulk permission update failed:', error);
       toast({
         title: 'Error',
         description: 'Failed to update permissions',

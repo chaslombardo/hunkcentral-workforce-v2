@@ -32,16 +32,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Activity,
   AlertTriangle,
   CheckCircle,
   Clock,
   Database,
-  Globe,
   MemoryStick,
   RefreshCw,
   Server,
-  TrendingUp,
   Zap,
   XCircle,
   Bug,

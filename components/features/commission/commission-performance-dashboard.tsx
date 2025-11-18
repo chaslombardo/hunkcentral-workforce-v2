@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   format as formatDate,
   subDays,
@@ -10,15 +10,10 @@ import {
 } from 'date-fns';
 import {
   TrendingUp,
-  TrendingDown,
   DollarSign,
   Target,
   BarChart3,
-  Users,
-  Calendar,
   Download,
-  Mail,
-  Filter,
   RefreshCw,
   Award,
   Activity,
@@ -41,15 +36,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+
 import { BrandButton } from '@/components/brand/brand-button';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -100,7 +91,6 @@ interface AnalyticsData {
 }
 
 export function CommissionPerformanceDashboard({
-  currentUserId,
   userRole = [],
 }: CommissionPerformanceDashboardProps) {
   const [timeRange, setTimeRange] = useState('30days');
@@ -114,31 +104,7 @@ export function CommissionPerformanceDashboard({
   const canViewAllData =
     userRole.includes('admin') || userRole.includes('manager');
 
-  // Load analytics data
-  const loadAnalyticsData = async () => {
-    setIsLoading(true);
-    try {
-      const dateRange = getDateRange();
-      const result = await getCommissionAnalyticsData(dateRange);
-
-      if (result.success) {
-        setAnalyticsData(result.data!);
-      } else {
-        toast.error('Failed to load analytics data');
-      }
-    } catch (error) {
-      console.error('Analytics load error:', error);
-      toast.error('Failed to load analytics data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [timeRange]);
-
-  const getDateRange = () => {
+  const getDateRange = useCallback(() => {
     const now = new Date();
     switch (timeRange) {
       case '7days':
@@ -157,7 +123,31 @@ export function CommissionPerformanceDashboard({
       default:
         return { start: subDays(now, 30), end: now };
     }
-  };
+  }, [timeRange]);
+
+  // Load analytics data
+  const loadAnalyticsData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const dateRange = getDateRange();
+      const result = await getCommissionAnalyticsData(dateRange);
+
+      if (result.success) {
+        setAnalyticsData(result.data!);
+      } else {
+        toast.error('Failed to load analytics data');
+      }
+    } catch (error) {
+      console.error('Analytics load error:', error);
+      toast.error('Failed to load analytics data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [timeRange, loadAnalyticsData]);
 
   const handleExport = async (format: 'excel' | 'csv' | 'pdf') => {
     setIsExporting(true);
@@ -173,6 +163,7 @@ export function CommissionPerformanceDashboard({
       if (result.success) {
         // Create and download file
         const filename = `commission-report-${formatDate(new Date(), 'yyyy-MM-dd')}.${format}`;
+        console.log('Generated filename:', filename);
         // Implementation would depend on the specific export format
         toast.success(`Commission report exported successfully`);
       } else {
