@@ -20,6 +20,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { AuditLog } from '@/types';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 import { getAuditLogs } from '@/lib/actions/audit';
 import { ChevronLeftIcon, ChevronRightIcon, EyeIcon } from 'lucide-react';
 
@@ -232,7 +235,7 @@ export function AuditTrailViewer({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {log.changes ? (
+                    {isRecord(log.changes) ? (
                       <HoverCard>
                         <HoverCardTrigger asChild>
                           <Button variant="ghost" size="sm">

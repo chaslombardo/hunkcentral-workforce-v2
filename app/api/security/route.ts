@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { logProductionError } from '@/lib/monitoring';
 import { SecurityMonitor } from '@/lib/security';
@@ -49,7 +49,7 @@ const SecurityConfigSchema = z.object({
 /**
  * GET /api/security - Get security configuration and statistics
  */
-async function handleGet(user: any, request: NextRequest) {
+async function handleGet(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,
@@ -167,8 +167,9 @@ async function handleGet(user: any, request: NextRequest) {
     // Process blocked IPs data
     const ipCounts = new Map<string, number>();
     blockedIPs.forEach((log) => {
-      const changes = log.changes as any;
-      const identifier = changes?.metadata?.identifier;
+      const changes = log.changes as Record<string, unknown>;
+      const identifier = (changes?.metadata as Record<string, unknown>)
+        ?.identifier as string;
       if (identifier) {
         const ip = identifier.split(':')[0];
         ipCounts.set(ip, (ipCounts.get(ip) || 0) + 1);
@@ -193,8 +194,12 @@ async function handleGet(user: any, request: NextRequest) {
         action: event.action,
         timestamp: event.createdAt,
         userId: event.userId,
-        severity: (event.changes as any)?.severity || 'medium',
-        component: (event.changes as any)?.component || 'unknown',
+        severity:
+          ((event.changes as Record<string, unknown>)?.severity as string) ||
+          'medium',
+        component:
+          ((event.changes as Record<string, unknown>)?.component as string) ||
+          'unknown',
       })),
       topBlockedIPs,
       systemHealth: {
@@ -262,7 +267,7 @@ async function handleGet(user: any, request: NextRequest) {
 /**
  * PUT /api/security - Update security configuration
  */
-async function handlePut(user: any, request: NextRequest) {
+async function handlePut(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,
@@ -325,7 +330,7 @@ async function handlePut(user: any, request: NextRequest) {
 /**
  * POST /api/security - Trigger security actions (e.g., clear rate limits, reset CSRF tokens)
  */
-async function handlePost(user: any, request: NextRequest) {
+async function handlePost(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,

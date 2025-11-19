@@ -1,32 +1,25 @@
 'use client';
-
-import { DollarSign, Target, Calendar, Clock, TrendingUp } from 'lucide-react';
-import { MetricCard } from '@/components/brand/metric-card';
 import { formatCurrency } from '@/lib/formatters';
-
+import { MetricCard } from '@/components/brand/metric-card';
+import { Calendar, Clock, DollarSign, Target } from 'lucide-react';
 interface SalesMetrics {
   pendingCommissions: number;
   matchedCommissions: number;
 }
-
 interface SalesSectionCardsProps {
   metrics?: SalesMetrics;
 }
-
 export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
   // Calculate derived metrics and trends
   const pendingCommissions = metrics?.pendingCommissions || 8;
   const matchedCommissions = metrics?.matchedCommissions || 12;
-
   // Mock data for display purposes
   const totalCommissionValue = 3450;
   const monthlyTarget = 5000;
   const bookingsPipeline = 24;
   const conversionRate = 68;
-
   // Calculate performance vs target
   const targetPerformance = (totalCommissionValue / monthlyTarget) * 100;
-
   // Enhanced trend calculations
   const getCommissionTrend = () => {
     if (totalCommissionValue > 4000)
@@ -37,7 +30,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
       return { value: -18.3, type: 'decrease' as const };
     return { value: 8.7, type: 'increase' as const };
   };
-
   const getTargetTrend = () => {
     if (targetPerformance > 100)
       return { value: 12.4, type: 'increase' as const };
@@ -47,7 +39,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
       return { value: -15.2, type: 'decrease' as const };
     return { value: 2.1, type: 'increase' as const };
   };
-
   const getPipelineTrend = () => {
     if (bookingsPipeline > 30)
       return { value: 18.9, type: 'increase' as const };
@@ -57,7 +48,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
       return { value: -25.3, type: 'decrease' as const };
     return { value: 5.4, type: 'increase' as const };
   };
-
   const getPendingTrend = () => {
     if (pendingCommissions > 15)
       return { value: 28.3, type: 'increase' as const };
@@ -67,12 +57,10 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
       return { value: -100, type: 'decrease' as const };
     return { value: -12.7, type: 'decrease' as const };
   };
-
   const commissionTrend = getCommissionTrend();
   const targetTrend = getTargetTrend();
   const pipelineTrend = getPipelineTrend();
   const pendingTrend = getPendingTrend();
-
   return (
     <div className="px-4 lg:px-6">
       <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -97,7 +85,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
           onCardClick={() => (window.location.href = '/commission/list')}
           className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-0"
         />
-
         {/* Target Progress Card */}
         <MetricCard
           title="Target Progress"
@@ -128,7 +115,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
           }}
           className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100"
         />
-
         {/* Booking Pipeline Card */}
         <MetricCard
           title="Booking Pipeline"
@@ -150,7 +136,6 @@ export function SalesSectionCards({ metrics }: SalesSectionCardsProps) {
           onCardClick={() => (window.location.href = '/commission/create')}
           className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200"
         />
-
         {/* Pending Commissions Card */}
         <MetricCard
           title="Pending Commissions"

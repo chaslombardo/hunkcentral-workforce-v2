@@ -5,7 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole, canUserAccessUserData } from '@/lib/auth';
+import {
+  requireAnyRole,
+  canUserAccessUserData,
+  type SessionUser,
+} from '@/lib/auth';
 import { DataExport } from '@/lib/data-protection';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -21,7 +25,7 @@ const DataExportRequestSchema = z.object({
 /**
  * POST /api/data-protection/export - Create a data export request
  */
-async function handlePost(user: any, request: NextRequest) {
+async function handlePost(user: SessionUser, request: NextRequest) {
   try {
     const body = await request.json();
     const validatedRequest = DataExportRequestSchema.parse(body);

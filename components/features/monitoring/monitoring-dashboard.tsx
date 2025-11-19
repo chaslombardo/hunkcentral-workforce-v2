@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useMonitoring } from '@/hooks/useMonitoring';
 import {
   IconActivity,
@@ -21,13 +20,6 @@ import {
   IconCircleCheck,
   IconClock,
 } from '@tabler/icons-react';
-
-interface HealthMetric {
-  name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  responseTime?: number;
-  details?: Record<string, unknown>;
-}
 
 interface ServiceMetrics {
   database?: {

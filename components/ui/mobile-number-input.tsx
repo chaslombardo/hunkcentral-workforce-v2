@@ -59,6 +59,28 @@ export function MobileNumberInput({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Format value for display
+  const formatDisplayValue = React.useCallback(
+    (num: number): string => {
+      if (isNaN(num)) return '';
+
+      let formatted = allowDecimals
+        ? num.toString()
+        : Math.floor(num).toString();
+
+      if (thousandsSeparator && !isFocused) {
+        formatted = num.toLocaleString();
+      }
+
+      if (currency && !isFocused) {
+        return `${currencySymbol}${formatted}`;
+      }
+
+      return formatted;
+    },
+    [allowDecimals, thousandsSeparator, isFocused, currency, currencySymbol]
+  );
+
   // Update display value when value prop changes
   React.useEffect(() => {
     if (value !== undefined && !isFocused) {
@@ -66,24 +88,7 @@ export function MobileNumberInput({
     } else if (value === undefined && !isFocused) {
       setDisplayValue('');
     }
-  }, [value, isFocused]);
-
-  // Format value for display
-  const formatDisplayValue = (num: number): string => {
-    if (isNaN(num)) return '';
-
-    let formatted = allowDecimals ? num.toString() : Math.floor(num).toString();
-
-    if (thousandsSeparator && !isFocused) {
-      formatted = num.toLocaleString();
-    }
-
-    if (currency && !isFocused) {
-      return `${currencySymbol}${formatted}`;
-    }
-
-    return formatted;
-  };
+  }, [value, isFocused, formatDisplayValue]);
 
   // Parse display value to number
   const parseDisplayValue = (str: string): number | undefined => {
@@ -118,7 +123,7 @@ export function MobileNumberInput({
   };
 
   // Handle focus
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFocus = () => {
     setIsFocused(true);
     // Show raw number without formatting when focused
     if (value !== undefined) {
@@ -127,7 +132,7 @@ export function MobileNumberInput({
   };
 
   // Handle blur
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = () => {
     setIsFocused(false);
     // Reformat display value when focus is lost
     if (value !== undefined) {
@@ -264,20 +269,6 @@ export function MobilePercentageInput({
   step = 1,
   ...props
 }: MobilePercentageInputProps) {
-  const [displayValue, setDisplayValue] = React.useState('');
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  // Format value with percentage symbol
-  React.useEffect(() => {
-    if (props.value !== undefined && !isFocused && showPercentSymbol) {
-      setDisplayValue(`${props.value}%`);
-    } else if (props.value !== undefined && !isFocused) {
-      setDisplayValue(props.value.toString());
-    } else if (props.value === undefined && !isFocused) {
-      setDisplayValue('');
-    }
-  }, [props.value, isFocused, showPercentSymbol]);
-
   const handleChange = (value: number | undefined) => {
     // Ensure value is within 0-100 range for percentages
     if (value !== undefined) {
@@ -299,7 +290,7 @@ export function MobilePercentageInput({
         step={step}
         allowDecimals={true}
       />
-      {showPercentSymbol && !isFocused && (
+      {showPercentSymbol && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
           %
         </div>

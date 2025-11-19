@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import {
   Area,
@@ -18,8 +17,9 @@ import {
   IconActivity,
   IconTrendingUp,
 } from '@tabler/icons-react';
-
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -42,26 +42,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
 interface AdminMetrics {
   systemHealth: number;
   userActivity: number;
   errorRate: number;
   performanceScore: number;
 }
-
 interface AdminChartAreaInteractiveProps {
   metrics?: AdminMetrics;
 }
-
 // Sample system performance data for demonstration - TODO: Replace with real data from metrics
-const generateSampleSystemData = (metrics?: AdminMetrics) => {
+const generateSampleSystemData = () => {
   return Array.from({ length: 24 }, (_, i) => {
     const date = new Date();
     date.setHours(date.getHours() - (23 - i));
-
     // Generate realistic system performance data
     const baseHealth = 98;
     const healthVariation = (Math.random() - 0.5) * 4;
@@ -69,15 +63,12 @@ const generateSampleSystemData = (metrics?: AdminMetrics) => {
       90,
       Math.min(100, baseHealth + healthVariation)
     );
-
     const baseUsers = 35;
     const userVariation = Math.floor((Math.random() - 0.5) * 20);
     const activeUsers = Math.max(10, baseUsers + userVariation);
-
     const baseActivity = 120;
     const activityVariation = Math.floor((Math.random() - 0.5) * 60);
     const userActivity = Math.max(50, baseActivity + activityVariation);
-
     return {
       time: date.toISOString(),
       systemHealth,
@@ -90,7 +81,6 @@ const generateSampleSystemData = (metrics?: AdminMetrics) => {
     };
   });
 };
-
 const chartConfig = {
   systemPerformance: {
     label: 'System Performance',
@@ -112,25 +102,16 @@ const chartConfig = {
     color: '#8b5cf6',
   },
 } satisfies ChartConfig;
-
-export function AdminChartAreaInteractive({
-  metrics,
-}: AdminChartAreaInteractiveProps) {
+export function AdminChartAreaInteractive({}: AdminChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState('24h');
   const [chartType, setChartType] = React.useState('health');
-
   React.useEffect(() => {
     if (isMobile) {
       setTimeRange('12h');
     }
   }, [isMobile]);
-
-  const chartData = React.useMemo(
-    () => generateSampleSystemData(metrics),
-    [metrics]
-  );
-
+  const chartData = React.useMemo(() => generateSampleSystemData(), []);
   const filteredData = React.useMemo(() => {
     // Filter by time range
     const now = new Date();
@@ -140,16 +121,13 @@ export function AdminChartAreaInteractive({
     } else if (timeRange === '6h') {
       hoursToSubtract = 6;
     }
-
     const startTime = new Date(now);
     startTime.setHours(startTime.getHours() - hoursToSubtract);
-
     return chartData.filter((item) => {
       const itemTime = new Date(item.time);
       return itemTime >= startTime;
     });
   }, [chartData, timeRange]);
-
   // Calculate summary stats
   const avgSystemHealth =
     filteredData.reduce((sum, item) => sum + item.systemHealth, 0) /
@@ -163,7 +141,6 @@ export function AdminChartAreaInteractive({
   const avgErrorRate =
     filteredData.reduce((sum, item) => sum + item.errorRate, 0) /
     filteredData.length;
-
   return (
     <Card className="@container/card hunk-gradient-bg">
       <CardHeader>
@@ -182,7 +159,6 @@ export function AdminChartAreaInteractive({
                 System performance tracking
               </span>
             </CardDescription>
-
             {/* Summary Stats */}
             <div className="flex gap-4 mt-4">
               <div className="flex items-center gap-2">
@@ -225,7 +201,6 @@ export function AdminChartAreaInteractive({
               </div>
             </div>
           </div>
-
           <div className="flex gap-2">
             <Select value={chartType} onValueChange={setChartType}>
               <SelectTrigger className="w-40">
@@ -333,7 +308,6 @@ export function AdminChartAreaInteractive({
                   />
                 }
               />
-
               {/* Target health line */}
               <ReferenceLine
                 y={95}
@@ -341,7 +315,6 @@ export function AdminChartAreaInteractive({
                 strokeDasharray="5 5"
                 label={{ value: 'Target (95%)', position: 'top' }}
               />
-
               <Area
                 dataKey="systemHealth"
                 type="natural"
@@ -401,7 +374,6 @@ export function AdminChartAreaInteractive({
                   />
                 }
               />
-
               <Area
                 dataKey="userActivity"
                 type="natural"
@@ -456,7 +428,6 @@ export function AdminChartAreaInteractive({
                   />
                 }
               />
-
               {/* Target response time line */}
               <ReferenceLine
                 y={50}
@@ -464,7 +435,6 @@ export function AdminChartAreaInteractive({
                 strokeDasharray="5 5"
                 label={{ value: 'Target (50ms)', position: 'top' }}
               />
-
               <Line
                 dataKey="responseTime"
                 type="monotone"

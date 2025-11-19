@@ -46,6 +46,20 @@ export interface DashboardMetrics {
   }>;
 }
 
+const isDashboardMetrics = (value: unknown): value is DashboardMetrics => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as Partial<DashboardMetrics>;
+  return (
+    typeof candidate.pendingLogs === 'object' &&
+    typeof candidate.commissionEntries === 'object' &&
+    typeof candidate.activeUsers === 'object' &&
+    typeof candidate.currentPayPeriod === 'object' &&
+    Array.isArray(candidate.recentActivity)
+  );
+};
+
 export async function getDashboardMetrics(): Promise<{
   success: boolean;
   data?: DashboardMetrics;
@@ -65,12 +79,9 @@ export async function getDashboardMetrics(): Promise<{
     );
 
     // If we have cached data, return it (intelligent cache handles warming)
-    if (cachedMetrics) {
+    if (cachedMetrics && isDashboardMetrics(cachedMetrics)) {
       return { success: true, data: cachedMetrics };
     }
-
-    // No cached data available - use direct queries (optimization integrated)
-    const optimizedData = null; // Use fallback individual queries
 
     // Fallback to individual queries
     const now = new Date();
@@ -291,10 +302,14 @@ export interface RoleSpecificMetrics {
   admin?: {
     systemHealth: number;
     userActivity: number;
+    logVolume: number;
     errorRate: number;
     performanceScore: number;
   };
 }
+
+const isRoleSpecificMetrics = (value: unknown): value is RoleSpecificMetrics =>
+  typeof value === 'object' && value !== null;
 
 // Get role-specific metrics for different user types
 export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
@@ -329,7 +344,8 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
       // Check if cached metrics are fresh (within 15 minutes for user-specific data)
       if (
         cachedMetrics &&
-        areMetricsFresh(new Date(cachedMetrics.computedAt), 15)
+        areMetricsFresh(new Date(cachedMetrics.computedAt), 15) &&
+        isRoleSpecificMetrics(cachedMetrics.data)
       ) {
         return { success: true, data: cachedMetrics.data };
       }
@@ -607,6 +623,7 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
       metrics.admin = {
         systemHealth: 0, // Will be populated by monitoring service
         userActivity: totalUsers,
+        logVolume: totalLogs,
         errorRate: 0, // Will be populated by error tracking service
         performanceScore: 0, // Will be populated by performance monitoring
       };
@@ -628,6 +645,11 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
 /**
  * Get database performance alerts for admin dashboard
  */
+interface QueryStatsSummary {
+  avgResponseTime: number;
+  slowQueries: number;
+}
+
 export async function getDatabasePerformanceAlerts(): Promise<{
   success: boolean;
   data?: {
@@ -641,7 +663,7 @@ export async function getDatabasePerformanceAlerts(): Promise<{
       timestamp: Date;
     }>;
     recommendations: string[];
-    queryStats: any;
+    queryStats: QueryStatsSummary;
   };
   error?: string;
 }> {
@@ -662,7 +684,12 @@ export async function getDatabasePerformanceAlerts(): Promise<{
     }
 
     // Get performance summary and alerts (integrated functionality)
-    const performanceSummary = {
+    const performanceSummary: {
+      health: 'good' | 'warning' | 'critical';
+      activeAlerts: number;
+      recommendations: string[];
+      queryStats: QueryStatsSummary;
+    } = {
       health: 'good' as const,
       activeAlerts: 0,
       recommendations: ['Database performance is within normal parameters'],

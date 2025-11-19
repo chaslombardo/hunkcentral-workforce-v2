@@ -52,6 +52,16 @@ interface SystemStatus {
   timestamp: string;
 }
 
+function isSystemStatus(data: unknown): data is SystemStatus {
+  if (!data || typeof data !== 'object') return false;
+  const status = data as Record<string, unknown>;
+  return (
+    typeof status.system === 'object' &&
+    status.system !== null &&
+    typeof (status.system as Record<string, unknown>).initialized === 'boolean'
+  );
+}
+
 export function BackgroundJobsMonitor() {
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,9 +75,11 @@ export function BackgroundJobsMonitor() {
       setError(null);
       const result = await getBackgroundJobSystemStatus();
 
-      if (result.success) {
+      if (result.success && isSystemStatus(result.data)) {
         setStatus(result.data);
         setLastRefresh(new Date());
+      } else if (result.success) {
+        setError('Received unexpected system status payload');
       } else {
         setError(result.error || 'Failed to fetch status');
       }
@@ -86,7 +98,10 @@ export function BackgroundJobsMonitor() {
   }, []);
 
   // Handle system actions
-  const handleAction = async (action: string, actionFn: () => Promise<any>) => {
+  const handleAction = async (
+    action: string,
+    actionFn: () => Promise<{ success: boolean; error?: string }>
+  ) => {
     setActionLoading(action);
     setError(null);
 

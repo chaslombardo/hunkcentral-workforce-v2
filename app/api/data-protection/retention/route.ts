@@ -5,14 +5,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { DataRetention } from '@/lib/data-protection';
 import { logProductionError } from '@/lib/monitoring';
 
 /**
  * GET /api/data-protection/retention - Get current retention policies
  */
-async function handleGet(user: any, request: NextRequest) {
+async function handleGet(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,
@@ -79,7 +79,7 @@ async function handleGet(user: any, request: NextRequest) {
 /**
  * POST /api/data-protection/retention - Apply retention policies
  */
-async function handlePost(user: any, request: NextRequest) {
+async function handlePost(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,

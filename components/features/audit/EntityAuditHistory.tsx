@@ -17,6 +17,9 @@ import { AuditLog } from '@/types';
 import { getEntityAuditHistory } from '@/lib/actions/audit';
 import { ClockIcon } from 'lucide-react';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 interface EntityAuditHistoryProps {
   entityType: string;
   entityId: string;
@@ -222,7 +225,7 @@ export function EntityAuditHistory({
                       </span>
                     </div>
 
-                    {log.changes && (
+                    {isRecord(log.changes) && (
                       <div className="bg-muted/50 rounded-md p-3">
                         {renderChanges(log.changes)}
                       </div>

@@ -49,7 +49,6 @@ async function checkDatabase() {
     // eslint-disable-next-line no-console
     console.log('\n✅ Database check completed successfully');
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('❌ Database check failed:', error);
   } finally {
     await prisma.$disconnect();

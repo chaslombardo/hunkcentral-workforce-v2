@@ -43,8 +43,17 @@ interface CaptainChartAreaInteractiveProps {
 
 // Sample labor cost data for demonstration - TODO: Replace with real data from metrics
 const generateSampleLaborData = (metrics?: CaptainMetrics) => {
-  const baseJunkPercent = 13.5;
-  const baseMovePercent = 23.2;
+  const baseJunkPercent = metrics?.laborCostPercent ?? 13.5;
+  const baseMovePercent =
+    metrics?.laborCostPercent !== undefined
+      ? Math.min(Math.max(metrics.laborCostPercent + 10, 18), 30)
+      : 23.2;
+  const baseRevenue = metrics?.currentPayPeriodRevenue
+    ? metrics.currentPayPeriodRevenue / 14
+    : 2000;
+  const baseTips = metrics?.currentPayPeriodTips
+    ? metrics.currentPayPeriodTips / 14
+    : 150;
 
   return Array.from({ length: 14 }, (_, i) => {
     const date = new Date();
@@ -64,8 +73,11 @@ const generateSampleLaborData = (metrics?: CaptainMetrics) => {
         18,
         Math.min(30, baseMovePercent + moveVariation)
       ),
-      junkRevenue: Math.floor(Math.random() * 2000) + 1000,
-      moveRevenue: Math.floor(Math.random() * 3000) + 1500,
+      junkRevenue:
+        Math.floor(Math.random() * (baseRevenue * 0.6)) + baseRevenue * 0.4,
+      moveRevenue:
+        Math.floor(Math.random() * (baseRevenue * 0.8)) + baseRevenue * 0.5,
+      tips: Math.floor(Math.random() * (baseTips * 0.5)) + baseTips * 0.75,
     };
   });
 };

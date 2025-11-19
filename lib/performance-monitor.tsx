@@ -249,6 +249,10 @@ export const bundleAnalysis = {
   ) => {
     if (process.env.NODE_ENV !== 'development') return;
 
+    void componentName;
+    void variant;
+    void props;
+
     // Bundle analysis removed for simplification
   },
 };

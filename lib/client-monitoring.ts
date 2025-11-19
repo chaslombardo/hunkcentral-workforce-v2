@@ -343,11 +343,14 @@ class ClientMonitoring {
                 (entry as PerformanceEventTiming).processingStart -
                   entry.startTime
               );
-            } else if (
-              entry.entryType === 'layout-shift' &&
-              !(entry as any).hadRecentInput
-            ) {
-              this.trackMetric('cls', (entry as any).value);
+            } else if (entry.entryType === 'layout-shift') {
+              const layoutShift = entry as PerformanceEntry & {
+                value?: number;
+                hadRecentInput?: boolean;
+              };
+              if (!layoutShift.hadRecentInput) {
+                this.trackMetric('cls', layoutShift.value ?? 0);
+              }
             }
           }
         });

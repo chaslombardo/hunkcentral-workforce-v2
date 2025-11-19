@@ -5,12 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
+  CardAction,
 } from '@/components/ui/card';
 import {
   Select,
@@ -20,7 +19,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,7 +30,6 @@ import {
   Award,
   AlertCircle,
   AlertTriangle,
-  Shield,
   RefreshCw,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -41,22 +38,12 @@ import {
   DepartmentBreakdown,
   type DepartmentBreakdownData,
 } from './payroll-breakdown/department-breakdown';
-import { RateInformationPanel } from './payroll-breakdown/rate-information-panel';
-import { DailyWorkCalendar } from './payroll-breakdown/daily-work-calendar';
-import { TipsDetailView } from './payroll-breakdown/tips-detail-view';
-import { PayPeriodAnalysis } from './payroll-breakdown/pay-period-analysis';
-import { PayrollValidationPanel } from './payroll-breakdown/payroll-validation-panel';
 import { PayrollExportDialog } from './payroll-export-dialog';
 import { DiscrepancyReportDialog } from './discrepancy-report-dialog';
 
-import {
-  PayrollErrorBoundary,
-  PayrollComponentErrorBoundary,
-} from './payroll-error-boundary';
+import { PayrollErrorBoundary } from './payroll-error-boundary';
 import {
   DepartmentBreakdownFallback,
-  DailyWorkFallback,
-  TipsDetailFallback,
   PayrollLoadingSkeleton,
 } from './payroll-fallback-views';
 import type { TipEntry } from '@/lib/payCalculator';
@@ -163,7 +150,6 @@ export function MyPayrollView({
     initialPayPeriod || null
   );
   const [payPeriods, setPayPeriods] = React.useState<PayPeriod[]>([]);
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [activeTab, setActiveTab] = React.useState('breakdown');
   const [showExportDialog, setShowExportDialog] = React.useState(false);
   const [showDiscrepancyDialog, setShowDiscrepancyDialog] =
@@ -226,7 +212,6 @@ export function MyPayrollView({
   const [summaryError, setSummaryError] = React.useState<string | null>(null);
   const [detailsError, setDetailsError] = React.useState<string | null>(null);
   const [summaryRetryCount, setSummaryRetryCount] = React.useState(0);
-  const [detailsRetryCount, setDetailsRetryCount] = React.useState(0);
 
   // Enhanced summary data loading with retry logic and better error handling
   React.useEffect(() => {
@@ -396,7 +381,6 @@ export function MyPayrollView({
         };
 
         setDetailedData(formattedData);
-        setDetailsRetryCount(0);
 
         // Cache the data
         const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
@@ -493,106 +477,6 @@ export function MyPayrollView({
     }
   }, [selectedPeriod, userId]);
 
-  const retryDetails = React.useCallback(async () => {
-    // Simplified retry - just reload the data
-    if (!selectedPeriod || !userId) return;
-
-    setIsLoadingDetails(true);
-    setDetailsError(null);
-
-    try {
-      const response = await fetch(
-        `/api/payroll/detailed?employeeId=${userId}&payPeriodId=${selectedPeriod.id}`
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || 'Failed to load detailed payroll data'
-        );
-      }
-
-      const enhancedData = await response.json();
-
-      const formattedData: DetailedPayrollData = {
-        departmentBreakdown: enhancedData.departmentBreakdown.map(
-          (dept: ApiDepartmentData) => ({
-            department: dept.department,
-            hours: dept.hours,
-            rate: dept.rate,
-            grossPay: dept.grossPay,
-            percentage: dept.percentage,
-            isPrimary: dept.isPrimary,
-          })
-        ),
-        dailyWorkHistory: enhancedData.dailyWorkHistory.map(
-          (day: ApiDayData) => ({
-            date: new Date(day.date),
-            logId: day.logIds[0] || '',
-            departments: day.departments.map(
-              (dept: { department: string; hours: number; rate: number }) => ({
-                department: dept.department,
-                hours: dept.hours,
-                rate: dept.rate,
-                role: day.role,
-              })
-            ),
-            tips: day.tips,
-            totalHours: day.departments.reduce(
-              (sum: number, dept: { hours: number }) => sum + dept.hours,
-              0
-            ),
-            grossPay: day.departments.reduce(
-              (sum: number, dept: { hours: number; rate: number }) =>
-                sum + dept.hours * dept.rate,
-              0
-            ),
-            jobsCompleted: 1, // Simplified - could be enhanced
-          })
-        ),
-        tipsDetails: enhancedData.tipsDetails.map((tip: ApiTipData) => ({
-          ...tip,
-          date: new Date(tip.date),
-        })),
-        workPatternStats: {
-          totalDaysWorked: enhancedData.dailyWorkHistory.length,
-          avgHoursPerDay:
-            enhancedData.totalHours /
-            Math.max(enhancedData.dailyWorkHistory.length, 1),
-          mostCommonDepartment:
-            enhancedData.departmentBreakdown[0]?.department || 'admin',
-          totalJobsCompleted: enhancedData.dailyWorkHistory.length, // Simplified
-          avgTipsPerDay:
-            enhancedData.tips /
-            Math.max(enhancedData.dailyWorkHistory.length, 1),
-          busiestDay: new Date(
-            enhancedData.dailyWorkHistory[0]?.date || new Date()
-          ),
-          highestTipDay: new Date(
-            enhancedData.dailyWorkHistory[0]?.date || new Date()
-          ),
-          highestPayDay: new Date(
-            enhancedData.dailyWorkHistory[0]?.date || new Date()
-          ),
-        },
-        validationResult: undefined,
-      };
-
-      setDetailedData(formattedData);
-      setDetailsRetryCount(0);
-
-      // Cache the data
-      const cacheKey = `payroll-details-${selectedPeriod.id}-${activeTab}`;
-      localStorage.setItem(cacheKey, JSON.stringify(formattedData));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to load detailed data';
-      setDetailsError(errorMessage);
-    } finally {
-      setIsLoadingDetails(false);
-    }
-  }, [activeTab, selectedPeriod, userId]);
-
   // Handle discrepancy reporting
   const handleReportDiscrepancy = React.useCallback(
     (errors: ValidationError[]) => {
@@ -646,11 +530,6 @@ export function MyPayrollView({
     },
     [userId, selectedPeriod, discrepancyErrors]
   );
-
-  const handleViewAuditTrail = React.useCallback(() => {
-    // Navigate to audit trail or show detailed view
-    // TODO: Implement audit trail navigation
-  }, []);
 
   return (
     <PayrollErrorBoundary>

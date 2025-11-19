@@ -143,7 +143,7 @@ export function CommissionPerformanceDashboard({
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getDateRange]);
 
   useEffect(() => {
     loadAnalyticsData();
@@ -163,7 +163,7 @@ export function CommissionPerformanceDashboard({
       if (result.success) {
         // Create and download file
         const filename = `commission-report-${formatDate(new Date(), 'yyyy-MM-dd')}.${format}`;
-        console.log('Generated filename:', filename);
+        console.warn('Generated filename:', filename);
         // Implementation would depend on the specific export format
         toast.success(`Commission report exported successfully`);
       } else {

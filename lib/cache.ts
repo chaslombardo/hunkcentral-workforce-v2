@@ -1,6 +1,6 @@
 // Unified Caching System for HUNKCentral
 // Consolidates intelligent caching strategies with smart invalidation
-
+import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
 import {
   getCachedMetrics,
@@ -10,12 +10,10 @@ import {
 import {
   triggerDashboardMetricsComputation,
   triggerPayrollMetricsComputation,
-  triggerLaborCostMetricsComputation,
   triggerCommissionMetricsComputation,
   triggerUserPerformanceComputation,
   invalidateMetricsCache,
 } from './backgroundJobs';
-
 // Cache configuration
 export interface CacheConfig {
   ttl: number;
@@ -24,7 +22,6 @@ export interface CacheConfig {
   priority: 'low' | 'medium' | 'high' | 'critical';
   dependencies: string[];
 }
-
 // Invalidation rules
 export interface InvalidationRule {
   trigger: string;
@@ -33,6 +30,16 @@ export interface InvalidationRule {
   priority: 'low' | 'medium' | 'high' | 'critical';
 }
 
+type CacheContext = Record<string, unknown>;
+
+interface CachedMetricSummary {
+  metricType: string;
+  entityType: string | null;
+  entityId: string | null;
+  payPeriodId: string | null;
+  department: string | null;
+  computedAt: Date;
+}
 // Cache configurations
 const CACHE_CONFIGS: Record<string, CacheConfig> = {
   dashboard_global: {
@@ -106,7 +113,6 @@ const CACHE_CONFIGS: Record<string, CacheConfig> = {
     dependencies: ['payroll_summary'],
   },
 };
-
 // Invalidation rules
 const INVALIDATION_RULES: InvalidationRule[] = [
   {
@@ -165,19 +171,17 @@ const INVALIDATION_RULES: InvalidationRule[] = [
     priority: 'critical',
   },
 ];
-
 // Unified cache service
 export class UnifiedCacheService {
   private warmupInProgress = new Set<string>();
   private preloadInProgress = new Set<string>();
-
   async getCachedData(
     metricType: string,
     entityType?: string,
     entityId?: string,
     payPeriodId?: string,
     department?: string
-  ): Promise<any | null> {
+  ): Promise<unknown | null> {
     const config = CACHE_CONFIGS[metricType] || this.getDefaultConfig();
     const cachedData = await getCachedMetrics(
       metricType,
@@ -186,7 +190,6 @@ export class UnifiedCacheService {
       payPeriodId,
       department
     );
-
     if (!cachedData) {
       this.triggerComputation(
         metricType,
@@ -198,11 +201,9 @@ export class UnifiedCacheService {
       );
       return null;
     }
-
     const computedAt = new Date(cachedData.computedAt);
     const ageMinutes =
       (new Date().getTime() - computedAt.getTime()) / (1000 * 60);
-
     if (areMetricsFresh(computedAt, config.ttl)) {
       if (ageMinutes >= config.ttl - config.warmupThreshold) {
         this.scheduleWarmup(
@@ -216,7 +217,6 @@ export class UnifiedCacheService {
       }
       return cachedData.data;
     }
-
     this.triggerComputation(
       metricType,
       entityType,
@@ -227,30 +227,26 @@ export class UnifiedCacheService {
     );
     return cachedData.data;
   }
-
   async handleDataChange(
     trigger: string,
     entityId: string,
-    additionalData?: any
+    additionalData?: CacheContext
   ): Promise<void> {
     const applicableRules = INVALIDATION_RULES.filter(
       (rule) => rule.trigger === trigger
     );
     if (applicableRules.length === 0) return;
-
     const promises = applicableRules.map((rule) =>
       this.processInvalidationRule(rule, entityId, additionalData)
     );
     await Promise.all(promises);
   }
-
   async invalidateWithDependencies(
     metricType: string,
     entityId?: string
   ): Promise<void> {
-    const config = CACHE_CONFIGS[metricType];
+    const config = CACHE_CONFIGS[metricType] || this.getDefaultConfig();
     if (!config) return;
-
     await this.invalidateCache(metricType, entityId);
     for (const dependentType of config.dependencies) {
       await this.invalidateCache(dependentType, entityId);
@@ -261,9 +257,8 @@ export class UnifiedCacheService {
       }
     }
   }
-
   async preloadCache(): Promise<void> {
-    console.log('Starting cache preloading...');
+    console.warn('Starting cache preloading...');
     const activeUsers = await prisma.user.findMany({
       where: {
         OR: [
@@ -284,12 +279,10 @@ export class UnifiedCacheService {
       select: { id: true, roles: true },
       take: 20,
     });
-
     const currentPayPeriod = await prisma.payPeriod.findFirst({
       where: { status: 'open' },
       orderBy: { startDate: 'desc' },
     });
-
     const preloadTasks: Promise<void>[] = [];
     for (const [metricType, config] of Object.entries(CACHE_CONFIGS)) {
       if (config.preloadEnabled && metricType === 'dashboard_global') {
@@ -303,11 +296,10 @@ export class UnifiedCacheService {
         );
       }
     }
-
     for (const user of activeUsers) {
       const userMetricTypes = this.getUserMetricTypes(user.roles);
       for (const metricType of userMetricTypes) {
-        const config = CACHE_CONFIGS[metricType];
+        const config = CACHE_CONFIGS[metricType] || this.getDefaultConfig();
         if (config?.preloadEnabled) {
           preloadTasks.push(
             this.preloadMetric(
@@ -320,16 +312,13 @@ export class UnifiedCacheService {
         }
       }
     }
-
     await this.executeConcurrentTasks(preloadTasks, 5);
-    console.log(`Cache preloading completed: ${preloadTasks.length} tasks`);
+    console.warn(`Cache preloading completed: ${preloadTasks.length} tasks`);
   }
-
   async warmupCache(): Promise<void> {
-    console.log('Starting cache warmup...');
+    console.warn('Starting cache warmup...');
     const approachingExpiry = await this.getMetricsApproachingExpiry();
     const warmupTasks: Promise<void>[] = [];
-
     for (const metric of approachingExpiry) {
       const config =
         CACHE_CONFIGS[metric.metricType] || this.getDefaultConfig();
@@ -340,7 +329,6 @@ export class UnifiedCacheService {
         metric.payPeriodId,
         metric.department
       );
-
       if (!this.warmupInProgress.has(cacheKey)) {
         warmupTasks.push(
           this.warmupMetric(
@@ -355,18 +343,15 @@ export class UnifiedCacheService {
         );
       }
     }
-
     await this.executeConcurrentTasks(warmupTasks, 3);
-    console.log(`Cache warmup completed: ${warmupTasks.length} tasks`);
+    console.warn(`Cache warmup completed: ${warmupTasks.length} tasks`);
   }
-
   async cleanupExpiredMetrics(): Promise<void> {
     const deletedCount = await prisma.precomputedMetric.deleteMany({
       where: { expiresAt: { lt: new Date() } },
     });
-    console.log(`Cleaned up ${deletedCount.count} expired metrics`);
+    console.warn(`Cleaned up ${deletedCount.count} expired metrics`);
   }
-
   async getCacheHealthMetrics(): Promise<{
     totalMetrics: number;
     expiredMetrics: number;
@@ -375,26 +360,21 @@ export class UnifiedCacheService {
     newestMetric: Date | null;
   }> {
     const totalMetrics = await prisma.precomputedMetric.count();
-
     const expiredMetrics = await prisma.precomputedMetric.count({
       where: { expiresAt: { lt: new Date() } },
     });
-
     const metricsByType = await prisma.precomputedMetric.groupBy({
       by: ['metricType'],
       _count: { metricType: true },
     });
-
     const oldestMetric = await prisma.precomputedMetric.findFirst({
       orderBy: { computedAt: 'asc' },
       select: { computedAt: true },
     });
-
     const newestMetric = await prisma.precomputedMetric.findFirst({
       orderBy: { computedAt: 'desc' },
       select: { computedAt: true },
     });
-
     return {
       totalMetrics,
       expiredMetrics,
@@ -409,7 +389,6 @@ export class UnifiedCacheService {
       newestMetric: newestMetric?.computedAt || null,
     };
   }
-
   // Private methods
   private getDefaultConfig(): CacheConfig {
     return {
@@ -420,7 +399,6 @@ export class UnifiedCacheService {
       dependencies: [],
     };
   }
-
   private buildCacheKey(
     metricType: string,
     entityType?: string | null,
@@ -430,7 +408,6 @@ export class UnifiedCacheService {
   ): string {
     return `${metricType}-${entityType || 'null'}-${entityId || 'null'}-${payPeriodId || 'null'}-${department || 'null'}`;
   }
-
   private getUserMetricTypes(roles: string[]): string[] {
     const metricTypes: string[] = [];
     if (roles.includes('captain'))
@@ -441,7 +418,6 @@ export class UnifiedCacheService {
     if (roles.includes('admin')) metricTypes.push('dashboard_admin');
     return metricTypes;
   }
-
   private async preloadMetric(
     metricType: string,
     entityType?: string,
@@ -449,6 +425,7 @@ export class UnifiedCacheService {
     payPeriodId?: string,
     department?: string
   ): Promise<void> {
+    const config = CACHE_CONFIGS[metricType] || this.getDefaultConfig();
     const cacheKey = this.buildCacheKey(
       metricType,
       entityType,
@@ -457,7 +434,6 @@ export class UnifiedCacheService {
       department
     );
     if (this.preloadInProgress.has(cacheKey)) return;
-
     this.preloadInProgress.add(cacheKey);
     try {
       const existing = await getCachedMetrics(
@@ -467,7 +443,6 @@ export class UnifiedCacheService {
         payPeriodId,
         department
       );
-      const config = CACHE_CONFIGS[metricType] || this.getDefaultConfig();
       if (
         existing &&
         areMetricsFresh(new Date(existing.computedAt), config.ttl)
@@ -485,7 +460,6 @@ export class UnifiedCacheService {
       this.preloadInProgress.delete(cacheKey);
     }
   }
-
   private async getMetricsApproachingExpiry(): Promise<
     Array<{
       metricType: string;
@@ -497,7 +471,7 @@ export class UnifiedCacheService {
     }>
   > {
     const now = new Date();
-    const approaching: any[] = [];
+    const approaching: CachedMetricSummary[] = [];
     const allMetrics = await prisma.precomputedMetric.findMany({
       select: {
         metricType: true,
@@ -508,20 +482,19 @@ export class UnifiedCacheService {
         computedAt: true,
       },
     });
-
     for (const metric of allMetrics) {
-      const config = CACHE_CONFIGS[metric.metricType];
+      const config =
+        CACHE_CONFIGS[metric.metricType] || this.getDefaultConfig();
       if (!config) continue;
       const ageMinutes =
         (now.getTime() - metric.computedAt.getTime()) / (1000 * 60);
       const warmupThreshold = config.ttl - config.warmupThreshold;
       if (ageMinutes >= warmupThreshold && ageMinutes < config.ttl) {
-        approaching.push(metric);
+        approaching.push(metric as CachedMetricSummary);
       }
     }
     return approaching;
   }
-
   private async executeConcurrentTasks(
     tasks: Promise<void>[],
     concurrency: number
@@ -538,7 +511,6 @@ export class UnifiedCacheService {
     }
     await Promise.all(executing);
   }
-
   private async scheduleWarmup(
     metricType: string,
     entityType?: string,
@@ -567,7 +539,6 @@ export class UnifiedCacheService {
       );
     }, 1000);
   }
-
   private async warmupMetric(
     cacheKey: string,
     metricType: string,
@@ -580,20 +551,19 @@ export class UnifiedCacheService {
     if (this.warmupInProgress.has(cacheKey)) return;
     this.warmupInProgress.add(cacheKey);
     try {
-      const priority = config?.priority || 'medium';
+      const warmupPriority = config?.priority ?? 'medium';
       await this.triggerComputation(
         metricType,
         entityType,
         entityId,
         payPeriodId,
         department,
-        priority
+        warmupPriority
       );
     } finally {
       this.warmupInProgress.delete(cacheKey);
     }
   }
-
   private async triggerComputation(
     metricType: string,
     entityType?: string | null,
@@ -644,11 +614,10 @@ export class UnifiedCacheService {
       console.error(`Failed to trigger computation for ${metricType}:`, error);
     }
   }
-
   private async processInvalidationRule(
     rule: InvalidationRule,
     entityId: string,
-    additionalData?: any
+    additionalData?: CacheContext
   ): Promise<void> {
     for (const metricType of rule.affectedMetrics) {
       switch (rule.scope) {
@@ -672,14 +641,15 @@ export class UnifiedCacheService {
         case 'department':
           await this.invalidateDepartmentMetrics(
             metricType,
-            additionalData?.department,
-            rule.priority
+            rule.priority,
+            typeof additionalData?.department === 'string'
+              ? (additionalData.department as string)
+              : undefined
           );
           break;
       }
     }
   }
-
   private async invalidateUserMetrics(
     metricType: string,
     userId: string,
@@ -708,55 +678,53 @@ export class UnifiedCacheService {
         break;
     }
   }
-
   private async invalidateGlobalMetrics(
     metricType: string,
     triggerEntityId: string,
     priority: 'low' | 'medium' | 'high' | 'critical'
   ): Promise<void> {
+    void triggerEntityId;
+    void priority;
     await invalidateMetricsCache(metricType);
   }
-
   private async invalidatePayPeriodMetrics(
     metricType: string,
     payPeriodId: string,
     priority: 'low' | 'medium' | 'high' | 'critical'
   ): Promise<void> {
+    void priority;
     await prisma.precomputedMetric.deleteMany({
       where: { metricType, payPeriodId },
     });
   }
-
   private async invalidateDepartmentMetrics(
     metricType: string,
-    department: string,
-    priority: 'low' | 'medium' | 'high' | 'critical'
+    priority: 'low' | 'medium' | 'high' | 'critical',
+    department?: string
   ): Promise<void> {
+    void priority;
+    if (!department) return;
     await prisma.precomputedMetric.deleteMany({
       where: { metricType, department },
     });
   }
-
   private async getCurrentPayPeriod() {
     return await prisma.payPeriod.findFirst({
       where: { status: 'open' },
       orderBy: { startDate: 'desc' },
     });
   }
-
   private async invalidateCache(
     metricType: string,
     entityId?: string
   ): Promise<void> {
-    const whereClause: any = { metricType };
+    const whereClause: Prisma.PrecomputedMetricWhereInput = { metricType };
     if (entityId) whereClause.entityId = entityId;
     await prisma.precomputedMetric.deleteMany({ where: whereClause });
   }
 }
-
 // Global cache service instance
 export const unifiedCache = new UnifiedCacheService();
-
 // Export helper functions
 export async function getCachedDataWithWarming(
   metricType: string,
@@ -764,7 +732,7 @@ export async function getCachedDataWithWarming(
   entityId?: string,
   payPeriodId?: string,
   department?: string
-): Promise<any | null> {
+): Promise<unknown | null> {
   return unifiedCache.getCachedData(
     metricType,
     entityType,
@@ -773,22 +741,19 @@ export async function getCachedDataWithWarming(
     department
   );
 }
-
 export async function invalidateCacheWithDependencies(
   metricType: string,
   entityId?: string
 ): Promise<void> {
   return unifiedCache.invalidateWithDependencies(metricType, entityId);
 }
-
 export async function handleDataChange(
   trigger: string,
   entityId: string,
-  additionalData?: any
+  additionalData?: CacheContext
 ): Promise<void> {
   return unifiedCache.handleDataChange(trigger, entityId, additionalData);
 }
-
 // Specific invalidation handlers
 export async function onLogCreated(logId: string): Promise<void> {
   const log = await prisma.dailyLog.findUnique({
@@ -797,7 +762,6 @@ export async function onLogCreated(logId: string): Promise<void> {
   });
   if (log) await handleDataChange('dailyLog.created', log.captainId);
 }
-
 export async function onLogUpdated(logId: string): Promise<void> {
   const log = await prisma.dailyLog.findUnique({
     where: { id: logId },
@@ -805,7 +769,6 @@ export async function onLogUpdated(logId: string): Promise<void> {
   });
   if (log) await handleDataChange('dailyLog.updated', log.captainId);
 }
-
 export async function onLogApproved(logId: string): Promise<void> {
   const log = await prisma.dailyLog.findUnique({
     where: { id: logId },
@@ -813,7 +776,6 @@ export async function onLogApproved(logId: string): Promise<void> {
   });
   if (log) await handleDataChange('dailyLog.approved', log.captainId);
 }
-
 export async function onCommissionMatched(commissionId: string): Promise<void> {
   const commission = await prisma.commissionEntry.findUnique({
     where: { id: commissionId },
@@ -822,7 +784,6 @@ export async function onCommissionMatched(commissionId: string): Promise<void> {
   if (commission)
     await handleDataChange('commission.matched', commission.salesId);
 }
-
 export async function onCommissionCreated(commissionId: string): Promise<void> {
   const commission = await prisma.commissionEntry.findUnique({
     where: { id: commissionId },
@@ -831,7 +792,6 @@ export async function onCommissionCreated(commissionId: string): Promise<void> {
   if (commission)
     await handleDataChange('commission.created', commission.salesId);
 }
-
 export async function onCommissionApproved(
   commissionId: string
 ): Promise<void> {
@@ -842,42 +802,38 @@ export async function onCommissionApproved(
   if (commission)
     await handleDataChange('commission.approved', commission.salesId);
 }
-
 export async function onLogDeleted(captainId: string): Promise<void> {
   await handleDataChange('dailyLog.deleted', captainId);
 }
-
 export async function onUserCreated(userId: string): Promise<void> {
   await handleDataChange('user.created', userId);
 }
-
 export async function onUserUpdated(userId: string): Promise<void> {
   await handleDataChange('user.updated', userId);
 }
-
 export async function onUserRatesUpdated(userId: string): Promise<void> {
   await handleDataChange('user.ratesUpdated', userId);
 }
-
 export async function onPayPeriodLocked(payPeriodId: string): Promise<void> {
   await handleDataChange('payPeriod.locked', payPeriodId);
 }
-
 // Batch invalidation
 export async function batchInvalidate(
-  changes: Array<{ trigger: string; entityId: string; additionalData?: any }>
+  changes: Array<{
+    trigger: string;
+    entityId: string;
+    additionalData?: CacheContext;
+  }>
 ): Promise<void> {
   const promises = changes.map((change) =>
     handleDataChange(change.trigger, change.entityId, change.additionalData)
   );
   await Promise.all(promises);
 }
-
 // Scheduled operations
 export async function cleanupExpiredMetrics(): Promise<void> {
   await unifiedCache.cleanupExpiredMetrics();
 }
-
 export async function getCacheHealthMetrics(): Promise<{
   totalMetrics: number;
   expiredMetrics: number;
@@ -887,9 +843,8 @@ export async function getCacheHealthMetrics(): Promise<{
 }> {
   return unifiedCache.getCacheHealthMetrics();
 }
-
 export function startIntelligentCaching(): void {
-  console.log('Starting unified caching system...');
+  console.warn('Starting unified caching system...');
   setTimeout(() => {
     unifiedCache.preloadCache().catch(console.error);
   }, 10000);
@@ -911,5 +866,5 @@ export function startIntelligentCaching(): void {
     },
     60 * 60 * 1000
   );
-  console.log('Unified caching system started');
+  console.warn('Unified caching system started');
 }

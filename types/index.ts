@@ -168,7 +168,7 @@ export interface DiscrepancyReport {
   expectedOutcome?: string;
   contactEmail?: string;
   requestCallback: boolean;
-  errors: any; // JSON array of ValidationError objects
+  errors: unknown; // JSON array of ValidationError objects
   severity: DiscrepancySeverity;
   status: DiscrepancyStatus;
   resolution?: string;
@@ -184,7 +184,7 @@ export interface AuditLog {
   entityType: string;
   entityId: string;
   action: string;
-  changes?: any;
+  changes?: unknown;
   userId: string;
   user: User;
   dailyLogId?: string;

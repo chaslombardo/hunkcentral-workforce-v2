@@ -2,16 +2,12 @@
  * Production Monitoring and Alerting System
  * Comprehensive monitoring for application health, performance, and errors
  */
-
 import { config, isMonitoringEnabled } from '@/lib/production-config';
 import { logInfo, logWarning } from '@/lib/production-logger';
-
 // Re-export types from the client-safe types file
 export type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
-
 // Import types for internal use
 import type { HealthCheck, SystemMetrics, Alert } from '@/lib/monitoring-types';
-
 // Performance monitoring types (consolidated from performanceMonitoring.ts)
 export interface PageLoadMetric {
   page: string;
@@ -20,32 +16,29 @@ export interface PageLoadMetric {
   userAgent?: string;
   timestamp: Date;
 }
-
 export interface InteractionMetric {
   action: string;
   component: string;
   duration: number;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp: Date;
 }
-
 export interface SystemHealthMetric {
   metricType: 'cpu' | 'memory' | 'database' | 'cache' | 'errors';
   value: number;
   threshold?: number;
   status: 'healthy' | 'warning' | 'critical';
+  metadata?: Record<string, unknown>;
   timestamp: Date;
 }
-
 export interface PerformanceAlert {
   type: 'slow_page' | 'slow_query' | 'high_error_rate' | 'system_health';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
-  data: any;
+  data: unknown;
   timestamp: Date;
 }
-
 // Performance configuration (consolidated from performance-config.ts)
 export interface PerformanceConfig {
   monitoring: {
@@ -72,7 +65,6 @@ export interface PerformanceConfig {
     enableCodeSplitting: boolean;
   };
 }
-
 // Error logging types (consolidated from error logging files)
 export interface ErrorContext {
   component: string;
@@ -93,7 +85,6 @@ export interface ErrorContext {
     | 'component'
     | 'security';
 }
-
 export interface ErrorLog {
   id: string;
   level: 'error' | 'warn' | 'info';
@@ -103,7 +94,6 @@ export interface ErrorLog {
   timestamp: string;
   fingerprint: string;
 }
-
 // Default performance configuration
 export const performanceConfig: PerformanceConfig = {
   monitoring: {
@@ -130,7 +120,6 @@ export const performanceConfig: PerformanceConfig = {
     enableCodeSplitting: true,
   },
 };
-
 class MonitoringSystem {
   // Performance monitoring properties (consolidated from PerformanceMonitoringService)
   private pageLoadMetrics: PageLoadMetric[] = [];
@@ -138,7 +127,6 @@ class MonitoringSystem {
   private systemHealthMetrics: SystemHealthMetric[] = [];
   private performanceAlerts: PerformanceAlert[] = [];
   private readonly maxMetrics = 1000; // Reduced from 10000 for simplification
-
   // Error logging properties (consolidated from error logging files)
   private errorLogs: ErrorLog[] = [];
   private readonly maxErrorLogs = 1000;
@@ -147,29 +135,23 @@ class MonitoringSystem {
   private alerts: Alert[] = [];
   private metricsInterval?: NodeJS.Timeout;
   private healthCheckInterval?: NodeJS.Timeout;
-
   constructor() {
     this.initialize();
   }
-
   private initialize(): void {
     if (!isMonitoringEnabled('enablePerformanceMonitoring')) {
       return;
     }
-
     // Start collecting metrics every 30 seconds
     this.metricsInterval = setInterval(() => {
       this.collectMetrics();
     }, 30000);
-
     // Run health checks every 60 seconds
     this.healthCheckInterval = setInterval(() => {
       this.runHealthChecks();
     }, 60000);
-
     // Initial health check
     this.runHealthChecks();
-
     logInfo('Monitoring system initialized', {
       component: 'monitoring',
       action: 'initialize',
@@ -180,18 +162,14 @@ class MonitoringSystem {
       },
     });
   }
-
   private async collectMetrics(): Promise<void> {
     // Only run on server-side
     if (typeof window !== 'undefined') return;
-
     try {
       const timestamp = new Date().toISOString();
-
       // Collect system metrics (Node.js specific)
       const memoryUsage = process.memoryUsage();
       const cpuUsage = process.cpuUsage();
-
       const metrics: SystemMetrics = {
         timestamp,
         cpu: {
@@ -222,17 +200,13 @@ class MonitoringSystem {
           lastError: await this.getLastError(),
         },
       };
-
       this.metrics.push(metrics);
-
       // Keep only last 100 metrics (about 50 minutes of data)
       if (this.metrics.length > 100) {
         this.metrics = this.metrics.slice(-100);
       }
-
       // Check for alerts based on metrics
       await this.checkMetricAlerts(metrics);
-
       logInfo('System metrics collected', {
         component: 'monitoring',
         action: 'collect_metrics',
@@ -246,20 +220,16 @@ class MonitoringSystem {
       console.error('Failed to collect metrics:', error);
     }
   }
-
   private async runHealthChecks(): Promise<void> {
     // Only run on server-side
     if (typeof window !== 'undefined') return;
-
     const checks = [
       this.checkDatabase(),
       this.checkExternalServices(),
       this.checkFileSystem(),
       this.checkMemoryUsage(),
     ];
-
     const results = await Promise.allSettled(checks);
-
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         this.healthChecks.set(result.value.name, result.value);
@@ -282,7 +252,6 @@ class MonitoringSystem {
         });
       }
     });
-
     // Check for unhealthy services and create alerts
     for (const [, check] of this.healthChecks) {
       if (check.status === 'unhealthy') {
@@ -298,19 +267,14 @@ class MonitoringSystem {
       }
     }
   }
-
   private async checkDatabase(): Promise<HealthCheck> {
     const startTime = Date.now();
-
     try {
       // Import Prisma client dynamically to avoid circular dependencies
       const { prisma } = await import('@/lib/prisma');
-
       // Simple query to check database connectivity
       await prisma.$queryRaw`SELECT 1`;
-
       const responseTime = Date.now() - startTime;
-
       return {
         name: 'database',
         status: responseTime < 1000 ? 'healthy' : 'degraded',
@@ -331,10 +295,8 @@ class MonitoringSystem {
       };
     }
   }
-
   private async checkExternalServices(): Promise<HealthCheck> {
     const startTime = Date.now();
-
     try {
       // Check Supabase API if configured
       if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -347,14 +309,11 @@ class MonitoringSystem {
             },
           }
         );
-
         if (!response.ok) {
           throw new Error(`Supabase API returned ${response.status}`);
         }
       }
-
       const responseTime = Date.now() - startTime;
-
       return {
         name: 'external_services',
         status: responseTime < 2000 ? 'healthy' : 'degraded',
@@ -374,15 +333,14 @@ class MonitoringSystem {
       };
     }
   }
-
   private async checkFileSystem(): Promise<HealthCheck> {
     const startTime = Date.now();
-
     try {
       // File system checks moved to API route to avoid client-side bundling
       // This prevents fs module from being included in client bundles
       throw new Error('File system checks delegated to /api/health endpoint');
     } catch (error) {
+      console.warn('File system checks delegated to API endpoint:', error);
       return {
         name: 'filesystem',
         status: 'degraded', // Using 'degraded' since check is delegated, not failed
@@ -392,24 +350,19 @@ class MonitoringSystem {
       };
     }
   }
-
   private async checkMemoryUsage(): Promise<HealthCheck> {
     const startTime = Date.now();
-
     try {
       const memoryUsage = process.memoryUsage();
       const memoryPercentage =
         (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
-
       let status: HealthCheck['status'] = 'healthy';
       if (memoryPercentage > 90) {
         status = 'unhealthy';
       } else if (memoryPercentage > 75) {
         status = 'degraded';
       }
-
       const responseTime = Date.now() - startTime;
-
       return {
         name: 'memory',
         status,
@@ -432,10 +385,8 @@ class MonitoringSystem {
       };
     }
   }
-
   private async checkMetricAlerts(metrics: SystemMetrics): Promise<void> {
     const alertsConfig = config.alerts;
-
     // Memory usage alert
     if (metrics.memory.percentage > 90) {
       await this.createAlert({
@@ -454,7 +405,6 @@ class MonitoringSystem {
         metadata: { metrics: metrics.memory },
       });
     }
-
     // Error rate alert
     if (metrics.http.errorRate > alertsConfig.errorThreshold) {
       await this.createAlert({
@@ -465,7 +415,6 @@ class MonitoringSystem {
         metadata: { metrics: metrics.http },
       });
     }
-
     // Response time alert
     if (metrics.http.avgResponseTime > alertsConfig.responseTimeThreshold) {
       await this.createAlert({
@@ -476,7 +425,6 @@ class MonitoringSystem {
         metadata: { metrics: metrics.http },
       });
     }
-
     // Critical errors alert
     if (metrics.errors.criticalCount > 0) {
       await this.createAlert({
@@ -491,7 +439,6 @@ class MonitoringSystem {
       });
     }
   }
-
   private async createAlert(
     alertData: Omit<Alert, 'id' | 'timestamp' | 'resolved'>
   ): Promise<void> {
@@ -501,17 +448,13 @@ class MonitoringSystem {
       resolved: false,
       ...alertData,
     };
-
     this.alerts.push(alert);
-
     // Keep only last 100 alerts
     if (this.alerts.length > 100) {
       this.alerts = this.alerts.slice(-100);
     }
-
     // Send notifications
     await this.sendAlertNotifications(alert);
-
     logWarning(`Alert created: ${alert.title}`, {
       component: 'monitoring',
       action: 'create_alert',
@@ -523,10 +466,8 @@ class MonitoringSystem {
       },
     });
   }
-
   private async sendAlertNotifications(alert: Alert): Promise<void> {
     const alertsConfig = config.alerts;
-
     try {
       // Send Slack notification
       if (
@@ -535,12 +476,10 @@ class MonitoringSystem {
       ) {
         await this.sendSlackNotification(alert, alertsConfig.slackWebhookUrl);
       }
-
       // Send email notification
       if (alertsConfig.enableEmailNotifications && alertsConfig.alertEmail) {
         await this.sendEmailNotification(alert, alertsConfig.alertEmail);
       }
-
       // Log to stderr for external monitoring tools
       const alertLog = {
         timestamp: alert.timestamp,
@@ -554,7 +493,6 @@ class MonitoringSystem {
         alertId: alert.id,
         metadata: alert.metadata,
       };
-
       process.stderr.write(`MONITORING_ALERT: ${JSON.stringify(alertLog)}\n`);
     } catch (error) {
       await logProductionError(error, {
@@ -569,7 +507,6 @@ class MonitoringSystem {
       });
     }
   }
-
   private async sendSlackNotification(
     alert: Alert,
     webhookUrl: string
@@ -580,7 +517,6 @@ class MonitoringSystem {
       high: '#ff0000',
       critical: '#8b0000',
     }[alert.severity];
-
     const payload = {
       text: `🚨 ${alert.title}`,
       attachments: [
@@ -618,7 +554,6 @@ class MonitoringSystem {
         },
       ],
     };
-
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -626,14 +561,12 @@ class MonitoringSystem {
       },
       body: JSON.stringify(payload),
     });
-
     if (!response.ok) {
       throw new Error(
         `Slack notification failed: ${response.status} ${response.statusText}`
       );
     }
   }
-
   private async sendEmailNotification(
     alert: Alert,
     email: string
@@ -650,13 +583,10 @@ class MonitoringSystem {
         - Environment: ${config.deployment.environment.toUpperCase()}
         - Time: ${new Date(alert.timestamp).toLocaleString()}
         - Message: ${alert.message}
-        
         Alert ID: ${alert.id}
-        
         This is an automated alert from HUNKCentral monitoring system.
       `,
     };
-
     logInfo('Email alert notification prepared', {
       component: 'monitoring',
       action: 'prepare_email_alert',
@@ -666,11 +596,9 @@ class MonitoringSystem {
         subject: emailContent.subject,
       },
     });
-
     // TODO: Implement actual email sending
     // Example: await sendEmail(emailContent);
   }
-
   // Helper methods for metrics collection
   private async getDatabaseConnections(): Promise<number> {
     try {
@@ -681,7 +609,6 @@ class MonitoringSystem {
       return 0;
     }
   }
-
   private async getActiveQueries(): Promise<number> {
     try {
       // This would query the database for active queries
@@ -691,7 +618,6 @@ class MonitoringSystem {
       return 0;
     }
   }
-
   private async getDatabaseResponseTime(): Promise<number> {
     try {
       const startTime = Date.now();
@@ -702,25 +628,21 @@ class MonitoringSystem {
       return 0;
     }
   }
-
   private async getRequestsPerMinute(): Promise<number> {
     // This would be tracked by middleware
     // For now, return a placeholder
     return 50;
   }
-
   private async getAvgResponseTime(): Promise<number> {
     // This would be tracked by middleware
     // For now, return a placeholder
     return 250;
   }
-
   private async getErrorRate(): Promise<number> {
     // This would be calculated from error logs
     // For now, return a placeholder
     return 1.5;
   }
-
   private async getErrorCount(): Promise<number> {
     try {
       const { prisma } = await import('@/lib/prisma');
@@ -737,7 +659,6 @@ class MonitoringSystem {
       return 0;
     }
   }
-
   private async getCriticalErrorCount(): Promise<number> {
     try {
       const { prisma } = await import('@/lib/prisma');
@@ -758,7 +679,6 @@ class MonitoringSystem {
       return 0;
     }
   }
-
   private async getLastError(): Promise<string | undefined> {
     try {
       const { prisma } = await import('@/lib/prisma');
@@ -770,36 +690,29 @@ class MonitoringSystem {
           createdAt: 'desc',
         },
       });
-
       if (lastError && lastError.changes) {
         const changes = lastError.changes as { message?: string };
         return changes.message;
       }
-
       return undefined;
     } catch {
       return undefined;
     }
   }
-
   // Public API methods
   public getHealthChecks(): HealthCheck[] {
     return Array.from(this.healthChecks.values());
   }
-
   public getMetrics(limit = 50): SystemMetrics[] {
     return this.metrics.slice(-limit);
   }
-
   public getAlerts(limit = 50): Alert[] {
     return this.alerts.slice(-limit);
   }
-
   public async resolveAlert(alertId: string): Promise<boolean> {
     const alert = this.alerts.find((a) => a.id === alertId);
     if (alert) {
       alert.resolved = true;
-
       logInfo(`Alert resolved: ${alert.title}`, {
         component: 'monitoring',
         action: 'resolve_alert',
@@ -809,12 +722,10 @@ class MonitoringSystem {
           severity: alert.severity,
         },
       });
-
       return true;
     }
     return false;
   }
-
   public async getSystemStatus(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
     checks: HealthCheck[];
@@ -822,29 +733,26 @@ class MonitoringSystem {
     activeAlerts: number;
   }> {
     const checks = this.getHealthChecks();
-    const metrics = this.metrics[this.metrics.length - 1] || null;
     const activeAlerts = this.alerts.filter((a) => !a.resolved).length;
-
+    const latestMetrics = this.metrics.length
+      ? this.metrics[this.metrics.length - 1]
+      : null;
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-
     // Determine overall status based on health checks
     const unhealthyChecks = checks.filter((c) => c.status === 'unhealthy');
     const degradedChecks = checks.filter((c) => c.status === 'degraded');
-
     if (unhealthyChecks.length > 0) {
       status = 'unhealthy';
     } else if (degradedChecks.length > 0 || activeAlerts > 0) {
       status = 'degraded';
     }
-
     return {
       status,
       checks,
-      metrics,
+      metrics: latestMetrics,
       activeAlerts,
     };
   }
-
   public destroy(): void {
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
@@ -852,27 +760,22 @@ class MonitoringSystem {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
-
     logInfo('Monitoring system destroyed', {
       component: 'monitoring',
       action: 'destroy',
     });
   }
-
   // Performance monitoring methods (consolidated from PerformanceMonitoringService)
-
   /**
    * Track page load performance
    */
   public trackPageLoad(
     pageOrMetric: string | Omit<PageLoadMetric, 'timestamp'>,
     loadTime?: number,
-    metadata?: { userId?: string; userAgent?: string; [key: string]: any }
+    metadata?: { userId?: string; userAgent?: string; [key: string]: unknown }
   ): void {
     if (!performanceConfig.monitoring.enabled) return;
-
     let metric: Omit<PageLoadMetric, 'timestamp'>;
-
     if (typeof pageOrMetric === 'string') {
       metric = {
         page: pageOrMetric,
@@ -883,36 +786,28 @@ class MonitoringSystem {
     } else {
       metric = pageOrMetric;
     }
-
     const fullMetric: PageLoadMetric = {
       ...metric,
       timestamp: new Date(),
     };
-
     this.pageLoadMetrics.push(fullMetric);
     this.trimMetrics(this.pageLoadMetrics);
-
     // Check for performance issues
     this.checkPageLoadPerformance(fullMetric);
   }
-
   /**
    * Track user interaction performance
    */
   public trackInteraction(metric: Omit<InteractionMetric, 'timestamp'>): void {
     if (!performanceConfig.monitoring.enabled) return;
-
     const fullMetric: InteractionMetric = {
       ...metric,
       timestamp: new Date(),
     };
-
     this.interactionMetrics.push(fullMetric);
     this.trimMetrics(this.interactionMetrics);
-
     this.checkInteractionPerformance(fullMetric);
   }
-
   /**
    * Track system health metrics
    */
@@ -923,20 +818,16 @@ class MonitoringSystem {
       ...metric,
       timestamp: new Date(),
     };
-
     this.systemHealthMetrics.push(fullMetric);
     this.trimMetrics(this.systemHealthMetrics);
-
     this.checkSystemHealthMetric(fullMetric);
   }
-
   /**
    * Get performance dashboard data
    */
   public getPerformanceDashboard() {
     const pageLoadTimes = this.pageLoadMetrics.map((m) => m.loadTime);
     const interactionTimes = this.interactionMetrics.map((m) => m.duration);
-
     return {
       pageLoad: {
         average: this.calculateAverage(pageLoadTimes),
@@ -955,29 +846,24 @@ class MonitoringSystem {
       alerts: this.performanceAlerts.slice(-20),
     };
   }
-
   // Performance utility methods
-  private trimMetrics(metrics: any[]): void {
+  private trimMetrics(metrics: unknown[]): void {
     if (metrics.length > this.maxMetrics) {
       metrics.splice(0, metrics.length - this.maxMetrics);
     }
   }
-
   private calculateAverage(values: number[]): number {
     if (values.length === 0) return 0;
     return values.reduce((a, b) => a + b, 0) / values.length;
   }
-
   private calculatePercentile(values: number[], percentile: number): number {
     if (values.length === 0) return 0;
     const sorted = [...values].sort((a, b) => a - b);
     const index = Math.ceil((percentile / 100) * sorted.length) - 1;
     return sorted[Math.max(0, index)];
   }
-
   private checkPageLoadPerformance(metric: PageLoadMetric): void {
     const { thresholds } = performanceConfig;
-
     if (metric.loadTime > thresholds.pageLoad.critical) {
       this.createPerformanceAlert({
         type: 'slow_page',
@@ -996,10 +882,8 @@ class MonitoringSystem {
       });
     }
   }
-
   private checkInteractionPerformance(metric: InteractionMetric): void {
     const { thresholds } = performanceConfig;
-
     if (metric.duration > thresholds.interaction.critical) {
       this.createPerformanceAlert({
         type: 'slow_query',
@@ -1010,7 +894,6 @@ class MonitoringSystem {
       });
     }
   }
-
   private checkSystemHealthMetric(metric: SystemHealthMetric): void {
     if (metric.status === 'critical') {
       this.createPerformanceAlert({
@@ -1022,19 +905,15 @@ class MonitoringSystem {
       });
     }
   }
-
   private createPerformanceAlert(alert: PerformanceAlert): void {
     this.performanceAlerts.push(alert);
-
     // Keep only last 100 alerts
     if (this.performanceAlerts.length > 100) {
       this.performanceAlerts.splice(0, this.performanceAlerts.length - 100);
     }
   }
-
   private getOverallHealthStatus(): 'healthy' | 'warning' | 'critical' {
     const recentMetrics = this.systemHealthMetrics.slice(-5);
-
     if (recentMetrics.some((m) => m.status === 'critical')) {
       return 'critical';
     }
@@ -1043,9 +922,7 @@ class MonitoringSystem {
     }
     return 'healthy';
   }
-
   // Error logging methods (consolidated from error logging files)
-
   /**
    * Log server errors with comprehensive context
    */
@@ -1056,7 +933,6 @@ class MonitoringSystem {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
     const isServer = typeof window === 'undefined';
-
     const enhancedContext: ErrorContext = {
       ...context,
       timestamp: Date.now(),
@@ -1065,13 +941,11 @@ class MonitoringSystem {
         context.severity ||
         this.determineSeverity(errorMessage, context.component),
     };
-
     const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fingerprint = this.createErrorFingerprint(
       errorMessage,
       enhancedContext
     );
-
     const errorLog: ErrorLog = {
       id: errorId,
       level: 'error',
@@ -1081,10 +955,8 @@ class MonitoringSystem {
       timestamp: new Date().toISOString(),
       fingerprint,
     };
-
     this.errorLogs.push(errorLog);
     this.trimErrorLogs();
-
     // Store in database if on server and in production
     if (isServer && process.env.NODE_ENV === 'production') {
       try {
@@ -1111,7 +983,6 @@ class MonitoringSystem {
         console.error('Failed to log error to database:', dbError);
       }
     }
-
     // Development logging
     if (process.env.NODE_ENV === 'development') {
       console.error('Error logged:', {
@@ -1123,7 +994,6 @@ class MonitoringSystem {
       });
     }
   }
-
   /**
    * Get error logs with optional filtering
    */
@@ -1134,46 +1004,37 @@ class MonitoringSystem {
     resolved?: boolean;
   }): ErrorLog[] {
     let filtered = [...this.errorLogs];
-
     if (options?.severity) {
       filtered = filtered.filter(
         (log) => log.context.severity === options.severity
       );
     }
-
     if (options?.component) {
       filtered = filtered.filter(
         (log) => log.context.component === options.component
       );
     }
-
     if (options?.resolved !== undefined) {
       filtered = filtered.filter((log) => log.resolved === options.resolved);
     }
-
-    const limit = options?.limit || 50;
+    const limit = options?.limit ?? 100;
     return filtered.slice(-limit);
   }
-
   /**
    * Mark an error as resolved
    */
   public resolveError(errorId: string): boolean {
     const error = this.errorLogs.find((log) => log.id === errorId);
-    if (error) {
-      error.resolved = true;
-      return true;
-    }
-    return false;
+    if (!error) return false;
+    error.resolved = true;
+    return true;
   }
-
   // Error utility methods
   private trimErrorLogs(): void {
     if (this.errorLogs.length > this.maxErrorLogs) {
       this.errorLogs.splice(0, this.errorLogs.length - this.maxErrorLogs);
     }
   }
-
   private createErrorFingerprint(
     message: string,
     context: ErrorContext
@@ -1181,22 +1042,18 @@ class MonitoringSystem {
     const component = context.component;
     const action = context.action;
     const stackLines = context.stack?.split('\n').slice(0, 3).join('|') || '';
-
     const fingerprint = `${component}:${action}:${message}:${stackLines}`
       .replace(/\d+/g, 'N')
       .replace(/['"]/g, '')
       .toLowerCase();
-
     return Buffer.from(fingerprint).toString('base64').substring(0, 32);
   }
-
   private determineSeverity(
     message: string,
     component: string
   ): ErrorContext['severity'] {
     const msg = message.toLowerCase();
     const comp = component.toLowerCase();
-
     // Critical errors
     if (
       msg.includes('database') ||
@@ -1208,7 +1065,6 @@ class MonitoringSystem {
     ) {
       return 'critical';
     }
-
     // High priority errors
     if (
       msg.includes('server error') ||
@@ -1217,7 +1073,6 @@ class MonitoringSystem {
     ) {
       return 'high';
     }
-
     // Medium priority errors
     if (
       msg.includes('not found') ||
@@ -1226,32 +1081,26 @@ class MonitoringSystem {
     ) {
       return 'medium';
     }
-
     return 'low';
   }
 }
-
 // Global monitoring instance
 let globalMonitoring: MonitoringSystem | null = null;
-
 export function initializeMonitoring(): MonitoringSystem {
   if (!globalMonitoring) {
     globalMonitoring = new MonitoringSystem();
   }
   return globalMonitoring;
 }
-
 export function getMonitoring(): MonitoringSystem | null {
   return globalMonitoring;
 }
-
 export function destroyMonitoring(): void {
   if (globalMonitoring) {
     globalMonitoring.destroy();
     globalMonitoring = null;
   }
 }
-
 // Initialize monitoring in production environments (server-side only)
 if (
   typeof window === 'undefined' &&
@@ -1259,9 +1108,7 @@ if (
 ) {
   initializeMonitoring();
 }
-
 export { MonitoringSystem };
-
 // Compatibility functions for the old error logging API
 /**
  * Log authentication errors (compatibility with old logAuthError function)
@@ -1297,7 +1144,6 @@ export async function logAuthError(
     });
   }
 }
-
 /**
  * Log database errors (compatibility with old logDatabaseError function)
  */
@@ -1329,7 +1175,6 @@ export async function logDatabaseError(
     });
   }
 }
-
 /**
  * Log API errors (compatibility with old logApiError function)
  */
@@ -1375,7 +1220,6 @@ export async function logApiError(
     });
   }
 }
-
 /**
  * Log page errors (compatibility with old logPageError function)
  */
@@ -1407,7 +1251,6 @@ export async function logPageError(
     });
   }
 }
-
 /**
  * Log production errors (compatibility with old logProductionError function)
  */
@@ -1439,7 +1282,6 @@ export async function logProductionError(
     });
   }
 }
-
 /**
  * Get error statistics (compatibility with old getErrorStatistics function)
  */
@@ -1471,9 +1313,7 @@ export async function getErrorStatistics(timeRange?: {
       topErrors: [],
     };
   }
-
   const errors = monitoring.getErrorLogs({ limit: 1000 });
-
   // Filter by time range if provided
   const filteredErrors = timeRange
     ? errors.filter((error) => {
@@ -1481,7 +1321,6 @@ export async function getErrorStatistics(timeRange?: {
         return errorTime >= timeRange.start && errorTime <= timeRange.end;
       })
     : errors;
-
   const stats = {
     total: filteredErrors.length,
     bySeverity: {} as Record<string, number>,
@@ -1496,7 +1335,6 @@ export async function getErrorStatistics(timeRange?: {
       severity: string;
     }>,
   };
-
   const errorMap = new Map<
     string,
     {
@@ -1507,26 +1345,20 @@ export async function getErrorStatistics(timeRange?: {
       severity: string;
     }
   >();
-
   filteredErrors.forEach((error) => {
     const severity = error.context.severity || 'medium';
     const category = error.context.category || 'server';
     const component = error.context.component;
-
     // Count by severity
     stats.bySeverity[severity] = (stats.bySeverity[severity] || 0) + 1;
-
     // Count by category
     stats.byCategory[category] = (stats.byCategory[category] || 0) + 1;
-
     // Count by component
     stats.byComponent[component] = (stats.byComponent[component] || 0) + 1;
-
     // Count resolved
     if (error.resolved) {
       stats.resolved++;
     }
-
     // Track unique errors
     if (!errorMap.has(error.fingerprint)) {
       errorMap.set(error.fingerprint, {
@@ -1541,11 +1373,9 @@ export async function getErrorStatistics(timeRange?: {
       existing.occurrenceCount++;
     }
   });
-
   // Get top errors by occurrence count
   stats.topErrors = Array.from(errorMap.values())
     .sort((a, b) => b.occurrenceCount - a.occurrenceCount)
     .slice(0, 10);
-
   return stats;
 }

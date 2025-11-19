@@ -1,9 +1,8 @@
 'use client';
-
+import type { RoleSpecificMetrics } from '@/lib/actions/dashboard';
 import {
   IconTrendingDown,
   IconTrendingUp,
-  IconMinus,
   IconServer,
   IconUsers,
   IconActivity,
@@ -12,6 +11,7 @@ import {
   IconDatabase,
 } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -20,38 +20,24 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
-interface AdminMetrics {
-  systemHealth: number;
-  userActivity: number;
-  errorRate: number;
-  performanceScore: number;
+export interface AdminSectionCardsProps {
+  metrics?: RoleSpecificMetrics['admin'];
 }
-
-interface AdminSectionCardsProps {
-  metrics?: AdminMetrics;
-}
-
 export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
   // Calculate derived metrics and trends
   const systemHealth = metrics?.systemHealth || 98;
   const userActivity = metrics?.userActivity || 156;
   const errorRate = metrics?.errorRate || 0.1;
-  const performanceScore = metrics?.performanceScore || 95;
-
   // Mock data for display purposes
   const activeUsers = 45;
   const pendingTasks = 7;
   const databaseHealth = 99;
   const serverUptime = 99.9;
-
   // Mock trend data - TODO: Replace with real trend calculations
   const healthTrend = systemHealth > 95 ? 1.2 : -2.3;
   const usersTrend = activeUsers > 40 ? 5.4 : -1.8;
   const activityTrend = userActivity > 150 ? 8.7 : -3.2;
   const tasksTrend = pendingTasks < 10 ? -2.1 : 4.5;
-
   const sectionCardsData = [
     {
       title: 'System Health',
@@ -133,7 +119,6 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
           : undefined,
     },
   ];
-
   // Additional system metrics cards
   const systemCardsData = [
     {
@@ -162,7 +147,6 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       icon: IconShield,
     },
   ];
-
   return (
     <div className="space-y-6">
       {/* Main Admin Metrics */}
@@ -234,7 +218,6 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
           </Card>
         ))}
       </div>
-
       {/* System Health Details */}
       <div className="*:data-[slot=card]:from-hunks-green/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
         {systemCardsData.map((item, index) => (
@@ -274,7 +257,6 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
             </CardFooter>
           </Card>
         ))}
-
         {/* Quick Actions Card */}
         <Card className="@container/card border-l-4 border-l-hunks-green">
           <CardHeader>

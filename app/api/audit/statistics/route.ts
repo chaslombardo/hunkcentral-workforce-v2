@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { AuditTrailService } from '@/lib/audit-trail';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -25,7 +25,7 @@ const StatisticsQuerySchema = z.object({
 /**
  * GET /api/audit/statistics - Get audit trail statistics
  */
-async function handleGet(user: any, request: NextRequest) {
+async function handleGet(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin', 'manager'], {
       url: request.url,

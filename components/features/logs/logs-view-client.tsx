@@ -35,12 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  listLogs,
-  deleteDraft,
-  quickUpdateLog,
-  type ListLogsParams,
-} from '@/lib/actions/logs';
+import { listLogs, deleteDraft, type ListLogsParams } from '@/lib/actions/logs';
 import { toast } from 'sonner';
 
 interface LogsViewClientProps {
@@ -149,7 +144,11 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
     try {
       // TODO: Implement proper hours and jobs updates
       // For now, just show a message that this feature is not yet available
-      toast.info('Quick edit for hours and jobs is not yet implemented');
+      const hoursCount = payload.hours?.length ?? 0;
+      const jobsCount = payload.jobs?.length ?? 0;
+      toast.info(
+        `Quick edit for ${hoursCount} hour item${hoursCount === 1 ? '' : 's'} and ${jobsCount} job${jobsCount === 1 ? '' : 's'} is not yet implemented`
+      );
       setQuickEditOpen(false);
       // const res = await quickUpdateLog(quickEditTarget, { status: 'draft' });
       // if (res.success) {

@@ -11,7 +11,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -33,16 +32,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -78,7 +76,7 @@ export interface FilterConfig {
 export interface QuickFilterConfig {
   key: string;
   label: string;
-  value: any;
+  value: unknown;
   icon?: React.ComponentType<{ className?: string }>;
   count?: number;
 }
@@ -96,20 +94,20 @@ export interface AggregationConfig {
 
 export interface ActionConfig {
   label: string;
-  action: (data: any[]) => void;
+  action: (data: unknown[]) => void;
   icon?: React.ComponentType<{ className?: string }>;
 }
 
 export interface BulkActionConfig {
   label: string;
-  action: (selectedRows: any[]) => void;
+  action: (selectedRows: unknown[]) => void;
   icon?: React.ComponentType<{ className?: string }>;
   variant?: 'default' | 'destructive';
 }
 
 export interface RowActionConfig {
   label: string;
-  action: (row: any) => void;
+  action: (row: unknown) => void;
   icon?: React.ComponentType<{ className?: string }>;
   variant?: 'default' | 'destructive';
 }
@@ -173,7 +171,7 @@ export function UniversalDataTable<T>({
   searchable = true,
   searchPlaceholder = 'Search...',
   globalSearch = true,
-  sortable = true,
+  sortable: _sortable = true,
   defaultSort,
   filters = [],
   quickFilters = [],
@@ -283,17 +281,17 @@ export function UniversalDataTable<T>({
   const handleQuickFilter = (filter: QuickFilterConfig) => {
     // Implementation depends on the specific filter logic
     // This is a placeholder for the actual filter implementation
-    console.log('Quick filter applied:', filter);
+    console.warn('Quick filter applied:', filter);
   };
 
   // Export handlers
   const handleExport = (format: string) => {
     // Implementation for export functionality
-    console.log('Export format:', format);
+    console.warn('Export format:', format);
   };
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4', className)} data-sortable={_sortable}>
       {/* Header with search, filters, and actions */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 items-center space-x-2">

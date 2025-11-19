@@ -30,7 +30,7 @@ export const prisma =
 if (process.env.NODE_ENV === 'production') {
   // Set connection pool limits for production
   prisma.$connect().then(() => {
-    console.log('Database connected with optimized connection pool');
+    console.warn('Database connected with optimized connection pool');
   });
 }
 

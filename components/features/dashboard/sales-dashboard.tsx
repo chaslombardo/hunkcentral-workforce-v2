@@ -8,9 +8,7 @@ import { SalesDataTable } from './sales-data-table';
 
 export function SalesDashboard() {
   const { user } = useSession();
-  const { metrics, roleMetrics, loading, error } = useDashboardData(
-    user?.roles
-  );
+  const { roleMetrics, loading, error } = useDashboardData(user?.roles);
 
   if (loading) {
     return (

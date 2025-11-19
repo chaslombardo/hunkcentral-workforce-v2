@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { DataExport } from '@/lib/data-protection';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -19,7 +19,7 @@ const DataDeletionRequestSchema = z.object({
 /**
  * POST /api/data-protection/delete - Delete user data (GDPR Right to be Forgotten)
  */
-async function handlePost(user: any, request: NextRequest) {
+async function handlePost(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,

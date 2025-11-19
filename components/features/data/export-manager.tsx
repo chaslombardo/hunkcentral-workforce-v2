@@ -56,10 +56,16 @@ export interface ExportOptions {
   template?: string;
 }
 
+export type ExportColumn = {
+  key: string;
+  label: string;
+  formatter?: (value: unknown) => string;
+};
+
 export interface ExportManagerProps {
-  data: any[];
-  columns: any[];
-  selectedRows?: any[];
+  data: Record<string, unknown>[];
+  columns: ExportColumn[];
+  selectedRows?: Record<string, unknown>[];
   onExport: (options: ExportOptions) => Promise<void>;
   className?: string;
   branded?: boolean;
@@ -76,9 +82,12 @@ export interface BulkActionConfig {
 }
 
 export interface BulkOperationsProps {
-  selectedRows: any[];
+  selectedRows: Record<string, unknown>[];
   actions: BulkActionConfig[];
-  onAction: (actionKey: string, rows: any[]) => Promise<void>;
+  onAction: (
+    actionKey: string,
+    rows: Record<string, unknown>[]
+  ) => Promise<void>;
   onClearSelection: () => void;
   className?: string;
   branded?: boolean;
@@ -114,11 +123,9 @@ const EXPORT_FORMATS = {
 
 // Email report dialog
 function EmailReportDialog({
-  data,
   onSend,
   trigger,
 }: {
-  data: any[];
   onSend: (options: {
     recipients: string[];
     subject: string;
@@ -152,7 +159,7 @@ function EmailReportDialog({
       setRecipients('');
       setSubject('');
       setMessage('');
-    } catch (error) {
+    } catch {
       toast.error('Failed to send report');
     } finally {
       setIsLoading(false);
@@ -239,9 +246,9 @@ function ExportDialog({
   onExport,
   trigger,
 }: {
-  data: any[];
-  columns: any[];
-  selectedRows?: any[];
+  data: unknown[];
+  columns: ExportColumn[];
+  selectedRows?: unknown[];
   onExport: (options: ExportOptions) => Promise<void>;
   trigger: React.ReactNode;
 }) {
@@ -277,7 +284,7 @@ function ExportDialog({
 
       toast.success(`Export completed successfully`);
       setIsOpen(false);
-    } catch (error) {
+    } catch {
       toast.error('Export failed');
     } finally {
       setIsLoading(false);
@@ -295,6 +302,21 @@ function ExportDialog({
             Choose your export format and options
           </DialogDescription>
         </DialogHeader>
+        <div className="rounded-md border bg-muted/30 p-2 text-xs text-muted-foreground">
+          <span>
+            {data.length} total row{data.length === 1 ? '' : 's'}
+          </span>
+          <span className="mx-2">•</span>
+          <span>
+            {columns.length} column{columns.length === 1 ? '' : 's'}
+          </span>
+          {selectedRows && selectedRows.length > 0 && (
+            <>
+              <span className="mx-2">•</span>
+              <span>{selectedRows.length} selected</span>
+            </>
+          )}
+        </div>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Format</Label>
@@ -397,13 +419,19 @@ export function ExportManager({
     format: ExportFormat;
   }) => {
     // Implementation would integrate with email service
-    console.log('Email report:', options);
+    console.warn('Email report:', options);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000));
   };
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div
+      className={cn(
+        'flex items-center space-x-2',
+        branded && 'text-hunks-green',
+        className
+      )}
+    >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
@@ -435,7 +463,6 @@ export function ExportManager({
             }
           />
           <EmailReportDialog
-            data={data}
             onSend={handleEmailReport}
             trigger={
               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -465,7 +492,7 @@ export function BulkOperations({
     try {
       await onAction(actionKey, selectedRows);
       toast.success('Action completed successfully');
-    } catch (error) {
+    } catch {
       toast.error('Action failed');
     } finally {
       setIsLoading(null);

@@ -8,9 +8,6 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
   IconLayoutColumns,
-  IconPlus,
-  IconSearch,
-  IconFilter,
 } from '@tabler/icons-react';
 import {
   ColumnDef,

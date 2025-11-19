@@ -20,6 +20,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import type { CategoricalChartFunc } from 'recharts/types/chart/generateCategoricalChart';
 import {
   IconDownload,
   IconFilter,
@@ -40,7 +41,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -55,7 +55,7 @@ import { cn } from '@/lib/utils';
 export type ChartType = 'line' | 'bar' | 'area' | 'pie' | 'scatter';
 
 export interface ChartDataPoint {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ChartConfig {
@@ -128,14 +128,40 @@ const DEFAULT_COLORS = [
   BRAND_COLORS.muted,
 ];
 
+const createDrilldownHandler = (
+  onDrillDown?: (data: ChartDataPoint) => void
+): CategoricalChartFunc | undefined => {
+  if (!onDrillDown) return undefined;
+  type DrilldownChartState = {
+    activePayload?: Array<{ payload?: ChartDataPoint }>;
+  };
+  return (chartState) => {
+    const typedState = chartState as DrilldownChartState;
+    const payload = typedState?.activePayload?.[0]?.payload;
+    if (payload && typeof payload === 'object') {
+      onDrillDown(payload as ChartDataPoint);
+    }
+  };
+};
+
 // Custom tooltip component
-function CustomTooltip({ active, payload, label, config }: any) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  config,
+}: {
+  active?: boolean;
+  payload?: { value: unknown; dataKey: string; color?: string }[];
+  label?: string;
+  config: ChartConfig;
+}) {
   if (!active || !payload || !payload.length) return null;
 
   return (
     <div className="rounded-lg border bg-background p-3 shadow-md">
       <p className="font-medium">{label}</p>
-      {payload.map((entry: any, index: number) => {
+      {payload.map((entry, index) => {
         const configItem = config[entry.dataKey];
         return (
           <div key={index} className="flex items-center space-x-2 text-sm">
@@ -149,7 +175,7 @@ function CustomTooltip({ active, payload, label, config }: any) {
             <span className="font-medium">
               {typeof entry.value === 'number'
                 ? entry.value.toLocaleString()
-                : entry.value}
+                : String(entry.value ?? '')}
             </span>
           </div>
         );
@@ -237,10 +263,11 @@ function LineChartComponent({
   branded?: boolean;
 }) {
   const dataKeys = Object.keys(config);
+  const drilldownHandler = createDrilldownHandler(onDrillDown);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} onClick={onDrillDown}>
+      <LineChart data={data} onClick={drilldownHandler}>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={branded ? BRAND_COLORS.muted : undefined}
@@ -287,10 +314,11 @@ function BarChartComponent({
   branded?: boolean;
 }) {
   const dataKeys = Object.keys(config);
+  const drilldownHandler = createDrilldownHandler(onDrillDown);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data} onClick={onDrillDown}>
+      <BarChart data={data} onClick={drilldownHandler}>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={branded ? BRAND_COLORS.muted : undefined}
@@ -330,10 +358,11 @@ function AreaChartComponent({
   branded?: boolean;
 }) {
   const dataKeys = Object.keys(config);
+  const drilldownHandler = createDrilldownHandler(onDrillDown);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={data} onClick={onDrillDown}>
+      <AreaChart data={data} onClick={drilldownHandler}>
         <defs>
           {dataKeys.map((key, index) => (
             <linearGradient
@@ -402,10 +431,14 @@ function PieChartComponent({
   branded?: boolean;
 }) {
   const dataKey = Object.keys(config)[0] || 'value';
+  const pieColors = branded
+    ? [BRAND_COLORS.primary, BRAND_COLORS.secondary, '#059669', '#f97316']
+    : DEFAULT_COLORS;
+  const drilldownHandler = createDrilldownHandler(onDrillDown);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <PieChart onClick={onDrillDown}>
+      <PieChart onClick={drilldownHandler}>
         <Pie
           data={data}
           dataKey={dataKey}
@@ -418,7 +451,7 @@ function PieChartComponent({
           {data.map((entry, index) => (
             <Cell
               key={`cell-${index}`}
-              fill={DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+              fill={pieColors[index % pieColors.length]}
             />
           ))}
         </Pie>
@@ -445,10 +478,11 @@ function ScatterChartComponent({
   branded?: boolean;
 }) {
   const dataKeys = Object.keys(config);
+  const drilldownHandler = createDrilldownHandler(onDrillDown);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ScatterChart data={data} onClick={onDrillDown}>
+      <ScatterChart data={data} onClick={drilldownHandler}>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={branded ? BRAND_COLORS.muted : undefined}
@@ -517,7 +551,7 @@ export function UniversalChart({
 
   const handleExport = (format: string) => {
     // Implementation would depend on the specific export library
-    console.log(`Exporting chart as ${format}`);
+    console.warn(`Exporting chart as ${format}`);
   };
 
   const handleDrillDown = (data: ChartDataPoint) => {

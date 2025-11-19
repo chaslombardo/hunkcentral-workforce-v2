@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import {
   IconChevronDown,
@@ -30,18 +29,17 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -58,15 +56,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatDateDisplay } from '@/lib/formatters';
-
-interface AdminMetrics {
-  systemHealth: number;
-  userActivity: number;
-  errorRate: number;
-  performanceScore: number;
-}
-
+// TODO: Define AdminMetrics when connecting to real data
 interface SystemEventData {
   id: string;
   timestamp: string;
@@ -84,14 +74,9 @@ interface SystemEventData {
   userAgent?: string;
 }
 
-interface AdminDataTableProps {
-  metrics?: AdminMetrics;
-}
-
+// TODO: Define interface when component accepts props again
 // Generate sample system event data - TODO: Replace with real data
-const generateSampleSystemEvents = (
-  metrics?: AdminMetrics
-): SystemEventData[] => {
+const generateSampleSystemEvents = (): SystemEventData[] => {
   const eventTypes: (
     | 'user_activity'
     | 'system_event'
@@ -134,20 +119,16 @@ const generateSampleSystemEvents = (
     'Pay period closed',
     'Report generated',
   ];
-
-  return Array.from({ length: 50 }, (_, i) => {
+  return Array.from({ length: 50 }, () => {
     const timestamp = new Date();
     timestamp.setMinutes(
       timestamp.getMinutes() - Math.floor(Math.random() * 1440)
     ); // Last 24 hours
-
     const type = eventTypes[Math.floor(Math.random() * eventTypes.length)];
     const severity = severities[Math.floor(Math.random() * severities.length)];
     const action = actions[Math.floor(Math.random() * actions.length)];
-
     let user: string | undefined;
     let details: string;
-
     if (type === 'user_activity' || type === 'admin_action') {
       user = users[Math.floor(Math.random() * users.length)];
       details = `${action} performed by ${user}`;
@@ -158,7 +139,6 @@ const generateSampleSystemEvents = (
     } else {
       details = `System: ${action}`;
     }
-
     return {
       id: `EVT-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`,
       timestamp: timestamp.toISOString(),
@@ -172,7 +152,6 @@ const generateSampleSystemEvents = (
     };
   });
 };
-
 const getEventIcon = (type: SystemEventData['type']) => {
   switch (type) {
     case 'user_activity':
@@ -189,7 +168,6 @@ const getEventIcon = (type: SystemEventData['type']) => {
       return IconActivity;
   }
 };
-
 const columns: ColumnDef<SystemEventData>[] = [
   {
     id: 'select',
@@ -226,7 +204,6 @@ const columns: ColumnDef<SystemEventData>[] = [
       const minutesAgo = Math.floor(
         (now.getTime() - timestamp.getTime()) / (1000 * 60)
       );
-
       return (
         <div className="text-sm">
           <div className="font-medium">
@@ -253,7 +230,6 @@ const columns: ColumnDef<SystemEventData>[] = [
     cell: ({ row }) => {
       const type = row.original.type;
       const Icon = getEventIcon(type);
-
       return (
         <div className="flex items-center gap-2">
           <Icon className="w-4 h-4 text-muted-foreground" />
@@ -309,7 +285,6 @@ const columns: ColumnDef<SystemEventData>[] = [
     header: 'Severity',
     cell: ({ row }) => {
       const severity = row.original.severity;
-
       return (
         <Badge
           variant="outline"
@@ -338,7 +313,7 @@ const columns: ColumnDef<SystemEventData>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => (
+    cell: () => (
       <div className="flex items-center gap-1">
         <Button variant="ghost" size="sm">
           <IconEye className="w-4 h-4" />
@@ -348,8 +323,7 @@ const columns: ColumnDef<SystemEventData>[] = [
     ),
   },
 ];
-
-export function AdminDataTable({ metrics }: AdminDataTableProps) {
+export function AdminDataTable() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -363,12 +337,7 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
     pageIndex: 0,
     pageSize: 15,
   });
-
-  const data = React.useMemo(
-    () => generateSampleSystemEvents(metrics),
-    [metrics]
-  );
-
+  const data = React.useMemo(() => generateSampleSystemEvents(), []);
   const table = useReactTable({
     data,
     columns,
@@ -392,17 +361,12 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-
-  // Calculate summary stats
-  const userActivityEvents = data.filter(
-    (event) => event.type === 'user_activity'
-  );
+  // TODO: Calculate summary stats when needed
   const securityAlerts = data.filter(
     (event) => event.type === 'security_alert'
   );
   const systemErrors = data.filter((event) => event.type === 'error');
   const adminActions = data.filter((event) => event.type === 'admin_action');
-
   return (
     <Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
       <div className="flex items-center justify-between px-4 lg:px-6">
@@ -414,7 +378,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
             Recent system events, user actions, and security alerts
           </p>
         </div>
-
         <TabsList className="hidden @4xl/main:flex">
           <TabsTrigger value="all">
             All Events
@@ -450,7 +413,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
             </Badge>
           </TabsTrigger>
         </TabsList>
-
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <Input
@@ -508,7 +470,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
               </SelectContent>
             </Select>
           </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -541,14 +502,12 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-
           <Button variant="outline" size="sm">
             <IconDownload className="w-4 h-4 mr-2" />
             Export
           </Button>
         </div>
       </div>
-
       <TabsContent
         value="all"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
@@ -612,7 +571,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
             </TableBody>
           </Table>
         </div>
-
         <div className="flex items-center justify-between px-4">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
@@ -691,7 +649,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
           </div>
         </div>
       </TabsContent>
-
       <TabsContent value="security" className="flex flex-col px-4 lg:px-6">
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
           <p className="text-muted-foreground">
@@ -699,7 +656,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
           </p>
         </div>
       </TabsContent>
-
       <TabsContent value="errors" className="flex flex-col px-4 lg:px-6">
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
           <p className="text-muted-foreground">
@@ -707,7 +663,6 @@ export function AdminDataTable({ metrics }: AdminDataTableProps) {
           </p>
         </div>
       </TabsContent>
-
       <TabsContent value="admin" className="flex flex-col px-4 lg:px-6">
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed flex items-center justify-center">
           <p className="text-muted-foreground">

@@ -1,11 +1,7 @@
 // Background Jobs Initialization and Management
 // Handles startup, scheduling, and monitoring of background job processing
 
-import {
-  jobQueue,
-  startJobQueueCleanup,
-  refreshAllMetrics,
-} from './backgroundJobs';
+import { startJobQueueCleanup, refreshAllMetrics } from './backgroundJobs';
 import { cleanupExpiredMetrics, getCacheHealthMetrics } from './cache';
 import { startIntelligentCaching } from './cache';
 
@@ -40,18 +36,18 @@ export function initializeBackgroundJobs(
   config: Partial<BackgroundJobConfig> = {}
 ): void {
   if (isInitialized) {
-    console.log('Background jobs already initialized');
+    console.warn('Background jobs already initialized');
     return;
   }
 
   const finalConfig = { ...defaultConfig, ...config };
 
   if (!finalConfig.enabled) {
-    console.log('Background jobs disabled');
+    console.warn('Background jobs disabled');
     return;
   }
 
-  console.log('Initializing background job processing system...');
+  console.warn('Initializing background job processing system...');
 
   // Start intelligent caching system
   startIntelligentCaching();
@@ -59,7 +55,7 @@ export function initializeBackgroundJobs(
   // Start job queue cleanup
   if (finalConfig.cleanupInterval > 0) {
     startJobQueueCleanup(finalConfig.cleanupInterval);
-    console.log(
+    console.warn(
       `Job queue cleanup scheduled every ${finalConfig.cleanupInterval / 1000}s`
     );
   }
@@ -71,7 +67,7 @@ export function initializeBackgroundJobs(
         console.error('Cache cleanup failed:', error);
       });
     }, finalConfig.cleanupInterval);
-    console.log(
+    console.warn(
       `Cache cleanup scheduled every ${finalConfig.cleanupInterval / 1000}s`
     );
   }
@@ -83,7 +79,7 @@ export function initializeBackgroundJobs(
         console.error('Health check failed:', error);
       });
     }, finalConfig.healthCheckInterval);
-    console.log(
+    console.warn(
       `Health checks scheduled every ${finalConfig.healthCheckInterval / 1000}s`
     );
   }
@@ -95,13 +91,13 @@ export function initializeBackgroundJobs(
         console.error('Critical metrics refresh failed:', error);
       });
     }, finalConfig.metricsRefreshInterval);
-    console.log(
+    console.warn(
       `Critical metrics refresh scheduled every ${finalConfig.metricsRefreshInterval / 1000}s`
     );
   }
 
   isInitialized = true;
-  console.log('Background job processing system initialized successfully');
+  console.warn('Background job processing system initialized successfully');
 }
 
 /**
@@ -112,7 +108,7 @@ export function shutdownBackgroundJobs(): void {
     return;
   }
 
-  console.log('Shutting down background job processing system...');
+  console.warn('Shutting down background job processing system...');
 
   // Clear all intervals
   if (cleanupIntervalId) {
@@ -131,7 +127,7 @@ export function shutdownBackgroundJobs(): void {
   }
 
   isInitialized = false;
-  console.log('Background job processing system shut down');
+  console.warn('Background job processing system shut down');
 }
 
 /**
@@ -143,7 +139,7 @@ async function performHealthCheck(): Promise<void> {
     const cacheHealth = await getCacheHealthMetrics();
 
     // Log health status
-    console.log('Background job system health check:', {
+    console.warn('Background job system health check:', {
       totalMetrics: cacheHealth.totalMetrics,
       expiredMetrics: cacheHealth.expiredMetrics,
       metricTypes: Object.keys(cacheHealth.metricsByType).length,
@@ -176,13 +172,13 @@ async function performHealthCheck(): Promise<void> {
  */
 async function refreshCriticalMetrics(): Promise<void> {
   try {
-    console.log('Refreshing critical system metrics...');
+    console.warn('Refreshing critical system metrics...');
 
     // This is a lightweight refresh - only refresh global dashboard metrics
     // User-specific metrics will be refreshed on-demand
     await refreshAllMetrics();
 
-    console.log('Critical metrics refresh completed');
+    console.warn('Critical metrics refresh completed');
   } catch (error) {
     console.error('Critical metrics refresh failed:', error);
   }
@@ -215,18 +211,18 @@ export function getBackgroundJobStatus(): {
  * Manually trigger a full system metrics refresh
  */
 export async function triggerFullMetricsRefresh(): Promise<void> {
-  console.log('Triggering full system metrics refresh...');
+  console.warn('Triggering full system metrics refresh...');
   await refreshAllMetrics();
-  console.log('Full system metrics refresh completed');
+  console.warn('Full system metrics refresh completed');
 }
 
 /**
  * Manually trigger cache cleanup
  */
 export async function triggerCacheCleanup(): Promise<void> {
-  console.log('Triggering cache cleanup...');
+  console.warn('Triggering cache cleanup...');
   await cleanupExpiredMetrics();
-  console.log('Cache cleanup completed');
+  console.warn('Cache cleanup completed');
 }
 
 // Export for debugging in development

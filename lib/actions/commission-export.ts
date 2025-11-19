@@ -1,8 +1,9 @@
 'use server';
 
+import { Prisma } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { DataExporter, EmailReporter } from '@/lib/export-utils';
+import { EmailReporter } from '@/lib/export-utils';
 import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
 import { format } from 'date-fns';
 
@@ -19,6 +20,7 @@ export interface CommissionExportOptions {
 }
 
 export interface CommissionReportData {
+  [key: string]: string | number | Date | null | undefined;
   id: string;
   jobId: string;
   clientName: string;
@@ -55,7 +57,7 @@ export async function exportCommissionData(options: CommissionExportOptions) {
     }
 
     // Build query filters
-    const whereClause: any = {};
+    const whereClause: Prisma.CommissionEntryWhereInput = {};
 
     if (options.dateRange) {
       whereClause.createdAt = {
@@ -285,7 +287,7 @@ export async function getCommissionAnalyticsData(dateRange?: {
     }
 
     // Build query filters
-    const whereClause: any = {};
+    const whereClause: Prisma.CommissionEntryWhereInput = {};
 
     if (dateRange) {
       whereClause.createdAt = {
@@ -415,7 +417,14 @@ function generateCommissionSummary(data: CommissionReportData[]) {
   };
 }
 
-function calculateAverageBookingAccuracy(entries: any[]): number {
+type CommissionEntryAmounts = {
+  actualRevenue: number | Prisma.Decimal | null;
+  estimatedRevenue: number | Prisma.Decimal | null;
+};
+
+function calculateAverageBookingAccuracy(
+  entries: CommissionEntryAmounts[]
+): number {
   const entriesWithAccuracy = entries.filter(
     (e) => e.actualRevenue && Number(e.estimatedRevenue) > 0
   );
@@ -433,7 +442,9 @@ function calculateAverageBookingAccuracy(entries: any[]): number {
   return totalAccuracy / entriesWithAccuracy.length;
 }
 
-async function getTopCommissionPerformers(whereClause: any) {
+async function getTopCommissionPerformers(
+  whereClause: Prisma.CommissionEntryWhereInput
+) {
   const performers = await prisma.commissionEntry.groupBy({
     by: ['salesId'],
     where: {
@@ -478,7 +489,17 @@ async function getTopCommissionPerformers(whereClause: any) {
     .slice(0, 10);
 }
 
-async function getCommissionMonthlyTrends(whereClause: any) {
+interface MonthlyTrendAccumulator {
+  month: string;
+  entries: number;
+  commission: number;
+  revenue: number;
+  matched: number;
+}
+
+async function getCommissionMonthlyTrends(
+  whereClause: Prisma.CommissionEntryWhereInput
+) {
   // This would be implemented with proper SQL aggregation
   // For now, return a simplified version
   const entries = await prisma.commissionEntry.findMany({
@@ -492,7 +513,7 @@ async function getCommissionMonthlyTrends(whereClause: any) {
   });
 
   // Group by month
-  const monthlyData = entries.reduce(
+  const monthlyData = entries.reduce<Record<string, MonthlyTrendAccumulator>>(
     (acc, entry) => {
       const month = format(entry.createdAt, 'yyyy-MM');
 
@@ -516,10 +537,10 @@ async function getCommissionMonthlyTrends(whereClause: any) {
 
       return acc;
     },
-    {} as Record<string, any>
+    {}
   );
 
   return Object.values(monthlyData)
-    .sort((a: any, b: any) => a.month.localeCompare(b.month))
+    .sort((a, b) => a.month.localeCompare(b.month))
     .slice(-12); // Last 12 months
 }

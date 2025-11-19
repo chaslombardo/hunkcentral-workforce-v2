@@ -5,7 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole, canUserAccessUserData } from '@/lib/auth';
+import {
+  requireAnyRole,
+  canUserAccessUserData,
+  type SessionUser,
+} from '@/lib/auth';
 import { AuditTrailService } from '@/lib/audit-trail';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -24,7 +28,7 @@ const EntityAuditQuerySchema = z.object({
 /**
  * GET /api/audit/entity/[entityType]/[entityId] - Get audit trail for specific entity
  */
-async function handleGet(user: any, request: NextRequest) {
+async function handleGet(user: SessionUser, request: NextRequest) {
   const url = new URL(request.url);
   const pathSegments = url.pathname.split('/');
   const entityType = pathSegments[pathSegments.length - 2];

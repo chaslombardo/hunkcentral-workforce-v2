@@ -7,9 +7,9 @@ import {
   IconCircleCheckFilled,
   IconUser,
   IconCalendar,
-  IconClock,
   IconCurrencyDollar,
   IconBriefcase,
+  IconClock,
 } from '@tabler/icons-react';
 
 import { Badge } from '@/components/ui/badge';

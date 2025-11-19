@@ -5,14 +5,6 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -51,7 +43,6 @@ export interface MobileSelectProps {
   emptyMessage?: string;
   showNativeSelectOnMobile?: boolean;
   multiple?: boolean;
-  maxSelections?: number;
 }
 
 export function MobileSelect({
@@ -69,7 +60,6 @@ export function MobileSelect({
   emptyMessage = 'No options found.',
   showNativeSelectOnMobile = false,
   multiple = false,
-  maxSelections,
 }: MobileSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);

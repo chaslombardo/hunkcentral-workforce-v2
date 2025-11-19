@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useThemeManager, type ThemeOption } from '@/lib/theme';
+import { useThemeManager } from '@/lib/theme';
 
 // Enhanced Theme Provider with error boundary
 export function ThemeProvider({ children, ...props }: NextThemesProviderProps) {

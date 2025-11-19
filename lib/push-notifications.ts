@@ -12,7 +12,7 @@ export interface PushNotificationOptions {
   badge?: string;
   image?: string;
   tag?: string;
-  data?: any;
+  data?: unknown;
   actions?: Array<{
     action: string;
     title: string;
@@ -440,10 +440,24 @@ export const NotificationTypes = {
 export type NotificationType =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
 
+type NotificationTemplateData = {
+  date: string;
+  logId: string;
+  reason?: string;
+  clientName?: string;
+  commissionId?: string;
+  period?: string;
+  periodId?: string;
+  message?: string;
+  version?: string;
+  title?: string;
+  reminderId?: string;
+};
+
 // Predefined notification templates
 export const NotificationTemplates: Record<
   NotificationType,
-  (data: any) => PushNotificationOptions
+  (data: NotificationTemplateData) => PushNotificationOptions
 > = {
   [NotificationTypes.LOG_APPROVED]: (data) => ({
     title: 'Log Approved ✅',
@@ -509,7 +523,7 @@ export const NotificationTemplates: Record<
 
   [NotificationTypes.REMINDER]: (data) => ({
     title: data.title || 'Reminder',
-    body: data.message,
+    body: data.message || '',
     icon: '/icon-192x192.png',
     tag: 'reminder',
     data: { type: 'reminder', reminderId: data.reminderId },
@@ -523,7 +537,7 @@ export const NotificationTemplates: Record<
 // Helper function to send notification
 export async function sendNotification(
   type: NotificationType,
-  data: any
+  data: NotificationTemplateData
 ): Promise<void> {
   const template = NotificationTemplates[type];
   const options = template(data);

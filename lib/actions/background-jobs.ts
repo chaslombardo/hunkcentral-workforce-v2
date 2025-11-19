@@ -19,7 +19,7 @@ import { getCacheHealthMetrics } from '@/lib/cache';
 
 export interface BackgroundJobActionResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 

@@ -8,9 +8,7 @@ import { ManagerDataTable } from './manager-data-table';
 
 export function ManagerDashboard() {
   const { user } = useSession();
-  const { metrics, roleMetrics, loading, error } = useDashboardData(
-    user?.roles
-  );
+  const { roleMetrics, loading, error } = useDashboardData(user?.roles);
 
   if (loading) {
     return (

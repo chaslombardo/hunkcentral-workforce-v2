@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { Decimal } from '@prisma/client/runtime/library';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -49,13 +50,27 @@ import { useToast } from '@/hooks/use-toast';
 
 import type { UserRole } from '@/types';
 
-interface User {
+type SelectedUserSummary = {
   id: string;
   email: string;
   fullName: string;
   roles: UserRole[];
   permissions?: string[];
-}
+};
+
+type ExportUserRow = {
+  fullName: string;
+  email: string;
+  roles: string[];
+  rateJunkCaptain?: number | Decimal | null;
+  rateJunkWingman?: number | Decimal | null;
+  rateMoveCaptain?: number | Decimal | null;
+  rateMoveWingman?: number | Decimal | null;
+  salaryAmount?: number | Decimal | null;
+  salaryFrequency?: string | null;
+  commissionRate?: number | Decimal | null;
+  createdAt: Date | string;
+};
 
 const BulkImportSchema = z.object({
   file: z.any().optional(),
@@ -79,7 +94,7 @@ type BulkRoleAssignmentFormData = z.infer<typeof BulkRoleAssignmentSchema>;
 type BulkActivationFormData = z.infer<typeof BulkActivationSchema>;
 
 interface BulkUserOperationsProps {
-  selectedUsers: User[];
+  selectedUsers: SelectedUserSummary[];
   onSuccess?: () => void;
 }
 
@@ -125,7 +140,7 @@ export function BulkUserOperations({
     },
   });
 
-  const handleBulkImport = async (_data: BulkImportFormData) => {
+  const handleBulkImport = async () => {
     setIsSubmitting(true);
     setUploadProgress(0);
 
@@ -260,7 +275,17 @@ export function BulkUserOperations({
     }
   };
 
-  const generateUserCSVFromData = (users: any[]) => {
+  const formatNumericValue = (value?: number | Decimal | null) => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'object' && 'toString' in value) {
+      return (value as { toString(): string }).toString();
+    }
+    return String(value);
+  };
+
+  const generateUserCSVFromData = (users: ExportUserRow[]) => {
     const headers = [
       'Full Name',
       'Email',
@@ -278,13 +303,13 @@ export function BulkUserOperations({
       user.fullName,
       user.email,
       user.roles.join(';'),
-      user.rateJunkCaptain || '',
-      user.rateJunkWingman || '',
-      user.rateMoveCaptain || '',
-      user.rateMoveWingman || '',
-      user.salaryAmount || '',
+      formatNumericValue(user.rateJunkCaptain),
+      formatNumericValue(user.rateJunkWingman),
+      formatNumericValue(user.rateMoveCaptain),
+      formatNumericValue(user.rateMoveWingman),
+      formatNumericValue(user.salaryAmount),
       user.salaryFrequency || '',
-      user.commissionRate || '',
+      formatNumericValue(user.commissionRate),
       new Date(user.createdAt).toISOString(),
     ]);
 

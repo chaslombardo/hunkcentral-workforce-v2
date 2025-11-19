@@ -37,7 +37,7 @@ export interface DropdownGroup {
 }
 
 export interface MobileDropdownProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   options?: DropdownOption[];
   groups?: DropdownGroup[];
   value?: string;
@@ -49,6 +49,11 @@ export interface MobileDropdownProps {
   side?: 'top' | 'right' | 'bottom' | 'left';
   title?: string;
 }
+
+type DropdownItem =
+  | { type: 'option'; data: DropdownOption }
+  | { type: 'group'; data: { label: string } }
+  | { type: 'separator'; data: null };
 
 export function MobileDropdown({
   trigger,
@@ -78,8 +83,7 @@ export function MobileDropdown({
 
   // Combine options and groups into a single structure
   const allItems = React.useMemo(() => {
-    const items: Array<{ type: 'group' | 'option' | 'separator'; data: any }> =
-      [];
+    const items: DropdownItem[] = [];
 
     // Add standalone options first
     if (options.length > 0) {
@@ -111,6 +115,34 @@ export function MobileDropdown({
 
     return items;
   }, [options, groups]);
+
+  const selectedLabel = React.useMemo(() => {
+    if (!value) return undefined;
+    const combinedOptions = [
+      ...options,
+      ...groups.flatMap((group) => group.options),
+    ];
+    return combinedOptions.find((option) => option.value === value)?.label;
+  }, [value, options, groups]);
+
+  const TriggerContent = () => {
+    if (trigger) return <>{trigger}</>;
+
+    return (
+      <Button
+        variant="outline"
+        className={cn(
+          'w-full justify-between text-left font-normal',
+          !selectedLabel && 'text-muted-foreground',
+          className
+        )}
+        disabled={disabled}
+      >
+        <span>{selectedLabel ?? placeholder}</span>
+        <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+      </Button>
+    );
+  };
 
   const handleSelect = (optionValue: string) => {
     selectionFeedback();
@@ -154,7 +186,7 @@ export function MobileDropdown({
               );
             }
 
-            const option = item.data as DropdownOption;
+            const option = item.data;
             const isSelected = value === option.value;
 
             return (
@@ -200,7 +232,7 @@ export function MobileDropdown({
           );
         }
 
-        const option = item.data as DropdownOption;
+        const option = item.data;
         const isSelected = value === option.value;
 
         return (
@@ -226,7 +258,9 @@ export function MobileDropdown({
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild disabled={disabled}>
-          <div onClick={handleTriggerClick}>{trigger}</div>
+          <div onClick={handleTriggerClick}>
+            <TriggerContent />
+          </div>
         </DrawerTrigger>
         <DrawerContent>
           <MobileContent />
@@ -238,7 +272,7 @@ export function MobileDropdown({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild disabled={disabled}>
-        {trigger}
+        <TriggerContent />
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} side={side} className={className}>
         <DesktopContent />
@@ -253,6 +287,7 @@ export interface MobileContextMenuProps {
   options: DropdownOption[];
   disabled?: boolean;
   className?: string;
+  onSelect?: (option: DropdownOption) => void;
 }
 
 export function MobileContextMenu({
@@ -260,6 +295,7 @@ export function MobileContextMenu({
   options,
   disabled = false,
   className,
+  onSelect,
 }: MobileContextMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
@@ -291,7 +327,7 @@ export function MobileContextMenu({
 
   const handleSelect = (option: DropdownOption) => {
     tapFeedback();
-    option.value && console.log('Selected:', option.value);
+    onSelect?.(option);
     setIsOpen(false);
   };
 

@@ -3,6 +3,7 @@
  * Implements data encryption, backup, retention policies, and GDPR compliance features
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { logProductionError } from '@/lib/monitoring';
 import { AuditTrailService } from '@/lib/audit-trail';
@@ -14,6 +15,10 @@ const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 const ENCRYPTION_KEY =
   process.env.DATA_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const IV_LENGTH = 16;
+
+type PrismaModelDelegate = {
+  findMany: (args?: unknown) => Promise<unknown[]>;
+};
 
 export interface EncryptedData {
   encryptedData: string;
@@ -169,13 +174,18 @@ export class DataBackup {
         'PayPeriod',
         'AuditLog',
       ];
-      const backupData: Record<string, any[]> = {};
+      const backupData: Record<string, unknown[]> = {};
       let totalRecords = 0;
+      const prismaModels = prisma as unknown as Record<
+        string,
+        PrismaModelDelegate
+      >;
 
       for (const table of tables) {
         const tableName = table.toLowerCase();
-        // Use dynamic query based on table name
-        const data = await (prisma as any)[tableName].findMany();
+        const model = prismaModels[tableName];
+        if (!model?.findMany) continue;
+        const data = await model.findMany();
         backupData[table] = data;
         totalRecords += data.length;
       }
@@ -255,13 +265,19 @@ export class DataBackup {
         'PayPeriod',
         'AuditLog',
       ];
-      const backupData: Record<string, any[]> = {};
+      const backupData: Record<string, unknown[]> = {};
       let totalRecords = 0;
+      const prismaModels = prisma as unknown as Record<
+        string,
+        PrismaModelDelegate
+      >;
 
       for (const table of tables) {
         const tableName = table.toLowerCase();
+        const model = prismaModels[tableName];
+        if (!model?.findMany) continue;
         // Get only records updated since last backup
-        const data = await (prisma as any)[tableName].findMany({
+        const data = await model.findMany({
           where: {
             updatedAt: {
               gt: lastBackupDate,
@@ -563,7 +579,7 @@ export class DataRetention {
 
     switch (entityType) {
       case 'audit_log':
-        const whereClause: any = {
+        const whereClause: Prisma.AuditLogWhereInput = {
           createdAt: { lt: deleteDate },
         };
 
@@ -705,8 +721,8 @@ export class DataExport {
   private static async collectUserData(
     userId: string,
     dataTypes: string[]
-  ): Promise<Record<string, any>> {
-    const userData: Record<string, any> = {};
+  ): Promise<Record<string, unknown>> {
+    const userData: Record<string, unknown> = {};
 
     try {
       if (dataTypes.includes('profile') || dataTypes.includes('all')) {
@@ -770,8 +786,8 @@ export class DataExport {
    * Format export data based on requested format
    */
   private static formatExportData(
-    userData: Record<string, any>,
-    format: string
+    userData: Record<string, unknown>,
+    format: 'json' | 'csv' | 'xml'
   ): string {
     switch (format) {
       case 'json':
@@ -793,7 +809,7 @@ export class DataExport {
   /**
    * Convert data to CSV format
    */
-  private static convertToCSV(userData: Record<string, any>): string {
+  private static convertToCSV(userData: Record<string, unknown>): string {
     let csv = '';
 
     for (const [section, data] of Object.entries(userData)) {
@@ -801,23 +817,29 @@ export class DataExport {
 
       if (Array.isArray(data)) {
         if (data.length > 0) {
-          const headers = Object.keys(data[0]);
+          const typedData = data as Record<string, unknown>[];
+          const headers = Object.keys(typedData[0]);
           csv += headers.join(',') + '\n';
 
-          data.forEach((item) => {
+          typedData.forEach((item) => {
             const row = headers.map((header) => {
               const value = item[header];
-              return typeof value === 'object'
+              return typeof value === 'object' && value !== null
                 ? JSON.stringify(value)
-                : String(value);
+                : String(value ?? '');
             });
             csv += row.join(',') + '\n';
           });
         }
       } else if (data && typeof data === 'object') {
+        const typedEntry = data as Record<string, unknown>;
         csv += 'Field,Value\n';
-        Object.entries(data).forEach(([key, value]) => {
-          csv += `${key},"${typeof value === 'object' ? JSON.stringify(value) : String(value)}"\n`;
+        Object.entries(typedEntry).forEach(([key, value]) => {
+          const formatted =
+            typeof value === 'object' && value !== null
+              ? JSON.stringify(value)
+              : String(value ?? '');
+          csv += `${key},"${formatted}"\n`;
         });
       }
     }
@@ -828,26 +850,36 @@ export class DataExport {
   /**
    * Convert data to XML format
    */
-  private static convertToXML(userData: Record<string, any>): string {
+  private static convertToXML(userData: Record<string, unknown>): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<user_data>\n';
 
     for (const [section, data] of Object.entries(userData)) {
       xml += `  <${section}>\n`;
 
       if (Array.isArray(data)) {
-        data.forEach((item, index) => {
+        const typedData = data as Record<string, unknown>[];
+        typedData.forEach((item, index) => {
           xml += `    <item_${index}>\n`;
           Object.entries(item).forEach(([key, value]) => {
-            xml += `      <${key}>${typeof value === 'object' ? JSON.stringify(value) : String(value)}</${key}>\n`;
+            const formatted =
+              typeof value === 'object' && value !== null
+                ? JSON.stringify(value)
+                : String(value ?? '');
+            xml += `      <${key}>${formatted}</${key}>\n`;
           });
           xml += `    </item_${index}>\n`;
         });
       } else if (data && typeof data === 'object') {
-        Object.entries(data).forEach(([key, value]) => {
-          xml += `    <${key}>${typeof value === 'object' ? JSON.stringify(value) : String(value)}</${key}>\n`;
+        const typedEntry = data as Record<string, unknown>;
+        Object.entries(typedEntry).forEach(([key, value]) => {
+          const formatted =
+            typeof value === 'object' && value !== null
+              ? JSON.stringify(value)
+              : String(value ?? '');
+          xml += `    <${key}>${formatted}</${key}>\n`;
         });
       }
-
+      xml += `    <value>${String(data ?? '')}</value>\n`;
       xml += `  </${section}>\n`;
     }
 

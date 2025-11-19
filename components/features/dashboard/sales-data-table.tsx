@@ -12,8 +12,8 @@ import {
   IconEye,
   IconEdit,
   IconPlus,
-  IconClock,
   IconCheck,
+  IconClock,
 } from '@tabler/icons-react';
 import {
   ColumnDef,
@@ -109,12 +109,29 @@ const generateSampleCommissionData = (
     'paid',
   ];
 
-  return Array.from({ length: 20 }, (_, i) => {
+  const pendingTarget = metrics?.pendingCommissions ?? 8;
+  const matchedTarget = metrics?.matchedCommissions ?? 5;
+  let pendingRemaining = pendingTarget;
+  let matchedRemaining = matchedTarget;
+  const baseLength = 20;
+  const totalLength = Math.max(baseLength, pendingTarget + matchedTarget + 5);
+
+  return Array.from({ length: totalLength }, () => {
     const bookingDate = new Date();
     bookingDate.setDate(bookingDate.getDate() - Math.floor(Math.random() * 30));
 
     const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    let status: 'pending' | 'matched' | 'paid';
+
+    if (pendingRemaining > 0) {
+      status = 'pending';
+      pendingRemaining -= 1;
+    } else if (matchedRemaining > 0) {
+      status = 'matched';
+      matchedRemaining -= 1;
+    } else {
+      status = statuses[Math.floor(Math.random() * statuses.length)];
+    }
     const estimatedRevenue = Math.floor(Math.random() * 1200) + 300;
     const commissionRate = 0.05 + Math.random() * 0.05; // 5-10%
     const estimatedCommission = estimatedRevenue * commissionRate;
@@ -301,7 +318,7 @@ const columns: ColumnDef<CommissionData>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => (
+    cell: () => (
       <div className="flex items-center gap-1">
         <Button variant="ghost" size="sm">
           <IconEye className="w-4 h-4" />

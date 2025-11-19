@@ -10,7 +10,7 @@ export interface HealthCheck {
   status: 'healthy' | 'degraded' | 'unhealthy';
   responseTime: number;
   timestamp: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   error?: string;
 }
 
@@ -38,7 +38,7 @@ export async function checkFileSystem(): Promise<HealthCheck> {
     for (const file of criticalFiles) {
       try {
         await fs.access(path.join(process.cwd(), file));
-      } catch (error) {
+      } catch {
         missingFiles.push(file);
       }
     }

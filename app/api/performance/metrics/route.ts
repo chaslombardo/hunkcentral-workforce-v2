@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(dbSummary);
 
       case 'alerts':
-        const alerts: Array<any> = [];
+        const alerts: Record<string, unknown>[] = [];
         return NextResponse.json(alerts);
 
       case 'real-time':

@@ -1,5 +1,7 @@
 import {
   FilterConfig,
+  FilterOption,
+  FilterPreset,
   QuickFilterConfig,
   STANDARD_DATE_PRESETS,
   STANDARD_STATUS_OPTIONS,
@@ -16,6 +18,18 @@ import {
   IconCurrencyDollar,
   IconUserPlus,
 } from '@tabler/icons-react';
+
+type FilterOptionsInput = {
+  presets?: FilterPreset[];
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: FilterOption[];
+  placeholder?: string;
+  multiline?: boolean;
+  trueLabel?: string;
+  falseLabel?: string;
+};
 
 // HUNKCentral-specific filter configurations
 export const HUNKCENTRAL_FILTERS = {
@@ -306,7 +320,9 @@ export const FILTER_SETS = {
 };
 
 // Utility functions for dynamic filter population
-export function populateUserOptions(users: any[]): FilterConfig[] {
+export function populateUserOptions(
+  users: Array<{ id: string; fullName: string; role: string }>
+): FilterConfig[] {
   const captainOptions = users
     .filter((user) => user.role === 'captain')
     .map((user) => ({ value: user.id, label: user.fullName }));
@@ -327,7 +343,9 @@ export function populateUserOptions(users: any[]): FilterConfig[] {
   ];
 }
 
-export function populateLocationOptions(locations: any[]): FilterConfig {
+export function populateLocationOptions(
+  locations: Array<{ id: string; name: string }>
+): FilterConfig {
   return {
     ...HUNKCENTRAL_FILTERS.location,
     options: locations.map((location) => ({
@@ -342,7 +360,7 @@ export function createFilterConfig(
   key: string,
   label: string,
   type: FilterConfig['type'],
-  options?: any
+  options?: FilterOptionsInput
 ): FilterConfig {
   const baseConfig = {
     key,

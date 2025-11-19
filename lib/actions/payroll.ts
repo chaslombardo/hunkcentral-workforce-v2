@@ -86,6 +86,12 @@ export interface EnhancedPayrollData {
   rateInformation: RateInfo;
 }
 
+const isEnhancedPayrollData = (value: unknown): value is EnhancedPayrollData =>
+  typeof value === 'object' &&
+  value !== null &&
+  'employeeId' in value &&
+  'totalHours' in value;
+
 /**
  * Get detailed payroll breakdown for a specific employee and pay period
  */
@@ -128,7 +134,8 @@ export async function getDetailedPayrollBreakdown(
     if (
       cachedPayroll &&
       (payPeriod.status === 'closed' ||
-        areMetricsFresh(new Date(cachedPayroll.computedAt), 60))
+        areMetricsFresh(new Date(cachedPayroll.computedAt), 60)) &&
+      isEnhancedPayrollData(cachedPayroll.data)
     ) {
       return { success: true, data: cachedPayroll.data };
     }

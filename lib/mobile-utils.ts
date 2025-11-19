@@ -1,5 +1,23 @@
 'use client';
 
+type NetworkInformation = {
+  downlink?: number;
+  effectiveType?: string;
+};
+
+type NetworkAwareNavigator = Navigator & {
+  connection?: NetworkInformation;
+  mozConnection?: NetworkInformation;
+  webkitConnection?: NetworkInformation;
+};
+
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback?: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions
+  ) => number;
+};
+
 /**
  * Mobile utility functions for enhanced mobile experience
  */
@@ -144,14 +162,14 @@ export const getViewportHeight = (): number => {
 export const getDynamicViewportHeight = (): number => {
   if (typeof window === 'undefined') return 0;
   // Use dynamic viewport height if available (better for mobile)
-  return (window as any).visualViewport?.height || window.innerHeight;
+  return window.visualViewport?.height ?? window.innerHeight;
 };
 
 // Keyboard detection
 export const isVirtualKeyboardOpen = (): boolean => {
   if (typeof window === 'undefined') return false;
 
-  const visualViewport = (window as any).visualViewport;
+  const visualViewport = window.visualViewport;
   if (visualViewport) {
     return visualViewport.height < window.innerHeight * 0.75;
   }
@@ -212,10 +230,11 @@ export const scrollToFormError = (errorElement: HTMLElement) => {
 export const getConnectionType = (): string => {
   if (typeof navigator === 'undefined') return 'unknown';
 
+  const networkNavigator = navigator as NetworkAwareNavigator;
   const connection =
-    (navigator as any).connection ||
-    (navigator as any).mozConnection ||
-    (navigator as any).webkitConnection;
+    networkNavigator.connection ||
+    networkNavigator.mozConnection ||
+    networkNavigator.webkitConnection;
   return connection?.effectiveType || 'unknown';
 };
 
@@ -228,8 +247,9 @@ export const isSlowConnection = (): boolean => {
 export const requestIdleCallback = (callback: () => void, timeout = 5000) => {
   if (typeof window === 'undefined') return;
 
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(callback, { timeout });
+  const browserWindow = window as WindowWithIdleCallback;
+  if (typeof browserWindow.requestIdleCallback === 'function') {
+    browserWindow.requestIdleCallback(() => callback(), { timeout });
   } else {
     // Fallback for browsers that don't support requestIdleCallback
     setTimeout(callback, 1);

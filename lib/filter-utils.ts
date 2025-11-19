@@ -4,7 +4,10 @@ import {
   FilterConfig,
   DateRangeValue,
   NumberRangeValue,
+  BooleanFilterConfig,
 } from '@/components/features/data';
+
+type FilterValues = Record<string, unknown>;
 
 // URL state management for filters
 export function useFilterState() {
@@ -14,7 +17,7 @@ export function useFilterState() {
   // Parse filters from URL
   const parseFiltersFromUrl = useCallback(
     (filterConfigs: FilterConfig[]) => {
-      const filters: Record<string, any> = {};
+      const filters: FilterValues = {};
 
       filterConfigs.forEach((config) => {
         const paramValue = searchParams.get(config.key);
@@ -61,7 +64,7 @@ export function useFilterState() {
 
   // Update URL with filter values
   const updateUrlWithFilters = useCallback(
-    (filters: Record<string, any>) => {
+    (filters: FilterValues) => {
       const params = new URLSearchParams(searchParams.toString());
 
       Object.entries(filters).forEach(([key, value]) => {
@@ -99,7 +102,7 @@ export function useFilterState() {
 // Local storage persistence for filter preferences
 export function useFilterPreferences(key: string) {
   const savePreferences = useCallback(
-    (filters: Record<string, any>) => {
+    (filters: FilterValues) => {
       try {
         localStorage.setItem(`filter-prefs-${key}`, JSON.stringify(filters));
       } catch (error) {
@@ -109,7 +112,7 @@ export function useFilterPreferences(key: string) {
     [key]
   );
 
-  const loadPreferences = useCallback((): Record<string, any> => {
+  const loadPreferences = useCallback((): FilterValues => {
     try {
       const saved = localStorage.getItem(`filter-prefs-${key}`);
       return saved ? JSON.parse(saved) : {};
@@ -135,7 +138,10 @@ export function useFilterPreferences(key: string) {
 }
 
 // Filter validation utilities
-export function validateFilterValue(config: FilterConfig, value: any): boolean {
+export function validateFilterValue(
+  config: FilterConfig,
+  value: unknown
+): boolean {
   if (value === undefined || value === null) return true;
 
   switch (config.type) {
@@ -178,7 +184,7 @@ export function validateFilterValue(config: FilterConfig, value: any): boolean {
 // Filter application utilities
 export function applyFilters<T>(
   data: T[],
-  filters: Record<string, any>,
+  filters: FilterValues,
   configs: FilterConfig[]
 ): T[] {
   return data.filter((item) => {
@@ -186,7 +192,8 @@ export function applyFilters<T>(
       const filterValue = filters[config.key];
       if (!filterValue) return true;
 
-      const itemValue = (item as any)[config.key];
+      const record = item as Record<string, unknown>;
+      const itemValue = record[config.key];
 
       switch (config.type) {
         case 'select':
@@ -210,7 +217,12 @@ export function applyFilters<T>(
           return true;
 
         case 'text':
-          if (typeof itemValue !== 'string') return true;
+          if (
+            typeof itemValue !== 'string' ||
+            typeof filterValue !== 'string'
+          ) {
+            return true;
+          }
           return itemValue.toLowerCase().includes(filterValue.toLowerCase());
 
         case 'boolean':
@@ -225,7 +237,7 @@ export function applyFilters<T>(
 
 // Filter summary utilities
 export function getFilterSummary(
-  filters: Record<string, any>,
+  filters: FilterValues,
   configs: FilterConfig[]
 ): string[] {
   const summaries: string[] = [];
@@ -290,7 +302,7 @@ export function getFilterSummary(
 
       case 'boolean':
         if (typeof value === 'boolean') {
-          const boolConfig = config as any;
+          const boolConfig = config as BooleanFilterConfig;
           const label = value
             ? boolConfig.trueLabel || 'Yes'
             : boolConfig.falseLabel || 'No';
@@ -306,7 +318,7 @@ export function getFilterSummary(
 // Export filter data utilities
 export function exportFilteredData<T>(
   data: T[],
-  filters: Record<string, any>,
+  filters: FilterValues,
   configs: FilterConfig[],
   format: 'csv' | 'json' = 'csv'
 ): string {
@@ -319,13 +331,13 @@ export function exportFilteredData<T>(
   // CSV export
   if (filteredData.length === 0) return '';
 
-  const headers = Object.keys(filteredData[0] as any);
+  const headers = Object.keys(filteredData[0] as Record<string, unknown>);
   const csvRows = [
     headers.join(','),
     ...filteredData.map((row) =>
       headers
         .map((header) => {
-          const value = (row as any)[header];
+          const value = (row as Record<string, unknown>)[header];
           // Escape commas and quotes in CSV
           if (
             typeof value === 'string' &&
@@ -333,7 +345,7 @@ export function exportFilteredData<T>(
           ) {
             return `"${value.replace(/"/g, '""')}"`;
           }
-          return value;
+          return value ?? '';
         })
         .join(',')
     ),
@@ -344,9 +356,9 @@ export function exportFilteredData<T>(
 
 // Advanced filter combinations
 export function combineFilters(
-  baseFilters: Record<string, any>,
-  additionalFilters: Record<string, any>
-): Record<string, any> {
+  baseFilters: FilterValues,
+  additionalFilters: FilterValues
+): FilterValues {
   const combined = { ...baseFilters };
 
   Object.entries(additionalFilters).forEach(([key, value]) => {
@@ -368,7 +380,7 @@ export interface FilterPreset {
   id: string;
   name: string;
   description?: string;
-  filters: Record<string, any>;
+  filters: FilterValues;
   isDefault?: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -13,9 +13,9 @@ import {
   IconCurrencyDollar,
   IconPercentage,
   IconTarget,
-  IconClock,
   IconBriefcase,
   IconShield,
+  IconClock,
 } from '@tabler/icons-react';
 // Remove Prisma import - use number type instead
 

@@ -9,10 +9,10 @@ import {
   IconBriefcase,
   IconCalendar,
   IconCircleCheckFilled,
-  IconClock,
   IconCurrencyDollar,
   IconEdit,
   IconUser,
+  IconClock,
 } from '@tabler/icons-react';
 
 import { Badge } from '@/components/ui/badge';

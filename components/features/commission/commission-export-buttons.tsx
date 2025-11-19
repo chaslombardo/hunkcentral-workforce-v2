@@ -24,15 +24,13 @@ import { Download, Mail, FileText, Loader2, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface CommissionExportButtonsProps {
-  entries: any[];
+  entries: unknown[];
   canViewAllData: boolean;
-  currentUserId: string;
 }
 
 export function CommissionExportButtons({
   entries,
   canViewAllData,
-  currentUserId,
 }: CommissionExportButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);

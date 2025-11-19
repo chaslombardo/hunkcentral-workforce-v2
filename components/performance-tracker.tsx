@@ -76,6 +76,10 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
 
     // Add event listeners for common interactions
     const events = ['click', 'submit', 'focus', 'blur'];
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
     events.forEach((eventType) => {
       document.addEventListener(eventType, trackInteraction, { passive: true });
     });
@@ -90,23 +94,40 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
   useEffect(() => {
     // Track system health metrics
     const trackSystemHealth = () => {
-      if (typeof window !== 'undefined') {
-        const connection =
-          (navigator as any).connection ||
-          (navigator as any).mozConnection ||
-          (navigator as any).webkitConnection;
-
-        const monitoring = getMonitoring();
-        if (monitoring) {
-          monitoring.trackSystemHealth({
-            metricType: 'memory',
-            value: (performance as any).memory
-              ? (performance as any).memory.usedJSHeapSize
-              : 0,
-            status: 'healthy',
-          });
-        }
+      if (typeof window === 'undefined') {
+        return;
       }
+
+      const monitoring = getMonitoring();
+      if (!monitoring) {
+        return;
+      }
+
+      const navigatorWithConnection = window.navigator as Navigator & {
+        connection?: { downlink?: number; effectiveType?: string };
+        mozConnection?: { downlink?: number; effectiveType?: string };
+        webkitConnection?: { downlink?: number; effectiveType?: string };
+      };
+      const connectionInfo =
+        navigatorWithConnection.connection ||
+        navigatorWithConnection.mozConnection ||
+        navigatorWithConnection.webkitConnection;
+      const performanceWithMemory = window.performance as Performance & {
+        memory?: { usedJSHeapSize?: number };
+      };
+      const usedMemory = performanceWithMemory.memory?.usedJSHeapSize ?? 0;
+
+      monitoring.trackSystemHealth({
+        metricType: 'memory',
+        value: usedMemory,
+        status: 'healthy',
+        metadata: connectionInfo
+          ? {
+              downlink: connectionInfo.downlink,
+              effectiveType: connectionInfo.effectiveType,
+            }
+          : undefined,
+      });
     };
 
     // Track system health on mount and periodically
@@ -146,6 +167,10 @@ export function PerformanceTracker({ userId }: PerformanceTrackerProps) {
         });
       }
     };
+
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 

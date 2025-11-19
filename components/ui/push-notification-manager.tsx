@@ -23,10 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  usePushNotifications,
-  NotificationTypes,
-} from '@/lib/push-notifications';
+import { usePushNotifications } from '@/lib/push-notifications';
 import { useToast } from '@/hooks/use-toast';
 
 export interface NotificationPreferences {

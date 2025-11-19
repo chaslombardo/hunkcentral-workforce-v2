@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Clock,
-  Users,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-} from 'lucide-react';
+import { Clock, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import { MetricCard } from '@/components/brand/metric-card';
 
 interface ManagerMetrics {

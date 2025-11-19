@@ -1,9 +1,14 @@
 // Metrics Calculator for Pre-computed Analytics
 // Handles calculation of dashboard, payroll, and performance metrics
 
+import { Prisma, PrecomputedMetric } from '@prisma/client';
 import { prisma } from './prisma';
-import { calculateOverallTotals } from './logCalculations';
-import { calculateEnhancedPayroll } from './payCalculator';
+
+type MetricPayload = {
+  userId?: string;
+  payPeriodId?: string;
+  department?: string;
+};
 
 export interface DashboardMetrics {
   // Captain metrics
@@ -17,15 +22,15 @@ export interface DashboardMetrics {
     moveLaborCostPercent: number;
     averageJobSize: number;
     jobsByType: { junk: number; move: number };
-    recentLogs: any[];
+    recentLogs: unknown[];
   };
 
   // Manager metrics
   manager?: {
     pendingApprovals: number;
-    teamPerformance: any[];
-    laborCostTrends: any[];
-    exceptionAlerts: any[];
+    teamPerformance: unknown[];
+    laborCostTrends: unknown[];
+    exceptionAlerts: unknown[];
     teamSummary: {
       totalEmployees: number;
       activeToday: number;
@@ -41,7 +46,7 @@ export interface DashboardMetrics {
     bookingAccuracy: number;
     conversionRate: number;
     pipelineValue: number;
-    recentBookings: any[];
+    recentBookings: unknown[];
   };
 
   // Admin metrics
@@ -49,12 +54,13 @@ export interface DashboardMetrics {
     systemHealth: {
       activeUsers: number;
       logsToday: number;
+      payPeriodLogs: number;
       errorRate: number;
       avgResponseTime: number;
     };
-    userActivity: any[];
-    payrollStatus: any[];
-    alerts: any[];
+    userActivity: unknown[];
+    payrollStatus: unknown[];
+    alerts: unknown[];
   };
 }
 
@@ -131,12 +137,12 @@ export interface UserPerformanceMetrics {
 // Main calculation function
 export async function calculatePrecomputedMetrics(
   metricType: string,
-  payload: any
+  payload: MetricPayload
 ): Promise<void> {
   // console.log(`Computing ${metricType} metrics with payload:`, payload);
 
   try {
-    let data: any;
+    let data: unknown;
     let entityType: string | null = null;
     let entityId: string | null = null;
 
@@ -151,15 +157,21 @@ export async function calculatePrecomputedMetrics(
         break;
 
       case 'payroll':
+        if (!payload.payPeriodId) {
+          throw new Error('payPeriodId is required for payroll metrics');
+        }
         data = await calculatePayrollMetrics(
           payload.payPeriodId,
           payload.userId
         );
         entityType = 'user';
-        entityId = payload.userId;
+        entityId = payload.userId || null;
         break;
 
       case 'labor_costs':
+        if (!payload.payPeriodId) {
+          throw new Error('payPeriodId is required for labor cost metrics');
+        }
         data = await calculateLaborCostMetrics(
           payload.payPeriodId,
           payload.department
@@ -174,10 +186,13 @@ export async function calculatePrecomputedMetrics(
           payload.payPeriodId
         );
         entityType = 'user';
-        entityId = payload.userId;
+        entityId = payload.userId || null;
         break;
 
       case 'user_performance':
+        if (!payload.userId) {
+          throw new Error('userId is required for user performance metrics');
+        }
         data = await calculateUserPerformanceMetrics(
           payload.userId,
           payload.payPeriodId
@@ -261,7 +276,7 @@ async function calculateDashboardMetrics(
 
 // Captain-specific metrics
 async function calculateCaptainMetrics(userId?: string, payPeriodId?: string) {
-  const whereClause: any = {};
+  const whereClause: Prisma.DailyLogWhereInput = {};
   if (userId) whereClause.captainId = userId;
   if (payPeriodId) {
     const payPeriod = await prisma.payPeriod.findUnique({
@@ -363,16 +378,31 @@ async function calculateCaptainMetrics(userId?: string, payPeriodId?: string) {
 
 // Manager-specific metrics
 async function calculateManagerMetrics(payPeriodId: string) {
+  const payPeriod = await prisma.payPeriod.findUnique({
+    where: { id: payPeriodId },
+    select: { startDate: true, endDate: true },
+  });
+
+  const dateFilter: Prisma.DateTimeFilter | undefined = payPeriod
+    ? {
+        gte: payPeriod.startDate,
+        lte: payPeriod.endDate,
+      }
+    : undefined;
+
   // Pending approvals
   const pendingApprovals = await prisma.dailyLog.count({
-    where: { status: 'submitted' },
+    where: {
+      status: 'submitted',
+      ...(dateFilter && { logDate: dateFilter }),
+    },
   });
 
   // Team performance (top performers)
   const teamPerformance = await prisma.dailyLog.findMany({
     where: {
       status: 'approved',
-      // Add pay period filter if needed
+      ...(dateFilter && { logDate: dateFilter }),
     },
     include: {
       captain: { select: { id: true, fullName: true } },
@@ -385,7 +415,7 @@ async function calculateManagerMetrics(payPeriodId: string) {
   const exceptionAlerts = await prisma.dailyLog.findMany({
     where: {
       status: 'submitted',
-      // Add conditions for high labor costs
+      ...(dateFilter && { logDate: dateFilter }),
     },
     include: {
       captain: { select: { fullName: true } },
@@ -431,8 +461,22 @@ async function calculateManagerMetrics(payPeriodId: string) {
 
 // Sales-specific metrics
 async function calculateSalesMetrics(userId?: string, payPeriodId?: string) {
-  const whereClause: any = {};
+  const whereClause: Prisma.CommissionEntryWhereInput = {};
   if (userId) whereClause.salesId = userId;
+
+  if (payPeriodId) {
+    const payPeriod = await prisma.payPeriod.findUnique({
+      where: { id: payPeriodId },
+      select: { startDate: true, endDate: true },
+    });
+
+    if (payPeriod) {
+      whereClause.createdAt = {
+        gte: payPeriod.startDate,
+        lte: payPeriod.endDate,
+      };
+    }
+  }
 
   const commissions = await prisma.commissionEntry.findMany({
     where: whereClause,
@@ -483,6 +527,11 @@ async function calculateSalesMetrics(userId?: string, payPeriodId?: string) {
 
 // Admin-specific metrics
 async function calculateAdminMetrics(payPeriodId: string) {
+  const payPeriod = await prisma.payPeriod.findUnique({
+    where: { id: payPeriodId },
+    select: { startDate: true, endDate: true },
+  });
+
   const activeUsers = await prisma.user.count();
 
   const logsToday = await prisma.dailyLog.count({
@@ -491,10 +540,22 @@ async function calculateAdminMetrics(payPeriodId: string) {
     },
   });
 
+  const payPeriodLogs = payPeriod
+    ? await prisma.dailyLog.count({
+        where: {
+          logDate: {
+            gte: payPeriod.startDate,
+            lte: payPeriod.endDate,
+          },
+        },
+      })
+    : logsToday;
+
   // System health metrics (simplified)
   const systemHealth = {
     activeUsers,
     logsToday,
+    payPeriodLogs,
     errorRate: 0, // TODO: Implement error tracking
     avgResponseTime: 0, // TODO: Implement performance tracking
   };
@@ -512,7 +573,7 @@ async function calculatePayrollMetrics(
   payPeriodId: string,
   userId?: string
 ): Promise<PayrollMetrics[]> {
-  const whereClause: any = {};
+  const whereClause: Prisma.UserWhereInput = {};
   if (userId) whereClause.id = userId;
 
   const users = await prisma.user.findMany({
@@ -730,7 +791,7 @@ async function storePrecomputedMetric({
   metricType: string;
   entityType: string | null;
   entityId: string | null;
-  data: any;
+  data: unknown;
   payPeriodId?: string;
   department?: string;
 }): Promise<void> {
@@ -745,7 +806,7 @@ async function storePrecomputedMetric({
       },
     },
     update: {
-      data,
+      data: data as Prisma.InputJsonValue,
       computedAt: new Date(),
       version: { increment: 1 },
     },
@@ -753,7 +814,7 @@ async function storePrecomputedMetric({
       metricType,
       entityType,
       entityId,
-      data,
+      data: data as Prisma.InputJsonValue,
       payPeriodId,
       department,
       computedAt: new Date(),
@@ -769,7 +830,7 @@ export async function getCachedMetrics(
   entityId?: string,
   payPeriodId?: string,
   department?: string
-): Promise<any | null> {
+): Promise<PrecomputedMetric | null> {
   const metric = await prisma.precomputedMetric.findFirst({
     where: {
       metricType,
@@ -781,7 +842,7 @@ export async function getCachedMetrics(
     orderBy: { computedAt: 'desc' },
   });
 
-  return metric?.data || null;
+  return metric;
 }
 
 // Check if metrics are fresh (within threshold)

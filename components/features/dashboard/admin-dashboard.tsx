@@ -8,9 +8,7 @@ import { AdminDataTable } from './admin-data-table';
 
 export function AdminDashboard() {
   const { user } = useSession();
-  const { metrics, roleMetrics, loading, error } = useDashboardData(
-    user?.roles
-  );
+  const { roleMetrics, loading, error } = useDashboardData(user?.roles);
 
   if (loading) {
     return (
@@ -67,7 +65,7 @@ export function AdminDashboard() {
         </div>
 
         {/* System Activity & Audit Log - Using dashboard-01 DataTable pattern with system monitoring */}
-        <AdminDataTable metrics={roleMetrics?.admin} />
+        <AdminDataTable />
       </div>
     </div>
   );

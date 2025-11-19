@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withProductionApiAuth } from '@/lib/production-auth';
-import { requireAnyRole } from '@/lib/auth';
+import { requireAnyRole, type SessionUser } from '@/lib/auth';
 import { DataBackup } from '@/lib/data-protection';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -21,7 +21,7 @@ const BackupRequestSchema = z.object({
 /**
  * POST /api/data-protection/backup - Create a new backup
  */
-async function handlePost(user: any, request: NextRequest) {
+async function handlePost(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,
@@ -90,7 +90,7 @@ async function handlePost(user: any, request: NextRequest) {
 /**
  * PUT /api/data-protection/backup - Restore from backup
  */
-async function handlePut(user: any, request: NextRequest) {
+async function handlePut(user: SessionUser, request: NextRequest) {
   try {
     requireAnyRole(user, ['admin'], {
       url: request.url,

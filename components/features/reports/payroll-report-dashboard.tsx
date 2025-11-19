@@ -53,6 +53,8 @@ export function PayrollReportDashboard() {
           if (periodsResult.data.length > 0) {
             setSelectedPeriod(periodsResult.data[0]);
           }
+          // Placeholder until real payroll data integration is complete
+          setPayrollData([]);
         }
       } catch {
         // Error loading payroll data
@@ -70,6 +72,7 @@ export function PayrollReportDashboard() {
       setSelectedPeriod(period);
       // Load payroll data for selected period
       // This would be an API call in real implementation
+      setPayrollData([]);
     }
   };
 

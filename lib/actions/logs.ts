@@ -1215,7 +1215,7 @@ export async function listLogs(
     } = params;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.DailyLogWhereInput = {};
 
     // Add status filter
     if (status && status !== 'all') {
@@ -1265,8 +1265,9 @@ export async function listLogs(
     }
 
     // Build order by clause
-    const orderBy: any = {};
-    orderBy[sortBy] = sortOrder;
+    const orderBy = {
+      [sortBy]: sortOrder,
+    } as Prisma.DailyLogOrderByWithRelationInput;
 
     // Execute query with pagination
     const [logs, total] = await Promise.all([
@@ -1525,8 +1526,10 @@ export async function quickUpdateLog(
       };
     }
 
-    const updateData: any = {
-      lastEditedById: session.user.id,
+    const updateData: Prisma.DailyLogUpdateInput = {
+      lastEditedBy: {
+        connect: { id: session.user.id },
+      },
       updatedAt: new Date(),
     };
 
@@ -1537,7 +1540,9 @@ export async function quickUpdateLog(
         updateData.submittedAt = new Date();
       } else if (updates.status === 'approved') {
         updateData.approvedAt = new Date();
-        updateData.approvedById = session.user.id;
+        updateData.approvedBy = {
+          connect: { id: session.user.id },
+        };
       }
     }
 

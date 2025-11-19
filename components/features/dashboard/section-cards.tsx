@@ -1,7 +1,7 @@
 import {
   IconTrendingDown,
-  IconTrendingUp,
   IconMinus,
+  IconTrendingUp,
 } from '@tabler/icons-react';
 
 import { Badge } from '@/components/ui/badge';

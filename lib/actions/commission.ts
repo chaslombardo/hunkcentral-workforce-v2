@@ -9,13 +9,8 @@ import {
 } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { logCommissionChange } from '@/lib/auditLogger';
-import { canModifyDataForDate } from '@/lib/actions/pay-periods';
 import { convertCommissionDecimalFields } from '@/lib/decimal-utils';
-import {
-  onCommissionCreated,
-  onCommissionMatched,
-  onCommissionApproved,
-} from '@/lib/cache';
+import { onCommissionCreated, onCommissionApproved } from '@/lib/cache';
 
 export async function createCommissionEntry(data: CommissionEntryFormData) {
   try {

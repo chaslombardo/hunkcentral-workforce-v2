@@ -3,6 +3,7 @@
  * Provides comprehensive audit logging, search, filtering, and reporting capabilities
  */
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { logProductionError } from '@/lib/monitoring';
 import { z } from 'zod';
@@ -152,7 +153,7 @@ export class AuditTrailService {
       const validatedFilters = AuditSearchSchema.parse(filters);
 
       // Build where clause
-      const whereClause: any = {};
+      const whereClause: Prisma.AuditLogWhereInput = {};
 
       if (validatedFilters.entityType) {
         whereClause.entityType = validatedFilters.entityType;
@@ -254,7 +255,7 @@ export class AuditTrailService {
     end: Date;
   }): Promise<AuditStatistics> {
     try {
-      const whereClause: any = {};
+      const whereClause: Prisma.AuditLogWhereInput = {};
 
       if (dateRange) {
         whereClause.createdAt = {
@@ -367,7 +368,7 @@ export class AuditTrailService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const timelineWhereClause = {
+      const timelineWhereClause: Prisma.AuditLogWhereInput = {
         ...whereClause,
         createdAt: {
           gte: dateRange?.start || thirtyDaysAgo,
@@ -401,7 +402,9 @@ export class AuditTrailService {
   /**
    * Generate timeline data for audit activity visualization
    */
-  private static async generateTimelineData(whereClause: any): Promise<
+  private static async generateTimelineData(
+    whereClause: Prisma.AuditLogWhereInput
+  ): Promise<
     Array<{
       date: string;
       count: number;
@@ -574,7 +577,7 @@ export class AuditTrailService {
     }
   ): Promise<AuditLogEntry[]> {
     try {
-      const whereClause: any = {
+      const whereClause: Prisma.AuditLogWhereInput = {
         entityType,
         entityId,
       };

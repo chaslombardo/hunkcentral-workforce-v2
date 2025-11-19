@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { addSwipeGesture, isMobileDevice } from '@/lib/mobile-utils';
+import { isMobileDevice } from '@/lib/mobile-utils';
 import { useHapticFeedback } from '@/hooks/useHapticFeedback';
 
 export interface SwipeGestureProps {

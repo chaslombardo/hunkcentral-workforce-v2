@@ -65,7 +65,6 @@ async function createTestUser() {
     // eslint-disable-next-line no-console
     console.log('Captain ID:', captain.id);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('❌ Error creating test user:', error);
   } finally {
     await prisma.$disconnect();

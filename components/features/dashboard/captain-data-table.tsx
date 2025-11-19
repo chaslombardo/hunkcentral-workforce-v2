@@ -8,7 +8,6 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
   IconLayoutColumns,
-  IconSearch,
   IconDownload,
 } from '@tabler/icons-react';
 import {
@@ -102,6 +101,13 @@ const generateSampleJobData = (metrics?: CaptainMetrics): JobHistoryData[] => {
     'Attic Removal',
   ];
 
+  const averageRevenue = metrics?.currentPayPeriodRevenue
+    ? metrics.currentPayPeriodRevenue / 15
+    : 1200;
+  const averageTips = metrics?.currentPayPeriodTips
+    ? metrics.currentPayPeriodTips / 15
+    : 120;
+
   return Array.from({ length: 15 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - i);
@@ -113,8 +119,10 @@ const generateSampleJobData = (metrics?: CaptainMetrics): JobHistoryData[] => {
       date: date.toISOString().split('T')[0],
       jobType,
       clientName: clients[Math.floor(Math.random() * clients.length)],
-      revenue: Math.floor(Math.random() * 1500) + 300,
-      tips: Math.floor(Math.random() * 150) + 20,
+      revenue:
+        Math.floor(Math.random() * (averageRevenue * 0.8)) +
+        averageRevenue * 0.4,
+      tips: Math.floor(Math.random() * (averageTips * 0.6)) + averageTips * 0.3,
       laborCostPercent: goalPercent + (Math.random() - 0.5) * 8,
       status: statuses[Math.floor(Math.random() * statuses.length)],
       teamSize: Math.floor(Math.random() * 4) + 2,

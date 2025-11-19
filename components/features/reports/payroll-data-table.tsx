@@ -66,7 +66,7 @@ import {
   getSortDirection,
 } from '@/components/ui/sortable-header';
 import { PayrollTableSkeleton } from '@/components/ui/skeleton-components';
-import type { PayPeriod, User } from '@/types';
+import type { PayPeriod } from '@/types';
 import type { PayrollCalculation } from '@/lib/payCalculator';
 
 interface PayrollDataTableProps {

@@ -37,8 +37,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,7 +56,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatCurrency, formatDateDisplay } from '@/lib/formatters';
+import { formatCurrency } from '@/lib/formatters';
 
 interface ManagerMetrics {
   logsAwaitingReview: number;
@@ -107,7 +105,10 @@ const generateSamplePendingLogs = (
     'Team size mismatch',
   ];
 
-  return Array.from({ length: 12 }, (_, i) => {
+  const backlogLevel = metrics?.logsAwaitingReview ?? 12;
+  const recentApprovals = metrics?.recentApprovals ?? 20;
+
+  return Array.from({ length: 12 }, () => {
     const date = new Date();
     date.setDate(date.getDate() - Math.floor(Math.random() * 3));
     const submittedAt = new Date(date);
@@ -117,9 +118,17 @@ const generateSamplePendingLogs = (
 
     const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
     const goalPercent = jobType === 'junk' ? 14 : 24;
-    const laborPercent = goalPercent + (Math.random() - 0.3) * 8; // Slightly biased toward higher costs
+    const approvalsBias = recentApprovals > 25 ? -2 : 0;
+    const laborPercent =
+      goalPercent + (Math.random() - 0.3) * 8 + approvalsBias;
 
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const flaggedBias = backlogLevel > 15 ? 0.5 : 0.25;
+    const status =
+      Math.random() < flaggedBias
+        ? 'flagged'
+        : Math.random() < 0.2
+          ? 'priority'
+          : statuses[0];
     const exceptions =
       status === 'flagged' || status === 'priority'
         ? [
@@ -138,8 +147,9 @@ const generateSamplePendingLogs = (
       laborCostPercent: Math.max(8, laborPercent),
       status,
       teamSize: Math.floor(Math.random() * 4) + 2,
-      submittedAt: submittedAt.toISOString(),
+      jobCount: Math.floor(Math.random() * 3) + 1,
       exceptions,
+      submittedAt: submittedAt.toISOString(),
     };
   });
 };
@@ -300,7 +310,7 @@ const columns: ColumnDef<PendingLogData>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => (
+    cell: () => (
       <div className="flex items-center gap-1">
         <Button variant="ghost" size="sm">
           <IconEye className="w-4 h-4" />

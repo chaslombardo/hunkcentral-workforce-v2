@@ -8,9 +8,7 @@ import { CaptainDataTable } from './captain-data-table';
 
 export function CaptainDashboard() {
   const { user } = useSession();
-  const { metrics, roleMetrics, loading, error } = useDashboardData(
-    user?.roles
-  );
+  const { roleMetrics, loading, error } = useDashboardData(user?.roles);
 
   if (loading) {
     return (

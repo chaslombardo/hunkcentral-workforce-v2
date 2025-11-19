@@ -49,21 +49,24 @@ interface ManagerChartAreaInteractiveProps {
 
 // Sample team performance data for demonstration - TODO: Replace with real data from metrics
 const generateSampleTeamData = (metrics?: ManagerMetrics) => {
+  const pendingLogs = metrics?.logsAwaitingReview ?? 12;
+  const recentApprovals = metrics?.recentApprovals ?? 20;
   return Array.from({ length: 14 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (13 - i));
 
     // Generate realistic team performance data
-    const baseEfficiency = 85;
+    const baseEfficiency = 75 + (recentApprovals % 15);
     const variation = (Math.random() - 0.5) * 10;
     const efficiency = Math.max(70, Math.min(100, baseEfficiency + variation));
 
     return {
       date: date.toISOString().split('T')[0],
       teamEfficiency: efficiency,
-      logsProcessed: Math.floor(Math.random() * 15) + 5,
+      logsProcessed:
+        Math.floor(Math.random() * 6) + Math.max(recentApprovals / 3, 5),
       avgApprovalTime: Math.floor(Math.random() * 30) + 30, // 30-60 seconds
-      exceptionsRaised: Math.floor(Math.random() * 3),
+      exceptionsRaised: Math.max(0, Math.floor(pendingLogs / 5) - 1),
     };
   });
 };

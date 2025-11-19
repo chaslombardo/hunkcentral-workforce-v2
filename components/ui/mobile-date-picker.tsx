@@ -2,11 +2,7 @@
 
 import * as React from 'react';
 import { format } from 'date-fns';
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -224,9 +220,9 @@ export function MobileDateRangePicker({
   placeholder = 'Pick a date range',
   disabled = false,
   className,
-  id,
-  name,
-  required = false,
+  id: _id,
+  name: _name,
+  required: _required = false,
   minDate,
   maxDate,
 }: MobileDateRangePickerProps) {
@@ -266,6 +262,10 @@ export function MobileDateRangePicker({
     if (!dateRange.to) return format(dateRange.from, 'PPP');
     return `${format(dateRange.from, 'PPP')} - ${format(dateRange.to, 'PPP')}`;
   };
+
+  const serializedRange = dateRange
+    ? `${dateRange.from?.toISOString() || ''}|${dateRange.to?.toISOString() || ''}`
+    : '';
 
   const DateRangePickerContent = () => (
     <Calendar
@@ -314,32 +314,41 @@ export function MobileDateRangePicker({
     </Button>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerTrigger asChild>
-          <TriggerButton />
-        </DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Select Date Range</DrawerTitle>
-          </DrawerHeader>
-          <div className="p-4 pb-8">
-            <DateRangePickerContent />
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <TriggerButton />
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <DateRangePickerContent />
-      </PopoverContent>
-    </Popover>
+    <>
+      {(_id || _name) && (
+        <input
+          type="hidden"
+          id={_id}
+          name={_name}
+          value={serializedRange}
+          required={_required}
+        />
+      )}
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
+            <TriggerButton />
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Select Date Range</DrawerTitle>
+            </DrawerHeader>
+            <div className="p-4 pb-8">
+              <DateRangePickerContent />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <TriggerButton />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <DateRangePickerContent />
+          </PopoverContent>
+        </Popover>
+      )}
+    </>
   );
 }

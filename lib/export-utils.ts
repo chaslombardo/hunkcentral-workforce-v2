@@ -1,12 +1,30 @@
 import { ExportOptions } from '@/components/features/data';
 
 // Export utilities for different formats
+interface DataRecord {
+  [key: string]: unknown;
+}
+
+interface ColumnDefinition {
+  key?: string;
+  accessorKey?: string;
+  id?: string;
+  title?: string;
+  header?: string | ((...args: unknown[]) => unknown);
+  format?: (value: unknown) => string;
+  formatter?: (value: unknown) => string;
+}
+
 export class DataExporter {
-  private data: any[];
-  private columns: any[];
+  private data: DataRecord[];
+  private columns: ColumnDefinition[];
   private options: ExportOptions;
 
-  constructor(data: any[], columns: any[], options: ExportOptions) {
+  constructor(
+    data: DataRecord[],
+    columns: ColumnDefinition[],
+    options: ExportOptions
+  ) {
     this.data = data;
     this.columns = columns;
     this.options = options;
@@ -293,7 +311,7 @@ export class DataExporter {
     `;
   }
 
-  private getExportData(): any[] {
+  private getExportData(): DataRecord[] {
     return this.options.selectedOnly && this.options.columns
       ? this.data.filter((_, index) =>
           this.options.columns?.includes(index.toString())
@@ -303,21 +321,23 @@ export class DataExporter {
 
   private getColumnHeaders(): string[] {
     return this.columns
-      .filter((col) => col.accessorKey || col.id)
-      .map((col) => col.accessorKey || col.id);
+      .filter((col) => col.accessorKey || col.id || col.key)
+      .map((col) => col.accessorKey || col.id || col.key!)
+      .filter(Boolean);
   }
 
   private getColumnLabels(): string[] {
     return this.columns
-      .filter((col) => col.accessorKey || col.id)
+      .filter((col) => col.accessorKey || col.id || col.key)
       .map((col) => {
+        if (typeof col.title === 'string') return col.title;
         if (typeof col.header === 'string') return col.header;
-        if (typeof col.header === 'function') return col.accessorKey || col.id;
-        return col.accessorKey || col.id;
+        const fallback = col.accessorKey || col.id || col.key;
+        return fallback ?? '';
       });
   }
 
-  private formatCellValue(value: any): string {
+  private formatCellValue(value: unknown): string {
     if (value === null || value === undefined) return '';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     if (value instanceof Date) return value.toLocaleDateString();
@@ -343,8 +363,8 @@ export interface EmailReportOptions {
   subject: string;
   message: string;
   format: 'pdf' | 'excel' | 'csv';
-  data: any[];
-  columns: any[];
+  data: DataRecord[];
+  columns: ColumnDefinition[];
 }
 
 export class EmailReporter {
@@ -352,7 +372,7 @@ export class EmailReporter {
     // This would integrate with your email service (SendGrid, AWS SES, etc.)
     // For now, we'll simulate the process
 
-    console.log('Sending email report:', {
+    console.warn('Sending email report:', {
       recipients: options.recipients,
       subject: options.subject,
       recordCount: options.data.length,
@@ -365,6 +385,7 @@ export class EmailReporter {
       filename: `report.${options.format}`,
       includeHeaders: true,
     });
+    void exporter;
 
     // In a real implementation, you would:
     // 1. Generate the file using the exporter
@@ -376,7 +397,7 @@ export class EmailReporter {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // For demo purposes, we'll just log the action
-    console.log('Email sent successfully to:', options.recipients.join(', '));
+    console.warn('Email sent successfully to:', options.recipients.join(', '));
   }
 }
 
@@ -439,8 +460,8 @@ export class BulkOperationProcessor {
 // Branded print templates
 export function generateBrandedPrintTemplate(
   title: string,
-  data: any[],
-  columns: any[],
+  data: DataRecord[],
+  columns: ColumnDefinition[],
   options: {
     includeHeaders?: boolean;
     includeFooter?: boolean;
@@ -454,15 +475,15 @@ export function generateBrandedPrintTemplate(
   } = options;
 
   const headers = columns
-    .filter((col) => col.accessorKey || col.id)
-    .map((col) => col.accessorKey || col.id);
+    .map((col) => col.accessorKey ?? col.id)
+    .filter((key): key is string => typeof key === 'string');
 
   const columnLabels = columns
-    .filter((col) => col.accessorKey || col.id)
     .map((col) => {
       if (typeof col.header === 'string') return col.header;
-      return col.accessorKey || col.id;
-    });
+      return col.accessorKey ?? col.id;
+    })
+    .filter((label): label is string => typeof label === 'string');
 
   return `
     <!DOCTYPE html>

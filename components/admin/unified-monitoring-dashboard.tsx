@@ -34,7 +34,6 @@ import {
 import {
   AlertTriangle,
   CheckCircle,
-  Clock,
   Database,
   MemoryStick,
   RefreshCw,

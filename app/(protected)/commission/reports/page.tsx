@@ -308,7 +308,6 @@ export default async function CommissionReportsPage() {
           <CommissionExportButtons
             entries={filteredEntries}
             canViewAllData={canViewAllData}
-            currentUserId={session.user.id}
           />
           <p className="text-xs text-muted-foreground mt-3">
             Export includes commission calculations, booking accuracy, revenue

@@ -14,7 +14,6 @@ import {
 } from 'recharts';
 import {
   IconDownload,
-  IconTrendingUp,
   IconCurrencyDollar,
   IconTarget,
 } from '@tabler/icons-react';
@@ -57,7 +56,10 @@ interface SalesChartAreaInteractiveProps {
 
 // Sample sales performance data for demonstration - TODO: Replace with real data from metrics
 const generateSampleSalesData = (metrics?: SalesMetrics) => {
-  const monthlyTarget = 5000; // Mock data
+  const monthlyTarget = metrics
+    ? Math.max(metrics.matchedCommissions * 200, 4000)
+    : 5000;
+  const pendingFactor = metrics?.pendingCommissions ?? 10;
 
   return Array.from({ length: 30 }, (_, i) => {
     const date = new Date();
@@ -72,9 +74,10 @@ const generateSampleSalesData = (metrics?: SalesMetrics) => {
     return {
       date: date.toISOString().split('T')[0],
       commissionEarned: Math.max(0, baseCommission),
-      bookingsCreated: Math.floor(Math.random() * 3) + 1,
-      conversionRate: Math.floor(Math.random() * 20) + 60, // 60-80%
-      pipelineValue: Math.floor(Math.random() * 1000) + 500,
+      bookingsCreated:
+        Math.floor(Math.random() * 2) + Math.max(pendingFactor / 5, 1),
+      conversionRate: Math.min(95, Math.floor(Math.random() * 15) + 60),
+      pipelineValue: Math.floor(Math.random() * 600) + pendingFactor * 40 + 400,
       target: (monthlyTarget / 30) * dayOfMonth, // Linear target progression
     };
   });
@@ -196,6 +199,14 @@ export function SalesChartAreaInteractive({
                 >
                   <IconTarget className="w-3 h-3" />
                   {targetProgress.toFixed(0)}% of Target
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="border-blue-400 text-blue-700 bg-blue-50"
+                >
+                  Avg Conversion {avgConversionRate.toFixed(1)}%
                 </Badge>
               </div>
             </div>

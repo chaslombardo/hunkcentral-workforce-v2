@@ -4,7 +4,6 @@
  */
 
 import { config, isMonitoringEnabled } from '@/lib/production-config';
-import { logProductionError } from '@/lib/monitoring';
 import { logInfo, logWarning } from '@/lib/production-logger';
 
 export interface UptimeCheck {
@@ -382,7 +381,8 @@ class UptimeMonitoringSystem {
       .filter((stats): stats is UptimeStats => stats !== null);
   }
 
-  public getIncidents(limit = 50): UptimeIncident[] {
+  public getIncidents(_limit = 50): UptimeIncident[] {
+    void _limit;
     return []; // Simplified - no incident tracking
   }
 

@@ -8,7 +8,7 @@ import { getBackgroundJobStatus } from '@/lib/backgroundJobsInit';
 
 export interface PerformanceActionResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
@@ -213,7 +213,7 @@ export async function trackInteractionPerformance(
   component: string,
   action: string,
   duration: number,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<PerformanceActionResult> {
   try {
     const session = await auth();
@@ -347,8 +347,7 @@ export async function clearPerformanceAlerts(): Promise<PerformanceActionResult>
     }
 
     // Clear alerts through the monitoring system
-    const monitoring = getMonitoring();
-    // Note: Alert clearing functionality integrated - alerts are automatically managed
+    getMonitoring();
 
     return {
       success: true,
@@ -365,6 +364,14 @@ export async function clearPerformanceAlerts(): Promise<PerformanceActionResult>
 /**
  * Get database alerts (admin only)
  */
+interface DatabaseAlertSummary {
+  id: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  timestamp: Date;
+}
+
 export async function getDatabaseAlerts(): Promise<PerformanceActionResult> {
   try {
     const session = await auth();
@@ -373,8 +380,8 @@ export async function getDatabaseAlerts(): Promise<PerformanceActionResult> {
     }
 
     // Use integrated database alerting functionality
-    const activeAlerts: Array<any> = [];
-    const allAlerts: Array<any> = [];
+    const activeAlerts: DatabaseAlertSummary[] = [];
+    const allAlerts: DatabaseAlertSummary[] = [];
     const summary = {
       health: 'good' as const,
       activeAlerts: 0,
@@ -417,7 +424,9 @@ export async function resolveDatabaseAlert(
 
     return {
       success: resolved,
-      data: { message: resolved ? 'Alert resolved' : 'Alert not found' },
+      data: {
+        message: resolved ? 'Alert resolved' : `Alert ${alertId} not found`,
+      },
     };
   } catch (error) {
     return {

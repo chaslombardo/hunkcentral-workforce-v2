@@ -3,19 +3,17 @@
 import * as React from 'react';
 import {
   IconTrophy,
-  IconTrendingUp,
   IconTrendingDown,
+  IconTrendingUp,
   IconMedal,
   IconStar,
   IconCurrencyDollar,
-  IconClock,
   IconUsers,
   IconMinus,
 } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -29,7 +27,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatCurrency } from '@/lib/formatters';
@@ -147,6 +144,26 @@ export function PerformanceRankings({
 }: PerformanceRankingsProps) {
   const [rankingType, setRankingType] = React.useState('overall');
   const [roleFilter, setRoleFilter] = React.useState('all');
+  const [internalTimeRange, setInternalTimeRange] = React.useState(timeRange);
+
+  React.useEffect(() => {
+    if (!onTimeRangeChange) {
+      setInternalTimeRange(timeRange);
+    }
+  }, [timeRange, onTimeRangeChange]);
+
+  const activeTimeRange = onTimeRangeChange ? timeRange : internalTimeRange;
+
+  const handleTimeRangeChange = React.useCallback(
+    (value: string) => {
+      if (onTimeRangeChange) {
+        onTimeRangeChange(value);
+      } else {
+        setInternalTimeRange(value);
+      }
+    },
+    [onTimeRangeChange]
+  );
 
   const performanceData = React.useMemo(
     () => generateSamplePerformanceData(),
@@ -230,6 +247,17 @@ export function PerformanceRankings({
               <SelectItem value="efficiency">Efficiency</SelectItem>
               <SelectItem value="productivity">Productivity</SelectItem>
               <SelectItem value="tips">Tips</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={activeTimeRange} onValueChange={handleTimeRangeChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Time Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -355,9 +383,9 @@ export function PerformanceRankings({
             </CardTitle>
             <CardDescription>
               Full team performance rankings for{' '}
-              {timeRange === '7d'
+              {activeTimeRange === '7d'
                 ? 'last 7 days'
-                : timeRange === '30d'
+                : activeTimeRange === '30d'
                   ? 'last 30 days'
                   : 'last 90 days'}
             </CardDescription>
