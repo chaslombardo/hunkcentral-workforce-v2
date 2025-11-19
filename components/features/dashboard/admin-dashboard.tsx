@@ -2,6 +2,7 @@
 
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useSession } from '@/hooks/useSession';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { AdminSectionCards } from './admin-section-cards';
 import { AdminChartAreaInteractive } from './admin-chart-area-interactive';
 import { AdminDataTable } from './admin-data-table';
@@ -13,26 +14,7 @@ export function AdminDashboard() {
   if (loading) {
     return (
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <div className="animate-pulse space-y-6">
-            <div className="*:data-[slot=card]:from-hunks-green/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-muted rounded-lg" />
-              ))}
-            </div>
-            <div className="*:data-[slot=card]:from-hunks-green/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-24 bg-muted rounded-lg" />
-              ))}
-            </div>
-          </div>
-          <div className="px-4 lg:px-6">
-            <div className="h-64 bg-muted rounded-lg animate-pulse" />
-          </div>
-          <div className="px-4 lg:px-6">
-            <div className="h-96 bg-muted rounded-lg animate-pulse" />
-          </div>
-        </div>
+        <BrandLoader label="Loading admin insights..." fullScreen size="lg" />
       </div>
     );
   }
@@ -42,10 +24,11 @@ export function AdminDashboard() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <div className="text-center py-8">
-              <p className="text-destructive">
-                Error loading dashboard: {error}
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
+              <p className="font-semibold text-destructive">
+                Unable to load admin dashboard
               </p>
+              <p className="text-sm text-destructive/80">{error}</p>
             </div>
           </div>
         </div>

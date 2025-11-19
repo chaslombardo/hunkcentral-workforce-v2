@@ -268,12 +268,12 @@ export default async function AnalyticsPage() {
       </Tabs>
 
       {/* Alert for data freshness */}
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="border border-hunks-green/40 bg-hunks-green/5 dark:bg-muted">
         <CardContent className="flex items-center gap-3 pt-6">
-          <AlertCircle className="h-5 w-5 text-blue-600" />
+          <AlertCircle className="h-5 w-5 text-hunks-green" />
           <div>
-            <p className="text-blue-800 font-medium">Data Freshness</p>
-            <p className="text-blue-700 text-sm">
+            <p className="text-foreground font-medium">Data Freshness</p>
+            <p className="text-sm text-foreground/80">
               Analytics data is updated every hour. Last updated:{' '}
               {new Date().toLocaleString()}
             </p>
@@ -530,14 +530,14 @@ function CommissionTab({
               </div>
             </div>
 
-            <div className="p-4 border rounded-lg bg-blue-50">
+            <div className="p-4 border rounded-lg border-hunks-green/30 bg-hunks-green/5 dark:bg-hunks-green/10">
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
+                <AlertCircle className="h-4 w-4 text-hunks-green" />
+                <span className="text-sm font-medium text-hunks-green">
                   Commission Pipeline
                 </span>
               </div>
-              <div className="text-sm text-blue-700">
+              <div className="text-sm text-foreground/80">
                 {commissionStats.pendingEntries} commission entries are pending
                 completion. These will be matched automatically when
                 corresponding logs are approved.

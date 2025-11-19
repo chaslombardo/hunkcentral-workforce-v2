@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import dynamicImport from 'next/dynamic';
+import { BrandLoader } from '@/components/ui/brand-loader';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,14 +13,7 @@ const MyPayrollView = dynamicImport(
     })),
   {
     loading: () => (
-      <div className="flex h-96 items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
-          <span className="text-sm text-muted-foreground">
-            Loading payroll data...
-          </span>
-        </div>
-      </div>
+      <BrandLoader label="Loading payroll data..." fullScreen size="lg" />
     ),
   }
 );

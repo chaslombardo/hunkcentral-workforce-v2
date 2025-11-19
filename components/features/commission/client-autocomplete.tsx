@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, ChevronsUpDown, User, Building } from 'lucide-react';
+import { Check, User, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
@@ -80,35 +79,35 @@ export function ClientAutocomplete({
     }).format(date);
   };
 
+  const shouldShowDropdown = open && !disabled;
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={shouldShowDropdown} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            'w-full h-12 justify-between transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20',
-            !value && 'text-muted-foreground'
-          )}
-          disabled={disabled}
-        >
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-[#026937]" />
-            {value || placeholder}
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput
-            placeholder="Search clients..."
+        <div>
+          <Input
             value={value}
-            onValueChange={onValueChange}
-            className="h-12"
+            onChange={(event) => {
+              onValueChange(event.target.value);
+              if (!open) {
+                setOpen(true);
+              }
+            }}
+            onFocus={() => setOpen(true)}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="h-12 transition-all duration-200 hover:border-[#026937]/50 focus:border-[#026937] focus:ring-2 focus:ring-[#026937]/20"
           />
-          <CommandList>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-full p-0"
+        align="start"
+        sideOffset={4}
+        collisionPadding={8}
+      >
+        <Command>
+          <CommandList className="max-h-64">
             {loading ? (
               <CommandEmpty>Loading suggestions...</CommandEmpty>
             ) : filteredSuggestions.length === 0 ? (
@@ -119,7 +118,7 @@ export function ClientAutocomplete({
                     No existing clients found.
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Type to create a new client entry.
+                    Keep typing to add a new client.
                   </p>
                 </div>
               </CommandEmpty>

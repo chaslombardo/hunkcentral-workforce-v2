@@ -1,4 +1,6 @@
 'use client';
+
+import Link from 'next/link';
 import type { RoleSpecificMetrics } from '@/lib/actions/dashboard';
 import {
   IconTrendingDown,
@@ -24,33 +26,45 @@ export interface AdminSectionCardsProps {
   metrics?: RoleSpecificMetrics['admin'];
 }
 export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
-  // Calculate derived metrics and trends
-  const systemHealth = metrics?.systemHealth || 98;
-  const userActivity = metrics?.userActivity || 156;
-  const errorRate = metrics?.errorRate || 0.1;
-  // Mock data for display purposes
-  const activeUsers = 45;
-  const pendingTasks = 7;
-  const databaseHealth = 99;
-  const serverUptime = 99.9;
-  // Mock trend data - TODO: Replace with real trend calculations
-  const healthTrend = systemHealth > 95 ? 1.2 : -2.3;
-  const usersTrend = activeUsers > 40 ? 5.4 : -1.8;
-  const activityTrend = userActivity > 150 ? 8.7 : -3.2;
-  const tasksTrend = pendingTasks < 10 ? -2.1 : 4.5;
+  const systemHealth = metrics?.systemHealth ?? 95;
+  const userActivity = metrics?.userActivity ?? 0;
+  const errorRate = metrics?.errorRate ?? 0;
+  const activeUsers = metrics?.activeUsers ?? 0;
+  const pendingTasks = metrics?.pendingTasks ?? 0;
+  const tasksTrend = pendingTasks - 5;
+  const databaseHealth = metrics?.databaseHealth ?? 94;
+  const uptime = metrics?.uptime ?? 100;
+  const activeAlerts = metrics?.activeAlerts ?? 0;
+
+  const history = metrics?.performanceHistory ?? [];
+  const firstSnapshot = history[0];
+  const lastSnapshot = history[history.length - 1];
+  const healthTrendValue =
+    firstSnapshot && lastSnapshot
+      ? lastSnapshot.systemHealth - firstSnapshot.systemHealth
+      : 0;
+  const usersTrend =
+    firstSnapshot && lastSnapshot
+      ? lastSnapshot.activeUsers - firstSnapshot.activeUsers
+      : 0;
+  const activityTrend =
+    firstSnapshot && lastSnapshot
+      ? lastSnapshot.userActivity - firstSnapshot.userActivity
+      : 0;
   const sectionCardsData = [
     {
       title: 'System Health',
       description: 'Overall status',
       value: `${systemHealth}%`,
       trend: {
-        value: Math.abs(healthTrend),
-        type: healthTrend > 0 ? ('increase' as const) : ('decrease' as const),
+        value: Math.abs(healthTrendValue).toFixed(1),
+        type:
+          healthTrendValue >= 0 ? ('increase' as const) : ('decrease' as const),
       },
       footer: {
         primary:
           systemHealth > 95 ? 'All systems operational' : 'Attention required',
-        secondary: `${serverUptime}% uptime, ${errorRate}% error rate`,
+        secondary: `${uptime}% uptime • ${errorRate}% error rate`,
       },
       icon: IconServer,
       actionButton:
@@ -66,12 +80,12 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       description: 'System users',
       value: activeUsers.toString(),
       trend: {
-        value: Math.abs(usersTrend),
-        type: usersTrend > 0 ? ('increase' as const) : ('decrease' as const),
+        value: Math.abs(usersTrend).toFixed(0),
+        type: usersTrend >= 0 ? ('increase' as const) : ('decrease' as const),
       },
       footer: {
-        primary: 'Total workforce',
-        secondary: `${Math.floor(activeUsers * 0.8)} online now`,
+        primary: 'Unique users last 24h',
+        secondary: `${userActivity.toLocaleString()} interactions tracked`,
       },
       icon: IconUsers,
       actionButton: {
@@ -84,12 +98,13 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       description: 'Last 24 hours',
       value: userActivity.toString(),
       trend: {
-        value: Math.abs(activityTrend),
-        type: activityTrend > 0 ? ('increase' as const) : ('decrease' as const),
+        value: Math.abs(activityTrend).toFixed(0),
+        type:
+          activityTrend >= 0 ? ('increase' as const) : ('decrease' as const),
       },
       footer: {
-        primary: 'Active sessions',
-        secondary: `${Math.floor(userActivity * 0.6)} unique users`,
+        primary: 'Telemetry events captured',
+        secondary: `${(userActivity / (activeUsers || 1)).toFixed(1)} avg events per user`,
       },
       icon: IconActivity,
     },
@@ -100,9 +115,9 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       trend:
         pendingTasks > 0
           ? {
-              value: Math.abs(tasksTrend),
+              value: Math.abs(tasksTrend).toFixed(0),
               type:
-                tasksTrend > 0 ? ('increase' as const) : ('decrease' as const),
+                tasksTrend >= 0 ? ('increase' as const) : ('decrease' as const),
             }
           : undefined,
       footer: {
@@ -126,23 +141,24 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       description: 'Performance status',
       value: `${databaseHealth}%`,
       trend: {
-        value: 0.5,
+        value: Math.max(0, databaseHealth - 90).toFixed(1),
         type: 'increase' as const,
       },
       footer: {
         primary:
-          databaseHealth > 95 ? 'Optimal performance' : 'Needs attention',
-        secondary: 'Query response time: 45ms',
+          databaseHealth > 95 ? 'Optimal performance' : 'Investigate queries',
+        secondary: 'Monitoring transactions + caches',
       },
       icon: IconDatabase,
     },
     {
       title: 'Security Status',
       description: 'System security',
-      value: 'Secure',
+      value: activeAlerts === 0 ? 'Secure' : `${activeAlerts} alert(s)`,
       footer: {
-        primary: 'No security alerts',
-        secondary: 'Last scan: 2 hours ago',
+        primary:
+          activeAlerts === 0 ? 'No open alerts' : 'Alerts need attention',
+        secondary: 'Real-time monitoring',
       },
       icon: IconShield,
     },
@@ -178,7 +194,7 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
                       {item.trend.type === 'decrease' && (
                         <IconTrendingDown className="w-3 h-3" />
                       )}
-                      {item.trend.value > 0 ? '+' : ''}
+                      {Number(item.trend.value) > 0 ? '+' : ''}
                       {item.trend.value}%
                     </Badge>
                   </CardAction>
@@ -269,14 +285,14 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
             </CardTitle>
           </CardHeader>
           <CardFooter className="flex-col items-start gap-2 text-sm">
-            <Button size="sm" variant="outline" className="w-full">
-              Manage Pay Periods
+            <Button size="sm" variant="outline" className="w-full" asChild>
+              <Link href="/payroll">Manage Pay Periods</Link>
             </Button>
-            <Button size="sm" variant="outline" className="w-full">
-              System Backup
+            <Button size="sm" variant="outline" className="w-full" asChild>
+              <Link href="/settings/backups">System Backup</Link>
             </Button>
-            <Button size="sm" variant="outline" className="w-full">
-              View Audit Logs
+            <Button size="sm" variant="outline" className="w-full" asChild>
+              <Link href="/audit">View Audit Logs</Link>
             </Button>
           </CardFooter>
         </Card>

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { prisma } from '@/lib/prisma';
 import { logAuthError, logPageError } from '@/lib/monitoring';
 import { LogsPageErrorFallback } from '@/components/ui/logs-error-fallback';
 
@@ -58,6 +59,31 @@ export default async function LogsPage() {
       userRoles.includes('captain') || userRoles.includes('admin');
     const canReviewLogs =
       userRoles.includes('manager') || userRoles.includes('admin');
+
+    const recentLogsRaw = await prisma.dailyLog.findMany({
+      where: { captainId: session.user.id },
+      orderBy: { logDate: 'desc' },
+      take: 3,
+      select: {
+        id: true,
+        logDate: true,
+        status: true,
+        submittedAt: true,
+        jobs: {
+          select: {
+            revenue: true,
+          },
+        },
+      },
+    });
+
+    const recentLogs = recentLogsRaw.map((log) => ({
+      ...log,
+      totalRevenue: log.jobs.reduce(
+        (sum, job) => sum + Number(job.revenue || 0),
+        0
+      ),
+    }));
 
     return (
       <div className="container mx-auto py-8 space-y-8">
@@ -128,7 +154,7 @@ export default async function LogsPage() {
             </Card>
           )}
 
-          <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-500/5 via-background to-transparent hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-l-4 border-l-blue-500 bg-card/60 dark:bg-muted/30 backdrop-blur">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-base font-semibold text-blue-600">
                 My Recent Logs
@@ -137,12 +163,46 @@ export default async function LogsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-base text-muted-foreground leading-relaxed">
-                  View your recently submitted logs and their status.
-                </p>
-                <BrandButton variant="outline" className="w-full h-12" disabled>
-                  <Clock className="mr-2 h-5 w-5" />
-                  Coming Soon
+                {recentLogs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    You haven&apos;t submitted any logs yet.
+                  </p>
+                ) : (
+                  <ul className="space-y-3">
+                    {recentLogs.map((log) => (
+                      <li
+                        key={log.id}
+                        className="flex items-center justify-between rounded-md border border-border/60 bg-background/80 px-3 py-2 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {new Date(log.logDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            ${log.totalRevenue.toLocaleString()} revenue
+                          </p>
+                        </div>
+                        <Badge
+                          variant={
+                            log.status === 'approved'
+                              ? 'default'
+                              : log.status === 'submitted'
+                                ? 'secondary'
+                                : 'outline'
+                          }
+                          className="capitalize"
+                        >
+                          {log.status}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <BrandButton variant="outline" className="w-full h-12" asChild>
+                  <Link href="/logs/mine">
+                    <Clock className="mr-2 h-5 w-5" />
+                    View My Logs
+                  </Link>
                 </BrandButton>
               </div>
             </CardContent>

@@ -259,7 +259,7 @@ export function UserFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl lg:max-w-6xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>
@@ -275,11 +275,19 @@ export function UserFormDialog({
           </DialogHeader>
 
           <Tabs defaultValue="basic" className="mt-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="rates">Hourly Rates</TabsTrigger>
-              <TabsTrigger value="salary">Salary & Commission</TabsTrigger>
-              <TabsTrigger value="bonuses">Bonus Goals</TabsTrigger>
+            <TabsList className="flex w-full flex-wrap gap-2">
+              <TabsTrigger value="basic" className="flex-1 min-w-[150px]">
+                Basic Info
+              </TabsTrigger>
+              <TabsTrigger value="rates" className="flex-1 min-w-[150px]">
+                Hourly Rates
+              </TabsTrigger>
+              <TabsTrigger value="salary" className="flex-1 min-w-[150px]">
+                Salary & Commission
+              </TabsTrigger>
+              <TabsTrigger value="bonuses" className="flex-1 min-w-[150px]">
+                Bonus Goals
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
@@ -291,7 +299,7 @@ export function UserFormDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="fullName">Full Name</Label>
                       <Input
@@ -360,7 +368,7 @@ export function UserFormDialog({
 
                   <div className="space-y-3">
                     <Label>Role Assignments</Label>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                       {USER_ROLES.map((role) => (
                         <Label
                           key={role.value}
@@ -402,7 +410,7 @@ export function UserFormDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="rateJunkCaptain">Junk Captain Rate</Label>
                       <Input
@@ -652,7 +660,7 @@ export function UserFormDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="salaryAmount">Salary Amount</Label>
                       <Input
@@ -706,7 +714,7 @@ export function UserFormDialog({
 
                   <div className="space-y-3">
                     <Label>Salary Type</Label>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       {SALARY_TYPES.map((type) => (
                         <Label
                           key={type.value}
@@ -776,7 +784,7 @@ export function UserFormDialog({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="junkBonusGoal">Junk Bonus Goal (%)</Label>
                       <Input

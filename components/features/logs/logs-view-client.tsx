@@ -11,6 +11,7 @@ import {
   IconEditCircle,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
+import { BrandLoader } from '@/components/ui/brand-loader';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -260,7 +261,12 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
       {/* Table */}
       <Card>
         <CardContent className="pt-6">
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur">
+                <BrandLoader label="Refreshing logs..." subdued />
+              </div>
+            )}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -275,7 +281,10 @@ export function LogsViewClient({ initialData }: LogsViewClientProps) {
               </TableHeader>
               <TableBody>
                 {data?.items.map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow
+                    key={row.id}
+                    className="transition-colors hover:bg-muted/50 dark:hover:bg-muted/30"
+                  >
                     <TableCell>
                       {new Date(row.logDate).toLocaleDateString()}
                     </TableCell>

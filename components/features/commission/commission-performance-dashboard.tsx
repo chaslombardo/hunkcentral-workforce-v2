@@ -36,6 +36,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { BrandLoader } from '@/components/ui/brand-loader';
 
 import { BrandButton } from '@/components/brand/brand-button';
 import {
@@ -190,29 +191,11 @@ export function CommissionPerformanceDashboard({
 
   if (isLoading || !analyticsData) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Commission Performance
-            </h2>
-            <p className="text-muted-foreground">Loading analytics data...</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="space-y-0 pb-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <BrandLoader
+        label="Loading commission analytics..."
+        fullScreen
+        size="lg"
+      />
     );
   }
 
@@ -284,7 +267,7 @@ export function CommissionPerformanceDashboard({
 
       {/* Key Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="relative overflow-hidden border-l-4 border-l-hunks-green bg-gradient-to-br from-white via-white to-hunks-green/5 transition-all duration-500 hover:shadow-2xl hover:shadow-hunks-green/20 hover:scale-[1.02] hover:border-l-hunks-green/90 group backdrop-blur-sm">
+        <Card className="relative overflow-hidden border-l-4 border-l-hunks-green bg-gradient-to-br from-background via-background to-hunks-green/5 dark:from-muted dark:via-muted transition-all duration-500 hover:shadow-2xl hover:shadow-hunks-green/20 hover:scale-[1.02] hover:border-l-hunks-green/90 group backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-hunks-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium group-hover:text-hunks-green transition-all duration-300 group-hover:font-semibold">
@@ -318,7 +301,7 @@ export function CommissionPerformanceDashboard({
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-l-4 border-l-hunks-orange bg-gradient-to-br from-white via-white to-hunks-orange/5 transition-all duration-500 hover:shadow-2xl hover:shadow-hunks-orange/20 hover:scale-[1.02] hover:border-l-hunks-orange/90 group backdrop-blur-sm">
+        <Card className="relative overflow-hidden border-l-4 border-l-hunks-orange bg-gradient-to-br from-background via-background to-hunks-orange/5 dark:from-muted dark:via-muted transition-all duration-500 hover:shadow-2xl hover:shadow-hunks-orange/20 hover:scale-[1.02] hover:border-l-hunks-orange/90 group backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-hunks-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium group-hover:text-hunks-orange transition-all duration-300 group-hover:font-semibold">
@@ -348,7 +331,7 @@ export function CommissionPerformanceDashboard({
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-l-4 border-l-blue-500 bg-gradient-to-br from-white via-white to-blue-50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:border-l-blue-600 group backdrop-blur-sm">
+        <Card className="relative overflow-hidden border-l-4 border-l-blue-500 bg-gradient-to-br from-background via-background to-blue-50/40 dark:from-muted dark:via-muted transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-[1.02] hover:border-l-blue-600 group backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium group-hover:text-blue-600 transition-all duration-300 group-hover:font-semibold">
@@ -384,7 +367,7 @@ export function CommissionPerformanceDashboard({
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-l-4 border-l-purple-500 bg-gradient-to-br from-white via-white to-purple-50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] hover:border-l-purple-600 group backdrop-blur-sm">
+        <Card className="relative overflow-hidden border-l-4 border-l-purple-500 bg-gradient-to-br from-background via-background to-purple-50/40 dark:from-muted dark:via-muted transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:scale-[1.02] hover:border-l-purple-600 group backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium group-hover:text-purple-600 transition-all duration-300 group-hover:font-semibold">
