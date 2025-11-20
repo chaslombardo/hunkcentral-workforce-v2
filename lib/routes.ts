@@ -23,12 +23,18 @@ export const ROUTES = {
   // Report routes
   REPORTS: '/reports',
   PAYROLL_REPORTS: '/reports/payroll',
+  REPORTS_ANALYTICS: '/reports/analytics',
   MY_PAYROLL: '/reports/my-payroll',
 
   // Admin routes
   ADMIN: '/admin',
+  ADMIN_MONITORING: '/admin/monitoring',
   MANAGE_USERS: '/admin/users',
   PAY_PERIODS: '/admin/pay-periods',
+  ADMIN_AUDIT: '/admin/audit',
+  MONITORING_RULES: '/admin/monitoring/rules',
+  ANALYTICS_SETTINGS: '/admin/analytics/settings',
+  PERFORMANCE_STUDIO: '/admin/performance/studio',
 } as const;
 
 export interface NavItem {
@@ -107,6 +113,11 @@ export const NAVIGATION: NavItem[] = [
     roles: ['admin'],
     children: [
       {
+        title: 'Monitoring Overview',
+        href: ROUTES.ADMIN_MONITORING,
+        roles: ['admin'],
+      },
+      {
         title: 'Manage Users',
         href: ROUTES.MANAGE_USERS,
         roles: ['admin'],
@@ -114,6 +125,26 @@ export const NAVIGATION: NavItem[] = [
       {
         title: 'Pay Periods',
         href: ROUTES.PAY_PERIODS,
+        roles: ['admin'],
+      },
+      {
+        title: 'Monitoring Rules',
+        href: ROUTES.MONITORING_RULES,
+        roles: ['admin'],
+      },
+      {
+        title: 'Analytics Settings',
+        href: ROUTES.ANALYTICS_SETTINGS,
+        roles: ['admin'],
+      },
+      {
+        title: 'Performance Studio',
+        href: ROUTES.PERFORMANCE_STUDIO,
+        roles: ['admin'],
+      },
+      {
+        title: 'Security & Audit',
+        href: ROUTES.ADMIN_AUDIT,
         roles: ['admin'],
       },
     ],

@@ -303,6 +303,20 @@ export interface RoleSpecificMetrics {
     averageHourlyRate: number; // Including gross hourly + tips + bonuses per hour
     currentPayPeriodHours: number;
   };
+  wingman?: {
+    // Pay details for wingman dashboard
+    currentPayPeriodHours: number;
+    currentPayPeriodBasePay: number;
+    currentPayPeriodTips: number;
+    currentPayPeriodOvertimePay: number;
+    effectiveHourlyRate: number; // Base + tips + overtime per hour
+    totalCompensation: number;
+    // Pay period summary
+    regularHours: number;
+    overtimeHours: number;
+    averageBaseRate: number;
+    tipsPerHour: number;
+  };
   sales?: {
     pendingCommissions: number;
     matchedCommissions: number;
@@ -344,13 +358,15 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
     // Try to get cached role-specific metrics first
     const cacheKey = userRoles.includes('captain')
       ? 'dashboard_captain'
-      : userRoles.includes('sales')
-        ? 'dashboard_sales'
-        : userRoles.includes('manager')
-          ? 'dashboard_manager'
-          : userRoles.includes('admin')
-            ? 'dashboard_admin'
-            : null;
+      : userRoles.includes('wingman')
+        ? 'dashboard_wingman'
+        : userRoles.includes('sales')
+          ? 'dashboard_sales'
+          : userRoles.includes('manager')
+            ? 'dashboard_manager'
+            : userRoles.includes('admin')
+              ? 'dashboard_admin'
+              : null;
 
     if (cacheKey) {
       const cachedMetrics = await getCachedMetrics(
@@ -585,6 +601,165 @@ export async function getRoleSpecificMetrics(userRoles: string[]): Promise<{
         moveLaborBonus: Math.round(moveLaborBonusWeekly * 100) / 100,
         averageHourlyRate: Math.round(averageHourlyRate * 100) / 100,
         currentPayPeriodHours: Math.round(totalHours * 10) / 10, // Round to 1 decimal
+      };
+    }
+
+    // Wingman-specific metrics
+    if (userRoles.includes('wingman')) {
+      // Get current pay period
+      const now = new Date();
+      const currentPayPeriod = await prisma.payPeriod.findFirst({
+        where: {
+          AND: [{ startDate: { lte: now } }, { endDate: { gte: now } }],
+        },
+        orderBy: { startDate: 'desc' },
+      });
+
+      // Get wingman's approved hours in current pay period
+      const payPeriodStart =
+        currentPayPeriod?.startDate ||
+        new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const payPeriodEnd = currentPayPeriod?.endDate || now;
+
+      const approvedHours = await prisma.logHour.findMany({
+        where: {
+          employeeId: session.user.id,
+          log: {
+            status: 'approved',
+            approvedAt: {
+              gte: payPeriodStart,
+              lte: payPeriodEnd,
+            },
+          },
+        },
+        include: {
+          employee: {
+            select: {
+              rateJunkWingman: true,
+              rateMoveWingman: true,
+              rateZigma: true,
+              rateTraining: true,
+              rateEstimating: true,
+              rateWarehouse: true,
+              rateAdmin: true,
+            },
+          },
+          log: {
+            include: {
+              jobs: true,
+            },
+          },
+        },
+      });
+
+      let totalHours = 0;
+      let regularHours = 0;
+      let overtimeHours = 0;
+      let totalBasePay = 0;
+      let totalOvertimePay = 0;
+      let totalTips = 0;
+      let totalRatesSum = 0;
+      let rateCount = 0;
+
+      // Calculate tips from jobs
+      const jobsMap = new Map<
+        string,
+        { tips: number; teamSize: number; processed: boolean }
+      >();
+      for (const hour of approvedHours) {
+        for (const job of hour.log.jobs) {
+          if (!jobsMap.has(job.id)) {
+            // Count team size for this job
+            const teamSize = await prisma.logHour.count({
+              where: {
+                logId: hour.logId,
+              },
+            });
+            jobsMap.set(job.id, {
+              tips: Number(job.tips),
+              teamSize,
+              processed: false,
+            });
+          }
+        }
+      }
+
+      // Process each hour entry
+      for (const hour of approvedHours) {
+        const hours = Number(hour.hours);
+        totalHours += hours;
+
+        // Determine hourly rate based on department
+        let rate = 0;
+        switch (hour.department) {
+          case 'junk':
+            rate = Number(hour.employee.rateJunkWingman || 0);
+            break;
+          case 'move':
+            rate = Number(hour.employee.rateMoveWingman || 0);
+            break;
+          case 'zigma':
+            rate = Number(hour.employee.rateZigma || 0);
+            break;
+          case 'training':
+            rate = Number(hour.employee.rateTraining || 0);
+            break;
+          case 'estimating':
+            rate = Number(hour.employee.rateEstimating || 0);
+            break;
+          case 'warehouse':
+            rate = Number(hour.employee.rateWarehouse || 0);
+            break;
+          case 'admin':
+            rate = Number(hour.employee.rateAdmin || 0);
+            break;
+        }
+
+        totalRatesSum += rate;
+        rateCount++;
+
+        // Calculate regular and overtime (assuming 40 hours/week threshold)
+        const weeklyHours = totalHours;
+        if (weeklyHours <= 40) {
+          regularHours += hours;
+          totalBasePay += hours * rate;
+        } else {
+          const regularThisEntry = Math.max(0, 40 - (weeklyHours - hours));
+          const overtimeThisEntry = hours - regularThisEntry;
+          regularHours += regularThisEntry;
+          overtimeHours += overtimeThisEntry;
+          totalBasePay += regularThisEntry * rate;
+          totalOvertimePay += overtimeThisEntry * rate * 1.5; // 1.5x for overtime
+        }
+
+        // Calculate tips share for jobs in this log
+        for (const job of hour.log.jobs) {
+          const jobData = jobsMap.get(job.id);
+          if (jobData && !jobData.processed) {
+            // Wingman gets equal share of tips with team
+            totalTips += jobData.tips / jobData.teamSize;
+            jobData.processed = true;
+          }
+        }
+      }
+
+      const averageBaseRate = rateCount > 0 ? totalRatesSum / rateCount : 0;
+      const totalCompensation = totalBasePay + totalOvertimePay + totalTips;
+      const effectiveHourlyRate =
+        totalHours > 0 ? totalCompensation / totalHours : 0;
+      const tipsPerHour = totalHours > 0 ? totalTips / totalHours : 0;
+
+      metrics.wingman = {
+        currentPayPeriodHours: Math.round(totalHours * 10) / 10,
+        currentPayPeriodBasePay: Math.round(totalBasePay * 100) / 100,
+        currentPayPeriodTips: Math.round(totalTips * 100) / 100,
+        currentPayPeriodOvertimePay: Math.round(totalOvertimePay * 100) / 100,
+        effectiveHourlyRate: Math.round(effectiveHourlyRate * 100) / 100,
+        totalCompensation: Math.round(totalCompensation * 100) / 100,
+        regularHours: Math.round(regularHours * 10) / 10,
+        overtimeHours: Math.round(overtimeHours * 10) / 10,
+        averageBaseRate: Math.round(averageBaseRate * 100) / 100,
+        tipsPerHour: Math.round(tipsPerHour * 100) / 100,
       };
     }
 

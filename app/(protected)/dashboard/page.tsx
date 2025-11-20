@@ -3,6 +3,7 @@
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { useSession } from '@/hooks/useSession';
 import { CaptainDashboard } from '@/components/features/dashboard/captain-dashboard';
+import { WingmanDashboard } from '@/components/features/dashboard/wingman-dashboard';
 import { ManagerDashboard } from '@/components/features/dashboard/manager-dashboard';
 import { SalesDashboard } from '@/components/features/dashboard/sales-dashboard';
 import { AdminDashboard } from '@/components/features/dashboard/admin-dashboard';
@@ -18,7 +19,7 @@ export default function DashboardPage() {
       return <div>Loading...</div>;
     }
 
-    // Priority order: Admin > Manager > Sales > Captain
+    // Priority order: Admin > Manager > Sales > Captain > Wingman
     if (user.roles.includes('admin')) {
       return <AdminDashboard />;
     } else if (user.roles.includes('manager')) {
@@ -27,9 +28,11 @@ export default function DashboardPage() {
       return <SalesDashboard />;
     } else if (user.roles.includes('captain')) {
       return <CaptainDashboard />;
+    } else if (user.roles.includes('wingman')) {
+      return <WingmanDashboard />;
     } else {
       // Default fallback for other roles
-      return <CaptainDashboard />;
+      return <WingmanDashboard />;
     }
   };
 

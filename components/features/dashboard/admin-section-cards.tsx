@@ -1,7 +1,9 @@
 'use client';
 
+import type { ComponentType } from 'react';
 import Link from 'next/link';
 import type { RoleSpecificMetrics } from '@/lib/actions/dashboard';
+import { ROUTES } from '@/lib/routes';
 import {
   IconTrendingDown,
   IconTrendingUp,
@@ -13,7 +15,7 @@ import {
   IconDatabase,
 } from '@tabler/icons-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, type ButtonProps } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -25,6 +27,29 @@ import {
 export interface AdminSectionCardsProps {
   metrics?: RoleSpecificMetrics['admin'];
 }
+type ActionButton = {
+  label: string;
+  href: string;
+  variant?: ButtonProps['variant'];
+  disabled?: boolean;
+};
+
+type SectionCard = {
+  title: string;
+  description: string;
+  value: string;
+  trend?: {
+    value: string;
+    type: 'increase' | 'decrease';
+  };
+  footer: {
+    primary: string;
+    secondary: string;
+  };
+  icon: ComponentType<{ className?: string }>;
+  actionButton?: ActionButton;
+};
+
 export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
   const systemHealth = metrics?.systemHealth ?? 95;
   const userActivity = metrics?.userActivity ?? 0;
@@ -51,7 +76,7 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
     firstSnapshot && lastSnapshot
       ? lastSnapshot.userActivity - firstSnapshot.userActivity
       : 0;
-  const sectionCardsData = [
+  const sectionCardsData: SectionCard[] = [
     {
       title: 'System Health',
       description: 'Overall status',
@@ -67,13 +92,11 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
         secondary: `${uptime}% uptime • ${errorRate}% error rate`,
       },
       icon: IconServer,
-      actionButton:
-        systemHealth < 95
-          ? {
-              label: 'View Issues',
-              variant: 'outline' as const,
-            }
-          : undefined,
+      actionButton: {
+        label: systemHealth < 95 ? 'View Issues' : 'Open Monitoring',
+        variant: 'outline',
+        href: ROUTES.ADMIN_MONITORING,
+      },
     },
     {
       title: 'Active Users',
@@ -90,7 +113,8 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
       icon: IconUsers,
       actionButton: {
         label: 'Manage Users',
-        variant: 'outline' as const,
+        variant: 'outline',
+        href: ROUTES.MANAGE_USERS,
       },
     },
     {
@@ -107,6 +131,11 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
         secondary: `${(userActivity / (activeUsers || 1)).toFixed(1)} avg events per user`,
       },
       icon: IconActivity,
+      actionButton: {
+        label: 'Open Analytics',
+        variant: 'outline',
+        href: ROUTES.ANALYTICS_SETTINGS,
+      },
     },
     {
       title: 'Admin Tasks',
@@ -125,17 +154,16 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
         secondary: pendingTasks > 0 ? 'Administrative queue' : 'Great work!',
       },
       icon: IconSettings,
-      actionButton:
-        pendingTasks > 0
-          ? {
-              label: 'View Tasks',
-              variant: 'default' as const,
-            }
-          : undefined,
+      actionButton: {
+        label: 'View Tasks',
+        variant: 'default',
+        href: ROUTES.REVIEW_LOGS,
+        disabled: pendingTasks === 0,
+      },
     },
   ];
   // Additional system metrics cards
-  const systemCardsData = [
+  const systemCardsData: SectionCard[] = [
     {
       title: 'Database Health',
       description: 'Performance status',
@@ -150,6 +178,11 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
         secondary: 'Monitoring transactions + caches',
       },
       icon: IconDatabase,
+      actionButton: {
+        label: 'Database Insights',
+        variant: 'outline',
+        href: `${ROUTES.ANALYTICS_SETTINGS}?focus=database`,
+      },
     },
     {
       title: 'Security Status',
@@ -161,6 +194,28 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
         secondary: 'Real-time monitoring',
       },
       icon: IconShield,
+      actionButton: {
+        label: 'Security Center',
+        variant: 'outline',
+        href: ROUTES.ADMIN_AUDIT,
+      },
+    },
+  ];
+  const insightButtons: ActionButton[] = [
+    {
+      label: 'Performance Studio',
+      href: ROUTES.PERFORMANCE_STUDIO,
+      variant: 'outline',
+    },
+    {
+      label: 'Monitoring Rules',
+      href: ROUTES.MONITORING_RULES,
+      variant: 'outline',
+    },
+    {
+      label: 'Customize Analytics',
+      href: ROUTES.ANALYTICS_SETTINGS,
+      variant: 'outline',
     },
   ];
   return (
@@ -226,8 +281,12 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
                   size="sm"
                   variant={item.actionButton.variant}
                   className="w-full mt-2"
+                  disabled={item.actionButton.disabled}
+                  asChild
                 >
-                  {item.actionButton.label}
+                  <Link href={item.actionButton.href}>
+                    {item.actionButton.label}
+                  </Link>
                 </Button>
               )}
             </CardFooter>
@@ -270,6 +329,18 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
               <div className="text-muted-foreground text-xs">
                 {item.footer.secondary}
               </div>
+              {item.actionButton && (
+                <Button
+                  size="sm"
+                  variant={item.actionButton.variant}
+                  className="w-full mt-2"
+                  asChild
+                >
+                  <Link href={item.actionButton.href}>
+                    {item.actionButton.label}
+                  </Link>
+                </Button>
+              )}
             </CardFooter>
           </Card>
         ))}
@@ -286,14 +357,39 @@ export function AdminSectionCards({ metrics }: AdminSectionCardsProps) {
           </CardHeader>
           <CardFooter className="flex-col items-start gap-2 text-sm">
             <Button size="sm" variant="outline" className="w-full" asChild>
-              <Link href="/payroll">Manage Pay Periods</Link>
+              <Link href={ROUTES.PAY_PERIODS}>Manage Pay Periods</Link>
             </Button>
             <Button size="sm" variant="outline" className="w-full" asChild>
-              <Link href="/settings/backups">System Backup</Link>
+              <Link href={ROUTES.MONITORING_RULES}>System Backup Rules</Link>
             </Button>
             <Button size="sm" variant="outline" className="w-full" asChild>
-              <Link href="/audit">View Audit Logs</Link>
+              <Link href={ROUTES.ADMIN_AUDIT}>View Audit Logs</Link>
             </Button>
+          </CardFooter>
+        </Card>
+        {/* Insights Controls Card */}
+        <Card className="@container/card border-l-4 border-l-hunks-orange">
+          <CardHeader>
+            <CardDescription className="text-hunks-orange/80 flex items-center gap-2">
+              <IconActivity className="w-4 h-4" />
+              Insights & Controls
+            </CardDescription>
+            <CardTitle className="text-xl font-semibold text-hunks-orange">
+              Customization Lab
+            </CardTitle>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-2 text-sm">
+            {insightButtons.map((button) => (
+              <Button
+                key={button.href}
+                size="sm"
+                variant={button.variant}
+                className="w-full"
+                asChild
+              >
+                <Link href={button.href}>{button.label}</Link>
+              </Button>
+            ))}
           </CardFooter>
         </Card>
       </div>
