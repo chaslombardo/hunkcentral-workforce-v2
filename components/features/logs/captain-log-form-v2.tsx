@@ -309,7 +309,7 @@ export function CaptainLogFormV2({
             jobs={form.watch('jobs')}
             hours={form.watch('hours')}
             employees={employees}
-            disposalCost={form.watch('disposalCost')}
+            disposalCost={form.watch('disposalCost') || 0}
           />
 
           {/* Save Status Alert */}
