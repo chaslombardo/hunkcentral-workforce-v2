@@ -12,6 +12,9 @@ export const ROUTES = {
   // Log routes
   LOGS: '/logs',
   CREATE_LOG: '/logs/create',
+  CREATE_LOG_V1: '/logs/create-v1',
+  CREATE_LOG_V2: '/logs/create-v2',
+  CREATE_LOG_V3: '/logs/create-v3',
   REVIEW_LOGS: '/logs/review',
   LOG_DETAIL: (id: string) => `/logs/${id}`,
 
@@ -59,8 +62,23 @@ export const NAVIGATION: NavItem[] = [
     roles: ['admin', 'manager', 'captain'],
     children: [
       {
-        title: 'Create Log',
+        title: 'Create Log (Classic)',
         href: ROUTES.CREATE_LOG,
+        roles: ['captain'],
+      },
+      {
+        title: 'Create Log (Single Page)',
+        href: ROUTES.CREATE_LOG_V1,
+        roles: ['captain'],
+      },
+      {
+        title: 'Create Log (Grid View)',
+        href: ROUTES.CREATE_LOG_V2,
+        roles: ['captain'],
+      },
+      {
+        title: 'Create Log (Wizard)',
+        href: ROUTES.CREATE_LOG_V3,
         roles: ['captain'],
       },
       {
