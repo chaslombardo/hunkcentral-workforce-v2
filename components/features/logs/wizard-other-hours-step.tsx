@@ -5,7 +5,13 @@ import { Plus, Trash2, Users, Clock, Briefcase } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
@@ -38,7 +44,9 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
   const captainId = watch('captainId');
 
   // Filter out junk and move hours
-  const otherHours = hours.filter(hour => !['junk', 'move'].includes(hour.department));
+  const otherHours = hours.filter(
+    (hour: any) => !['junk', 'move'].includes(hour.department)
+  );
 
   const addTeamMember = (employeeId?: string) => {
     const newHour = {
@@ -47,12 +55,15 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
       hours: 0,
       isCoCaptain: false,
     };
-    
+
     setValue('hours', [...hours, newHour]);
   };
 
   const removeHour = (globalIndex: number) => {
-    setValue('hours', hours.filter((_: any, i: number) => i !== globalIndex));
+    setValue(
+      'hours',
+      hours.filter((_: any, i: number) => i !== globalIndex)
+    );
   };
 
   const updateHourField = (globalIndex: number, field: string, value: any) => {
@@ -61,7 +72,10 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
 
   const addCaptainDefaults = () => {
     // Auto-add captain with default department
-    if (captainId && !otherHours.some(hour => hour.employeeId === captainId)) {
+    if (
+      captainId &&
+      !otherHours.some((hour: any) => hour.employeeId === captainId)
+    ) {
       addTeamMember(captainId);
     }
   };
@@ -72,31 +86,34 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
       <Alert>
         <Briefcase className="h-4 w-4" />
         <AlertDescription>
-          Add team members for other departments like training, estimating, warehouse, or administrative work. 
-          Time should be entered in 5-minute increments (0.08 = 5 minutes, 0.25 = 15 minutes, etc.).
+          Add team members for other departments like training, estimating,
+          warehouse, or administrative work. Time should be entered in 5-minute
+          increments (0.08 = 5 minutes, 0.25 = 15 minutes, etc.).
         </AlertDescription>
       </Alert>
 
       {/* Smart Suggestion */}
-      {captainId && !otherHours.some(hour => hour.employeeId === captainId) && (
-        <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-          <Users className="h-4 w-4" />
-          <div className="flex items-center justify-between">
-            <AlertDescription>
-              <strong>Suggestion:</strong> Add the captain to Other Hours since they worked in other sections
-            </AlertDescription>
-            <Button
-              type="button"
-              size="sm"
-              onClick={addCaptainDefaults}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Add Captain
-            </Button>
-          </div>
-        </Alert>
-      )}
+      {captainId &&
+        !otherHours.some((hour: any) => hour.employeeId === captainId) && (
+          <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <Users className="h-4 w-4" />
+            <div className="flex items-center justify-between">
+              <AlertDescription>
+                <strong>Suggestion:</strong> Add the captain to Other Hours
+                since they worked in other sections
+              </AlertDescription>
+              <Button
+                type="button"
+                size="sm"
+                onClick={addCaptainDefaults}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Captain
+              </Button>
+            </div>
+          </Alert>
+        )}
 
       {/* Add Team Member */}
       <div className="flex justify-between items-center">
@@ -114,12 +131,17 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
       {/* Team Members List */}
       <div className="space-y-4">
         {hours
-          .map((hour, globalIndex) => {
+          .map((hour: any, globalIndex: number) => {
             if (['junk', 'move'].includes(hour.department)) return null;
-            
-            const employee = employees.find(emp => emp.id === hour.employeeId);
-            const deptConfig = departmentConfig[hour.department as keyof typeof departmentConfig];
-            
+
+            const employee = employees.find(
+              (emp) => emp.id === hour.employeeId
+            );
+            const deptConfig =
+              departmentConfig[
+                hour.department as keyof typeof departmentConfig
+              ];
+
             return (
               <Card key={globalIndex} className="relative">
                 <CardContent className="p-4">
@@ -131,16 +153,22 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
                           {employee ? employee.fullName : 'Unknown'}
                         </span>
                         {hour.employeeId === captainId && (
-                          <Badge variant="secondary" className="text-xs">Captain</Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            Captain
+                          </Badge>
                         )}
-                        <Badge 
+                        <Badge
                           variant="outline"
-                          className={deptConfig?.color || 'bg-gray-100 text-gray-800'}
+                          className={
+                            deptConfig?.color || 'bg-gray-100 text-gray-800'
+                          }
                         >
                           {deptConfig?.label || hour.department}
                         </Badge>
                         {hour.isCoCaptain && (
-                          <Badge variant="secondary" className="text-xs">Co-Captain</Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            Co-Captain
+                          </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
@@ -153,10 +181,18 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
                             max="24"
                             placeholder="0.0"
                             value={hour.hours}
-                            onChange={(e) => updateHourField(globalIndex, 'hours', parseFloat(e.target.value) || 0)}
+                            onChange={(e) =>
+                              updateHourField(
+                                globalIndex,
+                                'hours',
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
                             className="w-20 text-sm"
                           />
-                          <span className="text-xs text-muted-foreground">h</span>
+                          <span className="text-xs text-muted-foreground">
+                            h
+                          </span>
                         </div>
                         <Button
                           type="button"
@@ -177,13 +213,15 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
                         <Label className="text-sm">Employee</Label>
                         <Select
                           value={hour.employeeId}
-                          onValueChange={(value) => updateHourField(globalIndex, 'employeeId', value)}
+                          onValueChange={(value) =>
+                            updateHourField(globalIndex, 'employeeId', value)
+                          }
                         >
                           <SelectTrigger className="text-sm">
                             <SelectValue placeholder="Select employee" />
                           </SelectTrigger>
                           <SelectContent>
-                            {employees.map((employee) => (
+                            {employees.map((employee: any) => (
                               <SelectItem key={employee.id} value={employee.id}>
                                 {employee.fullName}
                                 {employee.id === captainId && ' (Captain)'}
@@ -198,17 +236,21 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
                         <Label className="text-sm">Department</Label>
                         <Select
                           value={hour.department}
-                          onValueChange={(value) => updateHourField(globalIndex, 'department', value)}
+                          onValueChange={(value) =>
+                            updateHourField(globalIndex, 'department', value)
+                          }
                         >
                           <SelectTrigger className="text-sm">
                             <SelectValue placeholder="Department" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(departmentConfig).map(([value, config]) => (
-                              <SelectItem key={value} value={value}>
-                                {config.label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(departmentConfig).map(
+                              ([value, config]) => (
+                                <SelectItem key={value} value={value}>
+                                  {config.label}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -218,9 +260,14 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
                         <Checkbox
                           id={`co-captain-${globalIndex}`}
                           checked={hour.isCoCaptain}
-                          onCheckedChange={(checked) => updateHourField(globalIndex, 'isCoCaptain', checked)}
+                          onCheckedChange={(checked) =>
+                            updateHourField(globalIndex, 'isCoCaptain', checked)
+                          }
                         />
-                        <Label htmlFor={`co-captain-${globalIndex}`} className="text-sm">
+                        <Label
+                          htmlFor={`co-captain-${globalIndex}`}
+                          className="text-sm"
+                        >
                           Co-Captain
                         </Label>
                       </div>
@@ -254,29 +301,34 @@ export function WizardHoursStep({ form, employees }: WizardHoursStepProps) {
             <div className="space-y-3">
               <h4 className="font-medium">Hours Summary</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(departmentConfig).map(([dept, config]) => {
-                  const deptHours = otherHours
-                    .filter(hour => hour.department === dept)
-                    .reduce((sum, hour) => sum + hour.hours, 0);
-                  
-                  if (deptHours === 0) return null;
-                  
-                  return (
-                    <div key={dept} className="text-center">
-                      <Badge variant="outline" className={config.color}>
-                        {config.label}
-                      </Badge>
-                      <div className="text-sm font-medium mt-1">
-                        {deptHours.toFixed(1)}h
+                {Object.entries(departmentConfig).map(
+                  ([dept, config]: [string, any]) => {
+                    const deptHours = otherHours
+                      .filter((hour: any) => hour.department === dept)
+                      .reduce((sum: number, hour: any) => sum + hour.hours, 0);
+
+                    if (deptHours === 0) return null;
+
+                    return (
+                      <div key={dept} className="text-center">
+                        <Badge variant="outline" className={config.color}>
+                          {config.label}
+                        </Badge>
+                        <div className="text-sm font-medium mt-1">
+                          {deptHours.toFixed(1)}h
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
               <div className="pt-2 border-t flex justify-between">
                 <span className="font-medium">Total Other Hours:</span>
                 <span className="font-bold">
-                  {otherHours.reduce((sum, hour) => sum + hour.hours, 0).toFixed(1)}h
+                  {otherHours
+                    .reduce((sum: number, hour: any) => sum + hour.hours, 0)
+                    .toFixed(1)}
+                  h
                 </span>
               </div>
             </div>

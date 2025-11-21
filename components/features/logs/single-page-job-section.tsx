@@ -22,10 +22,15 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { CollaborativeTextarea } from '@/components/ui/collaborative-textarea';
 
 import { JobTileCompact } from './job-tile-compact';
 import type { DailyLogFormData } from '@/lib/validations';
@@ -47,7 +52,8 @@ export function SinglePageJobSection({
   employees = [],
   className = '',
 }: SinglePageJobSectionProps) {
-  const { control, watch, setValue, getValues } = useFormContext<DailyLogFormData>();
+  const { control, watch, setValue, getValues } =
+    useFormContext<DailyLogFormData>();
   const [isAddingJob, setIsAddingJob] = useState(false);
   const [isAddingTeamMember, setIsAddingTeamMember] = useState(false);
 
@@ -155,14 +161,14 @@ export function SinglePageJobSection({
 
   const jobColor = jobType === 'junk' ? 'hunks-green' : 'hunks-orange';
   const jobColorHex = jobType === 'junk' ? '#026937' : '#ea7200';
-  
+
   return (
     <Card className={`h-full flex flex-col ${className}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <div 
+              <div
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: jobColorHex }}
               />
@@ -175,7 +181,7 @@ export function SinglePageJobSection({
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="flex-1 space-y-4">
         {/* Jobs Section */}
         <div className="space-y-3">
@@ -211,7 +217,8 @@ export function SinglePageJobSection({
                         const jobId = e.target.value;
                         // Find or create the job entry
                         let existingIndex = allJobs.findIndex(
-                          (job) => job.jobType === jobType && job.jobId === jobId
+                          (job) =>
+                            job.jobType === jobType && job.jobId === jobId
                         );
                         if (existingIndex === -1) {
                           appendJob({
@@ -237,7 +244,8 @@ export function SinglePageJobSection({
                     className="text-sm"
                     onChange={(e) => {
                       const value = e.target.value;
-                      const latestIndex = sectionJobIndices[sectionJobIndices.length - 1];
+                      const latestIndex =
+                        sectionJobIndices[sectionJobIndices.length - 1];
                       if (latestIndex !== undefined) {
                         setValue(`jobs.${latestIndex}.clientName`, value);
                       }
@@ -390,7 +398,10 @@ export function SinglePageJobSection({
               const isCoCaptain = watch(`hours.${globalIndex}.isCoCaptain`);
 
               return (
-                <Card key={`${jobType}-hour-${globalIndex}-${hourFields[globalIndex]?.id || localIndex}`} className="p-3">
+                <Card
+                  key={`${jobType}-hour-${globalIndex}-${hourFields[globalIndex]?.id || localIndex}`}
+                  className="p-3"
+                >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -427,7 +438,9 @@ export function SinglePageJobSection({
                                     }}
                                     className="w-16 text-sm h-7"
                                   />
-                                  <span className="text-xs text-muted-foreground">h</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    h
+                                  </span>
                                 </div>
                               </FormControl>
                               <FormMessage />

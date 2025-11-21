@@ -20,7 +20,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -50,7 +56,8 @@ export function SinglePageOtherHoursSection({
   employees = [],
   className = '',
 }: SinglePageOtherHoursSectionProps) {
-  const { control, watch, getValues, setValue } = useFormContext<DailyLogFormData>();
+  const { control, watch, getValues, setValue } =
+    useFormContext<DailyLogFormData>();
   const [isAddingTeamMember, setIsAddingTeamMember] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
@@ -62,14 +69,14 @@ export function SinglePageOtherHoursSection({
   const captainId = getValues('captainId');
   const allHours = watch('hours') || [];
   const jobs = watch('jobs') || [];
-  
+
   // Determine which departments the captain already worked in from jobs/move/junk
   const workedDepartments = new Set<string>();
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     if (job.jobType === 'junk') workedDepartments.add('junk');
     if (job.jobType === 'move') workedDepartments.add('move');
   });
-  allHours.forEach(hour => {
+  allHours.forEach((hour) => {
     if (hour.department === 'junk' || hour.department === 'move') {
       workedDepartments.add(hour.department);
     }
@@ -85,13 +92,14 @@ export function SinglePageOtherHoursSection({
   // Smart default: add captains who've worked in junk/move but not yet in other hours
   const getCaptainsSuggestedForOtherHours = () => {
     const captainsWhoWorked = allHours
-      .filter(hour => ['junk', 'move'].includes(hour.department))
-      .filter(hour => hour.isCoCaptain || hour.employeeId === captainId)
-      .map(hour => hour.employeeId);
-    
+      .filter((hour) => ['junk', 'move'].includes(hour.department))
+      .filter((hour) => hour.isCoCaptain || hour.employeeId === captainId)
+      .map((hour) => hour.employeeId);
+
     // Remove duplicates and those already added
-    return [...new Set(captainsWhoWorked)]
-      .filter(id => !getAlreadyAddedEmployeesInOtherHours().includes(id));
+    return [...new Set(captainsWhoWorked)].filter(
+      (id) => !getAlreadyAddedEmployeesInOtherHours().includes(id)
+    );
   };
 
   const addTeamMember = (defaultEmployeeId?: string) => {
@@ -115,7 +123,7 @@ export function SinglePageOtherHoursSection({
 
   const addCaptainDefaults = () => {
     const suggestedCaptains = getCaptainsSuggestedForOtherHours();
-    suggestedCaptains.forEach(captainId => {
+    suggestedCaptains.forEach((captainId) => {
       addTeamMember(captainId);
     });
   };
@@ -128,13 +136,12 @@ export function SinglePageOtherHoursSection({
   };
 
   // Calculate other hours section summary
-  const otherHoursCalculation = calculateOtherHoursSection(
-    allHours,
-    employees
-  );
+  const otherHoursCalculation = calculateOtherHoursSection(allHours, employees);
 
   // Filter hour entries for other hours only (proper data isolation)
-  const otherHoursEntries = allHours.filter(hour => !['junk', 'move'].includes(hour.department));
+  const otherHoursEntries = allHours.filter(
+    (hour) => !['junk', 'move'].includes(hour.department)
+  );
 
   return (
     <Card className={`h-full flex flex-col ${className}`}>
@@ -152,16 +159,19 @@ export function SinglePageOtherHoursSection({
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="flex-1 space-y-4">
         {/* Smart Defaults Section */}
-        {(workedDepartments.size > 0 || getCaptainsSuggestedForOtherHours().length > 0) && (
+        {(workedDepartments.size > 0 ||
+          getCaptainsSuggestedForOtherHours().length > 0) && (
           <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 p-3">
             <div className="space-y-2">
               <div className="text-sm">
-                <p className="font-medium text-blue-900 dark:text-blue-100">Smart Suggestions</p>
+                <p className="font-medium text-blue-900 dark:text-blue-100">
+                  Smart Suggestions
+                </p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                  {getCaptainsSuggestedForOtherHours().length > 0 
+                  {getCaptainsSuggestedForOtherHours().length > 0
                     ? `Automatically add ${getCaptainsSuggestedForOtherHours().length} captain(s) who worked in other sections`
                     : 'No captains found who worked in other sections'}
                 </p>
@@ -217,7 +227,7 @@ export function SinglePageOtherHoursSection({
                         onValueChange={(value) => {
                           field.onChange(value);
                           // Create the hour entry
-                          appendHour({
+                          append({
                             employeeId: value,
                             department: 'admin',
                             hours: 0,
@@ -269,17 +279,22 @@ export function SinglePageOtherHoursSection({
 
           <div className="space-y-2">
             {otherHoursEntries.map((hourEntry, index) => {
-              const globalIndex = allHours.findIndex(h => h === hourEntry);
+              const globalIndex = allHours.findIndex((h) => h === hourEntry);
               const employeeId = hourEntry.employeeId;
               const employee = employees.find((emp) => emp.id === employeeId);
               const hours = hourEntry.hours;
               const department = hourEntry.department;
               const isCoCaptain = hourEntry.isCoCaptain;
 
-              const deptInfo = otherHoursDepartments.find(d => d.value === department);
+              const deptInfo = otherHoursDepartments.find(
+                (d) => d.value === department
+              );
 
               return (
-                <Card key={`other-hour-${globalIndex}-${fields[globalIndex]?.id || index}`} className="p-3">
+                <Card
+                  key={`other-hour-${globalIndex}-${fields[globalIndex]?.id || index}`}
+                  className="p-3"
+                >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -291,17 +306,15 @@ export function SinglePageOtherHoursSection({
                             Co-Captain
                           </Badge>
                         )}
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-xs border-${
                             deptInfo?.color || 'gray'
                           }-300 text-${
                             deptInfo?.color || 'gray'
                           }-700 dark:border-${
                             deptInfo?.color || 'gray'
-                          }-600 dark:text-${
-                            deptInfo?.color || 'gray'
-                          }-300`}
+                          }-600 dark:text-${deptInfo?.color || 'gray'}-300`}
                         >
                           {deptInfo?.label || department}
                         </Badge>
@@ -330,7 +343,9 @@ export function SinglePageOtherHoursSection({
                                     }}
                                     className="w-16 text-sm h-7"
                                   />
-                                  <span className="text-xs text-muted-foreground">h</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    h
+                                  </span>
                                 </div>
                               </FormControl>
                               <FormMessage />
@@ -348,7 +363,7 @@ export function SinglePageOtherHoursSection({
                         </Button>
                       </div>
                     </div>
-                    
+
                     {/* Department Selection */}
                     <div className="grid grid-cols-2 gap-2">
                       <FormField
@@ -356,7 +371,9 @@ export function SinglePageOtherHoursSection({
                         name={`hours.${globalIndex}.department`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-xs">Department</FormLabel>
+                            <FormLabel className="text-xs">
+                              Department
+                            </FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               value={field.value}
@@ -368,7 +385,10 @@ export function SinglePageOtherHoursSection({
                               </FormControl>
                               <SelectContent>
                                 {otherHoursDepartments.map((dept) => (
-                                  <SelectItem key={dept.value} value={dept.value}>
+                                  <SelectItem
+                                    key={dept.value}
+                                    value={dept.value}
+                                  >
                                     {dept.label}
                                   </SelectItem>
                                 ))}
@@ -378,7 +398,7 @@ export function SinglePageOtherHoursSection({
                           </FormItem>
                         )}
                       />
-                      
+
                       {/* Co-Captain Checkbox */}
                       <FormField
                         control={control}
@@ -414,7 +434,10 @@ export function SinglePageOtherHoursSection({
           {otherHoursEntries.length === 0 && !isAddingTeamMember && (
             <div className="text-center py-4 text-muted-foreground text-sm">
               <p>No team members added yet</p>
-              <p className="text-xs mt-1">Add captains who worked in other sections or team members for other activities</p>
+              <p className="text-xs mt-1">
+                Add captains who worked in other sections or team members for
+                other activities
+              </p>
               <Button
                 type="button"
                 variant="ghost"

@@ -5,7 +5,20 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, AlertCircle, Loader2, Save, Send, ChevronLeft, ChevronRight, Calendar, Users, DollarSign, Briefcase, FileCheck } from 'lucide-react';
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Save,
+  Send,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Users,
+  DollarSign,
+  Briefcase,
+  FileCheck,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -135,9 +148,15 @@ export function CaptainLogFormV3({
       case 0: // Basic Info
         return form.getValues('captainId') && form.getValues('logDate');
       case 1: // Jobs
-        return form.getValues('jobs').length > 0 || !form.getValues('sections.junk') && !form.getValues('sections.move');
+        return (
+          form.getValues('jobs').length > 0 ||
+          (!form.getValues('sections.junk') && !form.getValues('sections.move'))
+        );
       case 2: // Hours
-        return form.getValues('hours').length > 0 || !form.getValues('sections.otherHours');
+        return (
+          form.getValues('hours').length > 0 ||
+          !form.getValues('sections.otherHours')
+        );
       default:
         return true;
     }
@@ -232,7 +251,10 @@ export function CaptainLogFormV3({
       description: 'Set captain, date, and sections',
       icon: <FileCheck className="h-5 w-5" />,
       component: <WizardStepInfo form={form} captains={captains} user={user} />,
-      isValid: form.getValues('captainId') && form.getValues('logDate') && typeof form.getValues('logDate') === 'object',
+      isValid:
+        !!form.getValues('captainId') &&
+        !!form.getValues('logDate') &&
+        typeof form.getValues('logDate') === 'object',
     },
     {
       id: 1,
@@ -240,7 +262,9 @@ export function CaptainLogFormV3({
       description: 'Add junk and move jobs',
       icon: <DollarSign className="h-5 w-5" />,
       component: <WizardJobsStep form={form} employees={employees} />,
-      isValid: form.getValues('jobs').length > 0 || !form.getValues('sections.junk') && !form.getValues('sections.move'),
+      isValid:
+        form.getValues('jobs').length > 0 ||
+        (!form.getValues('sections.junk') && !form.getValues('sections.move')),
     },
     {
       id: 2,
@@ -248,14 +272,22 @@ export function CaptainLogFormV3({
       description: 'Assign team hours and departments',
       icon: <Users className="h-5 w-5" />,
       component: <WizardHoursStep form={form} employees={employees} />,
-      isValid: form.getValues('hours').length > 0 || !form.getValues('sections.otherHours'),
+      isValid:
+        form.getValues('hours').length > 0 ||
+        !form.getValues('sections.otherHours'),
     },
     {
       id: 3,
       title: 'Review & Submit',
       description: 'Review all data and submit log',
       icon: <CheckCircle2 className="h-5 w-5" />,
-      component: <WizardReviewStep form={form} calculation={overallCalculation} employees={employees} />,
+      component: (
+        <WizardReviewStep
+          form={form}
+          calculation={overallCalculation}
+          employees={employees}
+        />
+      ),
       isValid: true, // Always valid
     },
   ];
@@ -263,7 +295,7 @@ export function CaptainLogFormV3({
   return (
     <div className="space-y-6">
       <OfflineStatusCard />
-      
+
       {/* Progress Bar */}
       <Card>
         <CardContent className="pt-6">
@@ -279,9 +311,12 @@ export function CaptainLogFormV3({
                 {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
               </Badge>
             </div>
-            
-            <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2" />
-            
+
+            <Progress
+              value={((currentStep + 1) / steps.length) * 100}
+              className="h-2"
+            />
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {steps.map((step, index) => (
                 <div
@@ -290,22 +325,26 @@ export function CaptainLogFormV3({
                     index === currentStep
                       ? 'border-purple-600 bg-purple-50 dark:bg-purple-950'
                       : index < currentStep
-                      ? 'border-green-600 bg-green-50 dark:bg-green-950'
-                      : 'border-muted/50'
+                        ? 'border-green-600 bg-green-50 dark:bg-green-950'
+                        : 'border-muted/50'
                   }`}
                   onClick={() => index <= currentStep && setCurrentStep(index)}
                 >
-                  <div className={`flex-shrink-0 ${
-                    index === currentStep
-                      ? 'text-purple-600'
-                      : index < currentStep
-                      ? 'text-green-600'
-                      : 'text-muted-foreground'
-                  }`}>
+                  <div
+                    className={`flex-shrink-0 ${
+                      index === currentStep
+                        ? 'text-purple-600'
+                        : index < currentStep
+                          ? 'text-green-600'
+                          : 'text-muted-foreground'
+                    }`}
+                  >
                     {step.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium truncate">{step.title}</div>
+                    <div className="text-xs font-medium truncate">
+                      {step.title}
+                    </div>
                     <div className="text-xs text-muted-foreground truncate">
                       {step.description}
                     </div>
@@ -333,9 +372,7 @@ export function CaptainLogFormV3({
                 {steps[currentStep].description}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {steps[currentStep].component}
-            </CardContent>
+            <CardContent>{steps[currentStep].component}</CardContent>
           </Card>
 
           {/* Navigation Buttons */}
@@ -362,7 +399,7 @@ export function CaptainLogFormV3({
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex gap-3">
                   <Button
                     type="button"
@@ -374,7 +411,7 @@ export function CaptainLogFormV3({
                     <ChevronLeft className="h-4 w-4 mr-2" />
                     Previous
                   </Button>
-                  
+
                   {currentStep < steps.length - 1 ? (
                     <Button
                       type="button"
