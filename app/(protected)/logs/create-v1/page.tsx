@@ -85,7 +85,8 @@ export default async function CreateLogV1Page() {
               Version 1
             </span>
             <span className="text-sm text-muted-foreground">
-              Full-width single page with proper data isolation
+              Full-width single page with proper data isolation - UPDATED
+              VERSION
             </span>
           </div>
         </div>
