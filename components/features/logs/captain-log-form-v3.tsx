@@ -232,7 +232,7 @@ export function CaptainLogFormV3({
       description: 'Set captain, date, and sections',
       icon: <FileCheck className="h-5 w-5" />,
       component: <WizardStepInfo form={form} captains={captains} user={user} />,
-      isValid: form.getValues('captainId') && form.getValues('logDate'),
+      isValid: form.getValues('captainId') && form.getValues('logDate') && typeof form.getValues('logDate') === 'object',
     },
     {
       id: 1,
